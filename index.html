@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حاسبة كاش باك الصيدليات</title>
+<style>
+  :root{
+    --primary:#e2600a;
+    --primary-dark:#a8420a;
+    --accent:#ffb84d;
+    --bg:#fdf5ee;
+    --card:#ffffff;
+    --border:#f0ddc9;
+    --text:#2b2018;
+    --muted:#8a7362;
+    --slab1:#e2600a;
+    --slab2:#f2a900;
+    --slab3:#c94f1e;
+    --danger:#d64545;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI','Tahoma',Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding:20px;
+  }
+  .wrap{max-width:1000px;margin:0 auto;}
+  header{
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    color:#fff;
+    border-radius:16px;
+    padding:22px 26px;
+    margin-bottom:18px;
+    box-shadow:0 4px 14px rgba(0,0,0,.12);
+  }
+  header h1{margin:0 0 4px;font-size:22px;}
+  header p{margin:0;opacity:.85;font-size:13px;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px 20px;
+    margin-bottom:16px;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+  }
+  .card h2{margin:0 0 12px;font-size:16px;color:var(--primary-dark);}
+
+  .upload-box{
+    border:2px dashed var(--border);
+    border-radius:12px;
+    padding:26px;
+    text-align:center;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .upload-box:hover{border-color:var(--primary);background:#fff8f0;}
+  .upload-box .big{font-size:32px;margin-bottom:8px;}
+  .upload-box .lbl{font-weight:700;font-size:14px;}
+  .upload-box .sub{font-size:12px;color:var(--muted);margin-top:4px;}
+  #fileInput{display:none;}
+  .privacy-note{
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    background:#eef8f5;
+    border:1px solid #cfe9df;
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:12px;
+    color:#1a5c46;
+    margin-top:12px;
+    line-height:1.6;
+  }
+  .file-status{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .file-status .fname{font-weight:700;font-size:13px;}
+  .file-status .fcount{font-size:12px;color:var(--muted);}
+  .btn-secondary{
+    border:2px solid var(--border);
+    background:#fff;
+    color:var(--muted);
+    border-radius:20px;
+    padding:6px 14px;
+    font-size:12px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .btn-secondary:hover{border-color:var(--primary);color:var(--primary-dark);}
+  .error-box{
+    background:#fdeceb;
+    border:1px solid #f3c6c2;
+    color:var(--danger);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:13px;
+    margin-top:12px;
+    line-height:1.6;
+  }
+
+  .search-box{position:relative;}
+  .search-box input{
+    width:100%;
+    padding:13px 44px;
+    font-size:16px;
+    border:2px solid var(--border);
+    border-radius:10px;
+    outline:none;
+    transition:border-color .15s;
+  }
+  .search-box input:focus{border-color:var(--primary);}
+  .search-icon{
+    position:absolute;
+    top:50%;right:14px;
+    transform:translateY(-50%);
+    font-size:17px;
+    color:var(--muted);
+    pointer-events:none;
+  }
+  .clear-btn{
+    position:absolute;
+    top:50%;left:10px;
+    transform:translateY(-50%);
+    width:26px;height:26px;
+    border-radius:50%;
+    border:none;
+    background:var(--border);
+    color:var(--muted);
+    font-size:14px;
+    line-height:1;
+    cursor:pointer;
+    display:none;
+    align-items:center;
+    justify-content:center;
+  }
+  .clear-btn:hover{background:var(--primary);color:#fff;}
+  .search-count{font-size:12px;color:var(--muted);margin-top:6px;}
+  @media (max-width:480px){
+    header h1{font-size:19px;}
+    header p{font-size:12px;}
+    .search-box input{font-size:16px;padding:12px 42px;}
+    .results{max-height:260px;}
+    .sales-grid{grid-template-columns:1fr;}
+    table{font-size:12px;}
+    th,td{padding:7px 4px;}
+  }
+  .results{
+    position:absolute;
+    top:calc(100% + 6px);
+    right:0;left:0;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    max-height:320px;
+    overflow-y:auto;
+    z-index:20;
+    box-shadow:0 8px 24px rgba(0,0,0,.12);
+    display:none;
+  }
+  .results.show{display:block;}
+  .result-item{
+    padding:10px 14px;
+    cursor:pointer;
+    border-bottom:1px solid var(--border);
+  }
+  .result-item:last-child{border-bottom:none;}
+  .result-item:hover{background:#f0f7f5;}
+  .result-item .rname{font-weight:600;font-size:14px;}
+  .result-item .rmeta{font-size:12px;color:var(--muted);margin-top:2px;}
+  .empty-msg{padding:14px;color:var(--muted);font-size:13px;text-align:center;}
+
+  .pharma-header{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    gap:10px;
+    align-items:flex-start;
+  }
+  .pharma-header .name{font-size:18px;font-weight:700;color:var(--primary-dark);}
+  .pharma-header .code{font-size:12px;color:var(--muted);}
+  .meta-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:10px;
+    margin-top:12px;
+  }
+  .meta-item{
+    background:var(--bg);
+    border-radius:8px;
+    padding:8px 10px;
+  }
+  .meta-item .lbl{font-size:11px;color:var(--muted);}
+  .meta-item .val{font-size:13px;font-weight:600;margin-top:2px;}
+  .badge{
+    display:inline-block;
+    font-size:11px;
+    padding:3px 10px;
+    border-radius:20px;
+    font-weight:600;
+  }
+  .badge.exist{background:#e3f5ec;color:#1a7a4d;}
+  .badge.new{background:#fdf1de;color:#a0680d;}
+
+  .sales-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:12px;
+  }
+  @media (max-width:640px){.sales-grid{grid-template-columns:1fr;}}
+  .sales-box{
+    background:var(--bg);
+    border-radius:10px;
+    padding:14px;
+    text-align:center;
+  }
+  .sales-box .t{font-size:12px;color:var(--muted);margin-bottom:6px;}
+  .sales-box .v{font-size:19px;font-weight:700;color:var(--primary-dark);}
+  .sales-box .sub{font-size:11px;color:var(--muted);margin-top:4px;}
+  .growth-pos{color:#1a7a4d !important;}
+  .growth-neg{color:var(--danger) !important;}
+
+  .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab-btn{
+    flex:1;
+    min-width:140px;
+    padding:10px 12px;
+    border:2px solid var(--border);
+    background:#fff;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:600;
+    color:var(--muted);
+    text-align:center;
+    transition:.15s;
+  }
+  .tab-btn.active{border-color:var(--primary);color:var(--primary-dark);background:#eef8f5;}
+
+  .options-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    margin-bottom:16px;
+    padding:14px;
+    background:var(--bg);
+    border-radius:10px;
+  }
+  .opt-group{display:flex;flex-direction:column;gap:6px;}
+  .opt-group .g-lbl{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px;}
+  .opt-choices{display:flex;gap:6px;flex-wrap:wrap;}
+  .chip{
+    padding:6px 12px;
+    border:2px solid var(--border);
+    border-radius:20px;
+    font-size:12px;
+    cursor:pointer;
+    background:#fff;
+    user-select:none;
+  }
+  .chip.active{border-color:var(--primary);background:var(--primary);color:#fff;}
+  .checkbox-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border:2px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;background:#fff;}
+  .checkbox-chip.active{border-color:var(--accent);background:#fff8e8;}
+  .checkbox-chip input{accent-color:var(--accent);}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{background:var(--bg);color:var(--muted);font-weight:600;font-size:12px;}
+  tr.slab1 td:first-child{border-right:4px solid var(--slab1);}
+  tr.slab2 td:first-child{border-right:4px solid var(--slab2);}
+  tr.slab3 td:first-child{border-right:4px solid var(--slab3);}
+  td.total-cell{font-weight:700;color:var(--primary-dark);}
+  td.name-cell{font-weight:700;text-align:right;}
+
+  .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6;}
+  .placeholder{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--muted);
+  }
+  .placeholder .big{font-size:40px;margin-bottom:10px;}
+  footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🧮 حاسبة كاش باك ومكافآت الصيدليات</h1>
+    <p>اكتب اسم الصيدلية أو الكود، وشاهد مبيعات الربع الثالث والرابع، ونسبة النمو، وقيمة الكاش باك المستهدف للعقد الجديد.</p>
+  </header>
+
+  <div class="card" id="uploadCard">
+    <h2>تحميل ملف المبيعات</h2>
+    <div class="upload-box" id="uploadBox">
+      <div class="big">📂</div>
+      <div class="lbl">اضغط هنا لاختيار ملف الإكسل (مبيعات الصيدليات)</div>
+      <div class="sub">صيغة Excel .xlsx — الأعمدة المطلوبة: اسم الصيدلية، كود العميل، المندوب، المنطقة، مبيعات الربع الثالث والرابع (DIST)</div>
+    </div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls">
+    <div class="privacy-note">
+      🔒 الملف يُقرأ داخل متصفحك فقط — لا يُرفَع لأي سيرفر أو مكان آخر. عند إغلاق الصفحة أو تحديثها تُمحى البيانات تلقائياً، ويجب رفع الملف من جديد في المرة القادمة.
+    </div>
+    <div id="errorBox"></div>
+  </div>
+
+  <div class="card hidden" id="fileStatusCard">
+    <div class="file-status">
+      <div>
+        <div class="fname" id="fnameLabel"></div>
+        <div class="fcount" id="fcountLabel"></div>
+      </div>
+      <button class="btn-secondary" id="changeFileBtn">تغيير الملف</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="searchCard">
+    <h2>البحث عن صيدلية</h2>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="اكتب اسم الصيدلية، الكود، أو المنطقة..." autocomplete="off">
+      <button class="clear-btn" id="clearSearchBtn" type="button">✕</button>
+      <div class="results" id="resultsBox"></div>
+    </div>
+  </div>
+
+  <div id="detailSection"></div>
+
+  <footer>الأرقام محسوبة من بيانات مبيعات الموزع (DIST) للربع الثالث والرابع 2025 — الأداة لعرض السيناريوهات قبل التعاقد، وليست تأكيداً نهائياً للمستحقات. لا تُخزَّن أي بيانات مبيعات على هذا الموقع.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+let PHARMACIES = [];
+
+const SLABS = [
+  {key:'s1', label:'الشريحة 1', growth:0.15, cashRate:0.0125, targetFloor:5000, cashFloor:500, rebateRate:0.0025, color:'slab1'},
+  {key:'s2', label:'الشريحة 2', growth:0.20, cashRate:0.0225, targetFloor:6000, cashFloor:700, rebateRate:0.005, color:'slab2'},
+  {key:'s3', label:'الشريحة 3', growth:0.25, cashRate:0.0325, targetFloor:7000, cashFloor:1000, rebateRate:0.0075, color:'slab3'}
+];
+const SHELF_RATES = {none:0, '2':0.005, '3':0.01, '4':0.015};
+const POSM_RATE = 0.005;
+
+let currentPharmacy = null;
+let state = { baseline:'q4', shelf:'none', posm:false, full:false };
+
+function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
+function pct(n){ return (n*100).toFixed(1) + '%'; }
+
+// ---------- File upload & client-side parsing ----------
+const HEADER_PATTERNS = {
+  n:  [/ims_customer_came/i, /customer name/i, /pharmacy name/i, /customer_name/i],
+  c:  [/customer_code/i, /^code$/i, /customer code/i],
+  mr: [/mr name/i, /\bmr\b.*name/i],
+  dm: [/dm name/i, /\bdm\b.*name/i],
+  rg: [/region_name/i, /^region$/i],
+  tr: [/territory_name/i, /^territory$/i],
+  st: [/pharmacy status/i, /^status$/i]
+};
+
+function findCol(rowCells, patterns){
+  for(const {v, i} of rowCells){
+    if(v === null || v === undefined) continue;
+    const text = String(v).trim();
+    if(patterns.some(p => p.test(text))) return i;
+  }
+  return null;
+}
+function findQuarterCols(rowCells, quarterLabel){
+  let actualCol = null, distCol = null;
+  for(const {v, i} of rowCells){
+    if(v === null || v === undefined) continue;
+    const text = String(v).trim().toLowerCase();
+    if(text.includes(quarterLabel) && text.includes('actual')) actualCol = i;
+    else if(text.includes(quarterLabel) && text.includes('dist')) distCol = i;
+  }
+  return [actualCol, distCol];
+}
+function rowToCells(row){
+  return row.map((v, i) => ({v, i}));
+}
+function locateHeaderRow(rows, maxScan){
+  let bestRow = -1, bestScore = -1;
+  for(let r = 0; r < Math.min(maxScan, rows.length); r++){
+    const cells = rowToCells(rows[r] || []);
+    let score = 0;
+    for(const pats of Object.values(HEADER_PATTERNS)){
+      if(findCol(cells, pats) !== null) score++;
+    }
+    const [q3a, q3d] = findQuarterCols(cells, 'q3');
+    const [q4a, q4d] = findQuarterCols(cells, 'q4');
+    score += [q3a, q3d, q4a, q4d].filter(x => x !== null).length;
+    if(score > bestScore){ bestScore = score; bestRow = r; }
+  }
+  return bestRow;
+}
+
+function parseWorkbook(rows){
+  const headerR = locateHeaderRow(rows, 15);
+  if(headerR === -1) throw new Error('تعذر العثور على صف العناوين في الملف.');
+
+  const headerCells = rowToCells(rows[headerR] || []);
+  const cols = {};
+  for(const [key, pats] of Object.entries(HEADER_PATTERNS)){
+    cols[key] = findCol(headerCells, pats);
+  }
+  const [q3aCol, q3dCol] = findQuarterCols(headerCells, 'q3');
+  const [q4aCol, q4dCol] = findQuarterCols(headerCells, 'q4');
+
+  if(cols.n === null || q3dCol === null || q4dCol === null){
+    throw new Error('لم يتم العثور على الأعمدة المطلوبة (اسم الصيدلية / مبيعات الربع الثالث أو الرابع DIST). تأكد من صيغة الملف.');
+  }
+
+  const out = [];
+  let blankStreak = 0;
+  for(let r = headerR + 1; r < rows.length && blankStreak < 25; r++){
+    const row = rows[r] || [];
+    const name = row[cols.n];
+    if(name === null || name === undefined || String(name).trim() === ''){
+      blankStreak++;
+      continue;
+    }
+    blankStreak = 0;
+    const num = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+    out.push({
+      c: cols.c !== null ? row[cols.c] : null,
+      n: String(name).trim(),
+      mr: String((cols.mr !== null ? row[cols.mr] : '') || '').trim(),
+      dm: String((cols.dm !== null ? row[cols.dm] : '') || '').trim(),
+      rg: String((cols.rg !== null ? row[cols.rg] : '') || '').trim(),
+      tr: String((cols.tr !== null ? row[cols.tr] : '') || '').trim(),
+      st: String((cols.st !== null ? row[cols.st] : '') || '').trim(),
+      q3d: Math.round(num(row[q3dCol]) * 100) / 100,
+      q3a: q3aCol !== null ? Math.round(num(row[q3aCol]) * 100) / 100 : 0,
+      q4d: Math.round(num(row[q4dCol]) * 100) / 100,
+      q4a: q4aCol !== null ? Math.round(num(row[q4aCol]) * 100) / 100 : 0
+    });
+  }
+  return out;
+}
+
+const uploadBox = document.getElementById('uploadBox');
+const fileInput = document.getElementById('fileInput');
+const errorBox = document.getElementById('errorBox');
+
+uploadBox.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  errorBox.innerHTML = '';
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+      const parsed = parseWorkbook(rows);
+      if(parsed.length === 0) throw new Error('لم يتم استخراج أي صيدليات من الملف.');
+      PHARMACIES = parsed;
+      document.getElementById('uploadCard').classList.add('hidden');
+      document.getElementById('fileStatusCard').classList.remove('hidden');
+      document.getElementById('searchCard').classList.remove('hidden');
+      document.getElementById('fnameLabel').textContent = '📄 ' + file.name;
+      document.getElementById('fcountLabel').textContent = 'عدد الصيدليات: ' + parsed.length.toLocaleString('en-US');
+      document.getElementById('detailSection').innerHTML = `
+        <div class="card">
+          <div class="placeholder">
+            <div class="big">🏥</div>
+            ابحث عن صيدلية بالاسم أو الكود لعرض بيانات المبيعات وحاسبة الكاش باك
+          </div>
+        </div>`;
+    } catch(err){
+      errorBox.innerHTML = `<div class="error-box">⚠️ ${err.message}</div>`;
+    }
+  };
+  reader.onerror = () => {
+    errorBox.innerHTML = `<div class="error-box">⚠️ تعذرت قراءة الملف.</div>`;
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('changeFileBtn').addEventListener('click', () => {
+  PHARMACIES = [];
+  currentPharmacy = null;
+  fileInput.value = '';
+  document.getElementById('uploadCard').classList.remove('hidden');
+  document.getElementById('fileStatusCard').classList.add('hidden');
+  document.getElementById('searchCard').classList.add('hidden');
+  document.getElementById('detailSection').innerHTML = '';
+  document.getElementById('searchInput').value = '';
+});
+
+// ---------- Search ----------
+const searchInput = document.getElementById('searchInput');
+const resultsBox = document.getElementById('resultsBox');
+const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+// Normalize Arabic text so minor spelling variants (diacritics, alef/hamza
+// forms, ta-marbuta vs ha) still match while the rep is typing.
+function normalize(s){
+  return String(s || '')
+    .replace(/[ً-ْٰـ]/g, '') // diacritics + tatweel
+    .replace(/[إأآا]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .trim()
+    .toLowerCase();
+}
+
+// Loose "nearby" fallback: true if every character of the query appears in
+// the text in order (not necessarily adjacent). Catches typos/omissions
+// when the exact substring search comes up empty.
+function nearbyMatch(text, query){
+  let ti = 0;
+  for(let qi = 0; qi < query.length; qi++){
+    const ch = query[qi];
+    let found = false;
+    while(ti < text.length){
+      if(text[ti] === ch){ found = true; ti++; break; }
+      ti++;
+    }
+    if(!found) return false;
+  }
+  return true;
+}
+
+function runSearch(){
+  const raw = searchInput.value.trim();
+  clearSearchBtn.style.display = raw.length ? 'flex' : 'none';
+  if(raw.length < 1){ resultsBox.classList.remove('show'); return; }
+
+  const q = normalize(raw);
+  let matches = PHARMACIES.filter(p =>
+    normalize(p.n).includes(q) ||
+    (p.c && String(p.c).includes(raw)) ||
+    normalize(p.tr).includes(q) ||
+    normalize(p.rg).includes(q) ||
+    normalize(p.mr).includes(q)
+  );
+
+  let fuzzy = false;
+  if(matches.length === 0 && q.length >= 2){
+    fuzzy = true;
+    matches = PHARMACIES.filter(p => nearbyMatch(normalize(p.n), q) || nearbyMatch(normalize(p.mr), q));
+  }
+  matches = matches.slice(0, 25);
+
+  if(matches.length === 0){
+    resultsBox.innerHTML = '<div class="empty-msg">لا توجد نتائج مطابقة</div>';
+  } else {
+    resultsBox.innerHTML = (fuzzy ? '<div class="empty-msg" style="text-align:right;">أقرب نتائج مطابقة:</div>' : '') +
+      matches.map((p) => `
+      <div class="result-item" data-idx="${PHARMACIES.indexOf(p)}">
+        <div class="rname">${p.n}</div>
+        <div class="rmeta">كود: ${p.c} · ${p.rg} / ${p.tr} · المندوب: ${p.mr}</div>
+      </div>`).join('');
+  }
+  resultsBox.classList.add('show');
+}
+
+searchInput.addEventListener('input', runSearch);
+searchInput.addEventListener('focus', () => { if(searchInput.value.trim().length) runSearch(); });
+
+clearSearchBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  clearSearchBtn.style.display = 'none';
+  resultsBox.classList.remove('show');
+  searchInput.focus();
+});
+
+resultsBox.addEventListener('click', (e) => {
+  const item = e.target.closest('.result-item');
+  if(!item) return;
+  const idx = parseInt(item.dataset.idx, 10);
+  selectPharmacy(PHARMACIES[idx]);
+  resultsBox.classList.remove('show');
+  searchInput.value = PHARMACIES[idx].n;
+  clearSearchBtn.style.display = 'flex';
+});
+
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('.search-box')) resultsBox.classList.remove('show');
+});
+
+function selectPharmacy(p){
+  currentPharmacy = p;
+  state = { baseline:'q4', shelf:'none', posm:false, full:false };
+  renderDetail();
+}
+
+// ---------- Rendering ----------
+function renderDetail(){
+  const p = currentPharmacy;
+  if(!p) return;
+
+  const growth = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
+  const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
+  const growthText = growth === null ? 'لا توجد بيانات كافية' : (growth>=0?'+':'') + pct(growth);
+
+  const statusBadge = p.st === 'Exist'
+    ? '<span class="badge exist">صيدلية قائمة</span>'
+    : '<span class="badge new">صيدلية جديدة</span>';
+
+  const baselineSales = state.baseline === 'q3' ? p.q3d : (state.baseline === 'q4' ? p.q4d : (p.q3d + p.q4d));
+  const rows = calcSlabs(baselineSales, state);
+
+  document.getElementById('detailSection').innerHTML = `
+    <div class="card">
+      <div class="pharma-header">
+        <div>
+          <div class="name">${p.n}</div>
+          <div class="code">كود العميل: ${p.c}</div>
+        </div>
+        ${statusBadge}
+      </div>
+      <div class="meta-grid">
+        <div class="meta-item"><div class="lbl">المندوب الطبي</div><div class="val">${p.mr||'—'}</div></div>
+        <div class="meta-item"><div class="lbl">مدير المنطقة</div><div class="val">${p.dm||'—'}</div></div>
+        <div class="meta-item"><div class="lbl">المنطقة</div><div class="val">${p.rg||'—'}</div></div>
+        <div class="meta-item"><div class="lbl">القطاع</div><div class="val">${p.tr||'—'}</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>مبيعات الربعين الأخيرين (مبيعات الموزع)</h2>
+      <div class="sales-grid">
+        <div class="sales-box">
+          <div class="t">الربع الثالث 2025</div>
+          <div class="v">${fmt(p.q3d)} ج.م</div>
+          <div class="sub">مبيعات فعلية (IMS): ${fmt(p.q3a)} ج.م</div>
+        </div>
+        <div class="sales-box">
+          <div class="t">الربع الرابع 2025</div>
+          <div class="v">${fmt(p.q4d)} ج.م</div>
+          <div class="sub">مبيعات فعلية (IMS): ${fmt(p.q4a)} ج.م</div>
+        </div>
+        <div class="sales-box">
+          <div class="t">نسبة النمو (الرابع مقابل الثالث)</div>
+          <div class="v ${growthClass}">${growthText}</div>
+          <div class="sub">إجمالي الربعين: ${fmt(p.q3d+p.q4d)} ج.م</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>حاسبة عرض العقد الجديد</h2>
+
+      <div class="tabs" id="baselineTabs">
+        <div class="tab-btn ${state.baseline==='q3'?'active':''}" data-baseline="q3">أساس: الربع الثالث 2025</div>
+        <div class="tab-btn ${state.baseline==='q4'?'active':''}" data-baseline="q4">أساس: الربع الرابع 2025</div>
+        <div class="tab-btn ${state.baseline==='s2'?'active':''}" data-baseline="s2">أساس: الربعين معاً</div>
+      </div>
+
+      <div class="options-row">
+        <div class="opt-group">
+          <div class="g-lbl">عدد الأرفف (اختيار واحد)</div>
+          <div class="opt-choices" id="shelfChoices">
+            <div class="chip ${state.shelf==='none'?'active':''}" data-shelf="none">بدون رف إضافي</div>
+            <div class="chip ${state.shelf==='2'?'active':''}" data-shelf="2">2 أرفف</div>
+            <div class="chip ${state.shelf==='3'?'active':''}" data-shelf="3">3 أرفف</div>
+            <div class="chip ${state.shelf==='4'?'active':''}" data-shelf="4">4 أرفف</div>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="g-lbl">مكافآت إضافية</div>
+          <div class="opt-choices">
+            <label class="checkbox-chip ${state.posm?'active':''}" id="posmChip">
+              <input type="checkbox" id="posmCheck" ${state.posm?'checked':''}> مواد عرض إضافية (POSM)
+            </label>
+            <label class="checkbox-chip ${state.full?'active':''}" id="fullChip">
+              <input type="checkbox" id="fullCheck" ${state.full?'checked':''}> تحقيق الهدف في الربعين معاً (مكافأة نهاية الفترة)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>الشريحة</th>
+            <th>نسبة النمو المطلوبة</th>
+            <th>المبيعات المستهدفة</th>
+            <th>كاش باك النمو</th>
+            <th>مكافأة الأرفف</th>
+            <th>مكافأة POSM</th>
+            <th>مكافأة نهاية الفترة</th>
+            <th>الإجمالي</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr class="${r.color}">
+              <td class="name-cell">${r.label}</td>
+              <td>+${pct(r.growth)}</td>
+              <td>${fmt(r.target)} ج.م</td>
+              <td>${fmt(r.cashback)} ج.م</td>
+              <td>${r.shelfBonus>0?fmt(r.shelfBonus)+' ج.م':'—'}</td>
+              <td>${r.posmBonus>0?fmt(r.posmBonus)+' ج.م':'—'}</td>
+              <td>${r.rebateBonus>0?fmt(r.rebateBonus)+' ج.م':'—'}</td>
+              <td class="total-cell">${fmt(r.total)} ج.م</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>
+
+      <div class="note">
+        المبلغ الأساسي: ${fmt(baselineSales)} ج.م (${state.baseline==='q3'?'مبيعات الربع الثالث':state.baseline==='q4'?'مبيعات الربع الرابع':'إجمالي الربعين معاً'}).
+        الحد الأدنى للمبيعات المستهدفة والكاش باك مطبّق تلقائياً حسب سياسة الشركة (5,000/6,000/7,000 ج.م للمستهدف، و500/700/1,000 ج.م للكاش باك).
+        هذه الأرقام لعرضها على الصيدلي قبل توقيع العقد، وتُحسب من مبيعات الموزع فقط.
+      </div>
+    </div>
+  `;
+
+  document.getElementById('baselineTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab-btn');
+    if(!btn) return;
+    state.baseline = btn.dataset.baseline;
+    renderDetail();
+  });
+  document.getElementById('shelfChoices').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if(!chip) return;
+    state.shelf = chip.dataset.shelf;
+    renderDetail();
+  });
+  document.getElementById('posmCheck').addEventListener('change', (e) => {
+    state.posm = e.target.checked;
+    renderDetail();
+  });
+  document.getElementById('fullCheck').addEventListener('change', (e) => {
+    state.full = e.target.checked;
+    renderDetail();
+  });
+}
+
+function calcSlabs(baseSales, opts){
+  return SLABS.map(s => {
+    const rawTarget = baseSales * (1 + s.growth);
+    const target = Math.max(rawTarget, s.targetFloor);
+    const cashback = Math.max(target * s.cashRate, s.cashFloor);
+    const shelfBonus = target * (SHELF_RATES[opts.shelf] || 0);
+    const posmBonus = opts.posm ? target * POSM_RATE : 0;
+    const rebateBonus = opts.full ? target * s.rebateRate : 0;
+    const total = cashback + shelfBonus + posmBonus + rebateBonus;
+    return {
+      key:s.key, label:s.label, color:s.color, growth:s.growth,
+      target, cashback, shelfBonus, posmBonus, rebateBonus, total
+    };
+  });
+}
+</script>
+</body>
+</html>
