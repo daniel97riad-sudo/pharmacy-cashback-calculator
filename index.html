@@ -86,6 +86,59 @@
   }
   .clear-btn:hover{background:var(--primary);color:#fff;}
   .search-count{font-size:12px;color:var(--muted);margin-top:6px;}
+  .filter-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+  .filter-row select{
+    flex:1;
+    min-width:160px;
+    padding:10px 12px;
+    font-size:13px;
+    border:2px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    color:var(--text);
+    outline:none;
+  }
+  .filter-row select:focus{border-color:var(--primary);}
+  .totals-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:12px;
+    margin-bottom:14px;
+  }
+  .custom-baseline{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .custom-baseline label{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;}
+  .custom-baseline input{
+    flex:1;
+    min-width:160px;
+    padding:9px 12px;
+    font-size:14px;
+    border:2px solid var(--border);
+    border-radius:10px;
+    outline:none;
+  }
+  .custom-baseline input:focus{border-color:var(--primary);}
+  .custom-baseline .reset-btn{
+    border:2px solid var(--border);
+    background:#fff;
+    color:var(--muted);
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:12px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .custom-active{border-color:var(--accent) !important;background:#fff8e8;}
   @media (max-width:480px){
     header h1{font-size:19px;}
     header p{font-size:12px;}
@@ -242,6 +295,10 @@
 
   <div class="card">
     <h2>البحث عن صيدلية</h2>
+    <div class="filter-row">
+      <select id="mrFilter"><option value="">كل المندوبين الطبيين</option></select>
+      <select id="dmFilter"><option value="">كل مديري المناطق</option></select>
+    </div>
     <div class="search-box">
       <span class="search-icon">🔍</span>
       <input type="text" id="searchInput" placeholder="اكتب اسم الصيدلية، الكود، أو المنطقة..." autocomplete="off">
@@ -250,6 +307,8 @@
     </div>
     <div class="search-count" id="searchCount">إجمالي الصيدليات في القاعدة: 2751</div>
   </div>
+
+  <div id="totalsSection"></div>
 
   <div id="detailSection">
     <div class="card">
@@ -275,7 +334,9 @@ const SHELF_RATES = {none:0, '2':0.005, '3':0.01, '4':0.015};
 const POSM_RATE = 0.005;
 
 let currentPharmacy = null;
-let state = { baseline:'q4', shelf:'none', posm:false, full:false };
+let state = { baseline:'q4', shelf:'none', posm:false, full:false, customBaseline:null };
+let activeMR = '';
+let activeDM = '';
 
 function fmt(n){
   return Math.round(n).toLocaleString('en-US');
@@ -283,6 +344,88 @@ function fmt(n){
 function pct(n){
   return (n*100).toFixed(1) + '%';
 }
+
+// ---------- MR / DM filters ----------
+const mrFilter = document.getElementById('mrFilter');
+const dmFilter = document.getElementById('dmFilter');
+
+function populateFilters(){
+  const mrs = [...new Set(PHARMACIES.map(p => p.mr).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+  const dms = [...new Set(PHARMACIES.map(p => p.dm).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+  mrs.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    mrFilter.appendChild(opt);
+  });
+  dms.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    dmFilter.appendChild(opt);
+  });
+}
+
+function getFilteredPharmacies(){
+  return PHARMACIES.filter(p =>
+    (!activeMR || p.mr === activeMR) &&
+    (!activeDM || p.dm === activeDM)
+  );
+}
+
+function renderTotals(){
+  const totalsSection = document.getElementById('totalsSection');
+  if(!activeMR && !activeDM){
+    totalsSection.innerHTML = '';
+    return;
+  }
+  const subset = getFilteredPharmacies();
+  const count = subset.length;
+  const sumQ3 = subset.reduce((s,p) => s + p.q3d, 0);
+  const sumQ4 = subset.reduce((s,p) => s + p.q4d, 0);
+  const growth = sumQ3 > 0 ? (sumQ4 - sumQ3) / sumQ3 : null;
+  const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
+  const growthText = growth === null ? '—' : (growth>=0?'+':'') + pct(growth);
+  const slabRows = calcSlabs(sumQ4, {shelf:'none', posm:false, full:false});
+
+  const label = [activeMR ? `المندوب: ${activeMR}` : '', activeDM ? `مدير المنطقة: ${activeDM}` : '']
+    .filter(Boolean).join(' · ');
+
+  totalsSection.innerHTML = `
+    <div class="card">
+      <h2>إجمالي الصيدليات المفلترة — ${label}</h2>
+      <div class="totals-grid">
+        <div class="sales-box"><div class="t">عدد الصيدليات</div><div class="v">${count.toLocaleString('en-US')}</div></div>
+        <div class="sales-box"><div class="t">إجمالي الربع الثالث</div><div class="v">${fmt(sumQ3)} ج.م</div></div>
+        <div class="sales-box"><div class="t">إجمالي الربع الرابع</div><div class="v">${fmt(sumQ4)} ج.م</div></div>
+        <div class="sales-box"><div class="t">نسبة النمو الإجمالية</div><div class="v ${growthClass}">${growthText}</div></div>
+      </div>
+      <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>الشريحة</th><th>نسبة النمو</th><th>إجمالي المستهدف (على أساس الربع الرابع)</th><th>إجمالي كاش باك النمو الأساسي</th></tr></thead>
+        <tbody>
+          ${slabRows.map(r => `
+            <tr class="${r.color}">
+              <td class="name-cell">${r.label}</td>
+              <td>+${pct(r.growth)}</td>
+              <td>${fmt(r.target)} ج.م</td>
+              <td class="total-cell">${fmt(r.cashback)} ج.م</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>
+      <div class="note">إجمالي الكاش باك هنا هو معدل النمو الأساسي فقط (بدون أرفف أو POSM)، لأن كل صيدلية قد تختار خيارات مختلفة.</div>
+    </div>`;
+}
+
+mrFilter.addEventListener('change', () => {
+  activeMR = mrFilter.value;
+  renderTotals();
+  if(searchInput.value.trim().length) runSearch();
+});
+dmFilter.addEventListener('change', () => {
+  activeDM = dmFilter.value;
+  renderTotals();
+  if(searchInput.value.trim().length) runSearch();
+});
 
 // ---------- Search ----------
 const searchInput = document.getElementById('searchInput');
@@ -323,8 +466,9 @@ function runSearch(){
   clearSearchBtn.style.display = raw.length ? 'flex' : 'none';
   if(raw.length < 1){ resultsBox.classList.remove('show'); return; }
 
+  const pool = getFilteredPharmacies();
   const q = normalize(raw);
-  let matches = PHARMACIES.filter(p =>
+  let matches = pool.filter(p =>
     normalize(p.n).includes(q) ||
     (p.c && String(p.c).includes(raw)) ||
     normalize(p.tr).includes(q) ||
@@ -335,12 +479,12 @@ function runSearch(){
   let fuzzy = false;
   if(matches.length === 0 && q.length >= 2){
     fuzzy = true;
-    matches = PHARMACIES.filter(p => nearbyMatch(normalize(p.n), q) || nearbyMatch(normalize(p.mr), q));
+    matches = pool.filter(p => nearbyMatch(normalize(p.n), q) || nearbyMatch(normalize(p.mr), q));
   }
   matches = matches.slice(0, 25);
 
   if(matches.length === 0){
-    resultsBox.innerHTML = '<div class="empty-msg">لا توجد نتائج مطابقة</div>';
+    resultsBox.innerHTML = '<div class="empty-msg">لا توجد نتائج مطابقة ' + (activeMR || activeDM ? '(ضمن الفلتر الحالي)' : '') + '</div>';
   } else {
     resultsBox.innerHTML = (fuzzy ? '<div class="empty-msg" style="text-align:right;">أقرب نتائج مطابقة:</div>' : '') +
       matches.map((p) => `
@@ -378,7 +522,7 @@ document.addEventListener('click', (e) => {
 
 function selectPharmacy(p){
   currentPharmacy = p;
-  state = { baseline:'q4', shelf:'none', posm:false, full:false };
+  state = { baseline:'q4', shelf:'none', posm:false, full:false, customBaseline:null };
   renderDetail();
 }
 
@@ -395,7 +539,9 @@ function renderDetail(){
     ? '<span class="badge exist">صيدلية قائمة</span>'
     : '<span class="badge new">صيدلية جديدة</span>';
 
-  const baselineSales = state.baseline === 'q3' ? p.q3d : (state.baseline === 'q4' ? p.q4d : (p.q3d + p.q4d));
+  const tabBaseline = state.baseline === 'q3' ? p.q3d : (state.baseline === 'q4' ? p.q4d : (p.q3d + p.q4d));
+  const usingCustom = state.customBaseline != null && !isNaN(state.customBaseline) && state.customBaseline > 0;
+  const baselineSales = usingCustom ? state.customBaseline : tabBaseline;
   const rows = calcSlabs(baselineSales, state);
 
   document.getElementById('detailSection').innerHTML = `
@@ -439,10 +585,16 @@ function renderDetail(){
     <div class="card">
       <h2>حاسبة عرض العقد الجديد</h2>
 
-      <div class="tabs" id="baselineTabs">
+      <div class="tabs" id="baselineTabs" style="${usingCustom ? 'opacity:.45;pointer-events:none;' : ''}">
         <div class="tab-btn ${state.baseline==='q3'?'active':''}" data-baseline="q3">أساس: الربع الثالث 2025</div>
         <div class="tab-btn ${state.baseline==='q4'?'active':''}" data-baseline="q4">أساس: الربع الرابع 2025</div>
         <div class="tab-btn ${state.baseline==='s2'?'active':''}" data-baseline="s2">أساس: الربعين معاً</div>
+      </div>
+
+      <div class="custom-baseline">
+        <label>أو مبلغ مخصص (سيناريو ماذا لو):</label>
+        <input type="number" id="customBaselineInput" placeholder="اكتب رقم مبيعات مخصص..." value="${usingCustom ? state.customBaseline : ''}" class="${usingCustom ? 'custom-active' : ''}">
+        ${usingCustom ? '<button class="reset-btn" id="resetCustomBtn" type="button">إلغاء المخصص</button>' : ''}
       </div>
 
       <div class="options-row">
@@ -499,7 +651,7 @@ function renderDetail(){
       </div>
 
       <div class="note">
-        المبلغ الأساسي: ${fmt(baselineSales)} ج.م (${state.baseline==='q3'?'مبيعات الربع الثالث':state.baseline==='q4'?'مبيعات الربع الرابع':'إجمالي الربعين معاً'}).
+        المبلغ الأساسي: ${fmt(baselineSales)} ج.م (${usingCustom ? 'رقم مخصص من إدخال المستخدم -- سيناريو ماذا لو' : (state.baseline==='q3'?'مبيعات الربع الثالث':state.baseline==='q4'?'مبيعات الربع الرابع':'إجمالي الربعين معاً')}).
         الحد الأدنى للمبيعات المستهدفة والكاش باك مطبّق تلقائياً حسب سياسة الشركة (5,000/6,000/7,000 ج.م للمستهدف، و500/700/1,000 ج.م للكاش باك).
         هذه الأرقام لعرضها على الصيدلي قبل توقيع العقد، وتُحسب من مبيعات الموزع فقط.
       </div>
@@ -522,6 +674,18 @@ function renderDetail(){
     state.posm = e.target.checked;
     renderDetail();
   });
+  document.getElementById('customBaselineInput').addEventListener('change', (e) => {
+    const v = parseFloat(e.target.value);
+    state.customBaseline = (e.target.value.trim() !== '' && !isNaN(v) && v > 0) ? v : null;
+    renderDetail();
+  });
+  const resetCustomBtn = document.getElementById('resetCustomBtn');
+  if(resetCustomBtn){
+    resetCustomBtn.addEventListener('click', () => {
+      state.customBaseline = null;
+      renderDetail();
+    });
+  }
   document.getElementById('fullCheck').addEventListener('change', (e) => {
     state.full = e.target.checked;
     renderDetail();
@@ -543,6 +707,8 @@ function calcSlabs(baseSales, opts){
     };
   });
 }
+
+populateFilters();
 </script>
 </body>
 </html>
