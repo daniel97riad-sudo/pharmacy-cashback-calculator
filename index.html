@@ -110,6 +110,28 @@
     gap:12px;
     margin-bottom:14px;
   }
+  .pharm-list{
+    max-height:420px;
+    overflow-y:auto;
+    border:1px solid var(--border);
+    border-radius:10px;
+  }
+  .pharm-list-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    padding:10px 14px;
+    cursor:pointer;
+    border-bottom:1px solid var(--border);
+  }
+  .pharm-list-item:last-child{border-bottom:none;}
+  .pharm-list-item:hover{background:#f8f2ea;}
+  .pli-name{font-weight:600;font-size:13px;}
+  .pli-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+  .pli-stats{text-align:left;white-space:nowrap;}
+  .pli-sales{font-weight:700;font-size:13px;color:var(--primary-dark);}
+  .pli-growth{font-size:11px;margin-top:2px;}
   .custom-baseline{
     display:flex;
     align-items:center;
@@ -389,6 +411,25 @@ function renderTotals(){
   const label = [activeMR ? `المندوب: ${activeMR}` : '', activeDM ? `مدير المنطقة: ${activeDM}` : '']
     .filter(Boolean).join(' · ');
 
+  const sortedList = [...subset].sort((a,b) => a.n.localeCompare(b.n, 'ar'));
+  const listHtml = sortedList.map(p => {
+    const g = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
+    const gClass = g === null ? '' : (g >= 0 ? 'growth-pos' : 'growth-neg');
+    const gText = g === null ? '—' : (g>=0?'+':'') + pct(g);
+    const mrLine = !activeMR ? ` · ${p.mr}` : '';
+    return `
+      <div class="pharm-list-item" data-idx="${PHARMACIES.indexOf(p)}">
+        <div>
+          <div class="pli-name">${p.n}</div>
+          <div class="pli-meta">كود: ${p.c} · ${p.tr}${mrLine}</div>
+        </div>
+        <div class="pli-stats">
+          <div class="pli-sales">${fmt(p.q4d)} ج.م</div>
+          <div class="pli-growth ${gClass}">${gText}</div>
+        </div>
+      </div>`;
+  }).join('');
+
   totalsSection.innerHTML = `
     <div class="card">
       <h2>إجمالي الصيدليات المفلترة — ${label}</h2>
@@ -413,7 +454,21 @@ function renderTotals(){
       </table>
       </div>
       <div class="note">إجمالي الكاش باك هنا هو معدل النمو الأساسي فقط (بدون أرفف أو POSM)، لأن كل صيدلية قد تختار خيارات مختلفة.</div>
+    </div>
+
+    <div class="card">
+      <h2>قائمة الصيدليات (${count}) — اضغط على أي صيدلية لعرض بياناتها وحاسبة الكاش باك</h2>
+      <div class="pharm-list" id="totalsListBox">${listHtml}</div>
     </div>`;
+
+  document.getElementById('totalsListBox').addEventListener('click', (e) => {
+    const item = e.target.closest('.pharm-list-item');
+    if(!item) return;
+    const idx = parseInt(item.dataset.idx, 10);
+    selectPharmacy(PHARMACIES[idx]);
+    const detail = document.getElementById('detailSection');
+    if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
+  });
 }
 
 mrFilter.addEventListener('change', () => {
