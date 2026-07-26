@@ -372,18 +372,36 @@ const mrFilter = document.getElementById('mrFilter');
 const dmFilter = document.getElementById('dmFilter');
 
 function populateFilters(){
-  const mrs = [...new Set(PHARMACIES.map(p => p.mr).filter(Boolean))].sort((a,b) => a.localeCompare(b));
   const dms = [...new Set(PHARMACIES.map(p => p.dm).filter(Boolean))].sort((a,b) => a.localeCompare(b));
-  mrs.forEach(name => {
-    const opt = document.createElement('option');
-    opt.value = name; opt.textContent = name;
-    mrFilter.appendChild(opt);
-  });
   dms.forEach(name => {
     const opt = document.createElement('option');
     opt.value = name; opt.textContent = name;
     dmFilter.appendChild(opt);
   });
+  updateMRFilterOptions();
+}
+
+// Rebuilds the MR dropdown's options based on the currently selected DM
+// (or all MRs if no DM is selected), keeping the current MR selection if it's
+// still valid under the new DM, otherwise resetting it.
+function updateMRFilterOptions(){
+  const keepValue = activeMR;
+  const pool = activeDM ? PHARMACIES.filter(p => p.dm === activeDM) : PHARMACIES;
+  const mrs = [...new Set(pool.map(p => p.mr).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+
+  mrFilter.innerHTML = '<option value="">كل المندوبين الطبيين</option>';
+  mrs.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    mrFilter.appendChild(opt);
+  });
+
+  if(keepValue && mrs.includes(keepValue)){
+    mrFilter.value = keepValue;
+  } else {
+    activeMR = '';
+    mrFilter.value = '';
+  }
 }
 
 function getFilteredPharmacies(){
@@ -478,6 +496,7 @@ mrFilter.addEventListener('change', () => {
 });
 dmFilter.addEventListener('change', () => {
   activeDM = dmFilter.value;
+  updateMRFilterOptions();
   renderTotals();
   if(searchInput.value.trim().length) runSearch();
 });
