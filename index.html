@@ -226,6 +226,47 @@
   }
   .badge.exist{background:#e3f5ec;color:#1a7a4d;}
   .badge.new{background:#fdf1de;color:#a0680d;}
+  .badge.slab-max{background:#e3f5ec;color:#1a7a4d;}
+  .badge.slab-remaining{background:#fdf1de;color:#a0680d;}
+  .badge.slab-unknown{background:var(--bg);color:var(--muted);}
+  .badge-row{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;}
+
+  .view-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .view-tab-btn{
+    flex:1;
+    min-width:150px;
+    text-align:center;
+    padding:12px 10px;
+    border-radius:12px;
+    background:var(--card);
+    border:2px solid var(--border);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    color:var(--muted);
+  }
+  .view-tab-btn.active{border-color:var(--primary);color:var(--primary-dark);background:#fff8f0;}
+
+  .overview-note{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;}
+  .pli-slab-max .pli-sales{color:#1a7a4d;}
+  .pli-slab-remaining .pli-sales{color:var(--primary-dark);}
+
+  .compare-box{position:relative;margin-top:6px;}
+  .compare-active-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--bg);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-top:10px;
+    font-size:13px;
+  }
+  .compare-active-row .remove-compare-btn{
+    border:none;background:none;color:var(--danger);font-weight:700;cursor:pointer;font-size:13px;
+  }
+  table.compare-table th:first-child,
+  table.compare-table td:first-child{text-align:right;color:var(--muted);font-size:12px;}
 
   .sales-grid{
     display:grid;
@@ -315,30 +356,46 @@
     <p>اكتب اسم الصيدلية أو الكود، وشاهد مبيعات الربع الثالث والرابع، ونسبة النمو، وقيمة الكاش باك المستهدف للعقد الجديد.</p>
   </header>
 
-  <div class="card">
-    <h2>البحث عن صيدلية</h2>
-    <div class="filter-row">
-      <select id="mrFilter"><option value="">كل المندوبين الطبيين</option></select>
-      <select id="dmFilter"><option value="">كل مديري المناطق</option></select>
-    </div>
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="اكتب اسم الصيدلية، الكود، أو المنطقة..." autocomplete="off">
-      <button class="clear-btn" id="clearSearchBtn" type="button">✕</button>
-      <div class="results" id="resultsBox"></div>
-    </div>
-    <div class="search-count" id="searchCount">إجمالي الصيدليات في القاعدة: 2751</div>
+  <div class="view-tabs" id="viewTabs">
+    <div class="view-tab-btn active" data-view="search">🔍 بحث عن صيدلية</div>
+    <div class="view-tab-btn" data-view="overview">📊 نظرة عامة على الفرص</div>
   </div>
 
-  <div id="totalsSection"></div>
-
-  <div id="detailSection">
+  <div id="searchView">
     <div class="card">
-      <div class="placeholder">
-        <div class="big">🏥</div>
-        ابحث عن صيدلية بالاسم أو الكود لعرض بيانات المبيعات وحاسبة الكاش باك
+      <h2>البحث عن صيدلية</h2>
+      <div class="filter-row">
+        <select id="mrFilter"><option value="">كل المندوبين الطبيين</option></select>
+        <select id="dmFilter"><option value="">كل مديري المناطق</option></select>
+      </div>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="اكتب اسم الصيدلية، الكود، أو المنطقة..." autocomplete="off">
+        <button class="clear-btn" id="clearSearchBtn" type="button">✕</button>
+        <div class="results" id="resultsBox"></div>
+      </div>
+      <div class="search-count" id="searchCount">إجمالي الصيدليات في القاعدة: 2751</div>
+    </div>
+
+    <div id="totalsSection"></div>
+
+    <div id="detailSection">
+      <div class="card">
+        <div class="placeholder">
+          <div class="big">🏥</div>
+          ابحث عن صيدلية بالاسم أو الكود لعرض بيانات المبيعات وحاسبة الكاش باك
+        </div>
       </div>
     </div>
+  </div>
+
+  <div id="overviewView" style="display:none;">
+    <div class="card">
+      <div class="overview-note">
+        هذه النظرة العامة تعتمد على نمو مبيعات الموزع من الربع الثالث إلى الربع الرابع 2025، وتُفلتر حسب المندوب/مدير المنطقة المختار أعلاه في تبويب البحث.
+      </div>
+    </div>
+    <div id="overviewSection"></div>
   </div>
 
   <footer>الأرقام محسوبة من بيانات مبيعات الموزع (DIST) للربع الثالث والرابع 2025 — الأداة لعرض السيناريوهات قبل التعاقد، وليست تأكيداً نهائياً للمستحقات.</footer>
@@ -356,6 +413,7 @@ const SHELF_RATES = {none:0, '2':0.005, '3':0.01, '4':0.015};
 const POSM_RATE = 0.005;
 
 let currentPharmacy = null;
+let compareWith = null;
 let state = { baseline:'q4', shelf:'none', posm:false, full:false, customBaseline:null };
 let activeMR = '';
 let activeDM = '';
@@ -489,14 +547,130 @@ function renderTotals(){
   });
 }
 
+// ---------- Slab status: already maxed out vs. remaining to next slab ----------
+// Growth is measured the same way as everywhere else in the tool: Q4 distributor
+// sales vs. Q3 distributor sales. If a pharmacy has already cleared the top slab's
+// growth threshold, there's nothing left to chase -- it's a guaranteed win. Otherwise
+// this reports exactly how many more EGP of Q4 sales would clear the next slab up.
+function getSlabStatus(p){
+  if(!p.q3d || p.q3d <= 0){
+    return { state:'unknown' };
+  }
+  const growth = (p.q4d - p.q3d) / p.q3d;
+  const topSlab = SLABS[SLABS.length - 1];
+  if(growth >= topSlab.growth){
+    const rows = calcSlabs(p.q3d, {shelf:'none', posm:false, full:false});
+    const topRow = rows[rows.length - 1];
+    return {
+      state:'max',
+      currentGrowth: growth,
+      slabLabel: topSlab.label,
+      cashback: topRow.cashback,
+      target: topRow.target
+    };
+  }
+  const next = SLABS.find(s => growth < s.growth);
+  const neededSales = p.q3d * (1 + next.growth);
+  const remaining = Math.max(neededSales - p.q4d, 0);
+  return {
+    state:'remaining',
+    currentGrowth: growth,
+    nextLabel: next.label,
+    nextGrowth: next.growth,
+    remaining
+  };
+}
+
+function slabStatusBadgeHtml(s){
+  if(s.state === 'max'){
+    return `<span class="badge slab-max">🏆 حقّق الحد الأقصى للنمو (+${pct(s.currentGrowth)}) — فوز مضمون بكاش باك ${fmt(s.cashback)} ج.م</span>`;
+  }
+  if(s.state === 'remaining'){
+    return `<span class="badge slab-remaining">📈 يحتاج ${fmt(s.remaining)} ج.م إضافية للوصول إلى ${s.nextLabel} (+${pct(s.nextGrowth)})</span>`;
+  }
+  return `<span class="badge slab-unknown">لا تتوفر بيانات كافية لحساب الشريحة (لا يوجد مبيعات ربع ثالث)</span>`;
+}
+
+// ---------- Status Overview tab ----------
+function renderOverview(){
+  const overviewSection = document.getElementById('overviewSection');
+  const pool = getFilteredPharmacies();
+  const withStatus = pool.map(p => ({ p, s: getSlabStatus(p) }));
+  const maxed = withStatus.filter(x => x.s.state === 'max').sort((a,b) => b.s.currentGrowth - a.s.currentGrowth);
+  const remaining = withStatus.filter(x => x.s.state === 'remaining').sort((a,b) => a.s.remaining - b.s.remaining);
+
+  const maxItemsHtml = maxed.map(({p,s}) => `
+    <div class="pharm-list-item pli-slab-max" data-idx="${PHARMACIES.indexOf(p)}">
+      <div>
+        <div class="pli-name">${p.n}</div>
+        <div class="pli-meta">${p.mr||'—'} · نمو +${pct(s.currentGrowth)}</div>
+      </div>
+      <div class="pli-stats">
+        <div class="pli-sales">🏆 ${fmt(s.cashback)} ج.م</div>
+      </div>
+    </div>`).join('');
+
+  const remainingItemsHtml = remaining.slice(0, 150).map(({p,s}) => `
+    <div class="pharm-list-item pli-slab-remaining" data-idx="${PHARMACIES.indexOf(p)}">
+      <div>
+        <div class="pli-name">${p.n}</div>
+        <div class="pli-meta">${p.mr||'—'} · حتى ${s.nextLabel} (+${pct(s.nextGrowth)})</div>
+      </div>
+      <div class="pli-stats">
+        <div class="pli-sales">${fmt(s.remaining)} ج.م متبقية</div>
+      </div>
+    </div>`).join('');
+
+  overviewSection.innerHTML = `
+    <div class="card">
+      <h2>🏆 صيدليات حققت الحد الأقصى للنمو — فوز مضمون (${maxed.length})</h2>
+      <div class="pharm-list" id="maxListBox">${maxItemsHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
+    </div>
+    <div class="card">
+      <h2>📈 الأقرب للوصول للشريحة التالية (${remaining.length})</h2>
+      <div class="note">مرتّبة تصاعدياً حسب أقل مبلغ متبقٍ للوصول للشريحة التالية${remaining.length > 150 ? ' — تُعرض أقرب 150 صيدلية فقط' : ''}.</div>
+      <div class="pharm-list" id="remainingListBox">${remainingItemsHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
+    </div>`;
+
+  ['maxListBox', 'remainingListBox'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('click', (e) => {
+      const item = e.target.closest('.pharm-list-item');
+      if(!item) return;
+      const idx = parseInt(item.dataset.idx, 10);
+      selectPharmacy(PHARMACIES[idx]);
+      switchView('search');
+      const detail = document.getElementById('detailSection');
+      if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+}
+
+function switchView(view){
+  document.getElementById('searchView').style.display = view === 'search' ? '' : 'none';
+  document.getElementById('overviewView').style.display = view === 'overview' ? '' : 'none';
+  document.querySelectorAll('.view-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === view);
+  });
+  if(view === 'overview') renderOverview();
+}
+document.getElementById('viewTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.view-tab-btn');
+  if(!btn) return;
+  switchView(btn.dataset.view);
+});
+
 mrFilter.addEventListener('change', () => {
   activeMR = mrFilter.value;
   renderTotals();
+  if(document.getElementById('overviewView').style.display !== 'none') renderOverview();
   if(searchInput.value.trim().length) runSearch();
 });
 dmFilter.addEventListener('change', () => {
   activeDM = dmFilter.value;
   updateMRFilterOptions();
+  if(document.getElementById('overviewView').style.display !== 'none') renderOverview();
   renderTotals();
   if(searchInput.value.trim().length) runSearch();
 });
@@ -596,8 +770,105 @@ document.addEventListener('click', (e) => {
 
 function selectPharmacy(p){
   currentPharmacy = p;
+  compareWith = null;
   state = { baseline:'q4', shelf:'none', posm:false, full:false, customBaseline:null };
   renderDetail();
+}
+
+// ---------- Side-by-side comparison ----------
+function compareRowHtml(labelHtml, valA, valB){
+  return `<tr><td class="name-cell">${labelHtml}</td><td>${valA}</td><td>${valB}</td></tr>`;
+}
+
+function renderCompareCardHtml(p){
+  if(!compareWith){
+    return `
+      <div class="card">
+        <h2>مقارنة مع صيدلية أخرى</h2>
+        <div class="search-box compare-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="compareInput" placeholder="اكتب اسم صيدلية أخرى للمقارنة معها..." autocomplete="off">
+          <div class="results" id="compareResultsBox"></div>
+        </div>
+      </div>`;
+  }
+
+  const c = compareWith;
+  const gA = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
+  const gB = c.q3d > 0 ? (c.q4d - c.q3d) / c.q3d : null;
+  const sA = getSlabStatus(p);
+  const sB = getSlabStatus(c);
+  const rowsA = calcSlabs(p.q3d > 0 ? p.q3d : p.q4d, {shelf:'none', posm:false, full:false});
+  const rowsB = calcSlabs(c.q3d > 0 ? c.q3d : c.q4d, {shelf:'none', posm:false, full:false});
+  const topA = rowsA[rowsA.length - 1];
+  const topB = rowsB[rowsB.length - 1];
+
+  return `
+    <div class="card">
+      <h2>مقارنة مع صيدلية أخرى</h2>
+      <div class="compare-active-row">
+        <span>تتم المقارنة مع: <strong>${c.n}</strong></span>
+        <button class="remove-compare-btn" id="removeCompareBtn" type="button">✕ إزالة المقارنة</button>
+      </div>
+      <div style="overflow-x:auto;margin-top:12px;">
+      <table class="compare-table">
+        <thead><tr><th></th><th>${p.n}</th><th>${c.n}</th></tr></thead>
+        <tbody>
+          ${compareRowHtml('المندوب الطبي', p.mr||'—', c.mr||'—')}
+          ${compareRowHtml('مدير المنطقة', p.dm||'—', c.dm||'—')}
+          ${compareRowHtml('مبيعات الربع الثالث', fmt(p.q3d)+' ج.م', fmt(c.q3d)+' ج.م')}
+          ${compareRowHtml('مبيعات الربع الرابع', fmt(p.q4d)+' ج.م', fmt(c.q4d)+' ج.م')}
+          ${compareRowHtml('نسبة النمو', gA===null?'—':(gA>=0?'+':'')+pct(gA), gB===null?'—':(gB>=0?'+':'')+pct(gB))}
+          ${compareRowHtml('حالة الشريحة', sA.state==='max' ? '🏆 فوز مضمون' : sA.state==='remaining' ? `${fmt(sA.remaining)} ج.م لـ${sA.nextLabel}` : '—', sB.state==='max' ? '🏆 فوز مضمون' : sB.state==='remaining' ? `${fmt(sB.remaining)} ج.م لـ${sB.nextLabel}` : '—')}
+          ${compareRowHtml('كاش باك الشريحة القصوى (أساس الربع الثالث)', fmt(topA.cashback)+' ج.م', fmt(topB.cashback)+' ج.م')}
+        </tbody>
+      </table>
+      </div>
+      <div class="note">المقارنة تعتمد على مبيعات الربع الثالث كأساس لحساب الشريحة القصوى، بدون أرفف أو POSM، لتوفير مقارنة مباشرة بين الصيدليتين.</div>
+    </div>`;
+}
+
+function attachCompareHandlers(p){
+  const removeBtn = document.getElementById('removeCompareBtn');
+  if(removeBtn){
+    removeBtn.addEventListener('click', () => {
+      compareWith = null;
+      renderDetail();
+    });
+    return;
+  }
+  const compareInput = document.getElementById('compareInput');
+  const compareResultsBox = document.getElementById('compareResultsBox');
+  if(!compareInput) return;
+  compareInput.addEventListener('input', () => {
+    const raw = compareInput.value.trim();
+    if(raw.length < 1){ compareResultsBox.classList.remove('show'); return; }
+    const q = normalize(raw);
+    let matches = PHARMACIES.filter(x => x !== p && (normalize(x.n).includes(q) || (x.c && String(x.c).includes(raw))));
+    if(matches.length === 0 && q.length >= 2){
+      matches = PHARMACIES.filter(x => x !== p && nearbyMatch(normalize(x.n), q));
+    }
+    matches = matches.slice(0, 15);
+    compareResultsBox.innerHTML = matches.length === 0
+      ? '<div class="empty-msg">لا توجد نتائج مطابقة</div>'
+      : matches.map(x => `
+        <div class="result-item" data-idx="${PHARMACIES.indexOf(x)}">
+          <div class="rname">${x.n}</div>
+          <div class="rmeta">كود: ${x.c} · ${x.rg} / ${x.tr} · المندوب: ${x.mr}</div>
+        </div>`).join('');
+    compareResultsBox.classList.add('show');
+  });
+  compareResultsBox.addEventListener('click', (e) => {
+    const item = e.target.closest('.result-item');
+    if(!item) return;
+    compareWith = PHARMACIES[parseInt(item.dataset.idx, 10)];
+    renderDetail();
+  });
+  document.addEventListener('click', function closeCompareOnOutsideClick(e){
+    if(!e.target.closest('.compare-box')){
+      compareResultsBox.classList.remove('show');
+    }
+  });
 }
 
 // ---------- Rendering ----------
@@ -617,6 +888,7 @@ function renderDetail(){
   const usingCustom = state.customBaseline != null && !isNaN(state.customBaseline) && state.customBaseline > 0;
   const baselineSales = usingCustom ? state.customBaseline : tabBaseline;
   const rows = calcSlabs(baselineSales, state);
+  const slabStatus = getSlabStatus(p);
 
   document.getElementById('detailSection').innerHTML = `
     <div class="card">
@@ -627,6 +899,7 @@ function renderDetail(){
         </div>
         ${statusBadge}
       </div>
+      <div class="badge-row">${slabStatusBadgeHtml(slabStatus)}</div>
       <div class="meta-grid">
         <div class="meta-item"><div class="lbl">المندوب الطبي</div><div class="val">${p.mr||'—'}</div></div>
         <div class="meta-item"><div class="lbl">مدير المنطقة</div><div class="val">${p.dm||'—'}</div></div>
@@ -730,7 +1003,11 @@ function renderDetail(){
         هذه الأرقام لعرضها على الصيدلي قبل توقيع العقد، وتُحسب من مبيعات الموزع فقط.
       </div>
     </div>
+
+    ${renderCompareCardHtml(p)}
   `;
+
+  attachCompareHandlers(p);
 
   document.getElementById('baselineTabs').addEventListener('click', (e) => {
     const btn = e.target.closest('.tab-btn');
