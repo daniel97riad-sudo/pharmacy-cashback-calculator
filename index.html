@@ -233,6 +233,7 @@
 
   .view-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
   .view-tab-btn{
+    position:relative;
     flex:1;
     min-width:150px;
     text-align:center;
@@ -246,9 +247,30 @@
     color:var(--muted);
   }
   .view-tab-btn.active{border-color:var(--primary);color:var(--primary-dark);background:#fff8f0;}
+  .tab-badge{
+    display:inline-block;
+    min-width:18px;
+    padding:1px 6px;
+    margin-right:6px;
+    border-radius:20px;
+    background:var(--danger);
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+    vertical-align:middle;
+  }
 
   .overview-note{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;}
   .pli-slab-max .pli-sales{color:#1a7a4d;}
+  .pli-best-chance .pli-sales{color:#1a7a4d;}
+  .pli-needs-attention .pli-sales{color:var(--danger);}
+
+  .history-chart{display:flex;align-items:flex-end;gap:18px;height:150px;padding:10px 6px 0;}
+  .history-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;max-width:110px;}
+  .history-bar{width:100%;border-radius:6px 6px 0 0;background:var(--primary);min-height:3px;transition:height .2s;}
+  .history-bar.muted{background:var(--border);}
+  .history-bar-val{font-size:11px;font-weight:700;color:var(--primary-dark);margin-bottom:4px;}
+  .history-bar-lbl{font-size:11px;color:var(--muted);margin-top:8px;text-align:center;}
   .pli-slab-remaining .pli-sales{color:var(--primary-dark);}
 
   .compare-box{position:relative;margin-top:6px;}
@@ -358,7 +380,7 @@
 
   <div class="view-tabs" id="viewTabs">
     <div class="view-tab-btn active" data-view="search">🔍 بحث عن صيدلية</div>
-    <div class="view-tab-btn" data-view="overview">📊 نظرة عامة على الفرص</div>
+    <div class="view-tab-btn" data-view="overview"><span class="tab-badge" id="overviewBadge" style="display:none;">0</span>📊 نظرة عامة على الفرص</div>
   </div>
 
   <div id="searchView">
@@ -600,35 +622,90 @@ function slabStatusBadgeHtml(s){
   return `<span class="badge slab-unknown">لا تتوفر بيانات كافية لحساب الشريحة (لا يوجد مبيعات ربع ثالث)</span>`;
 }
 
+// ---------- Sales history bar chart (per pharmacy) ----------
+// Plain CSS bars, no charting library -- keeps the tool a single offline file.
+// Every period we currently have per pharmacy is plotted on the same scale so a
+// rep/DM can see the actual trend at a glance, not just one quarter-over-quarter
+// percentage. More periods (e.g. a confirmed Semester 1 file) can be added here
+// later without changing this rendering approach.
+function renderHistoryChart(p){
+  const periods = [
+    { lbl: 'الربع الثالث 2025', val: p.q3d },
+    { lbl: 'الربع الرابع 2025', val: p.q4d },
+  ];
+  if(SUPPLEMENT_LABEL && p.wk !== null && p.wk !== undefined){
+    periods.push({ lbl: SUPPLEMENT_LABEL, val: p.wk });
+  }
+  const maxVal = Math.max(...periods.map(x => x.val), 1);
+  const cols = periods.map(x => {
+    const heightPct = Math.max((x.val / maxVal) * 100, 1);
+    return `
+      <div class="history-bar-col">
+        <div class="history-bar-val">${fmt(x.val)}</div>
+        <div class="history-bar" style="height:${heightPct}%"></div>
+        <div class="history-bar-lbl">${x.lbl}</div>
+      </div>`;
+  }).join('');
+  return `<div class="history-chart">${cols}</div>`;
+}
+
 // ---------- Status Overview tab ----------
+// "Remaining" pharmacies are split into two groups so a rep/DM can tell a pharmacy
+// that's actively trending toward its target apart from one that's flat or slipping,
+// instead of lumping every not-yet-maxed pharmacy into one undifferentiated list:
+//   - Best chance: growth is positive (already moving toward the goal) -- these are
+//     the ones worth a nudge right now, sorted by smallest remaining amount first.
+//   - Needs attention: growth is zero or negative (flat/declining) -- still shown so
+//     nothing is hidden, but separated since closing the gap here is a harder sell.
+function classifyRemaining(withStatus){
+  const remaining = withStatus.filter(x => x.s.state === 'remaining');
+  const bestChance = remaining.filter(x => x.s.currentGrowth > 0).sort((a,b) => a.s.remaining - b.s.remaining);
+  const needsAttention = remaining.filter(x => x.s.currentGrowth <= 0).sort((a,b) => a.s.remaining - b.s.remaining);
+  return { remaining, bestChance, needsAttention };
+}
+
+// Keeps the red count badge on the Overview tab button in sync with the current
+// MR/DM filter, even while the Search tab is the one showing -- so a rep can see
+// "12 pharmacies need a nudge" without having to click into Overview first.
+function updateOverviewBadge(){
+  const pool = getFilteredPharmacies();
+  const withStatus = pool.map(p => ({ p, s: getSlabStatus(p) }));
+  const { remaining } = classifyRemaining(withStatus);
+  const badge = document.getElementById('overviewBadge');
+  if(remaining.length > 0){
+    badge.textContent = remaining.length.toLocaleString('en-US');
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
 function renderOverview(){
   const overviewSection = document.getElementById('overviewSection');
   const pool = getFilteredPharmacies();
   const withStatus = pool.map(p => ({ p, s: getSlabStatus(p) }));
   const maxed = withStatus.filter(x => x.s.state === 'max').sort((a,b) => b.s.currentGrowth - a.s.currentGrowth);
-  const remaining = withStatus.filter(x => x.s.state === 'remaining').sort((a,b) => a.s.remaining - b.s.remaining);
+  const { bestChance, needsAttention } = classifyRemaining(withStatus);
 
-  const maxItemsHtml = maxed.map(({p,s}) => `
-    <div class="pharm-list-item pli-slab-max" data-idx="${PHARMACIES.indexOf(p)}">
+  const listItem = (p, s, cls, metaHtml, salesHtml) => `
+    <div class="pharm-list-item ${cls}" data-idx="${PHARMACIES.indexOf(p)}">
       <div>
         <div class="pli-name">${p.n}</div>
-        <div class="pli-meta">${p.mr||'—'} · نمو +${pct(s.currentGrowth)}</div>
+        <div class="pli-meta">${p.mr||'—'} · ${metaHtml}</div>
       </div>
       <div class="pli-stats">
-        <div class="pli-sales">🏆 ${fmt(s.cashback)} ج.م</div>
+        <div class="pli-sales">${salesHtml}</div>
       </div>
-    </div>`).join('');
+    </div>`;
 
-  const remainingItemsHtml = remaining.slice(0, 150).map(({p,s}) => `
-    <div class="pharm-list-item pli-slab-remaining" data-idx="${PHARMACIES.indexOf(p)}">
-      <div>
-        <div class="pli-name">${p.n}</div>
-        <div class="pli-meta">${p.mr||'—'} · حتى ${s.nextLabel} (+${pct(s.nextGrowth)})</div>
-      </div>
-      <div class="pli-stats">
-        <div class="pli-sales">${fmt(s.remaining)} ج.م متبقية</div>
-      </div>
-    </div>`).join('');
+  const maxItemsHtml = maxed.map(({p,s}) => listItem(p, s, 'pli-slab-max',
+    `نمو +${pct(s.currentGrowth)}`, `🏆 ${fmt(s.cashback)} ج.م`)).join('');
+
+  const bestChanceHtml = bestChance.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-best-chance',
+    `نمو +${pct(s.currentGrowth)} · حتى ${s.nextLabel}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
+
+  const needsAttentionHtml = needsAttention.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
+    `نمو ${pct(s.currentGrowth)} · حتى ${s.nextLabel}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
 
   overviewSection.innerHTML = `
     <div class="card">
@@ -636,12 +713,17 @@ function renderOverview(){
       <div class="pharm-list" id="maxListBox">${maxItemsHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
     </div>
     <div class="card">
-      <h2>📈 الأقرب للوصول للشريحة التالية (${remaining.length})</h2>
-      <div class="note">مرتّبة تصاعدياً حسب أقل مبلغ متبقٍ للوصول للشريحة التالية${remaining.length > 150 ? ' — تُعرض أقرب 150 صيدلية فقط' : ''}.</div>
-      <div class="pharm-list" id="remainingListBox">${remainingItemsHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
+      <h2>✅ الأفضل حظاً لتحقيق المستهدف (${bestChance.length})</h2>
+      <div class="note">نمو إيجابي بالفعل بين الربع الثالث والرابع، ومرتّبة تصاعدياً حسب أقل مبلغ متبقٍ للوصول للشريحة التالية${bestChance.length > 150 ? ' — تُعرض أقرب 150 صيدلية فقط' : ''}.</div>
+      <div class="pharm-list" id="bestChanceListBox">${bestChanceHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
+    </div>
+    <div class="card">
+      <h2>⚠️ تحتاج متابعة (${needsAttention.length})</h2>
+      <div class="note">نمو صفري أو سلبي بين الربع الثالث والرابع — الوصول للشريحة التالية أصعب هنا حتى لو كان المبلغ المتبقي صغيراً${needsAttention.length > 150 ? ' — تُعرض أقرب 150 صيدلية فقط' : ''}.</div>
+      <div class="pharm-list" id="needsAttentionListBox">${needsAttentionHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
     </div>`;
 
-  ['maxListBox', 'remainingListBox'].forEach(id => {
+  ['maxListBox', 'bestChanceListBox', 'needsAttentionListBox'].forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
     el.addEventListener('click', (e) => {
@@ -673,12 +755,14 @@ document.getElementById('viewTabs').addEventListener('click', (e) => {
 mrFilter.addEventListener('change', () => {
   activeMR = mrFilter.value;
   renderTotals();
+  updateOverviewBadge();
   if(document.getElementById('overviewView').style.display !== 'none') renderOverview();
   if(searchInput.value.trim().length) runSearch();
 });
 dmFilter.addEventListener('change', () => {
   activeDM = dmFilter.value;
   updateMRFilterOptions();
+  updateOverviewBadge();
   if(document.getElementById('overviewView').style.display !== 'none') renderOverview();
   renderTotals();
   if(searchInput.value.trim().length) runSearch();
@@ -945,6 +1029,12 @@ function renderDetail(){
     </div>
 
     <div class="card">
+      <h2>📊 سجل المبيعات — للاستدلال على الإمكانية الفعلية للصيدلية</h2>
+      ${renderHistoryChart(p)}
+      <div class="note">أعمدة بنفس المقياس لسهولة المقارنة بين الفترات. كلما زادت نقاط البيانات المتاحة مستقبلاً (مثل بيانات نصف السنة)، ستظهر هنا تلقائياً.</div>
+    </div>
+
+    <div class="card">
       <h2>حاسبة عرض العقد الجديد</h2>
 
       <div class="tabs" id="baselineTabs" style="${usingCustom ? 'opacity:.45;pointer-events:none;' : ''}">
@@ -1075,6 +1165,7 @@ function calcSlabs(baseSales, opts){
 }
 
 populateFilters();
+updateOverviewBadge();
 </script>
 </body>
 </html>
