@@ -265,12 +265,8 @@
   .pli-best-chance .pli-sales{color:#1a7a4d;}
   .pli-needs-attention .pli-sales{color:var(--danger);}
 
-  .history-chart{display:flex;align-items:flex-end;gap:18px;height:150px;padding:10px 6px 0;}
-  .history-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;max-width:110px;}
-  .history-bar{width:100%;border-radius:6px 6px 0 0;background:var(--primary);min-height:3px;transition:height .2s;}
-  .history-bar.muted{background:var(--border);}
-  .history-bar-val{font-size:11px;font-weight:700;color:var(--primary-dark);margin-bottom:4px;}
-  .history-bar-lbl{font-size:11px;color:var(--muted);margin-top:8px;text-align:center;}
+  .history-chart-wrap{padding:6px 2px 0;}
+  .history-chart-svg{width:100%;height:190px;display:block;overflow:visible;}
   .pli-slab-remaining .pli-sales{color:var(--primary-dark);}
 
   .compare-box{position:relative;margin-top:6px;}
@@ -622,12 +618,13 @@ function slabStatusBadgeHtml(s){
   return `<span class="badge slab-unknown">لا تتوفر بيانات كافية لحساب الشريحة (لا يوجد مبيعات ربع ثالث)</span>`;
 }
 
-// ---------- Sales history bar chart (per pharmacy) ----------
-// Plain CSS bars, no charting library -- keeps the tool a single offline file.
-// Every period we currently have per pharmacy is plotted on the same scale so a
-// rep/DM can see the actual trend at a glance, not just one quarter-over-quarter
-// percentage. More periods (e.g. a confirmed Semester 1 file) can be added here
-// later without changing this rendering approach.
+// ---------- Sales history line chart (per pharmacy) ----------
+// A small inline SVG line/point chart -- no charting library, keeps the tool a single
+// offline file. Every period we currently have per pharmacy is plotted on the same
+// scale, left (earliest) to right (latest), so a rep/DM can see the actual trend
+// direction at a glance, not just one quarter-over-quarter percentage. More periods
+// (e.g. a confirmed Semester 1 file) can be added here later without changing this
+// rendering approach -- the chart just lays out however many points it's given.
 function renderHistoryChart(p){
   const periods = [
     { lbl: 'الربع الثالث 2025', val: p.q3d },
@@ -636,17 +633,35 @@ function renderHistoryChart(p){
   if(SUPPLEMENT_LABEL && p.wk !== null && p.wk !== undefined){
     periods.push({ lbl: SUPPLEMENT_LABEL, val: p.wk });
   }
+
+  const W = 600, H = 190, padL = 18, padR = 18, padT = 34, padB = 40;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
   const maxVal = Math.max(...periods.map(x => x.val), 1);
-  const cols = periods.map(x => {
-    const heightPct = Math.max((x.val / maxVal) * 100, 1);
-    return `
-      <div class="history-bar-col">
-        <div class="history-bar-val">${fmt(x.val)}</div>
-        <div class="history-bar" style="height:${heightPct}%"></div>
-        <div class="history-bar-lbl">${x.lbl}</div>
-      </div>`;
-  }).join('');
-  return `<div class="history-chart">${cols}</div>`;
+  const n = periods.length;
+
+  const points = periods.map((x, i) => {
+    const px = n === 1 ? padL + plotW / 2 : padL + (plotW * i) / (n - 1);
+    const py = padT + plotH - (x.val / maxVal) * plotH;
+    return { ...x, px, py };
+  });
+
+  const pathD = points.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt.px.toFixed(1)},${pt.py.toFixed(1)}`).join(' ');
+
+  const markers = points.map(pt => `
+    <text x="${pt.px.toFixed(1)}" y="${(pt.py - 14).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--primary-dark)">${fmt(pt.val)}</text>
+    <circle cx="${pt.px.toFixed(1)}" cy="${pt.py.toFixed(1)}" r="5" fill="var(--primary)" stroke="#fff" stroke-width="2"></circle>
+    <text x="${pt.px.toFixed(1)}" y="${H - 12}" text-anchor="middle" font-size="12" fill="var(--muted)">${pt.lbl}</text>
+  `).join('');
+
+  return `
+    <div class="history-chart-wrap">
+      <svg class="history-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+        <line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--border)" stroke-width="1"></line>
+        <path d="${pathD}" fill="none" stroke="var(--primary)" stroke-width="2.5"></path>
+        ${markers}
+      </svg>
+    </div>`;
 }
 
 // ---------- Status Overview tab ----------
@@ -1031,7 +1046,7 @@ function renderDetail(){
     <div class="card">
       <h2>📊 سجل المبيعات — للاستدلال على الإمكانية الفعلية للصيدلية</h2>
       ${renderHistoryChart(p)}
-      <div class="note">أعمدة بنفس المقياس لسهولة المقارنة بين الفترات. كلما زادت نقاط البيانات المتاحة مستقبلاً (مثل بيانات نصف السنة)، ستظهر هنا تلقائياً.</div>
+      <div class="note">نقاط متصلة بنفس المقياس لتوضيح اتجاه النمو الفعلي. كلما زادت نقاط البيانات المتاحة مستقبلاً (مثل بيانات نصف السنة)، ستظهر هنا تلقائياً.</div>
     </div>
 
     <div class="card">
