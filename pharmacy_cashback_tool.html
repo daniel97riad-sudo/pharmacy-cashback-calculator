@@ -1208,7 +1208,13 @@ function calcSlabs(baseSales, opts){
     const rawTarget = baseSales * (1 + s.growth);
     const floor = useLowValueFloors ? LOW_VALUE_TARGET_FLOORS[s.key] : s.targetFloor;
     const target = Math.max(rawTarget, floor);
-    const cashback = Math.max(target * s.cashRate, s.cashFloor);
+    // The cashback floor (500/700/1000 EGP) only guarantees a minimum for genuinely
+    // low-sales pharmacies (baseSales <= LOW_VALUE_THRESHOLD) -- gated by the same
+    // useLowValueFloors flag as the target floor above. Without this gate, the flat
+    // floor swallowed the percentage-based cashback for ~90% of pharmacies (median Q4
+    // sales here is far below the ~25-35k EGP breakeven point), which is what made the
+    // cashback look like it "wasn't changing" between most pharmacies.
+    const cashback = useLowValueFloors ? Math.max(target * s.cashRate, s.cashFloor) : target * s.cashRate;
     const shelfBonus = target * (SHELF_RATES[opts.shelf] || 0);
     const posmBonus = opts.posm ? target * POSM_RATE : 0;
     const rebateBonus = opts.full ? target * s.rebateRate : 0;
