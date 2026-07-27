@@ -1203,7 +1203,7 @@ function calcSlabs(baseSales, opts){
   // whatever the caller is using as "the baseline" (Q3 / Q4 / combined / a custom
   // what-if figure, or a pharmacy's own Q3 sales for badges/comparisons), so this
   // rule applies consistently everywhere calcSlabs is used, not just one screen.
-  const useLowValueFloors = baseSales < LOW_VALUE_THRESHOLD;
+  const useLowValueFloors = baseSales <= LOW_VALUE_THRESHOLD;  // inclusive: exactly 5000 counts as low-value too
   return SLABS.map(s => {
     const rawTarget = baseSales * (1 + s.growth);
     const floor = useLowValueFloors ? LOW_VALUE_TARGET_FLOORS[s.key] : s.targetFloor;
