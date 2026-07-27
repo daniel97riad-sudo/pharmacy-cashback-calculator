@@ -634,13 +634,16 @@ function slabStatusBadgeHtml(s){
 // direction at a glance, not just one quarter-over-quarter percentage. More periods
 // (e.g. a confirmed Semester 1 file) can be added here later without changing this
 // rendering approach -- the chart just lays out however many points it's given.
-// Arabic month names for turning an S1 "YYYYMM" key (e.g. "202601") into a
-// chart label like "يناير 2026" -- generic across any year, not hardcoded to 2026.
-const ARABIC_MONTHS = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+// English month names for turning an S1 "YYYYMM" key (e.g. "202601") into a
+// chart label like "Jan 2026" -- generic across any year, not hardcoded to 2026.
+// English (not Arabic) is used deliberately here: mixing an Arabic month name with
+// Latin-digit years inside this RTL page triggered bidi reordering/rendering glitches
+// on the live chart, so plain English keeps these labels rendering correctly.
+const ENGLISH_MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function monthLabel(yyyymm){
   const s = String(yyyymm);
   const year = s.slice(0, 4), month = parseInt(s.slice(4, 6), 10);
-  return `${ARABIC_MONTHS[month] || month} ${year}`;
+  return `${ENGLISH_MONTHS[month] || month} ${year}`;
 }
 
 function renderHistoryChart(p){
@@ -657,11 +660,19 @@ function renderHistoryChart(p){
     periods.push({ lbl: SUPPLEMENT_LABEL, val: p.wk });
   }
 
-  const W = 600, H = 190, padL = 18, padR = 18, padT = 34, padB = 40;
-  const plotW = W - padL - padR;
+  // Each point gets a fixed minimum pixel width (not just a fixed-width viewBox
+  // stretched over however many points there are) -- this is what keeps the point
+  // spacing and labels perfectly even and non-overlapping no matter how many
+  // periods a pharmacy has (2 with no supplements, up to 9 with full S1 + week4).
+  // The chart grows wider instead of squeezing points together; the wrap div
+  // scrolls horizontally if that width exceeds the card.
+  const H = 190, padL = 18, padR = 18, padT = 34, padB = 40;
   const plotH = H - padT - padB;
-  const maxVal = Math.max(...periods.map(x => x.val), 1);
   const n = periods.length;
+  const MIN_SPACING = 90;
+  const plotW = Math.max(600 - padL - padR, (n - 1) * MIN_SPACING);
+  const W = plotW + padL + padR;
+  const maxVal = Math.max(...periods.map(x => x.val), 1);
 
   const points = periods.map((x, i) => {
     const px = n === 1 ? padL + plotW / 2 : padL + (plotW * i) / (n - 1);
@@ -678,8 +689,8 @@ function renderHistoryChart(p){
   `).join('');
 
   return `
-    <div class="history-chart-wrap">
-      <svg class="history-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+    <div class="history-chart-wrap" style="overflow-x:${W > 600 ? 'auto' : 'visible'};">
+      <svg class="history-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:${W}px;max-width:none;min-width:100%;">
         <line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--border)" stroke-width="1"></line>
         <path d="${pathD}" fill="none" stroke="var(--primary)" stroke-width="2.5"></path>
         ${markers}
