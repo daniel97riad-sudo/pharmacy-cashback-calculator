@@ -212,6 +212,93 @@ def extract_data(xlsx_path, overrides=None, forced_header_row=None):
 
     return rows
 
+CHC_REQUIRED_COLS = [
+    "customer_code", "ims_customer_name", "region_name", "territory_name",
+    "mr_name", "dm_name", "ims_cust_type", "ph_flag",
+]
+
+def extract_chc_data(xlsx_path, ph_flag_only=True):
+    """Extract pharmacies from a master CHC customer file -- a full multi-channel
+    customer master (pharmacies, hospitals, universities, etc.) with one column per
+    calendar month (V_YYYYMM = that month's distributor sales value) rather than
+    pre-aggregated Q3/Q4 columns. Unlike extract_data (built for a merchandising-
+    list shape with fixed Q3/Q4 Actual/DIST columns), this reads the header row
+    literally by name -- this file's shape is fixed and well-known, not something
+    that needs fuzzy column-guessing.
+
+    ph_flag_only=True (the default) keeps only rows flagged as an actual pharmacy
+    (ph_flag == TRUE) -- the source file also contains hospitals, universities,
+    the army, etc. under the same customer master, which this tool has no reason
+    to include.
+
+    Q3 2025 / Q4 2025 are derived by summing that quarter's 3 monthly V_ columns
+    (Jul+Aug+Sep, Oct+Nov+Dec). Jan-Jun 2026 monthly values are kept per-pharmacy
+    under "s1" (same shape load_monthly_supplement_map produces) so the sales-
+    history chart gets the same monthly points as before, all from this one file.
+    "ims_cust_type" is kept as "ct" (e.g. PHAR/CHPH/EGPH) for display. There's no
+    equivalent of the old "actual sales (IMS)" figure or "pharmacy status" field in
+    this file's shape, so those are left blank -- see build_tool.py's caller for
+    how the template handles missing status.
+    """
+    wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
+    ws = wb[wb.sheetnames[0]]
+    rows_iter = ws.iter_rows(values_only=True)
+    header = next(rows_iter)
+    idx = {h: i for i, h in enumerate(header)}
+
+    missing = [c for c in CHC_REQUIRED_COLS if c not in idx]
+    if missing:
+        raise RuntimeError(
+            f"final_chc-style file is missing expected columns: {missing}.\n"
+            f"Found headers: {list(idx.keys())}\n\n"
+            f"Don't guess -- ask the user to confirm the file/column names before proceeding."
+        )
+
+    def val(row, key):
+        i = idx.get(key)
+        return row[i] if i is not None and i < len(row) else None
+
+    def month_val(row, yyyymm):
+        i = idx.get(f"V_{yyyymm}")
+        if i is None or i >= len(row):
+            return 0.0
+        v = row[i]
+        return float(v) if v else 0.0
+
+    rows = []
+    for row in rows_iter:
+        ph = val(row, "ph_flag")
+        is_ph = (ph is True) or (str(ph).strip().upper() == "TRUE")
+        if ph_flag_only and not is_ph:
+            continue
+        code = val(row, "customer_code")
+        name = val(row, "ims_customer_name")
+        if code is None or name is None or str(name).strip() == "":
+            continue
+
+        q3d = round(sum(month_val(row, f"2025{m:02d}") for m in (7, 8, 9)), 2)
+        q4d = round(sum(month_val(row, f"2025{m:02d}") for m in (10, 11, 12)), 2)
+        s1 = {}
+        for m in range(1, 7):
+            yyyymm = f"2026{m:02d}"
+            if f"V_{yyyymm}" in idx:
+                s1[yyyymm] = round(month_val(row, yyyymm), 2)
+
+        rows.append({
+            "c": str(code).strip(),
+            "n": str(name).strip(),
+            "mr": str(val(row, "mr_name") or "").strip(),
+            "dm": str(val(row, "dm_name") or "").strip(),
+            "rg": str(val(row, "region_name") or "").strip(),
+            "tr": str(val(row, "territory_name") or "").strip(),
+            "st": "",
+            "ct": str(val(row, "ims_cust_type") or "").strip(),
+            "q3d": q3d, "q3a": 0, "q4d": q4d, "q4a": 0,
+            "s1": s1 if s1 else None,
+        })
+    wb.close()
+    return rows
+
 SUPPLEMENT_HEADER_PATTERNS = {
     "code": [r"customer_code", r"^code$", r"customer code"],
     "value": [r"dist_value", r"distributor.*value", r"^value$"],
@@ -343,8 +430,21 @@ def build_html(rows, template_path, output_path, supplement_label=None, week1_la
 
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("xlsx_path")
+    p.add_argument("xlsx_path", nargs="?",
+                   help="Legacy merchandising-list Excel file (old fixed-Q3/Q4-column shape). "
+                        "Omit this and use --chc-file instead when building from a master CHC "
+                        "customer file (monthly V_YYYYMM columns, ph_flag, ims_cust_type).")
     p.add_argument("output_path", nargs="?", default="pharmacy_cashback_tool.html")
+    p.add_argument("--chc-file",
+                   help="Master CHC customer file (one row per customer across all channels, with "
+                        "customer_code/ims_customer_name/region_name/territory_name/mr_name/dm_name/"
+                        "ims_cust_type/ph_flag and monthly V_YYYYMM sales columns). When given, this "
+                        "becomes the base pharmacy list (filtered to ph_flag=TRUE) instead of xlsx_path "
+                        "-- Q3/Q4 2025 and the Jan-Jun 2026 monthly chart points are derived directly "
+                        "from its V_ columns, so --s1-file is not needed alongside this.")
+    p.add_argument("--chc-include-non-pharmacy", action="store_true",
+                   help="Include rows where ph_flag is not TRUE too (hospitals, universities, etc. "
+                        "from the same customer master). Off by default -- this tool is pharmacy-only.")
     p.add_argument("--dump-headers", action="store_true",
                    help="Print every header cell found (row by row, column letter + text) and exit. "
                         "Use this first when a file's structure is unfamiliar, so you can ask the user "
@@ -396,17 +496,23 @@ def main():
         dump_headers(args.xlsx_path)
         return
 
-    overrides = {
-        "name_col": args.name_col, "code_col": args.code_col,
-        "mr_col": args.mr_col, "dm_col": args.dm_col,
-        "region_col": args.region_col, "territory_col": args.territory_col,
-        "status_col": args.status_col,
-        "q3_actual_col": args.q3_actual_col, "q3_dist_col": args.q3_dist_col,
-        "q4_actual_col": args.q4_actual_col, "q4_dist_col": args.q4_dist_col,
-    }
     template_path = Path(__file__).parent.parent / "assets" / "tool_template.html"
 
-    rows = extract_data(args.xlsx_path, overrides=overrides, forced_header_row=args.header_row)
+    if args.chc_file:
+        rows = extract_chc_data(args.chc_file, ph_flag_only=not args.chc_include_non_pharmacy)
+    else:
+        if not args.xlsx_path:
+            print("Provide either xlsx_path (legacy merchandising list) or --chc-file.", file=sys.stderr)
+            sys.exit(1)
+        overrides = {
+            "name_col": args.name_col, "code_col": args.code_col,
+            "mr_col": args.mr_col, "dm_col": args.dm_col,
+            "region_col": args.region_col, "territory_col": args.territory_col,
+            "status_col": args.status_col,
+            "q3_actual_col": args.q3_actual_col, "q3_dist_col": args.q3_dist_col,
+            "q4_actual_col": args.q4_actual_col, "q4_dist_col": args.q4_dist_col,
+        }
+        rows = extract_data(args.xlsx_path, overrides=overrides, forced_header_row=args.header_row)
     if not rows:
         print("No pharmacy rows extracted -- double check the source file structure.", file=sys.stderr)
         sys.exit(1)

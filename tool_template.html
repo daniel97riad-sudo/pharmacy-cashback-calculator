@@ -474,6 +474,20 @@ const SLABS = [
   {key:'s3', label:'الشريحة 3', growth:0.25, cashRate:0.0325, targetFloor:7000, cashFloor:1000, rebateRate:0.0075, color:'slab3'}
 ];
 const SHELF_RATES = {none:0, '2':0.005, '3':0.01, '4':0.015};
+
+// Human-readable labels for the ims_cust_type ("ct") code carried in from the CHC
+// customer master. Unrecognized/blank codes just fall back to showing the raw
+// code (or a dash), rather than hiding the field -- new codes can show up in future
+// data refreshes and shouldn't silently disappear.
+const CT_LABELS = {
+  'PHAR': 'صيدلية عادية',
+  'CHPH': 'صيدلية سلسلة (Chain)',
+  'EGPH': 'صيدلية EGPH',
+};
+function ctLabel(ct){
+  if(!ct) return '—';
+  return CT_LABELS[ct] || ct;
+}
 const POSM_RATE = 0.005;
 
 // For pharmacies whose baseline sales fall at or below this threshold, the target
@@ -1302,9 +1316,13 @@ function renderDetail(){
   const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
   const growthText = growth === null ? 'لا توجد بيانات كافية' : (growth>=0?'+':'') + pct(growth);
 
-  const statusBadge = p.st === 'Exist'
-    ? '<span class="badge exist">صيدلية قائمة</span>'
-    : '<span class="badge new">صيدلية جديدة</span>';
+  // Not every data source carries a reliable "existing vs. new" status (the CHC
+  // master file this can be built from doesn't have an equivalent field) -- only
+  // show the badge when we actually have the value, rather than defaulting
+  // everyone with no data to "new".
+  const statusBadge = p.st === 'Exist' ? '<span class="badge exist">صيدلية قائمة</span>'
+    : p.st === 'New' ? '<span class="badge new">صيدلية جديدة</span>'
+    : '';
 
   const tabBaseline = state.baseline === 'q3' ? p.q3d : (state.baseline === 'q4' ? p.q4d : (p.q3d + p.q4d));
   const usingCustom = state.customBaseline != null && !isNaN(state.customBaseline) && state.customBaseline > 0;
@@ -1327,6 +1345,7 @@ function renderDetail(){
         <div class="meta-item"><div class="lbl">مدير المنطقة</div><div class="val">${p.dm||'—'}</div></div>
         <div class="meta-item"><div class="lbl">المنطقة</div><div class="val">${p.rg||'—'}</div></div>
         <div class="meta-item"><div class="lbl">القطاع</div><div class="val">${p.tr||'—'}</div></div>
+        <div class="meta-item"><div class="lbl">نوع الصيدلية</div><div class="val">${ctLabel(p.ct)}</div></div>
       </div>
     </div>
 
