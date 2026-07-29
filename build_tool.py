@@ -374,6 +374,58 @@ def load_mr_dm_override_map(xlsx_path, forced_header_row=None):
     return override
 
 
+def canonicalize_rep_names(rows, fields=("mr", "dm")):
+    """Merges near-duplicate rep names that differ only in case/spacing/hyphenation
+    (e.g. "wafaa Gamal Fathy eldegwey" from final_chc.xlsx vs "Wafaa Gamal Fathy
+    eldegwey" from merch8.xlsx -- same person, inconsistent casing between the two
+    source files) into a single canonical spelling per field, so MR/DM filter
+    dropdowns and the leaderboard don't show the same rep split across two entries.
+
+    Within each normalized group, prefers whichever variant starts with an uppercase
+    letter (proper name casing); if more than one does (or none do), prefers
+    whichever exact spelling is used by more pharmacies, so the more common form
+    wins. Returns {field: [(canonical, [all variants merged into it])]} listing only
+    the groups that actually had more than one variant, for reporting.
+    """
+    def normalize(s):
+        s = s.lower()
+        s = re.sub(r"el[\s\-]+", "el", s)   # "El- " / "El " / "el-" -> "el"
+        s = re.sub(r"[\s\-.]", "", s)        # strip remaining spaces/hyphens/dots
+        return s.strip()
+
+    report = {}
+    for field in fields:
+        counts = {}
+        for row in rows:
+            v = row.get(field)
+            if v:
+                counts[v] = counts.get(v, 0) + 1
+
+        groups = {}
+        for v in counts:
+            groups.setdefault(normalize(v), []).append(v)
+
+        canonical_map = {}
+        merges = []
+        for variants in groups.values():
+            if len(variants) < 2:
+                continue
+            capitalized = [v for v in variants if v[:1].isupper()]
+            pool = capitalized if capitalized else variants
+            canonical = max(pool, key=lambda v: counts[v])
+            for v in variants:
+                if v != canonical:
+                    canonical_map[v] = canonical
+            merges.append((canonical, variants))
+
+        if canonical_map:
+            for row in rows:
+                v = row.get(field)
+                if v in canonical_map:
+                    row[field] = canonical_map[v]
+        report[field] = merges
+    return report
+
 def apply_mr_dm_override(rows, override_map):
     """Overwrite mr/dm fields in-place for any row whose customer code is present in
     override_map, leaving every other row untouched. Returns (matched, changed):
@@ -629,6 +681,15 @@ def main():
             f"{matched}/{len(rows)} pharmacies matched by customer code, "
             f"{changed} actually had a different mr/dm value before the override."
         )
+
+    # Always run this, regardless of source: even without an override file, a single
+    # source file can itself carry inconsistent casing across rows. Cheap and only
+    # ever merges exact-normalized matches, so it's safe to run unconditionally.
+    rep_merges = canonicalize_rep_names(rows)
+    for field, merges in rep_merges.items():
+        for canonical, variants in merges:
+            others = [v for v in variants if v != canonical]
+            print(f"Merged duplicate {field} name(s) into \"{canonical}\": {others}")
 
     supplement_label = None
     if args.supplement_file:
