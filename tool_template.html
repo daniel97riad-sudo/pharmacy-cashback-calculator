@@ -395,6 +395,7 @@
         <div class="results" id="resultsBox"></div>
       </div>
       <div class="search-count" id="searchCount">إجمالي الصيدليات في القاعدة: __COUNT__</div>
+      <div class="search-count" id="statusBreakdown"></div>
     </div>
 
     <div id="totalsSection"></div>
@@ -522,6 +523,22 @@ function populateFilters(){
     dmFilter.appendChild(opt);
   });
   updateMRFilterOptions();
+  renderStatusBreakdown();
+}
+
+// Shows how many pharmacies were already on the merchandising program (PH & Merch,
+// "st" === 'Exist') vs. only present because they're a pharmacy in the CHC master
+// but were never on the merchandising list before (PH only, "st" === 'New'). Only
+// renders when at least one pharmacy actually carries this field -- older builds
+// without merch_flag data leave "st" blank for everyone, in which case this stays
+// empty rather than showing a misleading "0 / 0" breakdown.
+function renderStatusBreakdown(){
+  const el = document.getElementById('statusBreakdown');
+  if(!el) return;
+  const withMerch = PHARMACIES.filter(p => p.st === 'Exist').length;
+  const phOnly = PHARMACIES.filter(p => p.st === 'New').length;
+  if(withMerch === 0 && phOnly === 0){ el.textContent = ''; return; }
+  el.innerHTML = `🏷️ PH + Merch: <b>${withMerch.toLocaleString('en-US')}</b> · 🆕 PH فقط: <b>${phOnly.toLocaleString('en-US')}</b>`;
 }
 
 // Rebuilds the MR dropdown's options based on the currently selected DM
@@ -1329,12 +1346,14 @@ function renderDetail(){
   const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
   const growthText = growth === null ? 'لا توجد بيانات كافية' : (growth>=0?'+':'') + pct(growth);
 
-  // Not every data source carries a reliable "existing vs. new" status (the CHC
-  // master file this can be built from doesn't have an equivalent field) -- only
-  // show the badge when we actually have the value, rather than defaulting
-  // everyone with no data to "new".
-  const statusBadge = p.st === 'Exist' ? '<span class="badge exist">صيدلية قائمة</span>'
-    : p.st === 'New' ? '<span class="badge new">صيدلية جديدة</span>'
+  // For a CHC-based build, "st" reflects merch_flag: "Exist" = this pharmacy was
+  // already part of the merchandising program (on both the PH and Merch lists),
+  // "New" = it only shows up here because it's a pharmacy in the CHC master, but
+  // was never on the merchandising list before. Not every data source carries
+  // this (older merch-list-only builds leave "st" blank), so only show the badge
+  // when we actually have the value.
+  const statusBadge = p.st === 'Exist' ? '<span class="badge exist">🏷️ PH + Merch (كانت ضمن قائمة الميرشندايزينج)</span>'
+    : p.st === 'New' ? '<span class="badge new">🆕 PH فقط (جديدة على قائمة الميرشندايزينج)</span>'
     : '';
 
   const tabBaseline = state.baseline === 'q3' ? p.q3d : (state.baseline === 'q4' ? p.q4d : (p.q3d + p.q4d));

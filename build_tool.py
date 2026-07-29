@@ -214,7 +214,7 @@ def extract_data(xlsx_path, overrides=None, forced_header_row=None):
 
 CHC_REQUIRED_COLS = [
     "customer_code", "ims_customer_name", "region_name", "territory_name",
-    "mr_name", "dm_name", "ims_cust_type", "ph_flag",
+    "mr_name", "dm_name", "ims_cust_type", "ph_flag", "merch_flag",
 ]
 
 def extract_chc_data(xlsx_path, ph_flag_only=True):
@@ -291,6 +291,15 @@ def extract_chc_data(xlsx_path, ph_flag_only=True):
         q4d = round(sum(month_val(row, f"2025{m:02d}") for m in (10, 11, 12)), 2)
         mo = {yyyymm: round(month_val(row, yyyymm), 2) for yyyymm in all_month_cols}
 
+        # merch_flag distinguishes pharmacies that were already part of the
+        # merchandising program (the old ~2,751-pharmacy list this tool used to be
+        # built from) from ones that are only showing up here because they're a
+        # pharmacy in the CHC master (ph_flag=TRUE) but were never on the
+        # merchandising list. Reuses the existing "st" exist/new badge field/UI --
+        # "Exist" = PH & Merch (on both lists), "New" = PH only (this file only).
+        mf_raw = val(row, "merch_flag")
+        is_merch = (mf_raw is True) or (str(mf_raw).strip().upper() == "TRUE")
+
         rows.append({
             "c": str(code).strip(),
             "n": str(name).strip(),
@@ -298,7 +307,7 @@ def extract_chc_data(xlsx_path, ph_flag_only=True):
             "dm": str(val(row, "dm_name") or "").strip(),
             "rg": str(val(row, "region_name") or "").strip(),
             "tr": str(val(row, "territory_name") or "").strip(),
-            "st": "",
+            "st": "Exist" if is_merch else "New",
             "ct": str(val(row, "ims_cust_type") or "").strip(),
             "q3d": q3d, "q3a": 0, "q4d": q4d, "q4a": 0,
             "mo": mo if mo else None,
