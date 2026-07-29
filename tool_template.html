@@ -378,6 +378,7 @@
     <div class="view-tab-btn active" data-view="search">🔍 بحث عن صيدلية</div>
     <div class="view-tab-btn" data-view="overview"><span class="tab-badge" id="overviewBadge" style="display:none;">0</span>📊 نظرة عامة على الفرص</div>
     <div class="view-tab-btn" data-view="chain">🔗 دمج صيدليات (سلسلة)</div>
+    <div class="view-tab-btn" data-view="leaderboard">🏆 لوحة المتصدرين</div>
   </div>
 
   <div id="searchView">
@@ -430,6 +431,14 @@
     <div id="chainSection"></div>
   </div>
 
+  <div id="leaderboardView" style="display:none;">
+    <div class="card">
+      <h2>🏆 لوحة متصدري المندوبين — عدد الصيدليات المتفق عليها</h2>
+      <div class="note" style="margin-top:0;">تُحسب من الاتفاقات المسجَّلة فعلياً عبر زر "✅ اتفاق مع الصيدلية" أسفل حاسبة كل صيدلية. الترتيب حسب عدد الصيدليات الفريدة التي تم الاتفاق معها لكل مندوب.</div>
+    </div>
+    <div id="leaderboardSection"></div>
+  </div>
+
   <footer>الأرقام محسوبة من بيانات مبيعات الموزع (DIST) للربع الثالث والرابع 2025 — الأداة لعرض السيناريوهات قبل التعاقد، وليست تأكيداً نهائياً للمستحقات.</footer>
 </div>
 
@@ -443,6 +452,15 @@ const SUPPLEMENT_LABEL = __SUPPLEMENT_LABEL__;
 // Optional label for the week-1-of-month pacing figure, merged in by
 // scripts/build_tool.py's --week1-file. null until a week-1 extract has been supplied.
 const WEEK1_LABEL = __WEEK1_LABEL__;
+
+// Live backend (Google Sheet + Apps Script Web App) for logging agreed deals and
+// powering the MR leaderboard. doGet returns {ok, deals:[...]}; doPost appends one
+// row per agreed deal. Posted as text/plain to avoid a CORS preflight (Apps Script
+// Web Apps don't handle OPTIONS by default) -- the script still JSON.parses the body.
+const DEALS_API_URL = 'https://script.google.com/macros/s/AKfycbzH27ggZS5NAbv32ZQWyhlLUJChY902FhNfUxCExmf9ORqzMkxBEWLZH6IGXLTq0NzAQA/exec';
+// Pharmacy codes agreed on during this browser session, so the button can flip to
+// a disabled "done" state immediately without waiting on a round-trip re-fetch.
+const agreedThisSession = new Set();
 
 const SLABS = [
   {key:'s1', label:'الشريحة 1', growth:0.15, cashRate:0.0125, targetFloor:5000, cashFloor:500, rebateRate:0.0025, color:'slab1'},
@@ -805,11 +823,13 @@ function switchView(view){
   document.getElementById('searchView').style.display = view === 'search' ? '' : 'none';
   document.getElementById('overviewView').style.display = view === 'overview' ? '' : 'none';
   document.getElementById('chainView').style.display = view === 'chain' ? '' : 'none';
+  document.getElementById('leaderboardView').style.display = view === 'leaderboard' ? '' : 'none';
   document.querySelectorAll('.view-tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.view === view);
   });
   if(view === 'overview') renderOverview();
   if(view === 'chain') renderChainSection();
+  if(view === 'leaderboard') renderLeaderboard();
 }
 document.getElementById('viewTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('.view-tab-btn');
@@ -1038,6 +1058,91 @@ function renderChainSection(){
   chainSection.querySelectorAll('[data-remove]').forEach(btn => {
     btn.addEventListener('click', () => removeChainMember(parseInt(btn.dataset.remove, 10)));
   });
+}
+
+// ---------- MR leaderboard (live, backed by the Deals API) ----------
+// Ranks reps by the number of DISTINCT pharmacies they've logged an agreed deal
+// for (not raw deal count -- re-agreeing the same pharmacy twice shouldn't inflate
+// the rank), per the explicit ranking choice made for this feature.
+async function renderLeaderboard(){
+  const section = document.getElementById('leaderboardSection');
+  if(!section) return;
+  section.innerHTML = `<div class="card"><div class="placeholder">جارٍ تحميل بيانات لوحة المتصدرين...</div></div>`;
+
+  let deals;
+  try {
+    const res = await fetch(DEALS_API_URL, { method:'GET' });
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error || 'unknown error');
+    deals = data.deals || [];
+  } catch(err) {
+    section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">⚠️</div>تعذّر تحميل بيانات لوحة المتصدرين حالياً. حاول مرة أخرى لاحقاً.</div></div>`;
+    return;
+  }
+
+  const byMR = new Map();
+  deals.forEach(d => {
+    const mr = (d.mr_name || 'غير محدد').trim() || 'غير محدد';
+    if(!byMR.has(mr)) byMR.set(mr, new Set());
+    if(d.pharmacy_code) byMR.get(mr).add(String(d.pharmacy_code));
+  });
+
+  const ranking = [...byMR.entries()]
+    .map(([mr, codes]) => ({ mr, count: codes.size }))
+    .sort((a,b) => b.count - a.count);
+
+  if(ranking.length === 0){
+    section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">🏆</div>لا توجد اتفاقات مسجَّلة بعد. أول اتفاق يظهر هنا فوراً.</div></div>`;
+    return;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+  const rowsHtml = ranking.map((r, i) => `
+    <div class="pharm-list-item">
+      <div>
+        <div class="pli-name">${medals[i] || ('#' + (i+1))} ${r.mr}</div>
+      </div>
+      <div class="pli-stats">
+        <div class="pli-sales">${r.count.toLocaleString('en-US')} صيدلية</div>
+      </div>
+    </div>`).join('');
+
+  section.innerHTML = `
+    <div class="card">
+      <h2>الترتيب (${ranking.length} مندوب)</h2>
+      <div class="pharm-list">${rowsHtml}</div>
+    </div>`;
+}
+
+// Logs an agreed deal for one slab of one pharmacy to the live backend. Called from
+// the "✅ اتفاق مع الصيدلية" button next to each slab row in the contract calculator.
+async function agreeDeal(p, row, baselineSales, btn){
+  if(agreedThisSession.has(p.c + ':' + row.key)) return;
+  btn.disabled = true;
+  btn.textContent = 'جارٍ الإرسال...';
+  const payload = {
+    pharmacy_code: p.c, pharmacy_name: p.n, region: p.rg, territory: p.tr,
+    mr_name: p.mr, dm_name: p.dm,
+    baseline_used: state.baseline, baseline_sales: baselineSales,
+    slab_key: row.key, slab_label: row.label, growth_pct: Math.round(row.growth * 1000) / 10,
+    target_sales: Math.round(row.target), cashback: Math.round(row.cashback),
+    shelf_option: state.shelf, posm: state.posm, full_period_bonus: state.full,
+    total_payout: Math.round(row.total), notes: ''
+  };
+  try {
+    const res = await fetch(DEALS_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error || 'unknown error');
+    agreedThisSession.add(p.c + ':' + row.key);
+    btn.textContent = '✅ تم تسجيل الاتفاق';
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = '⚠️ فشل الإرسال — أعد المحاولة';
+  }
 }
 
 function selectPharmacy(p){
@@ -1312,10 +1417,11 @@ function renderDetail(){
             <th>مكافأة POSM</th>
             <th>مكافأة نهاية الفترة</th>
             <th>الإجمالي</th>
+            <th>اتفاق</th>
           </tr>
         </thead>
         <tbody>
-          ${rows.map(r => `
+          ${rows.map((r, ri) => `
             <tr class="${r.color}">
               <td class="name-cell">${r.label}</td>
               <td>+${pct(r.growth)}</td>
@@ -1325,6 +1431,7 @@ function renderDetail(){
               <td>${r.posmBonus>0?fmt(r.posmBonus)+' ج.م':'—'}</td>
               <td>${r.rebateBonus>0?fmt(r.rebateBonus)+' ج.م':'—'}</td>
               <td class="total-cell">${fmt(r.total)} ج.م</td>
+              <td><button class="reset-btn agree-deal-btn" data-slab-idx="${ri}" type="button" ${agreedThisSession.has(p.c + ':' + r.key) ? 'disabled' : ''}>${agreedThisSession.has(p.c + ':' + r.key) ? '✅ تم تسجيل الاتفاق' : '✅ اتفاق مع الصيدلية'}</button></td>
             </tr>`).join('')}
         </tbody>
       </table>
@@ -1373,6 +1480,12 @@ function renderDetail(){
   document.getElementById('fullCheck').addEventListener('change', (e) => {
     state.full = e.target.checked;
     renderDetail();
+  });
+  document.querySelectorAll('.agree-deal-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.slabIdx, 10);
+      agreeDeal(p, rows[idx], baselineSales, btn);
+    });
   });
 }
 
