@@ -232,13 +232,16 @@ def extract_chc_data(xlsx_path, ph_flag_only=True):
     to include.
 
     Q3 2025 / Q4 2025 are derived by summing that quarter's 3 monthly V_ columns
-    (Jul+Aug+Sep, Oct+Nov+Dec). Jan-Jun 2026 monthly values are kept per-pharmacy
-    under "s1" (same shape load_monthly_supplement_map produces) so the sales-
-    history chart gets the same monthly points as before, all from this one file.
-    "ims_cust_type" is kept as "ct" (e.g. PHAR/CHPH/EGPH) for display. There's no
-    equivalent of the old "actual sales (IMS)" figure or "pharmacy status" field in
-    this file's shape, so those are left blank -- see build_tool.py's caller for
-    how the template handles missing status.
+    (Jul+Aug+Sep, Oct+Nov+Dec) -- kept for the slab/cashback calculator baseline,
+    unchanged from before. Separately, EVERY monthly V_ column the file has (Jan
+    2024 through whatever the latest month present is -- currently Jun 2026) is
+    kept per-pharmacy under "mo", keyed by yyyymm, purely for the sales-history
+    chart: the chart renders whatever's in this dict, sorted chronologically, so
+    a rep can see the full multi-year trend, not just the two quarters used for
+    the cashback math. "ims_cust_type" is kept as "ct" (e.g. PHAR/CHPH/EGPH) for
+    display. There's no equivalent of the old "actual sales (IMS)" figure or
+    "pharmacy status" field in this file's shape, so those are left blank -- see
+    build_tool.py's caller for how the template handles missing status.
     """
     wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
     ws = wb[wb.sheetnames[0]]
@@ -265,6 +268,14 @@ def extract_chc_data(xlsx_path, ph_flag_only=True):
         v = row[i]
         return float(v) if v else 0.0
 
+    # Discover every monthly V_ column the file actually has, rather than hardcoding
+    # a date range -- so future refreshes of this file (more months added) pick up
+    # automatically without a code change. Sorted so the chart always plots them
+    # left-to-right in chronological order regardless of column order in the sheet.
+    all_month_cols = sorted(
+        h[2:] for h in idx.keys() if isinstance(h, str) and h.startswith("V_") and h[2:].isdigit()
+    )
+
     rows = []
     for row in rows_iter:
         ph = val(row, "ph_flag")
@@ -278,11 +289,7 @@ def extract_chc_data(xlsx_path, ph_flag_only=True):
 
         q3d = round(sum(month_val(row, f"2025{m:02d}") for m in (7, 8, 9)), 2)
         q4d = round(sum(month_val(row, f"2025{m:02d}") for m in (10, 11, 12)), 2)
-        s1 = {}
-        for m in range(1, 7):
-            yyyymm = f"2026{m:02d}"
-            if f"V_{yyyymm}" in idx:
-                s1[yyyymm] = round(month_val(row, yyyymm), 2)
+        mo = {yyyymm: round(month_val(row, yyyymm), 2) for yyyymm in all_month_cols}
 
         rows.append({
             "c": str(code).strip(),
@@ -294,7 +301,7 @@ def extract_chc_data(xlsx_path, ph_flag_only=True):
             "st": "",
             "ct": str(val(row, "ims_cust_type") or "").strip(),
             "q3d": q3d, "q3a": 0, "q4d": q4d, "q4a": 0,
-            "s1": s1 if s1 else None,
+            "mo": mo if mo else None,
         })
     wb.close()
     return rows

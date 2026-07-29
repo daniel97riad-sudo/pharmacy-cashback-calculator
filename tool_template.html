@@ -701,14 +701,27 @@ function monthLabel(yyyymm){
 }
 
 function renderHistoryChart(p){
-  const periods = [
-    { lbl: 'Q3 2025', val: p.q3d },
-    { lbl: 'Q4 2025', val: p.q4d },
-  ];
-  if(p.s1){
+  const periods = [];
+  // Prefer the full monthly series ("mo", from a final_chc.xlsx-style build) when
+  // available -- it already covers Q3/Q4 2025 broken down month-by-month (plus
+  // everything back to Jan 2024 and forward through Jun 2026), so showing the old
+  // quarterly aggregate points alongside it would double-count the same sales as
+  // both a quarter total and its component months. Fall back to "s1" (the legacy
+  // merch-list + separate monthly-supplement-file shape) if present, and finally
+  // to the two quarterly points if neither monthly series is available.
+  if(p.mo){
+    Object.keys(p.mo).sort().forEach(m => {
+      periods.push({ lbl: monthLabel(m), val: p.mo[m] });
+    });
+  } else if(p.s1){
+    periods.push({ lbl: 'Q3 2025', val: p.q3d });
+    periods.push({ lbl: 'Q4 2025', val: p.q4d });
     Object.keys(p.s1).sort().forEach(m => {
       periods.push({ lbl: monthLabel(m), val: p.s1[m] });
     });
+  } else {
+    periods.push({ lbl: 'Q3 2025', val: p.q3d });
+    periods.push({ lbl: 'Q4 2025', val: p.q4d });
   }
   if(SUPPLEMENT_LABEL && p.wk !== null && p.wk !== undefined){
     periods.push({ lbl: SUPPLEMENT_LABEL, val: p.wk });
