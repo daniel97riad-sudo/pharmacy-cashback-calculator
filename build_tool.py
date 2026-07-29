@@ -315,6 +315,85 @@ def extract_chc_data(xlsx_path, ph_flag_only=True):
     wb.close()
     return rows
 
+def load_mr_dm_override_map(xlsx_path, forced_header_row=None):
+    """Load MR/DM name overrides from a merchandising-list-shaped file (e.g.
+    merch8.xlsx), keyed by customer code. Reuses the same fuzzy header detection as
+    extract_data (HEADER_PATTERNS' "c"/"mr"/"dm" entries), since this file has that
+    shape, not the CHC master's shape.
+
+    Why this exists: when the pharmacy list was rebuilt from final_chc.xlsx, its
+    mr_name/dm_name columns turned out to disagree with merch8.xlsx for a large
+    share of the ~2,466 pharmacies present in both files -- mostly spelling variants
+    of the same person ("Mohamed Salah" vs "Mohammed Salah", "Ahmed Albakry" vs
+    "Ahmed El- Bakry"), some blanked-out DM names, and a handful of what look like
+    genuinely different people. Since the merchandising list is the source the team
+    already trusts for rep assignment on those pharmacies, this lets a build
+    override final_chc.xlsx's mr/dm with the merchandising list's version for any
+    customer code found in both -- pharmacies only in the CHC master (not on the
+    merch list) keep whatever final_chc.xlsx has, since there's no alternative.
+
+    Returns {code: (mr_name, dm_name)}.
+    """
+    all_rows, max_col = _read_all_rows(xlsx_path)
+    header_r = forced_header_row if forced_header_row else locate_header_row(all_rows)
+    if header_r is None:
+        raise RuntimeError(
+            "Could not locate a header row in the MR/DM override file. "
+            "Run with --dump-headers on that file to see its raw contents, then "
+            "re-run with --mr-dm-override-header-row."
+        )
+    header_vals = all_rows[header_r - 1]
+    row_cells = list(zip(header_vals, range(1, len(header_vals) + 1)))
+    code_col = find_col(row_cells, HEADER_PATTERNS["c"])
+    mr_col = find_col(row_cells, HEADER_PATTERNS["mr"])
+    dm_col = find_col(row_cells, HEADER_PATTERNS["dm"])
+    missing = [k for k, v in [("code", code_col), ("mr", mr_col), ("dm", dm_col)] if v is None]
+    if missing:
+        raise RuntimeError(
+            f"MR/DM override file is missing expected columns: {missing}. "
+            f"Run with --dump-headers on that file to see its raw contents."
+        )
+
+    def val(row_vals, col):
+        if col is None or col > len(row_vals):
+            return None
+        return row_vals[col - 1]
+
+    override = {}
+    for r in range(header_r + 1, len(all_rows) + 1):
+        row_vals = all_rows[r - 1]
+        code = val(row_vals, code_col)
+        if code is None or str(code).strip() == "":
+            continue
+        mr = val(row_vals, mr_col)
+        dm = val(row_vals, dm_col)
+        override[str(code).strip()] = (
+            str(mr).strip() if mr else "",
+            str(dm).strip() if dm else "",
+        )
+    return override
+
+
+def apply_mr_dm_override(rows, override_map):
+    """Overwrite mr/dm fields in-place for any row whose customer code is present in
+    override_map, leaving every other row untouched. Returns (matched, changed):
+    matched = how many rows had a code found in the override file at all, changed =
+    of those, how many actually had a different mr or dm value before the override
+    (so the caller can report how much this really moved, not just how much overlap
+    there was)."""
+    matched = changed = 0
+    for row in rows:
+        ov = override_map.get(row["c"])
+        if ov is None:
+            continue
+        matched += 1
+        new_mr, new_dm = ov
+        if row["mr"] != new_mr or row["dm"] != new_dm:
+            changed += 1
+        row["mr"] = new_mr
+        row["dm"] = new_dm
+    return matched, changed
+
 SUPPLEMENT_HEADER_PATTERNS = {
     "code": [r"customer_code", r"^code$", r"customer code"],
     "value": [r"dist_value", r"distributor.*value", r"^value$"],
@@ -461,6 +540,13 @@ def parse_args():
     p.add_argument("--chc-include-non-pharmacy", action="store_true",
                    help="Include rows where ph_flag is not TRUE too (hospitals, universities, etc. "
                         "from the same customer master). Off by default -- this tool is pharmacy-only.")
+    p.add_argument("--mr-dm-override-file",
+                   help="A merchandising-list-shaped file (e.g. merch8.xlsx) whose mr_name/dm_name "
+                        "should win over --chc-file's, for any customer code found in both. Use this "
+                        "when the CHC master's rep-assignment columns are known to be stale/inconsistent "
+                        "relative to the merchandising list for pharmacies that were already on it.")
+    p.add_argument("--mr-dm-override-header-row", type=int, default=None,
+                   help="Force the header row for --mr-dm-override-file if auto-detection picks wrong.")
     p.add_argument("--dump-headers", action="store_true",
                    help="Print every header cell found (row by row, column letter + text) and exit. "
                         "Use this first when a file's structure is unfamiliar, so you can ask the user "
@@ -532,6 +618,17 @@ def main():
     if not rows:
         print("No pharmacy rows extracted -- double check the source file structure.", file=sys.stderr)
         sys.exit(1)
+
+    if args.mr_dm_override_file:
+        override_map = load_mr_dm_override_map(
+            args.mr_dm_override_file, forced_header_row=args.mr_dm_override_header_row,
+        )
+        matched, changed = apply_mr_dm_override(rows, override_map)
+        print(
+            f"Applied MR/DM override from {args.mr_dm_override_file}: "
+            f"{matched}/{len(rows)} pharmacies matched by customer code, "
+            f"{changed} actually had a different mr/dm value before the override."
+        )
 
     supplement_label = None
     if args.supplement_file:
