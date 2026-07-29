@@ -458,6 +458,12 @@ const WEEK1_LABEL = __WEEK1_LABEL__;
 // row per agreed deal. Posted as text/plain to avoid a CORS preflight (Apps Script
 // Web Apps don't handle OPTIONS by default) -- the script still JSON.parses the body.
 const DEALS_API_URL = 'https://script.google.com/macros/s/AKfycbzH27ggZS5NAbv32ZQWyhlLUJChY902FhNfUxCExmf9ORqzMkxBEWLZH6IGXLTq0NzAQA/exec';
+// Deters casual/automated abuse of the endpoint (random scanners, drive-by bots) --
+// NOT a real secret, since it's sitting right here in this file's public source.
+// Anyone who reads this file already has it. See doGet's aggregate-only response
+// shape for the actual privacy protection (raw pharmacy/sales data never leaves
+// the Sheet through this API, regardless of who's calling).
+const DEALS_API_TOKEN = '6UIyKQI1LwIl4iBAUOP3heMpSAo-3OGn';
 // Pharmacy codes agreed on during this browser session, so the button can flip to
 // a disabled "done" state immediately without waiting on a round-trip re-fetch.
 const agreedThisSession = new Set();
@@ -1069,27 +1075,18 @@ async function renderLeaderboard(){
   if(!section) return;
   section.innerHTML = `<div class="card"><div class="placeholder">جارٍ تحميل بيانات لوحة المتصدرين...</div></div>`;
 
-  let deals;
+  let ranking;
   try {
-    const res = await fetch(DEALS_API_URL, { method:'GET' });
+    const res = await fetch(`${DEALS_API_URL}?token=${encodeURIComponent(DEALS_API_TOKEN)}`, { method:'GET' });
     const data = await res.json();
     if(!data.ok) throw new Error(data.error || 'unknown error');
-    deals = data.deals || [];
+    // Backend returns pre-aggregated {mr_name, count} pairs only -- it never sends
+    // raw pharmacy names, codes, or sales figures back to the browser.
+    ranking = (data.leaderboard || []).map(x => ({ mr: x.mr_name, count: x.count }));
   } catch(err) {
     section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">⚠️</div>تعذّر تحميل بيانات لوحة المتصدرين حالياً. حاول مرة أخرى لاحقاً.</div></div>`;
     return;
   }
-
-  const byMR = new Map();
-  deals.forEach(d => {
-    const mr = (d.mr_name || 'غير محدد').trim() || 'غير محدد';
-    if(!byMR.has(mr)) byMR.set(mr, new Set());
-    if(d.pharmacy_code) byMR.get(mr).add(String(d.pharmacy_code));
-  });
-
-  const ranking = [...byMR.entries()]
-    .map(([mr, codes]) => ({ mr, count: codes.size }))
-    .sort((a,b) => b.count - a.count);
 
   if(ranking.length === 0){
     section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">🏆</div>لا توجد اتفاقات مسجَّلة بعد. أول اتفاق يظهر هنا فوراً.</div></div>`;
@@ -1121,6 +1118,7 @@ async function agreeDeal(p, row, baselineSales, btn){
   btn.disabled = true;
   btn.textContent = 'جارٍ الإرسال...';
   const payload = {
+    token: DEALS_API_TOKEN,
     pharmacy_code: p.c, pharmacy_name: p.n, region: p.rg, territory: p.tr,
     mr_name: p.mr, dm_name: p.dm,
     baseline_used: state.baseline, baseline_sales: baselineSales,
