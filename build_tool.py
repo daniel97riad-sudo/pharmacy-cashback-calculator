@@ -746,11 +746,20 @@ def build_html(rows, template_path, output_path, supplement_label=None, week1_la
     data_json = json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
     label_json = json.dumps(supplement_label, ensure_ascii=False) if supplement_label else "null"
     week1_label_json = json.dumps(week1_label, ensure_ascii=False) if week1_label else "null"
+    # Brand assets (Pharco Consumer Healthcare logo + favicon) live as base64 text
+    # files next to the template so build_tool.py doesn't carry giant string literals.
+    assets_dir = Path(template_path).parent
+    logo_b64_path = assets_dir / "logo_header.b64"
+    favicon_b64_path = assets_dir / "favicon_32.b64"
+    logo_b64 = logo_b64_path.read_text(encoding="utf-8").strip() if logo_b64_path.exists() else ""
+    favicon_b64 = favicon_b64_path.read_text(encoding="utf-8").strip() if favicon_b64_path.exists() else ""
     html = (template
             .replace("__DATA__", data_json)
             .replace("__COUNT__", str(len(rows)))
             .replace("__SUPPLEMENT_LABEL__", label_json)
-            .replace("__WEEK1_LABEL__", week1_label_json))
+            .replace("__WEEK1_LABEL__", week1_label_json)
+            .replace("__LOGO_B64__", logo_b64)
+            .replace("__FAVICON_B64__", favicon_b64))
     Path(output_path).write_text(html, encoding="utf-8")
 
 def parse_args():

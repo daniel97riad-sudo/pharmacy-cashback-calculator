@@ -3,20 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>حاسبة كاش باك الصيدليات</title>
+<title>PHARCO CHC | حاسبة كاش باك الصيدليات</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,__FAVICON_B64__">
 <style>
 :root{
---primary:#e2600a;
---primary-dark:#a8420a;
---accent:#ffb84d;
---bg:#fdf5ee;
+--primary:#ffa400;
+--primary-dark:#cc8300;
+--accent:#ffd98a;
+--bg:#f7f7f8;
 --card:#ffffff;
---border:#f0ddc9;
---text:#2b2018;
---muted:#8a7362;
---slab1:#e2600a;
---slab2:#f2a900;
---slab3:#c94f1e;
+--border:#e3e4e6;
+--text:#2b2b2e;
+--muted:#63656a;
+--slab1:#ffd98a;
+--slab2:#ffa400;
+--slab3:#cc8300;
 --danger:#d64545;
 }
 *{box-sizing:border-box;}
@@ -29,15 +30,21 @@ padding:20px;
 }
 .wrap{max-width:1000px;margin:0 auto;}
 header{
-background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-color:#fff;
+background:#fff;
+color:var(--text);
 border-radius:16px;
-padding:22px 26px;
+padding:20px 26px 22px;
 margin-bottom:18px;
-box-shadow:0 4px 14px rgba(0,0,0,.12);
+box-shadow:0 4px 14px rgba(0,0,0,.08);
+border:1px solid var(--border);
+border-top:5px solid var(--primary);
 }
-header h1{margin:0 0 4px;font-size:22px;}
-header p{margin:0;opacity:.85;font-size:13px;}
+.header-brand{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.brand-logo{height:38px;width:auto;display:block;}
+.brand-divider{width:1px;height:32px;background:var(--border);}
+.brand-tag{font-size:11px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;}
+header h1{margin:0 0 4px;font-size:21px;color:var(--primary-dark);}
+header p{margin:0;opacity:.8;font-size:13px;color:var(--muted);}
 
 .card{
 background:var(--card);
@@ -370,6 +377,11 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="wrap">
 
 <header>
+<div class="header-brand">
+<img class="brand-logo" src="data:image/png;base64,__LOGO_B64__" alt="Pharco Consumer Healthcare">
+<div class="brand-divider"></div>
+<span class="brand-tag">Consumer Healthcare</span>
+</div>
 <h1>🧮 حاسبة كاش باك ومكافآت الصيدليات</h1>
 <p>اكتب اسم الصيدلية أو الكود، وشاهد مبيعات الربع الثالث والرابع، ونسبة النمو، وقيمة الكاش باك المستهدف للعقد الجديد.</p>
 </header>
