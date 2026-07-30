@@ -379,7 +379,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="view-tab-btn" data-view="overview"><span class="tab-badge" id="overviewBadge" style="display:none;">0</span>📊 نظرة عامة على الفرص</div>
 <div class="view-tab-btn" data-view="chain">🔗 دمج صيدليات (سلسلة)</div>
 <div class="view-tab-btn" data-view="leaderboard">🏆 لوحة المتصدرين</div>
-<div class="view-tab-btn" data-view="analysis">📈 التحليل</div>
+<div class="view-tab-btn" data-view="analysis">📈 Analysis</div>
 </div>
 
 <div id="searchView">
@@ -443,13 +443,13 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 
 <div id="analysisView" style="display:none;">
 <div class="card">
-<h2>📈 تحليل الأداء</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">تحليل إجمالي عبر كل الـ<span id="analysisTotalCount"></span> صيدلية في القاعدة (لا يتأثر بفلتر المندوب/مدير المنطقة في تبويب البحث). اضغط على أي عمود بالجدول لترتيبه. الضغط على أي صف "حسب المندوب" أو "حسب مدير المنطقة" يفلتر تبويب البحث على هذا الشخص مباشرة.</div>
+<h2>📈 Performance Analysis</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">Aggregate analysis across all <span id="analysisTotalCount"></span> pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.</div>
 <div class="tabs" id="analysisSubTabs">
-<div class="tab-btn active" data-group="rg">حسب المنطقة</div>
-<div class="tab-btn" data-group="tr">حسب القطاع</div>
-<div class="tab-btn" data-group="mr">حسب المندوب الطبي</div>
-<div class="tab-btn" data-group="dm">حسب مدير المنطقة</div>
+<div class="tab-btn active" data-group="rg">By Region</div>
+<div class="tab-btn" data-group="tr">By Territory</div>
+<div class="tab-btn" data-group="mr">By Medical Representative</div>
+<div class="tab-btn" data-group="dm">By District Manager</div>
 </div>
 </div>
 <div id="analysisSection"></div>
@@ -888,14 +888,19 @@ if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', bl
 // Deliberately independent of the search tab's activeMR/activeDM filter -- this is
 // a standing company-wide dashboard, not a filtered view, so it always summarizes
 // every pharmacy in the base regardless of what's selected elsewhere in the tool.
-const ANALYSIS_GROUP_LABELS = { rg: 'المنطقة', tr: 'القطاع', mr: 'المندوب الطبي', dm: 'مدير المنطقة' };
+const ANALYSIS_GROUP_LABELS = { rg: 'Region', tr: 'Territory', mr: 'Medical Representative', dm: 'District Manager' };
 let analysisGroup = 'rg';
 let analysisSort = { key: 'q4', dir: 'desc' };
 
+// Pharmacies missing the field being grouped on are excluded from that grouping
+// entirely (not lumped into a "—" bucket) -- e.g. a pharmacy with no MR assigned
+// simply doesn't appear under "By Medical Representative", but still counts under
+// "By Region" if it has a region. Keeps every analysis table free of blank rows.
 function computeAnalysisGroups(field){
 const groups = {};
 PHARMACIES.forEach(p => {
-const key = p[field] || '—';
+const key = p[field];
+if(!key) return;
 if(!groups[key]){
 groups[key] = { name:key, count:0, q3:0, q4:0, maxed:0, bestChance:0, needsAttention:0, unknown:0 };
 }
@@ -919,7 +924,7 @@ function sortAnalysisRows(rows, key, dir){
 return [...rows].sort((a, b) => {
 let av = a[key], bv = b[key];
 if(typeof av === 'string' || typeof bv === 'string'){
-return dir === 'asc' ? String(av).localeCompare(String(bv), 'ar') : String(bv).localeCompare(String(av), 'ar');
+return dir === 'asc' ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
 }
 if(av === null) av = -Infinity;
 if(bv === null) bv = -Infinity;
@@ -929,13 +934,13 @@ return dir === 'asc' ? av - bv : bv - av;
 
 const ANALYSIS_COLS = [
 { key:'name', lbl: null },
-{ key:'count', lbl:'عدد الصيدليات' },
-{ key:'q3', lbl:'إجمالي الربع الثالث' },
-{ key:'q4', lbl:'إجمالي الربع الرابع' },
-{ key:'growth', lbl:'نسبة النمو' },
-{ key:'maxed', lbl:'🏆 حقق الحد الأقصى' },
-{ key:'bestChance', lbl:'📈 الأفضل حظاً' },
-{ key:'needsAttention', lbl:'⚠️ تحتاج متابعة' },
+{ key:'count', lbl:'Pharmacy Count' },
+{ key:'q3', lbl:'Q3 Total' },
+{ key:'q4', lbl:'Q4 Total' },
+{ key:'growth', lbl:'Growth %' },
+{ key:'maxed', lbl:'🏆 Maxed Out' },
+{ key:'bestChance', lbl:'📈 Best Chance' },
+{ key:'needsAttention', lbl:'⚠️ Needs Attention' },
 ];
 
 function renderAnalysis(){
@@ -959,8 +964,8 @@ return `
 <tr class="${clickable ? 'pharm-list-item' : ''}" ${clickable ? `data-name="${g.name}"` : ''} style="${clickable ? 'cursor:pointer;' : ''}">
 <td class="name-cell">${g.name}</td>
 <td>${g.count.toLocaleString('en-US')}</td>
-<td>${fmt(g.q3)} ج.م</td>
-<td>${fmt(g.q4)} ج.م</td>
+<td>${fmt(g.q3)} EGP</td>
+<td>${fmt(g.q4)} EGP</td>
 <td class="${gClass}">${gText}</td>
 <td>${g.maxed.toLocaleString('en-US')}</td>
 <td>${g.bestChance.toLocaleString('en-US')}</td>

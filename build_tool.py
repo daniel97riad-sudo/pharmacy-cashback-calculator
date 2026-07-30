@@ -3,23 +3,23 @@
 Build the pharmacy cashback calculator HTML tool from a merchandising Excel file.
 
 Usage:
-    python build_tool.py <path/to/merchandising.xlsx> [output.html]
-    python build_tool.py <path/to/merchandising.xlsx> --dump-headers
-    python build_tool.py <path/to/merchandising.xlsx> [output.html] --name-col E --q3-dist-col P ...
+python build_tool.py <path/to/merchandising.xlsx> [output.html]
+python build_tool.py <path/to/merchandising.xlsx> --dump-headers
+python build_tool.py <path/to/merchandising.xlsx> [output.html] --name-col E --q3-dist-col P ...
 
 The Excel file is expected to have one row per pharmacy with columns
 (header text match is fuzzy/case-insensitive, order doesn't matter) for:
-  - pharmacy name              (e.g. "Ims_Customer_Came", "Customer Name", "Pharmacy Name")
-  - customer code              (e.g. "Customer_Code")
-  - MR / rep name               (e.g. "MR Name")
-  - DM / district manager name (e.g. "DM Name")
-  - region                     (e.g. "Region_Name")
-  - territory                  (e.g. "Territory_Name")
-  - pharmacy status            (e.g. "Pharmacy Status")
-  - Q3 actual sales            (header containing "Q3" and "Actual")
-  - Q3 distributor sales       (header containing "Q3" and "DIST")
-  - Q4 actual sales            (header containing "Q4" and "Actual")
-  - Q4 distributor sales       (header containing "Q4" and "DIST")
+- pharmacy name (e.g. "Ims_Customer_Came", "Customer Name", "Pharmacy Name")
+- customer code (e.g. "Customer_Code")
+- MR / rep name (e.g. "MR Name")
+- DM / district manager name (e.g. "DM Name")
+- region (e.g. "Region_Name")
+- territory (e.g. "Territory_Name")
+- pharmacy status (e.g. "Pharmacy Status")
+- Q3 actual sales (header containing "Q3" and "Actual")
+- Q3 distributor sales (header containing "Q3" and "DIST")
+- Q4 actual sales (header containing "Q4" and "Actual")
+- Q4 distributor sales (header containing "Q4" and "DIST")
 
 It scans the first 15 rows of the first sheet to find the header row
 (whichever row matches the most expected labels), then reads every row
@@ -54,8 +54,8 @@ except ImportError:
     sys.exit(1)
 
 HEADER_PATTERNS = {
-    "n":  [r"ims_customer_came", r"customer name", r"pharmacy name", r"customer_name"],
-    "c":  [r"customer_code", r"^code$", r"customer code"],
+    "n": [r"ims_customer_came", r"customer name", r"pharmacy name", r"customer_name"],
+    "c": [r"customer_code", r"^code$", r"customer code"],
     "mr": [r"mr name", r"\bmr\b.*name"],
     "dm": [r"dm name", r"\bdm\b.*name"],
     "rg": [r"region_name", r"^region$"],
@@ -136,7 +136,7 @@ def dump_headers(xlsx_path, max_scan_rows=15):
         nonblank = [(v, c) for c, v in enumerate(row_vals, start=1) if v is not None and str(v).strip() != ""]
         if not nonblank:
             continue
-        marker = "  <-- auto-detected header row" if r == detected else ""
+        marker = " <-- auto-detected header row" if r == detected else ""
         print(f"Row {r}:{marker}")
         for v, c in nonblank:
             print(f"  {get_column_letter(c)}: {v!r}")
@@ -487,16 +487,18 @@ def reconcile_dm_with_trusted_roster(rows, trusted_dm, similarity_cutoff=0.55):
     difference between final_chc.xlsx and the merch list, not a different person.
     Confirmed cases: "Mohammed Salah" / "Mohamed Salah" (763 rows), "Nagat El- Sissi"
     / "Najat Alsisi" (761 rows), "Ahmed El- Bakry" / "Ahmed Albakry" (633 rows) --
-    together nearly a third of the whole pharmacy list, which is why this is worth
-    correcting rather than blanking.
+    together nearly a thir
+jat Alsisi" (761 rows), "Ahmed El- Bakry" / "Ahmed Albakry" (633 rows) --
+together nearly a third of the whole pharmacy list, which is why this is worth
+correcting rather than blanking.
 
-    For each dm_name not in trusted_dm, finds the trusted name with the highest
-    difflib.SequenceMatcher ratio; if that ratio clears similarity_cutoff, corrects
-    dm_name to the trusted spelling. names with no close-enough match are left
-    untouched (there's no safe assumption to make about them).
+For each dm_name not in trusted_dm, finds the trusted name with the highest
+difflib.SequenceMatcher ratio; if that ratio clears similarity_cutoff, corrects
+dm_name to the trusted spelling. names with no close-enough match are left
+untouched (there's no safe assumption to make about them).
 
-    Returns a list of (old_name, new_name, row_count) for every correction made.
-    """
+Returns a list of (old_name, new_name, row_count) for every correction made.
+"""
     counts = {}
     for row in rows:
         dm = row.get("dm")
@@ -565,8 +567,8 @@ def canonicalize_rep_names(rows, fields=("mr", "dm")):
     """
     def normalize(s):
         s = s.lower()
-        s = re.sub(r"el[\s\-]+", "el", s)   # "El- " / "El " / "el-" -> "el"
-        s = re.sub(r"[\s\-.]", "", s)        # strip remaining spaces/hyphens/dots
+        s = re.sub(r"el[\s\-]+", "el", s)  # "El- " / "El " / "el-" -> "el"
+        s = re.sub(r"[\s\-.]", "", s)      # strip remaining spaces/hyphens/dots
         return s.strip()
 
     report = {}
@@ -843,9 +845,9 @@ def main():
             "q4_actual_col": args.q4_actual_col, "q4_dist_col": args.q4_dist_col,
         }
         rows = extract_data(args.xlsx_path, overrides=overrides, forced_header_row=args.header_row)
-    if not rows:
-        print("No pharmacy rows extracted -- double check the source file structure.", file=sys.stderr)
-        sys.exit(1)
+        if not rows:
+            print("No pharmacy rows extracted -- double check the source file structure.", file=sys.stderr)
+            sys.exit(1)
 
     if args.mr_dm_override_file:
         override_map = load_mr_dm_override_map(
