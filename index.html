@@ -379,6 +379,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="view-tab-btn" data-view="overview"><span class="tab-badge" id="overviewBadge" style="display:none;">0</span>📊 نظرة عامة على الفرص</div>
 <div class="view-tab-btn" data-view="chain">🔗 دمج صيدليات (سلسلة)</div>
 <div class="view-tab-btn" data-view="leaderboard">🏆 لوحة المتصدرين</div>
+<div class="view-tab-btn" data-view="myperf">👤 My Performance</div>
 <div class="view-tab-btn" data-view="analysis">📈 Analysis</div>
 </div>
 
@@ -439,6 +440,15 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="note" style="margin-top:0;">تُحسب من الاتفاقات المسجَّلة فعلياً عبر زر "✅ اتفاق مع الصيدلية" أسفل حاسبة كل صيدلية. الترتيب حسب عدد الصيدليات الفريدة التي تم الاتفاق معها لكل مندوب.</div>
 </div>
 <div id="leaderboardSection"></div>
+</div>
+
+<div id="myperfView" style="display:none;">
+<div class="card">
+<h2>👤 My Performance</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">Select your name to see your book's growth, how you rank against other reps, and which of your pharmacies are worth a follow-up call this week.</div>
+<select id="myperfMrSelect"><option value="">-- Select your name --</option></select>
+</div>
+<div id="myperfSection"></div>
 </div>
 
 <div id="analysisView" style="display:none;">
@@ -518,6 +528,7 @@ let compareWith = null;
 let state = { baseline:'q4', shelf:'none', posm:false, full:false, customBaseline:null };
 let activeMR = '';
 let activeDM = '';
+let myperfActiveMR = '';
 
 function fmt(n){
 return Math.round(n).toLocaleString('en-US');
@@ -539,6 +550,7 @@ dmFilter.appendChild(opt);
 });
 updateMRFilterOptions();
 renderStatusBreakdown();
+populateMyPerfSelect();
 }
 
 // Shows how many pharmacies were already on the merchandising program (PH & Merch,
@@ -884,6 +896,127 @@ if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', bl
 });
 }
 
+// ---------- My Performance (per-MR self-service summary) ----------
+// A rep picks their own name and gets a private-feeling snapshot: their book's
+// growth vs. the company average, their rank among all reps by revenue and by
+// growth, a running total of cashback already locked in on maxed-out pharmacies,
+// and short "do this next" lists (best-chance and needs-attention) pulled from
+// their own book only. Deliberately its own tab/select (not reusing the Search
+// tab's MR filter) so a rep can check this without disturbing whatever filter
+// they already have set on the Search tab.
+const myperfMrSelect = document.getElementById('myperfMrSelect');
+
+function populateMyPerfSelect(){
+const mrs = [...new Set(PHARMACIES.map(p => p.mr).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+mrs.forEach(name => {
+const opt = document.createElement('option');
+opt.value = name; opt.textContent = name;
+myperfMrSelect.appendChild(opt);
+});
+}
+
+myperfMrSelect.addEventListener('change', () => {
+myperfActiveMR = myperfMrSelect.value;
+renderMyPerf();
+});
+
+function renderMyPerf(){
+const section = document.getElementById('myperfSection');
+if(!section) return;
+
+if(!myperfActiveMR){
+section.innerHTML = '';
+return;
+}
+
+const subset = PHARMACIES.filter(p => p.mr === myperfActiveMR);
+const count = subset.length;
+const sumQ3 = subset.reduce((s,p) => s + p.q3d, 0);
+const sumQ4 = subset.reduce((s,p) => s + p.q4d, 0);
+const growth = sumQ3 > 0 ? (sumQ4 - sumQ3) / sumQ3 : null;
+const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
+const growthText = growth === null ? '—' : (growth>=0?'+':'') + pct(growth);
+
+const companyQ3 = PHARMACIES.reduce((s,p) => s + p.q3d, 0);
+const companyQ4 = PHARMACIES.reduce((s,p) => s + p.q4d, 0);
+const companyGrowth = companyQ3 > 0 ? (companyQ4 - companyQ3) / companyQ3 : null;
+
+const mrGroups = computeAnalysisGroups('mr');
+const totalMRs = mrGroups.length;
+const byQ4Rank = [...mrGroups].sort((a,b) => b.q4 - a.q4);
+const q4Rank = byQ4Rank.findIndex(g => g.name === myperfActiveMR) + 1;
+const byGrowthRank = mrGroups.filter(g => g.growth !== null).sort((a,b) => b.growth - a.growth);
+const growthRank = growth !== null ? byGrowthRank.findIndex(g => g.name === myperfActiveMR) + 1 : null;
+
+const withStatus = subset.map(p => ({ p, s: getSlabStatus(p) }));
+const maxed = withStatus.filter(x => x.s.state === 'max');
+const { bestChance, needsAttention } = classifyRemaining(withStatus);
+const lockedCashback = maxed.reduce((sum, {p}) => {
+const rows = calcSlabs(p.q3d, {shelf:'none', posm:false, full:false});
+return sum + rows[rows.length - 1].cashback;
+}, 0);
+
+const listItem = (p, s, cls, metaHtml, salesHtml) => `
+<div class="pharm-list-item ${cls}" data-idx="${PHARMACIES.indexOf(p)}">
+<div>
+<div class="pli-name">${p.n}</div>
+<div class="pli-meta">${metaHtml}</div>
+</div>
+<div class="pli-stats">
+<div class="pli-sales">${salesHtml}</div>
+</div>
+</div>`;
+
+const bestChanceHtml = bestChance.slice(0, 5).map(({p,s}) => listItem(p, s, 'pli-best-chance',
+`${p.tr} · growth +${pct(s.currentGrowth)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
+const needsAttentionHtml = needsAttention.slice(0, 5).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
+`${p.tr} · growth ${pct(s.currentGrowth)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
+
+section.innerHTML = `
+<div class="card">
+<h2>${myperfActiveMR}'s Book (${count} pharmacies)</h2>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">Q3 Total</div><div class="v">${fmt(sumQ3)} EGP</div></div>
+<div class="sales-box"><div class="t">Q4 Total</div><div class="v">${fmt(sumQ4)} EGP</div></div>
+<div class="sales-box"><div class="t">Your Growth</div><div class="v ${growthClass}">${growthText}</div></div>
+</div>
+<div class="note">Company-wide growth this period: ${companyGrowth===null?'—':(companyGrowth>=0?'+':'')+pct(companyGrowth)}. ${growth!==null && companyGrowth!==null ? (growth > companyGrowth ? 'You are outperforming the company average.' : 'You are behind the company average.') : ''}</div>
+</div>
+<div class="card">
+<h2>📊 Your Ranking (of ${totalMRs} reps)</h2>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">By Revenue (Q4)</div><div class="v">#${q4Rank}</div></div>
+<div class="sales-box"><div class="t">By Growth %</div><div class="v">${growthRank ? '#'+growthRank+' of '+byGrowthRank.length : 'n/a'}</div></div>
+</div>
+</div>
+<div class="card">
+<h2>🏆 Already Locked In (${maxed.length})</h2>
+<div class="note" style="margin-top:0;">Guaranteed cashback already earned across pharmacies that hit the top growth slab: <b>${fmt(lockedCashback)} EGP</b></div>
+</div>
+<div class="card">
+<h2>📈 Best Chance to Push (${bestChance.length})</h2>
+<div class="note" style="margin-top:0;">Closest to their next slab in your book -- a small nudge could tip these over.</div>
+<div class="pharm-list">${bestChanceHtml || '<div class="empty-msg">None right now</div>'}</div>
+</div>
+<div class="card">
+<h2>⚠️ Needs Attention (${needsAttention.length})</h2>
+<div class="pharm-list">${needsAttentionHtml || '<div class="empty-msg">None right now</div>'}</div>
+</div>`;
+
+section.querySelectorAll('.pharm-list-item').forEach(item => {
+item.addEventListener('click', () => {
+const idx = parseInt(item.dataset.idx, 10);
+selectPharmacy(PHARMACIES[idx]);
+activeMR = myperfActiveMR;
+mrFilter.value = myperfActiveMR;
+updateMRFilterOptions();
+switchView('search');
+const detail = document.getElementById('detailSection');
+if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
+});
+});
+}
+
 // ---------- Analysis tab: aggregate performance by region/territory/MR/DM ----------
 // Deliberately independent of the search tab's activeMR/activeDM filter -- this is
 // a standing company-wide dashboard, not a filtered view, so it always summarizes
@@ -1029,6 +1162,7 @@ document.getElementById('searchView').style.display = view === 'search' ? '' : '
 document.getElementById('overviewView').style.display = view === 'overview' ? '' : 'none';
 document.getElementById('chainView').style.display = view === 'chain' ? '' : 'none';
 document.getElementById('leaderboardView').style.display = view === 'leaderboard' ? '' : 'none';
+document.getElementById('myperfView').style.display = view === 'myperf' ? '' : 'none';
 document.getElementById('analysisView').style.display = view === 'analysis' ? '' : 'none';
 document.querySelectorAll('.view-tab-btn').forEach(btn => {
 btn.classList.toggle('active', btn.dataset.view === view);
@@ -1036,6 +1170,7 @@ btn.classList.toggle('active', btn.dataset.view === view);
 if(view === 'overview') renderOverview();
 if(view === 'chain') renderChainSection();
 if(view === 'leaderboard') renderLeaderboard();
+if(view === 'myperf') renderMyPerf();
 if(view === 'analysis') renderAnalysis();
 }
 document.getElementById('viewTabs').addEventListener('click', (e) => {
