@@ -43,6 +43,7 @@ import sys
 import json
 import re
 import argparse
+import difflib
 from pathlib import Path
 
 try:
@@ -444,6 +445,111 @@ def load_mr_dm_override_map(xlsx_path, forced_header_row=None):
         )
     return override
 
+def load_trusted_rep_roster(xlsx_path, forced_header_row=None):
+    """Load the full set of MR names and DM names that actually appear in a
+    merchandising-list-shaped file (e.g. merch_list.xlsx, the "2.7K" list) -- the
+    roster the team trusts as real, currently-active reps. Reuses the same fuzzy
+    header detection as extract_data/load_mr_dm_override_map, since this file has
+    that shape. Returns (trusted_mr_names, trusted_dm_names), both sets of strings.
+    """
+    all_rows, max_col = _read_all_rows(xlsx_path)
+    header_r = forced_header_row if forced_header_row else locate_header_row(all_rows)
+    if header_r is None:
+        raise RuntimeError(
+            "Could not locate a header row in the trusted roster file. "
+            "Run with --dump-headers on that file to see its raw contents."
+        )
+    header_vals = all_rows[header_r - 1]
+    row_cells = list(zip(header_vals, range(1, len(header_vals) + 1)))
+    mr_col = find_col(row_cells, HEADER_PATTERNS["mr"])
+    dm_col = find_col(row_cells, HEADER_PATTERNS["dm"])
+
+    def val(row_vals, col):
+        if col is None or col > len(row_vals):
+            return None
+        return row_vals[col - 1]
+
+    trusted_mr, trusted_dm = set(), set()
+    for r in range(header_r + 1, len(all_rows) + 1):
+        row_vals = all_rows[r - 1]
+        mr = val(row_vals, mr_col)
+        dm = val(row_vals, dm_col)
+        if mr and str(mr).strip():
+            trusted_mr.add(str(mr).strip())
+        if dm and str(dm).strip():
+            trusted_dm.add(str(dm).strip())
+    return trusted_mr, trusted_dm
+
+def reconcile_dm_with_trusted_roster(rows, trusted_dm, similarity_cutoff=0.55):
+    """DM names are a small, stable roster (5 people, each covering hundreds of
+    pharmacies) -- so unlike MR names, a dm_name currently in use but not literally
+    in the trusted roster is almost certainly the SAME person with a spelling
+    difference between final_chc.xlsx and the merch list, not a different person.
+    Confirmed cases: "Mohammed Salah" / "Mohamed Salah" (763 rows), "Nagat El- Sissi"
+    / "Najat Alsisi" (761 rows), "Ahmed El- Bakry" / "Ahmed Albakry" (633 rows) --
+    together nearly a third of the whole pharmacy list, which is why this is worth
+    correcting rather than blanking.
+
+    For each dm_name not in trusted_dm, finds the trusted name with the highest
+    difflib.SequenceMatcher ratio; if that ratio clears similarity_cutoff, corrects
+    dm_name to the trusted spelling. names with no close-enough match are left
+    untouched (there's no safe assumption to make about them).
+
+    Returns a list of (old_name, new_name, row_count) for every correction made.
+    """
+    counts = {}
+    for row in rows:
+        dm = row.get("dm")
+        if dm and dm not in trusted_dm:
+            counts[dm] = counts.get(dm, 0) + 1
+
+    corrections_map = {}
+    report = []
+    for name, count in counts.items():
+        best_name, best_ratio = None, 0.0
+        for t in trusted_dm:
+            ratio = difflib.SequenceMatcher(None, name.lower(), t.lower()).ratio()
+            if ratio > best_ratio:
+                best_ratio, best_name = ratio, t
+        if best_ratio >= similarity_cutoff:
+            corrections_map[name] = best_name
+            report.append((name, best_name, count))
+
+    if corrections_map:
+        for row in rows:
+            dm = row.get("dm")
+            if dm in corrections_map:
+                row["dm"] = corrections_map[dm]
+
+    return report
+
+def strip_mr_not_in_trusted_roster(rows, trusted_mr):
+    """Per an explicit decision to treat any MR name not appearing anywhere in the
+    trusted merch-list roster as unverified: blank mr_name on pharmacy rows whose
+    current mr_name isn't literally one of the known/trusted MR names. Unlike the DM
+    case, these were checked for spelling-variant matches against the trusted roster
+    and found none with real token overlap -- they're distinct names, most likely
+    legitimately new reps for pharmacies that were never on the old merch list (which
+    only covered ~2,751 of the 7,015 pharmacies here). There's no data-driven evidence
+    these are wrong the way the medical/non-pharmacy leak names were -- this is purely
+    "not on the list we currently trust," applied per explicit instruction.
+
+    Returns a list of (name, row_count) for every name that got stripped.
+    """
+    counts = {}
+    for row in rows:
+        mr = row.get("mr")
+        if mr and mr not in trusted_mr:
+            counts[mr] = counts.get(mr, 0) + 1
+
+    stripped_names = set(counts.keys())
+    if stripped_names:
+        for row in rows:
+            if row.get("mr") in stripped_names:
+                row["mr"] = ""
+
+    return sorted(counts.items(), key=lambda x: -x[1])
+
 def canonicalize_rep_names(rows, fields=("mr", "dm")):
     """Merges near-duplicate rep names that differ only in case/spacing/hyphenation
     (e.g. "wafaa Gamal Fathy eldegwey" from final_chc.xlsx vs "Wafaa Gamal Fathy
@@ -771,6 +877,23 @@ def main():
                 f"Stripped non-pharmacy-leaked mr_name \"{name}\" from {ph_count} pharmacy "
                 f"row(s) -- has {nonph_count} non-pharmacy row(s), so not a real pharmacy MR."
             )
+
+    # Reconcile mr_name/dm_name against the trusted merch-list roster: DM spelling
+    # variants get corrected (small, stable roster -- a non-matching name is almost
+    # certainly the same person spelled differently), MR names not on the roster get
+    # blanked (per explicit instruction -- no assumption made that they're wrong,
+    # just not verified against the trusted list).
+    if args.mr_dm_override_file:
+        trusted_mr, trusted_dm = load_trusted_rep_roster(
+            args.mr_dm_override_file, forced_header_row=args.mr_dm_override_header_row,
+        )
+        dm_corrections = reconcile_dm_with_trusted_roster(rows, trusted_dm)
+        for old_name, new_name, count in dm_corrections:
+            print(f"Corrected dm_name \"{old_name}\" -> \"{new_name}\" on {count} pharmacy row(s).")
+
+        mr_stripped = strip_mr_not_in_trusted_roster(rows, trusted_mr)
+        for name, count in mr_stripped:
+            print(f"Stripped mr_name \"{name}\" from {count} pharmacy row(s) -- not on the trusted roster.")
 
     supplement_label = None
     if args.supplement_file:
