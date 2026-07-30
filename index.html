@@ -356,7 +356,6 @@ cursor:pointer;font-family:inherit;border:1px solid var(--border);background:#ff
 .gap-bar-wrap{margin-top:12px;background:var(--bg);border-radius:999px;height:12px;overflow:hidden;}
 .gap-bar{height:100%;background:var(--primary);border-radius:999px;}
 .gap-bar.ok{background:#1a7a4d;}
-tr.rep-behind td{background:#fdf3f2;}
 
 .compare-box{position:relative;margin-top:6px;}
 .compare-active-row{
@@ -1655,10 +1654,17 @@ wirePriorityList(section, myperfActiveMR);
 // ---------- District Manager team view ----------
 // A DM's job is different from a rep's: they cannot work 1,400 pharmacies, but
 // they can move 6-8 people. The most useful thing this data says to a DM is
-// that the spread between their best and worst rep is 48-83 percentage points
-// -- inside the same district, same market, same products. That gap is not
-// market conditions, it's practice, which means it's coachable. So this view
-// leads with the spread rather than with a territory total.
+// that the growth range inside a single district is 45-102 percentage points --
+// same market, same products, same customers. That range is mostly practice
+// rather than market conditions, which means it's coachable. So this view leads
+// with the range rather than with a territory total.
+//
+// Framing note: this tool is open to reps, DMs and senior management alike, so
+// nothing here ranks a named person or labels anyone as underperforming. The
+// highest performer is named as someone to learn from; nobody is named as a
+// problem. Figures are shown plainly and managers draw their own conclusions
+// in private. A number is fine to publish; a verdict attached to a colleague's
+// name is not.
 let myteamActiveDM = '';
 
 function populateMyteamSelect(){
@@ -1701,25 +1707,28 @@ const teamGap = computeGapToTarget(pool);
 const rows = computeTeamRows(myteamActiveDM);
 const { curRange, priorRange } = yoyRangeLabels();
 
+// `highest` is named in the UI as someone to learn from. `lowest` is used only
+// to size the range -- it is never displayed or labelled.
 const withGrowth = rows.filter(r => r.g.growthSoFar !== null);
-const best = withGrowth.length ? withGrowth[withGrowth.length - 1] : null;
-const worst = withGrowth.length ? withGrowth[0] : null;
-const spread = (best && worst) ? (best.g.growthSoFar - worst.g.growthSoFar) : null;
-const behind = rows.filter(r => !r.g.onTrack);
+const highest = withGrowth.length ? withGrowth[withGrowth.length - 1] : null;
+const lowest = withGrowth.length ? withGrowth[0] : null;
+const spread = (highest && lowest) ? (highest.g.growthSoFar - lowest.g.growthSoFar) : null;
 
+// Deliberately neutral: no ranking flags, no highlighted "behind" rows, no
+// emoji verdicts next to anyone's name. This tool is open to the whole team,
+// and a label a colleague can read is a different thing from a number. The
+// figures are shown plainly and the manager draws their own conclusions.
 const rowsHtml = rows.map(r => {
 const sf = r.g.growthSoFar;
 const sfText = sf === null ? '—' : (sf >= 0 ? '+' : '') + pct(sf);
-const sfClass = sf === null ? '' : (sf >= GROWTH_TARGET ? 'growth-pos' : 'growth-neg');
-const rr = r.g.requiredRemainingGrowth;
-const needsSupport = rr !== null && rr > 0.40;
-return `<tr class="${r.g.onTrack ? '' : 'rep-behind'} pharm-list-item" data-name="${r.mr}" style="cursor:pointer;">
-<td class="name-cell">${needsSupport ? '🆘 ' : ''}${r.mr}</td>
+const sfClass = sf === null ? '' : (sf >= 0 ? 'growth-pos' : 'growth-neg');
+return `<tr class="pharm-list-item" data-name="${r.mr}" style="cursor:pointer;">
+<td class="name-cell">${r.mr}</td>
 <td>${r.count}</td>
 <td class="${sfClass}">${sfText}</td>
-<td class="${r.g.extraVsTrend > 0 ? 'growth-neg' : 'growth-pos'}">${fmt(Math.max(r.g.extraVsTrend, 0))} EGP</td>
+<td>${fmt(Math.max(r.g.extraVsTrend, 0))} EGP</td>
 <td>${r.g.extraPerMonth === null ? '—' : fmt(Math.max(r.g.extraPerMonth, 0))} EGP</td>
-<td class="${r.dormantCount > 0 ? 'growth-neg' : ''}">${r.dormantCount}</td>
+<td>${r.dormantCount}</td>
 <td>${fmt(r.recoverable)} EGP</td>
 <td>${r.prio.length}</td>
 </tr>`;
@@ -1729,28 +1738,31 @@ section.innerHTML = `
 ${gapCardHtml(teamGap, { who: myteamActiveDM + "'s district" })}
 ${spread !== null ? `
 <div class="card">
-<h2>🎯 Where Your Coaching Leverage Is</h2>
+<h2>🎯 Room to Grow in Your District</h2>
 <div class="note" style="margin-top:0;">
-Your best and worst rep are <b>${pct(spread)} apart</b> on current-year growth — same district, same products, same market.
-That gap is practice, not territory, which makes it the cheapest growth available to you: no budget, no new customers, just moving what
-<b>${best.mr}</b> is already doing across to the rest of the team.
+Across your team there is a <b>${pct(spread)} range</b> in current-year growth — same district, same products, same market.
+Because those conditions are held constant, most of that range is practice rather than territory, which makes it the cheapest growth
+available to you: no budget and no new customers needed.
 </div>
 <div class="totals-grid">
-<div class="sales-box"><div class="t">Best in District</div><div class="v growth-pos">${(best.g.growthSoFar>=0?'+':'')+pct(best.g.growthSoFar)}</div><div class="sub">${best.mr}</div></div>
-<div class="sales-box"><div class="t">Needs Most Support</div><div class="v growth-neg">${(worst.g.growthSoFar>=0?'+':'')+pct(worst.g.growthSoFar)}</div><div class="sub">${worst.mr}</div></div>
-<div class="sales-box"><div class="t">Spread</div><div class="v">${pct(spread)}</div><div class="sub">points of coachable difference</div></div>
-<div class="sales-box"><div class="t">Reps Behind 15%</div><div class="v ${behind.length ? 'growth-neg' : 'growth-pos'}">${behind.length} of ${rows.length}</div></div>
+<div class="sales-box"><div class="t">Range Across Team</div><div class="v">${pct(spread)}</div><div class="sub">between the highest and lowest growth</div></div>
+<div class="sales-box"><div class="t">District Growth</div><div class="v ${teamGap && teamGap.growthSoFar !== null && teamGap.growthSoFar >= GROWTH_TARGET ? 'growth-pos' : ''}">${teamGap && teamGap.growthSoFar !== null ? (teamGap.growthSoFar>=0?'+':'')+pct(teamGap.growthSoFar) : '—'}</div><div class="sub">target is +15%</div></div>
+<div class="sales-box"><div class="t">Pharmacies in District</div><div class="v">${pool.length.toLocaleString('en-US')}</div></div>
+<div class="sales-box"><div class="t">Dormant Across Team</div><div class="v ${rows.reduce((s,r)=>s+r.dormantCount,0) > 0 ? 'growth-neg' : ''}">${rows.reduce((s,r)=>s+r.dormantCount,0)}</div><div class="sub">stopped buying entirely</div></div>
 </div>
 <div class="note">
-Worth asking ${best.mr} in your next team meeting: which pharmacies did they win back this year, and what did they actually say or do?
-That answer is more useful to ${worst.mr} than any target.
+<b>Worth sharing:</b> ${highest.mr} is running at ${(highest.g.growthSoFar>=0?"+":"")+pct(highest.g.growthSoFar)} this year.
+A useful team-meeting question is which pharmacies they won back and what they actually said or did — specific accounts and specific words
+travel much better than a target does.
 </div>
 </div>` : ''}
 <div class="card">
 <h2>📋 Your Reps (${rows.length})</h2>
 <div class="note" style="margin-top:0;">
-Each rep against their <i>own</i> 15% target, computed from their own ${PRIOR_YEAR} book. "Real Gap" is what they need on top of current pace.
-🆘 marks reps needing more than +40% from here — structural, not effort. Sorted worst-first. Click a rep to open their book.
+Each rep against their <i>own</i> 15% target, computed from their own ${PRIOR_YEAR} book — so a rep with 100 pharmacies isn't measured
+against the same number as a rep with 210. "Real Gap" is what they need on top of their current pace. Where "Required From Here" would be
+very large, that usually points to something structural — a lost chain, a credit freeze, a territory issue — rather than effort, and is worth
+a conversation before it's treated as performance. Click a rep to open their book.
 </div>
 <div style="overflow-x:auto;">
 <table>
@@ -1987,24 +1999,25 @@ const totalRecoverable = rows.reduce((s,r) => s + r.recoverable, 0);
 const companyCoverage = companyGap && companyGap.extraVsTrend > 0
 ? totalRecoverable / companyGap.extraVsTrend : null;
 
+// Same principle as the DM table: plain figures, no verdict labels attached to
+// a named person, since every rep can open this page too.
 const rowsHtml = rows.map(r => {
 const sf = r.g.growthSoFar;
 const sfText = sf === null ? '—' : (sf >= 0 ? '+' : '') + pct(sf);
-const sfClass = sf === null ? '' : (sf >= GROWTH_TARGET ? 'growth-pos' : 'growth-neg');
+const sfClass = sf === null ? '' : (sf >= 0 ? 'growth-pos' : 'growth-neg');
 const rr = r.g.requiredRemainingGrowth;
 const rrText = rr === null ? '—' : (rr >= 0 ? '+' : '') + pct(rr);
-const needsSupport = rr !== null && rr > 0.40;
-return `<tr class="${r.g.onTrack ? '' : 'rep-behind'} pharm-list-item" data-name="${r.mr}" style="cursor:pointer;">
-<td class="name-cell">${needsSupport ? '🆘 ' : ''}${r.mr}</td>
+return `<tr class="pharm-list-item" data-name="${r.mr}" style="cursor:pointer;">
+<td class="name-cell">${r.mr}</td>
 <td>${r.count.toLocaleString('en-US')}</td>
 <td>${fmt(r.g.priorFullYear)} EGP</td>
 <td>${fmt(r.g.target)} EGP</td>
 <td class="${sfClass}">${sfText}</td>
-<td class="${r.g.extraVsTrend > 0 ? 'growth-neg' : 'growth-pos'}">${fmt(Math.max(r.g.extraVsTrend, 0))} EGP</td>
+<td>${fmt(Math.max(r.g.extraVsTrend, 0))} EGP</td>
 <td>${r.g.extraPerMonth === null ? '—' : fmt(Math.max(r.g.extraPerMonth, 0))} EGP</td>
-<td class="${needsSupport ? 'growth-neg' : ''}">${rrText}</td>
+<td>${rrText}</td>
 <td>${fmt(r.recoverable)} EGP</td>
-<td class="${r.coverage >= 1 ? 'growth-pos' : ''}">${r.g.extraVsTrend > 0 ? Math.round(r.coverage*100) + '%' : '✅'}</td>
+<td>${r.g.extraVsTrend > 0 ? Math.round(r.coverage*100) + '%' : '—'}</td>
 </tr>`;
 }).join('');
 
@@ -2022,15 +2035,16 @@ ${companyCoverage !== null && companyCoverage < 1
 <div class="sales-box"><div class="t">Priority Accounts</div><div class="v">${totalPriorityAccounts}</div><div class="sub">of ${PHARMACIES.length.toLocaleString('en-US')} pharmacies — ${(totalPriorityAccounts/PHARMACIES.length*100).toFixed(1)}%</div></div>
 <div class="sales-box"><div class="t">Recoverable</div><div class="v">${fmt(totalRecoverable)} EGP</div><div class="sub">was booked last year, isn't now</div></div>
 <div class="sales-box"><div class="t">Covers</div><div class="v ${companyCoverage !== null && companyCoverage >= 1 ? 'growth-pos' : ''}">${companyCoverage === null ? '—' : Math.round(companyCoverage*100) + '%'}</div><div class="sub">of the gap to 15%</div></div>
-<div class="sales-box"><div class="t">Reps Who Can Close It Alone</div><div class="v">${fullyCovered.length + onTrack.length} of ${rows.length}</div><div class="sub">by recovery only, no new business</div></div>
+<div class="sales-box"><div class="t">Territories Coverable by Recovery</div><div class="v">${fullyCovered.length + onTrack.length} of ${rows.length}</div><div class="sub">no new business needed there</div></div>
 </div>
 </div>
 <div class="card">
-<h2>🆘 Who Needs Help (${behind.length} of ${rows.length} reps behind)</h2>
+<h2>📊 Progress to 15% by Rep</h2>
 <div class="note" style="margin-top:0;">
-${onTrack.length} rep${onTrack.length === 1 ? '' : 's'} already at or above 15%; ${behind.length} below.
-The ${structural.length} marked <b>🆘</b> would need more than +40% over the remaining months to reach 15% — that is usually structural (a lost chain, a credit freeze, a territory problem), not effort, and worth a direct conversation rather than a push.
-Sorted by growth so far, worst first. Click a rep to open their book in the Search tab.
+Every rep against their own target, derived from their own ${PRIOR_YEAR} book, so territory size is already accounted for.
+Read "Required From Here" carefully: where it is very high, the realistic explanation is usually structural — a lost chain, a credit freeze,
+a distribution problem in that territory — rather than effort.${structural.length > 0 ? ` ${structural.length} rep${structural.length === 1 ? '' : 's'} currently sit${structural.length === 1 ? 's' : ''} in that range, and that is worth understanding before it becomes a target conversation.` : ''}
+Ordered by growth so far. Click a rep to open their book in the Search tab.
 </div>
 <div style="overflow-x:auto;">
 <table>
