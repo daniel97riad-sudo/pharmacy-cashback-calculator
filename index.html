@@ -1443,13 +1443,25 @@ const monthSpan = REMAINING_CUR_MONTHS.length
 const remainLabel = REMAINING_CUR_MONTHS.length ? `${monthSpan} ${LATEST_YEAR}` : '—';
 const remainPriorLabel = REMAINING_CUR_MONTHS.length ? `${monthSpan} ${PRIOR_YEAR}` : '—';
 const mine = who === 'Your book';
+const isCompany = who === 'The company';
+// Heading and framing differ by audience: a rep sees their own book, a DM sees
+// their district, management sees the whole company. Same maths, three
+// different sentences -- getting this wrong made a district card read
+// "Company-Wide", which is exactly the kind of thing that makes people stop
+// trusting a number.
+const heading = mine ? 'Your Road to 15%'
+: isCompany ? 'The Road to 15% — Company-Wide'
+: `Road to 15% — ${who}`;
+const intro = mine
+? `Your own target, worked out from your actual ${PRIOR_YEAR} book — not a flat number handed to everyone.`
+: isCompany
+? `The company target, and the basis for every rep's individual number below.`
+: `This district's target, worked out from its actual ${PRIOR_YEAR} book — the sum of the individual rep targets below.`;
 return `
 <div class="card">
-<h2>🎯 ${mine ? 'Your Road to 15%' : 'The Road to 15% — Company-Wide'}</h2>
+<h2>🎯 ${heading}</h2>
 <div class="note" style="margin-top:0;">
-${mine
-? `Your own target, worked out from your actual ${PRIOR_YEAR} book — not a flat number handed to everyone.`
-: `The company target, and the basis for every rep's individual number below.`}
+${intro}
 A 15% year means <b>${fmt(gap.target)} EGP</b> across ${LATEST_YEAR}.
 </div>
 <div class="gap-hero">
