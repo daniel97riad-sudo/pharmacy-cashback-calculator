@@ -1426,14 +1426,19 @@ const reqText = gap.requiredRemainingGrowth === null ? '—'
 const soFarText = gap.growthSoFar === null ? '—' : (gap.growthSoFar >= 0 ? '+' : '') + pct(gap.growthSoFar);
 const soFarClass = gap.growthSoFar === null ? '' : (gap.growthSoFar >= GROWTH_TARGET ? 'growth-pos' : 'growth-neg');
 const projText = gap.projectedGrowth === null ? '—' : (gap.projectedGrowth >= 0 ? '+' : '') + pct(gap.projectedGrowth);
-const remainLabel = REMAINING_CUR_MONTHS.length
-? `${monthAbbr(REMAINING_CUR_MONTHS[0])}–${monthAbbr(REMAINING_CUR_MONTHS[REMAINING_CUR_MONTHS.length-1])} ${LATEST_YEAR}`
+const monthSpan = REMAINING_CUR_MONTHS.length
+? `${monthAbbr(REMAINING_CUR_MONTHS[0])}–${monthAbbr(REMAINING_CUR_MONTHS[REMAINING_CUR_MONTHS.length-1])}`
 : '—';
+const remainLabel = REMAINING_CUR_MONTHS.length ? `${monthSpan} ${LATEST_YEAR}` : '—';
+const remainPriorLabel = REMAINING_CUR_MONTHS.length ? `${monthSpan} ${PRIOR_YEAR}` : '—';
+const mine = who === 'Your book';
 return `
 <div class="card">
-<h2>🎯 ${who}'s Road to 15%</h2>
+<h2>🎯 ${mine ? 'Your Road to 15%' : 'The Road to 15% — Company-Wide'}</h2>
 <div class="note" style="margin-top:0;">
-${who === 'Your book' ? 'Your' : 'This'} own target, worked out from ${who === 'Your book' ? 'your' : 'their'} actual ${PRIOR_YEAR} book — not a flat number handed to everyone.
+${mine
+? `Your own target, worked out from your actual ${PRIOR_YEAR} book — not a flat number handed to everyone.`
+: `The company target, and the basis for every rep's individual number below.`}
 A 15% year means <b>${fmt(gap.target)} EGP</b> across ${LATEST_YEAR}.
 </div>
 <div class="gap-hero">
@@ -1446,14 +1451,14 @@ A 15% year means <b>${fmt(gap.target)} EGP</b> across ${LATEST_YEAR}.
 <div class="totals-grid" style="margin-top:14px;">
 <div class="sales-box"><div class="t">Extra Per Month</div><div class="v">${gap.extraPerMonth === null ? '—' : fmt(Math.max(gap.extraPerMonth, 0))} EGP</div><div class="sub">above current pace, for ${gap.monthsLeft} months</div></div>
 <div class="sales-box"><div class="t">Growth So Far</div><div class="v ${soFarClass}">${soFarText}</div><div class="sub">target is +15%</div></div>
-<div class="sales-box"><div class="t">Required From Here</div><div class="v ${gap.requiredRemainingGrowth !== null && gap.requiredRemainingGrowth > 0.30 ? 'growth-neg' : ''}">${reqText}</div><div class="sub">vs ${remainLabel} last year</div></div>
+<div class="sales-box"><div class="t">Required From Here</div><div class="v ${gap.requiredRemainingGrowth !== null && gap.requiredRemainingGrowth > 0.30 ? 'growth-neg' : ''}">${reqText}</div><div class="sub">${remainLabel} vs ${remainPriorLabel}</div></div>
 </div>
 <div class="note">
-"The Real Gap" is the number that matters: total still to book this year is ${fmt(Math.max(gap.needRemaining, 0))} EGP, but most of that is already covered by ${who === 'Your book' ? 'your' : 'the'} existing pace — only <b>${fmt(Math.max(gap.extraVsTrend, 0))} EGP</b> of it is genuinely new work.
+"The Real Gap" is the number that matters: total still to book this year is ${fmt(Math.max(gap.needRemaining, 0))} EGP, but most of that is already covered by ${mine ? 'your' : 'the'} existing pace — only <b>${fmt(Math.max(gap.extraVsTrend, 0))} EGP</b> of it is genuinely new work.
 ${gap.onTrack
 ? `✅ Already running at or above 15%. Hold this and the year lands — protect the accounts on the list below so it doesn't slip.`
 : gap.requiredRemainingGrowth !== null && gap.requiredRemainingGrowth > 0.40
-? `⚠️ Getting to 15% from here needs ${reqText} over the remaining months, which is a big ask on ${who === 'Your book' ? 'your' : 'this'} current base. Recovering the accounts below is the realistic route — and this is a case to ask for help rather than absorb alone.`
+? `⚠️ Getting to 15% from here needs ${reqText} over the remaining months, which is a big ask on ${mine ? 'your' : 'this'} current base. Recovering the accounts below is the realistic route — and this is a case to ask for help rather than absorb alone.`
 : `That works out to ${gap.extraPerMonth === null ? '—' : fmt(Math.max(gap.extraPerMonth, 0))} EGP a month. The list below is where that money already exists — it was being booked last year and stopped.`}
 </div>
 </div>`;
