@@ -5,457 +5,457 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>حاسبة كاش باك الصيدليات</title>
 <style>
-  :root{
-    --primary:#e2600a;
-    --primary-dark:#a8420a;
-    --accent:#ffb84d;
-    --bg:#fdf5ee;
-    --card:#ffffff;
-    --border:#f0ddc9;
-    --text:#2b2018;
-    --muted:#8a7362;
-    --slab1:#e2600a;
-    --slab2:#f2a900;
-    --slab3:#c94f1e;
-    --danger:#d64545;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family:'Segoe UI','Tahoma',Arial,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    padding:20px;
-  }
-  .wrap{max-width:1000px;margin:0 auto;}
-  header{
-    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-    color:#fff;
-    border-radius:16px;
-    padding:22px 26px;
-    margin-bottom:18px;
-    box-shadow:0 4px 14px rgba(0,0,0,.12);
-  }
-  header h1{margin:0 0 4px;font-size:22px;}
-  header p{margin:0;opacity:.85;font-size:13px;}
+:root{
+--primary:#e2600a;
+--primary-dark:#a8420a;
+--accent:#ffb84d;
+--bg:#fdf5ee;
+--card:#ffffff;
+--border:#f0ddc9;
+--text:#2b2018;
+--muted:#8a7362;
+--slab1:#e2600a;
+--slab2:#f2a900;
+--slab3:#c94f1e;
+--danger:#d64545;
+}
+*{box-sizing:border-box;}
+body{
+margin:0;
+font-family:'Segoe UI','Tahoma',Arial,sans-serif;
+background:var(--bg);
+color:var(--text);
+padding:20px;
+}
+.wrap{max-width:1000px;margin:0 auto;}
+header{
+background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+color:#fff;
+border-radius:16px;
+padding:22px 26px;
+margin-bottom:18px;
+box-shadow:0 4px 14px rgba(0,0,0,.12);
+}
+header h1{margin:0 0 4px;font-size:22px;}
+header p{margin:0;opacity:.85;font-size:13px;}
 
-  .card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:18px 20px;
-    margin-bottom:16px;
-    box-shadow:0 2px 8px rgba(0,0,0,.04);
-  }
-  .card h2{margin:0 0 12px;font-size:16px;color:var(--primary-dark);}
+.card{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:14px;
+padding:18px 20px;
+margin-bottom:16px;
+box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+.card h2{margin:0 0 12px;font-size:16px;color:var(--primary-dark);}
 
-  .search-box{position:relative;}
-  .search-box input{
-    width:100%;
-    padding:13px 44px;
-    font-size:16px;
-    border:2px solid var(--border);
-    border-radius:10px;
-    outline:none;
-    transition:border-color .15s;
-  }
-  .search-box input:focus{border-color:var(--primary);}
-  .search-icon{
-    position:absolute;
-    top:50%;right:14px;
-    transform:translateY(-50%);
-    font-size:17px;
-    color:var(--muted);
-    pointer-events:none;
-  }
-  .clear-btn{
-    position:absolute;
-    top:50%;left:10px;
-    transform:translateY(-50%);
-    width:26px;height:26px;
-    border-radius:50%;
-    border:none;
-    background:var(--border);
-    color:var(--muted);
-    font-size:14px;
-    line-height:1;
-    cursor:pointer;
-    display:none;
-    align-items:center;
-    justify-content:center;
-  }
-  .clear-btn:hover{background:var(--primary);color:#fff;}
-  .search-count{font-size:12px;color:var(--muted);margin-top:6px;}
-  .filter-row{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:12px;
-  }
-  .filter-row select{
-    flex:1;
-    min-width:160px;
-    padding:10px 12px;
-    font-size:13px;
-    border:2px solid var(--border);
-    border-radius:10px;
-    background:#fff;
-    color:var(--text);
-    outline:none;
-  }
-  .filter-row select:focus{border-color:var(--primary);}
-  .totals-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-    gap:12px;
-    margin-bottom:14px;
-  }
-  .pharm-list{
-    max-height:420px;
-    overflow-y:auto;
-    border:1px solid var(--border);
-    border-radius:10px;
-  }
-  .pharm-list-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    padding:10px 14px;
-    cursor:pointer;
-    border-bottom:1px solid var(--border);
-  }
-  .pharm-list-item:last-child{border-bottom:none;}
-  .pharm-list-item:hover{background:#f8f2ea;}
-  .pli-name{font-weight:600;font-size:13px;}
-  .pli-meta{font-size:11px;color:var(--muted);margin-top:2px;}
-  .pli-stats{text-align:left;white-space:nowrap;}
-  .pli-sales{font-weight:700;font-size:13px;color:var(--primary-dark);}
-  .pli-growth{font-size:11px;margin-top:2px;}
-  .custom-baseline{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:14px;
-    flex-wrap:wrap;
-  }
-  .custom-baseline label{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;}
-  .custom-baseline input{
-    flex:1;
-    min-width:160px;
-    padding:9px 12px;
-    font-size:14px;
-    border:2px solid var(--border);
-    border-radius:10px;
-    outline:none;
-  }
-  .custom-baseline input:focus{border-color:var(--primary);}
-  .custom-baseline .reset-btn{
-    border:2px solid var(--border);
-    background:#fff;
-    color:var(--muted);
-    border-radius:8px;
-    padding:8px 12px;
-    font-size:12px;
-    cursor:pointer;
-    font-weight:600;
-  }
-  .custom-active{border-color:var(--accent) !important;background:#fff8e8;}
-  @media (max-width:480px){
-    header h1{font-size:19px;}
-    header p{font-size:12px;}
-    .search-box input{font-size:16px;padding:12px 42px;}
-    .results{max-height:260px;}
-    .sales-grid{grid-template-columns:1fr;}
-    table{font-size:12px;}
-    th,td{padding:7px 4px;}
-  }
-  .results{
-    position:absolute;
-    top:calc(100% + 6px);
-    right:0;left:0;
-    background:#fff;
-    border:1px solid var(--border);
-    border-radius:10px;
-    max-height:320px;
-    overflow-y:auto;
-    z-index:20;
-    box-shadow:0 8px 24px rgba(0,0,0,.12);
-    display:none;
-  }
-  .results.show{display:block;}
-  .result-item{
-    padding:10px 14px;
-    cursor:pointer;
-    border-bottom:1px solid var(--border);
-  }
-  .result-item:last-child{border-bottom:none;}
-  .result-item:hover{background:#f0f7f5;}
-  .result-item .rname{font-weight:600;font-size:14px;}
-  .result-item .rmeta{font-size:12px;color:var(--muted);margin-top:2px;}
-  .empty-msg{padding:14px;color:var(--muted);font-size:13px;text-align:center;}
+.search-box{position:relative;}
+.search-box input{
+width:100%;
+padding:13px 44px;
+font-size:16px;
+border:2px solid var(--border);
+border-radius:10px;
+outline:none;
+transition:border-color .15s;
+}
+.search-box input:focus{border-color:var(--primary);}
+.search-icon{
+position:absolute;
+top:50%;right:14px;
+transform:translateY(-50%);
+font-size:17px;
+color:var(--muted);
+pointer-events:none;
+}
+.clear-btn{
+position:absolute;
+top:50%;left:10px;
+transform:translateY(-50%);
+width:26px;height:26px;
+border-radius:50%;
+border:none;
+background:var(--border);
+color:var(--muted);
+font-size:14px;
+line-height:1;
+cursor:pointer;
+display:none;
+align-items:center;
+justify-content:center;
+}
+.clear-btn:hover{background:var(--primary);color:#fff;}
+.search-count{font-size:12px;color:var(--muted);margin-top:6px;}
+.filter-row{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:12px;
+}
+.filter-row select{
+flex:1;
+min-width:160px;
+padding:10px 12px;
+font-size:13px;
+border:2px solid var(--border);
+border-radius:10px;
+background:#fff;
+color:var(--text);
+outline:none;
+}
+.filter-row select:focus{border-color:var(--primary);}
+.totals-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:12px;
+margin-bottom:14px;
+}
+.pharm-list{
+max-height:420px;
+overflow-y:auto;
+border:1px solid var(--border);
+border-radius:10px;
+}
+.pharm-list-item{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+padding:10px 14px;
+cursor:pointer;
+border-bottom:1px solid var(--border);
+}
+.pharm-list-item:last-child{border-bottom:none;}
+.pharm-list-item:hover{background:#f8f2ea;}
+.pli-name{font-weight:600;font-size:13px;}
+.pli-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.pli-stats{text-align:left;white-space:nowrap;}
+.pli-sales{font-weight:700;font-size:13px;color:var(--primary-dark);}
+.pli-growth{font-size:11px;margin-top:2px;}
+.custom-baseline{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:14px;
+flex-wrap:wrap;
+}
+.custom-baseline label{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;}
+.custom-baseline input{
+flex:1;
+min-width:160px;
+padding:9px 12px;
+font-size:14px;
+border:2px solid var(--border);
+border-radius:10px;
+outline:none;
+}
+.custom-baseline input:focus{border-color:var(--primary);}
+.custom-baseline .reset-btn{
+border:2px solid var(--border);
+background:#fff;
+color:var(--muted);
+border-radius:8px;
+padding:8px 12px;
+font-size:12px;
+cursor:pointer;
+font-weight:600;
+}
+.custom-active{border-color:var(--accent) !important;background:#fff8e8;}
+@media (max-width:480px){
+header h1{font-size:19px;}
+header p{font-size:12px;}
+.search-box input{font-size:16px;padding:12px 42px;}
+.results{max-height:260px;}
+.sales-grid{grid-template-columns:1fr;}
+table{font-size:12px;}
+th,td{padding:7px 4px;}
+}
+.results{
+position:absolute;
+top:calc(100% + 6px);
+right:0;left:0;
+background:#fff;
+border:1px solid var(--border);
+border-radius:10px;
+max-height:320px;
+overflow-y:auto;
+z-index:20;
+box-shadow:0 8px 24px rgba(0,0,0,.12);
+display:none;
+}
+.results.show{display:block;}
+.result-item{
+padding:10px 14px;
+cursor:pointer;
+border-bottom:1px solid var(--border);
+}
+.result-item:last-child{border-bottom:none;}
+.result-item:hover{background:#f0f7f5;}
+.result-item .rname{font-weight:600;font-size:14px;}
+.result-item .rmeta{font-size:12px;color:var(--muted);margin-top:2px;}
+.empty-msg{padding:14px;color:var(--muted);font-size:13px;text-align:center;}
 
-  .pharma-header{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:space-between;
-    gap:10px;
-    align-items:flex-start;
-  }
-  .pharma-header .name{font-size:18px;font-weight:700;color:var(--primary-dark);}
-  .pharma-header .code{font-size:12px;color:var(--muted);}
-  .meta-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-    gap:10px;
-    margin-top:12px;
-  }
-  .meta-item{
-    background:var(--bg);
-    border-radius:8px;
-    padding:8px 10px;
-  }
-  .meta-item .lbl{font-size:11px;color:var(--muted);}
-  .meta-item .val{font-size:13px;font-weight:600;margin-top:2px;}
-  .badge{
-    display:inline-block;
-    font-size:11px;
-    padding:3px 10px;
-    border-radius:20px;
-    font-weight:600;
-  }
-  .badge.exist{background:#e3f5ec;color:#1a7a4d;}
-  .badge.new{background:#fdf1de;color:#a0680d;}
-  .badge.slab-max{background:#e3f5ec;color:#1a7a4d;}
-  .badge.slab-remaining{background:#fdf1de;color:#a0680d;}
-  .badge.slab-unknown{background:var(--bg);color:var(--muted);}
-  .badge-row{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;}
+.pharma-header{
+display:flex;
+flex-wrap:wrap;
+justify-content:space-between;
+gap:10px;
+align-items:flex-start;
+}
+.pharma-header .name{font-size:18px;font-weight:700;color:var(--primary-dark);}
+.pharma-header .code{font-size:12px;color:var(--muted);}
+.meta-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:10px;
+margin-top:12px;
+}
+.meta-item{
+background:var(--bg);
+border-radius:8px;
+padding:8px 10px;
+}
+.meta-item .lbl{font-size:11px;color:var(--muted);}
+.meta-item .val{font-size:13px;font-weight:600;margin-top:2px;}
+.badge{
+display:inline-block;
+font-size:11px;
+padding:3px 10px;
+border-radius:20px;
+font-weight:600;
+}
+.badge.exist{background:#e3f5ec;color:#1a7a4d;}
+.badge.new{background:#fdf1de;color:#a0680d;}
+.badge.slab-max{background:#e3f5ec;color:#1a7a4d;}
+.badge.slab-remaining{background:#fdf1de;color:#a0680d;}
+.badge.slab-unknown{background:var(--bg);color:var(--muted);}
+.badge-row{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;}
 
-  .view-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-  .view-tab-btn{
-    position:relative;
-    flex:1;
-    min-width:150px;
-    text-align:center;
-    padding:12px 10px;
-    border-radius:12px;
-    background:var(--card);
-    border:2px solid var(--border);
-    font-size:13px;
-    font-weight:600;
-    cursor:pointer;
-    color:var(--muted);
-  }
-  .view-tab-btn.active{border-color:var(--primary);color:var(--primary-dark);background:#fff8f0;}
-  .tab-badge{
-    display:inline-block;
-    min-width:18px;
-    padding:1px 6px;
-    margin-right:6px;
-    border-radius:20px;
-    background:var(--danger);
-    color:#fff;
-    font-size:11px;
-    font-weight:700;
-    vertical-align:middle;
-  }
+.view-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.view-tab-btn{
+position:relative;
+flex:1;
+min-width:150px;
+text-align:center;
+padding:12px 10px;
+border-radius:12px;
+background:var(--card);
+border:2px solid var(--border);
+font-size:13px;
+font-weight:600;
+cursor:pointer;
+color:var(--muted);
+}
+.view-tab-btn.active{border-color:var(--primary);color:var(--primary-dark);background:#fff8f0;}
+.tab-badge{
+display:inline-block;
+min-width:18px;
+padding:1px 6px;
+margin-right:6px;
+border-radius:20px;
+background:var(--danger);
+color:#fff;
+font-size:11px;
+font-weight:700;
+vertical-align:middle;
+}
 
-  .overview-note{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;}
-  .pli-slab-max .pli-sales{color:#1a7a4d;}
-  .pli-best-chance .pli-sales{color:#1a7a4d;}
-  .pli-needs-attention .pli-sales{color:var(--danger);}
+.overview-note{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;}
+.pli-slab-max .pli-sales{color:#1a7a4d;}
+.pli-best-chance .pli-sales{color:#1a7a4d;}
+.pli-needs-attention .pli-sales{color:var(--danger);}
 
-  .history-chart-wrap{padding:6px 2px 0;}
-  .history-chart-svg{width:100%;height:190px;display:block;overflow:visible;}
-  .pli-slab-remaining .pli-sales{color:var(--primary-dark);}
+.history-chart-wrap{padding:6px 2px 0;}
+.history-chart-svg{width:100%;height:190px;display:block;overflow:visible;}
+.pli-slab-remaining .pli-sales{color:var(--primary-dark);}
 
-  .compare-box{position:relative;margin-top:6px;}
-  .compare-active-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    background:var(--bg);
-    border-radius:10px;
-    padding:10px 14px;
-    margin-top:10px;
-    font-size:13px;
-  }
-  .compare-active-row .remove-compare-btn{
-    border:none;background:none;color:var(--danger);font-weight:700;cursor:pointer;font-size:13px;
-  }
-  table.compare-table th:first-child,
-  table.compare-table td:first-child{text-align:right;color:var(--muted);font-size:12px;}
+.compare-box{position:relative;margin-top:6px;}
+.compare-active-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:var(--bg);
+border-radius:10px;
+padding:10px 14px;
+margin-top:10px;
+font-size:13px;
+}
+.compare-active-row .remove-compare-btn{
+border:none;background:none;color:var(--danger);font-weight:700;cursor:pointer;font-size:13px;
+}
+table.compare-table th:first-child,
+table.compare-table td:first-child{text-align:right;color:var(--muted);font-size:12px;}
 
-  .sales-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-    gap:12px;
-  }
-  @media (max-width:640px){.sales-grid{grid-template-columns:1fr;}}
-  .sales-box{
-    background:var(--bg);
-    border-radius:10px;
-    padding:14px;
-    text-align:center;
-  }
-  .sales-box .t{font-size:12px;color:var(--muted);margin-bottom:6px;}
-  .sales-box .v{font-size:19px;font-weight:700;color:var(--primary-dark);}
-  .sales-box .sub{font-size:11px;color:var(--muted);margin-top:4px;}
-  .growth-pos{color:#1a7a4d !important;}
-  .growth-neg{color:var(--danger) !important;}
+.sales-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:12px;
+}
+@media (max-width:640px){.sales-grid{grid-template-columns:1fr;}}
+.sales-box{
+background:var(--bg);
+border-radius:10px;
+padding:14px;
+text-align:center;
+}
+.sales-box .t{font-size:12px;color:var(--muted);margin-bottom:6px;}
+.sales-box .v{font-size:19px;font-weight:700;color:var(--primary-dark);}
+.sales-box .sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.growth-pos{color:#1a7a4d !important;}
+.growth-neg{color:var(--danger) !important;}
 
-  .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-  .tab-btn{
-    flex:1;
-    min-width:140px;
-    padding:10px 12px;
-    border:2px solid var(--border);
-    background:#fff;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:13px;
-    font-weight:600;
-    color:var(--muted);
-    text-align:center;
-    transition:.15s;
-  }
-  .tab-btn.active{border-color:var(--primary);color:var(--primary-dark);background:#eef8f5;}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.tab-btn{
+flex:1;
+min-width:140px;
+padding:10px 12px;
+border:2px solid var(--border);
+background:#fff;
+border-radius:10px;
+cursor:pointer;
+font-size:13px;
+font-weight:600;
+color:var(--muted);
+text-align:center;
+transition:.15s;
+}
+.tab-btn.active{border-color:var(--primary);color:var(--primary-dark);background:#eef8f5;}
 
-  .options-row{
-    display:flex;
-    flex-wrap:wrap;
-    gap:18px;
-    margin-bottom:16px;
-    padding:14px;
-    background:var(--bg);
-    border-radius:10px;
-  }
-  .opt-group{display:flex;flex-direction:column;gap:6px;}
-  .opt-group .g-lbl{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px;}
-  .opt-choices{display:flex;gap:6px;flex-wrap:wrap;}
-  .chip{
-    padding:6px 12px;
-    border:2px solid var(--border);
-    border-radius:20px;
-    font-size:12px;
-    cursor:pointer;
-    background:#fff;
-    user-select:none;
-  }
-  .chip.active{border-color:var(--primary);background:var(--primary);color:#fff;}
-  .checkbox-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border:2px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;background:#fff;}
-  .checkbox-chip.active{border-color:var(--accent);background:#fff8e8;}
-  .checkbox-chip input{accent-color:var(--accent);}
+.options-row{
+display:flex;
+flex-wrap:wrap;
+gap:18px;
+margin-bottom:16px;
+padding:14px;
+background:var(--bg);
+border-radius:10px;
+}
+.opt-group{display:flex;flex-direction:column;gap:6px;}
+.opt-group .g-lbl{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px;}
+.opt-choices{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{
+padding:6px 12px;
+border:2px solid var(--border);
+border-radius:20px;
+font-size:12px;
+cursor:pointer;
+background:#fff;
+user-select:none;
+}
+.chip.active{border-color:var(--primary);background:var(--primary);color:#fff;}
+.checkbox-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border:2px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;background:#fff;}
+.checkbox-chip.active{border-color:var(--accent);background:#fff8e8;}
+.checkbox-chip input{accent-color:var(--accent);}
 
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  th,td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--border);}
-  th{background:var(--bg);color:var(--muted);font-weight:600;font-size:12px;}
-  tr.slab1 td:first-child{border-right:4px solid var(--slab1);}
-  tr.slab2 td:first-child{border-right:4px solid var(--slab2);}
-  tr.slab3 td:first-child{border-right:4px solid var(--slab3);}
-  td.total-cell{font-weight:700;color:var(--primary-dark);}
-  td.name-cell{font-weight:700;text-align:right;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--border);}
+th{background:var(--bg);color:var(--muted);font-weight:600;font-size:12px;}
+tr.slab1 td:first-child{border-right:4px solid var(--slab1);}
+tr.slab2 td:first-child{border-right:4px solid var(--slab2);}
+tr.slab3 td:first-child{border-right:4px solid var(--slab3);}
+td.total-cell{font-weight:700;color:var(--primary-dark);}
+td.name-cell{font-weight:700;text-align:right;}
 
-  .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6;}
-  .placeholder{
-    text-align:center;
-    padding:50px 20px;
-    color:var(--muted);
-  }
-  .placeholder .big{font-size:40px;margin-bottom:10px;}
-  footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
+.note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6;}
+.placeholder{
+text-align:center;
+padding:50px 20px;
+color:var(--muted);
+}
+.placeholder .big{font-size:40px;margin-bottom:10px;}
+footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <header>
-    <h1>🧮 حاسبة كاش باك ومكافآت الصيدليات</h1>
-    <p>اكتب اسم الصيدلية أو الكود، وشاهد مبيعات الربع الثالث والرابع، ونسبة النمو، وقيمة الكاش باك المستهدف للعقد الجديد.</p>
-  </header>
+<header>
+<h1>🧮 حاسبة كاش باك ومكافآت الصيدليات</h1>
+<p>اكتب اسم الصيدلية أو الكود، وشاهد مبيعات الربع الثالث والرابع، ونسبة النمو، وقيمة الكاش باك المستهدف للعقد الجديد.</p>
+</header>
 
-  <div class="view-tabs" id="viewTabs">
-    <div class="view-tab-btn active" data-view="search">🔍 بحث عن صيدلية</div>
-    <div class="view-tab-btn" data-view="overview"><span class="tab-badge" id="overviewBadge" style="display:none;">0</span>📊 نظرة عامة على الفرص</div>
-    <div class="view-tab-btn" data-view="chain">🔗 دمج صيدليات (سلسلة)</div>
-    <div class="view-tab-btn" data-view="leaderboard">🏆 لوحة المتصدرين</div>
-    <div class="view-tab-btn" data-view="analysis">📈 التحليل</div>
-  </div>
+<div class="view-tabs" id="viewTabs">
+<div class="view-tab-btn active" data-view="search">🔍 بحث عن صيدلية</div>
+<div class="view-tab-btn" data-view="overview"><span class="tab-badge" id="overviewBadge" style="display:none;">0</span>📊 نظرة عامة على الفرص</div>
+<div class="view-tab-btn" data-view="chain">🔗 دمج صيدليات (سلسلة)</div>
+<div class="view-tab-btn" data-view="leaderboard">🏆 لوحة المتصدرين</div>
+<div class="view-tab-btn" data-view="analysis">📈 التحليل</div>
+</div>
 
-  <div id="searchView">
-    <div class="card">
-      <h2>البحث عن صيدلية</h2>
-      <div class="filter-row">
-        <select id="mrFilter"><option value="">كل المندوبين الطبيين</option></select>
-        <select id="dmFilter"><option value="">كل مديري المناطق</option></select>
-      </div>
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="اكتب اسم الصيدلية، الكود، أو المنطقة..." autocomplete="off">
-        <button class="clear-btn" id="clearSearchBtn" type="button">✕</button>
-        <div class="results" id="resultsBox"></div>
-      </div>
-      <div class="search-count" id="searchCount">إجمالي الصيدليات في القاعدة: __COUNT__</div>
-      <div class="search-count" id="statusBreakdown"></div>
-    </div>
+<div id="searchView">
+<div class="card">
+<h2>البحث عن صيدلية</h2>
+<div class="filter-row">
+<select id="mrFilter"><option value="">كل المندوبين الطبيين</option></select>
+<select id="dmFilter"><option value="">كل مديري المناطق</option></select>
+</div>
+<div class="search-box">
+<span class="search-icon">🔍</span>
+<input type="text" id="searchInput" placeholder="اكتب اسم الصيدلية، الكود، أو المنطقة..." autocomplete="off">
+<button class="clear-btn" id="clearSearchBtn" type="button">✕</button>
+<div class="results" id="resultsBox"></div>
+</div>
+<div class="search-count" id="searchCount">إجمالي الصيدليات في القاعدة: __COUNT__</div>
+<div class="search-count" id="statusBreakdown"></div>
+</div>
 
-    <div id="totalsSection"></div>
+<div id="totalsSection"></div>
 
-    <div id="detailSection">
-      <div class="card">
-        <div class="placeholder">
-          <div class="big">🏥</div>
-          ابحث عن صيدلية بالاسم أو الكود لعرض بيانات المبيعات وحاسبة الكاش باك
-        </div>
-      </div>
-    </div>
-  </div>
+<div id="detailSection">
+<div class="card">
+<div class="placeholder">
+<div class="big">🏥</div>
+ابحث عن صيدلية بالاسم أو الكود لعرض بيانات المبيعات وحاسبة الكاش باك
+</div>
+</div>
+</div>
+</div>
 
-  <div id="overviewView" style="display:none;">
-    <div class="card">
-      <div class="overview-note">
-        هذه النظرة العامة تعتمد على نمو مبيعات الموزع من الربع الثالث إلى الربع الرابع 2025، وتُفلتر حسب المندوب/مدير المنطقة المختار أعلاه في تبويب البحث.
-      </div>
-    </div>
-    <div id="overviewSection"></div>
-  </div>
+<div id="overviewView" style="display:none;">
+<div class="card">
+<div class="overview-note">
+هذه النظرة العامة تعتمد على نمو مبيعات الموزع من الربع الثالث إلى الربع الرابع 2025، وتُفلتر حسب المندوب/مدير المنطقة المختار أعلاه في تبويب البحث.
+</div>
+</div>
+<div id="overviewSection"></div>
+</div>
 
-  <div id="chainView" style="display:none;">
-    <div class="card">
-      <h2>دمج صيدليات في سلسلة واحدة</h2>
-      <div class="note" style="margin-top:0;margin-bottom:12px;">اختر صيدليتين أو أكثر (فروع بنفس الاسم أو تتبع نفس المالك) لعرض إجمالي مبيعاتها ونمو السلسلة كوحدة واحدة، وحساب الكاش باك على الإجمالي المدمج. هذا الدمج مؤقت لهذه الجلسة فقط ولا يُغيّر بيانات الصيدليات الأصلية.</div>
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="chainSearchInput" placeholder="ابحث عن صيدلية لإضافتها للسلسلة..." autocomplete="off">
-        <div class="results" id="chainResultsBox"></div>
-      </div>
-    </div>
-    <div id="chainSection"></div>
-  </div>
+<div id="chainView" style="display:none;">
+<div class="card">
+<h2>دمج صيدليات في سلسلة واحدة</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">اختر صيدليتين أو أكثر (فروع بنفس الاسم أو تتبع نفس المالك) لعرض إجمالي مبيعاتها ونمو السلسلة كوحدة واحدة، وحساب الكاش باك على الإجمالي المدمج. هذا الدمج مؤقت لهذه الجلسة فقط ولا يُغيّر بيانات الصيدليات الأصلية.</div>
+<div class="search-box">
+<span class="search-icon">🔍</span>
+<input type="text" id="chainSearchInput" placeholder="ابحث عن صيدلية لإضافتها للسلسلة..." autocomplete="off">
+<div class="results" id="chainResultsBox"></div>
+</div>
+</div>
+<div id="chainSection"></div>
+</div>
 
-  <div id="leaderboardView" style="display:none;">
-    <div class="card">
-      <h2>🏆 لوحة متصدري المندوبين — عدد الصيدليات المتفق عليها</h2>
-      <div class="note" style="margin-top:0;">تُحسب من الاتفاقات المسجَّلة فعلياً عبر زر "✅ اتفاق مع الصيدلية" أسفل حاسبة كل صيدلية. الترتيب حسب عدد الصيدليات الفريدة التي تم الاتفاق معها لكل مندوب.</div>
-    </div>
-    <div id="leaderboardSection"></div>
-  </div>
+<div id="leaderboardView" style="display:none;">
+<div class="card">
+<h2>🏆 لوحة متصدري المندوبين — عدد الصيدليات المتفق عليها</h2>
+<div class="note" style="margin-top:0;">تُحسب من الاتفاقات المسجَّلة فعلياً عبر زر "✅ اتفاق مع الصيدلية" أسفل حاسبة كل صيدلية. الترتيب حسب عدد الصيدليات الفريدة التي تم الاتفاق معها لكل مندوب.</div>
+</div>
+<div id="leaderboardSection"></div>
+</div>
 
-  <div id="analysisView" style="display:none;">
-    <div class="card">
-      <h2>📈 تحليل الأداء</h2>
-      <div class="note" style="margin-top:0;margin-bottom:12px;">تحليل إجمالي عبر كل الـ<span id="analysisTotalCount"></span> صيدلية في القاعدة (لا يتأثر بفلتر المندوب/مدير المنطقة في تبويب البحث). اضغط على أي عمود بالجدول لترتيبه. الضغط على أي صف "حسب المندوب" أو "حسب مدير المنطقة" يفلتر تبويب البحث على هذا الشخص مباشرة.</div>
-      <div class="tabs" id="analysisSubTabs">
-        <div class="tab-btn active" data-group="rg">حسب المنطقة</div>
-        <div class="tab-btn" data-group="tr">حسب القطاع</div>
-        <div class="tab-btn" data-group="mr">حسب المندوب الطبي</div>
-        <div class="tab-btn" data-group="dm">حسب مدير المنطقة</div>
-      </div>
-    </div>
-    <div id="analysisSection"></div>
-  </div>
+<div id="analysisView" style="display:none;">
+<div class="card">
+<h2>📈 تحليل الأداء</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">تحليل إجمالي عبر كل الـ<span id="analysisTotalCount"></span> صيدلية في القاعدة (لا يتأثر بفلتر المندوب/مدير المنطقة في تبويب البحث). اضغط على أي عمود بالجدول لترتيبه. الضغط على أي صف "حسب المندوب" أو "حسب مدير المنطقة" يفلتر تبويب البحث على هذا الشخص مباشرة.</div>
+<div class="tabs" id="analysisSubTabs">
+<div class="tab-btn active" data-group="rg">حسب المنطقة</div>
+<div class="tab-btn" data-group="tr">حسب القطاع</div>
+<div class="tab-btn" data-group="mr">حسب المندوب الطبي</div>
+<div class="tab-btn" data-group="dm">حسب مدير المنطقة</div>
+</div>
+</div>
+<div id="analysisSection"></div>
+</div>
 
-  <footer>الأرقام محسوبة من بيانات مبيعات الموزع (DIST) للربع الثالث والرابع 2025 — الأداة لعرض السيناريوهات قبل التعاقد، وليست تأكيداً نهائياً للمستحقات.</footer>
+<footer>الأرقام محسوبة من بيانات مبيعات الموزع (DIST) للربع الثالث والرابع 2025 — الأداة لعرض السيناريوهات قبل التعاقد، وليست تأكيداً نهائياً للمستحقات.</footer>
 </div>
 
 <script>
@@ -485,9 +485,9 @@ const DEALS_API_TOKEN = '6UIyKQI1LwIl4iBAUOP3heMpSAo-3OGn';
 const agreedThisSession = new Set();
 
 const SLABS = [
-  {key:'s1', label:'الشريحة 1', growth:0.15, cashRate:0.0125, targetFloor:5000, cashFloor:500, rebateRate:0.0025, color:'slab1'},
-  {key:'s2', label:'الشريحة 2', growth:0.20, cashRate:0.0225, targetFloor:6000, cashFloor:700, rebateRate:0.005, color:'slab2'},
-  {key:'s3', label:'الشريحة 3', growth:0.25, cashRate:0.0325, targetFloor:7000, cashFloor:1000, rebateRate:0.0075, color:'slab3'}
+{key:'s1', label:'الشريحة 1', growth:0.15, cashRate:0.0125, targetFloor:5000, cashFloor:500, rebateRate:0.0025, color:'slab1'},
+{key:'s2', label:'الشريحة 2', growth:0.20, cashRate:0.0225, targetFloor:6000, cashFloor:700, rebateRate:0.005, color:'slab2'},
+{key:'s3', label:'الشريحة 3', growth:0.25, cashRate:0.0325, targetFloor:7000, cashFloor:1000, rebateRate:0.0075, color:'slab3'}
 ];
 const SHELF_RATES = {none:0, '2':0.005, '3':0.01, '4':0.015};
 
@@ -496,13 +496,13 @@ const SHELF_RATES = {none:0, '2':0.005, '3':0.01, '4':0.015};
 // code (or a dash), rather than hiding the field -- new codes can show up in future
 // data refreshes and shouldn't silently disappear.
 const CT_LABELS = {
-  'PHAR': 'صيدلية عادية',
-  'CHPH': 'صيدلية سلسلة (Chain)',
-  'EGPH': 'صيدلية EGPH',
+'PHAR': 'صيدلية عادية',
+'CHPH': 'صيدلية سلسلة (Chain)',
+'EGPH': 'صيدلية EGPH',
 };
 function ctLabel(ct){
-  if(!ct) return '—';
-  return CT_LABELS[ct] || ct;
+if(!ct) return '—';
+return CT_LABELS[ct] || ct;
 }
 const POSM_RATE = 0.005;
 
@@ -520,10 +520,10 @@ let activeMR = '';
 let activeDM = '';
 
 function fmt(n){
-  return Math.round(n).toLocaleString('en-US');
+return Math.round(n).toLocaleString('en-US');
 }
 function pct(n){
-  return (n*100).toFixed(1) + '%';
+return (n*100).toFixed(1) + '%';
 }
 
 // ---------- MR / DM filters ----------
@@ -531,14 +531,14 @@ const mrFilter = document.getElementById('mrFilter');
 const dmFilter = document.getElementById('dmFilter');
 
 function populateFilters(){
-  const dms = [...new Set(PHARMACIES.map(p => p.dm).filter(Boolean))].sort((a,b) => a.localeCompare(b));
-  dms.forEach(name => {
-    const opt = document.createElement('option');
-    opt.value = name; opt.textContent = name;
-    dmFilter.appendChild(opt);
-  });
-  updateMRFilterOptions();
-  renderStatusBreakdown();
+const dms = [...new Set(PHARMACIES.map(p => p.dm).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+dms.forEach(name => {
+const opt = document.createElement('option');
+opt.value = name; opt.textContent = name;
+dmFilter.appendChild(opt);
+});
+updateMRFilterOptions();
+renderStatusBreakdown();
 }
 
 // Shows how many pharmacies were already on the merchandising program (PH & Merch,
@@ -548,124 +548,124 @@ function populateFilters(){
 // without merch_flag data leave "st" blank for everyone, in which case this stays
 // empty rather than showing a misleading "0 / 0" breakdown.
 function renderStatusBreakdown(){
-  const el = document.getElementById('statusBreakdown');
-  if(!el) return;
-  const withMerch = PHARMACIES.filter(p => p.st === 'Exist').length;
-  const phOnly = PHARMACIES.filter(p => p.st === 'New').length;
-  if(withMerch === 0 && phOnly === 0){ el.textContent = ''; return; }
-  el.innerHTML = `🏷️ PH + Merch: <b>${withMerch.toLocaleString('en-US')}</b> · 🆕 PH فقط: <b>${phOnly.toLocaleString('en-US')}</b>`;
+const el = document.getElementById('statusBreakdown');
+if(!el) return;
+const withMerch = PHARMACIES.filter(p => p.st === 'Exist').length;
+const phOnly = PHARMACIES.filter(p => p.st === 'New').length;
+if(withMerch === 0 && phOnly === 0){ el.textContent = ''; return; }
+el.innerHTML = `🏷️ PH + Merch: <b>${withMerch.toLocaleString('en-US')}</b> · 🆕 PH فقط: <b>${phOnly.toLocaleString('en-US')}</b>`;
 }
 
 // Rebuilds the MR dropdown's options based on the currently selected DM
 // (or all MRs if no DM is selected), keeping the current MR selection if it's
 // still valid under the new DM, otherwise resetting it.
 function updateMRFilterOptions(){
-  const keepValue = activeMR;
-  const pool = activeDM ? PHARMACIES.filter(p => p.dm === activeDM) : PHARMACIES;
-  const mrs = [...new Set(pool.map(p => p.mr).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+const keepValue = activeMR;
+const pool = activeDM ? PHARMACIES.filter(p => p.dm === activeDM) : PHARMACIES;
+const mrs = [...new Set(pool.map(p => p.mr).filter(Boolean))].sort((a,b) => a.localeCompare(b));
 
-  mrFilter.innerHTML = '<option value="">كل المندوبين الطبيين</option>';
-  mrs.forEach(name => {
-    const opt = document.createElement('option');
-    opt.value = name; opt.textContent = name;
-    mrFilter.appendChild(opt);
-  });
+mrFilter.innerHTML = '<option value="">كل المندوبين الطبيين</option>';
+mrs.forEach(name => {
+const opt = document.createElement('option');
+opt.value = name; opt.textContent = name;
+mrFilter.appendChild(opt);
+});
 
-  if(keepValue && mrs.includes(keepValue)){
-    mrFilter.value = keepValue;
-  } else {
-    activeMR = '';
-    mrFilter.value = '';
-  }
+if(keepValue && mrs.includes(keepValue)){
+mrFilter.value = keepValue;
+} else {
+activeMR = '';
+mrFilter.value = '';
+}
 }
 
 function getFilteredPharmacies(){
-  return PHARMACIES.filter(p =>
-    (!activeMR || p.mr === activeMR) &&
-    (!activeDM || p.dm === activeDM)
-  );
+return PHARMACIES.filter(p =>
+(!activeMR || p.mr === activeMR) &&
+(!activeDM || p.dm === activeDM)
+);
 }
 
 function renderTotals(){
-  const totalsSection = document.getElementById('totalsSection');
-  if(!activeMR && !activeDM){
-    totalsSection.innerHTML = '';
-    return;
-  }
-  const subset = getFilteredPharmacies();
-  const count = subset.length;
-  const sumQ3 = subset.reduce((s,p) => s + p.q3d, 0);
-  const sumQ4 = subset.reduce((s,p) => s + p.q4d, 0);
-  const growth = sumQ3 > 0 ? (sumQ4 - sumQ3) / sumQ3 : null;
-  const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
-  const growthText = growth === null ? '—' : (growth>=0?'+':'') + pct(growth);
-  const slabRows = calcSlabs(sumQ4, {shelf:'none', posm:false, full:false});
+const totalsSection = document.getElementById('totalsSection');
+if(!activeMR && !activeDM){
+totalsSection.innerHTML = '';
+return;
+}
+const subset = getFilteredPharmacies();
+const count = subset.length;
+const sumQ3 = subset.reduce((s,p) => s + p.q3d, 0);
+const sumQ4 = subset.reduce((s,p) => s + p.q4d, 0);
+const growth = sumQ3 > 0 ? (sumQ4 - sumQ3) / sumQ3 : null;
+const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
+const growthText = growth === null ? '—' : (growth>=0?'+':'') + pct(growth);
+const slabRows = calcSlabs(sumQ4, {shelf:'none', posm:false, full:false});
 
-  const withWk = subset.filter(p => p.wk !== null && p.wk !== undefined);
-  const sumWk = withWk.reduce((s,p) => s + p.wk, 0);
+const withWk = subset.filter(p => p.wk !== null && p.wk !== undefined);
+const sumWk = withWk.reduce((s,p) => s + p.wk, 0);
 
-  const label = [activeMR ? `المندوب: ${activeMR}` : '', activeDM ? `مدير المنطقة: ${activeDM}` : '']
-    .filter(Boolean).join(' · ');
+const label = [activeMR ? `المندوب: ${activeMR}` : '', activeDM ? `مدير المنطقة: ${activeDM}` : '']
+.filter(Boolean).join(' · ');
 
-  const sortedList = [...subset].sort((a,b) => a.n.localeCompare(b.n, 'ar'));
-  const listHtml = sortedList.map(p => {
-    const g = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
-    const gClass = g === null ? '' : (g >= 0 ? 'growth-pos' : 'growth-neg');
-    const gText = g === null ? '—' : (g>=0?'+':'') + pct(g);
-    const mrLine = !activeMR ? ` · ${p.mr}` : '';
-    return `
-      <div class="pharm-list-item" data-idx="${PHARMACIES.indexOf(p)}">
-        <div>
-          <div class="pli-name">${p.n}</div>
-          <div class="pli-meta">كود: ${p.c} · ${p.tr}${mrLine}</div>
-        </div>
-        <div class="pli-stats">
-          <div class="pli-sales">${fmt(p.q4d)} ج.م</div>
-          <div class="pli-growth ${gClass}">${gText}</div>
-        </div>
-      </div>`;
-  }).join('');
+const sortedList = [...subset].sort((a,b) => a.n.localeCompare(b.n, 'ar'));
+const listHtml = sortedList.map(p => {
+const g = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
+const gClass = g === null ? '' : (g >= 0 ? 'growth-pos' : 'growth-neg');
+const gText = g === null ? '—' : (g>=0?'+':'') + pct(g);
+const mrLine = !activeMR ? ` · ${p.mr}` : '';
+return `
+<div class="pharm-list-item" data-idx="${PHARMACIES.indexOf(p)}">
+<div>
+<div class="pli-name">${p.n}</div>
+<div class="pli-meta">كود: ${p.c} · ${p.tr}${mrLine}</div>
+</div>
+<div class="pli-stats">
+<div class="pli-sales">${fmt(p.q4d)} ج.م</div>
+<div class="pli-growth ${gClass}">${gText}</div>
+</div>
+</div>`;
+}).join('');
 
-  totalsSection.innerHTML = `
-    <div class="card">
-      <h2>إجمالي الصيدليات المفلترة — ${label}</h2>
-      <div class="totals-grid">
-        <div class="sales-box"><div class="t">عدد الصيدليات</div><div class="v">${count.toLocaleString('en-US')}</div></div>
-        <div class="sales-box"><div class="t">إجمالي الربع الثالث</div><div class="v">${fmt(sumQ3)} ج.م</div></div>
-        <div class="sales-box"><div class="t">إجمالي الربع الرابع</div><div class="v">${fmt(sumQ4)} ج.م</div></div>
-        <div class="sales-box"><div class="t">نسبة النمو الإجمالية</div><div class="v ${growthClass}">${growthText}</div></div>
-        ${SUPPLEMENT_LABEL ? `<div class="sales-box"><div class="t">${SUPPLEMENT_LABEL}</div><div class="v">${fmt(sumWk)} ج.م</div><div class="sub">${withWk.length} من ${count} صيدلية لديها بيانات</div></div>` : ''}
-      </div>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>الشريحة</th><th>نسبة النمو</th><th>إجمالي المستهدف (على أساس الربع الرابع)</th><th>إجمالي كاش باك النمو الأساسي</th></tr></thead>
-        <tbody>
-          ${slabRows.map(r => `
-            <tr class="${r.color}">
-              <td class="name-cell">${r.label}</td>
-              <td>+${pct(r.growth)}</td>
-              <td>${fmt(r.target)} ج.م</td>
-              <td class="total-cell">${fmt(r.cashback)} ج.م</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-      </div>
-      <div class="note">إجمالي الكاش باك هنا هو معدل النمو الأساسي فقط (بدون أرفف أو POSM)، لأن كل صيدلية قد تختار خيارات مختلفة.</div>
-    </div>
+totalsSection.innerHTML = `
+<div class="card">
+<h2>إجمالي الصيدليات المفلترة — ${label}</h2>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">عدد الصيدليات</div><div class="v">${count.toLocaleString('en-US')}</div></div>
+<div class="sales-box"><div class="t">إجمالي الربع الثالث</div><div class="v">${fmt(sumQ3)} ج.م</div></div>
+<div class="sales-box"><div class="t">إجمالي الربع الرابع</div><div class="v">${fmt(sumQ4)} ج.م</div></div>
+<div class="sales-box"><div class="t">نسبة النمو الإجمالية</div><div class="v ${growthClass}">${growthText}</div></div>
+${SUPPLEMENT_LABEL ? `<div class="sales-box"><div class="t">${SUPPLEMENT_LABEL}</div><div class="v">${fmt(sumWk)} ج.م</div><div class="sub">${withWk.length} من ${count} صيدلية لديها بيانات</div></div>` : ''}
+</div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>الشريحة</th><th>نسبة النمو</th><th>إجمالي المستهدف (على أساس الربع الرابع)</th><th>إجمالي كاش باك النمو الأساسي</th></tr></thead>
+<tbody>
+${slabRows.map(r => `
+<tr class="${r.color}">
+<td class="name-cell">${r.label}</td>
+<td>+${pct(r.growth)}</td>
+<td>${fmt(r.target)} ج.م</td>
+<td class="total-cell">${fmt(r.cashback)} ج.م</td>
+</tr>`).join('')}
+</tbody>
+</table>
+</div>
+<div class="note">إجمالي الكاش باك هنا هو معدل النمو الأساسي فقط (بدون أرفف أو POSM)، لأن كل صيدلية قد تختار خيارات مختلفة.</div>
+</div>
 
-    <div class="card">
-      <h2>قائمة الصيدليات (${count}) — اضغط على أي صيدلية لعرض بياناتها وحاسبة الكاش باك</h2>
-      <div class="pharm-list" id="totalsListBox">${listHtml}</div>
-    </div>`;
+<div class="card">
+<h2>قائمة الصيدليات (${count}) — اضغط على أي صيدلية لعرض بياناتها وحاسبة الكاش باك</h2>
+<div class="pharm-list" id="totalsListBox">${listHtml}</div>
+</div>`;
 
-  document.getElementById('totalsListBox').addEventListener('click', (e) => {
-    const item = e.target.closest('.pharm-list-item');
-    if(!item) return;
-    const idx = parseInt(item.dataset.idx, 10);
-    selectPharmacy(PHARMACIES[idx]);
-    const detail = document.getElementById('detailSection');
-    if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
-  });
+document.getElementById('totalsListBox').addEventListener('click', (e) => {
+const item = e.target.closest('.pharm-list-item');
+if(!item) return;
+const idx = parseInt(item.dataset.idx, 10);
+selectPharmacy(PHARMACIES[idx]);
+const detail = document.getElementById('detailSection');
+if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
+});
 }
 
 // ---------- Slab status: already maxed out vs. remaining to next slab ----------
@@ -674,46 +674,46 @@ function renderTotals(){
 // growth threshold, there's nothing left to chase -- it's a guaranteed win. Otherwise
 // this reports exactly how many more EGP of Q4 sales would clear the next slab up.
 function getSlabStatus(p){
-  if(!p.q3d || p.q3d <= 0){
-    return { state:'unknown' };
-  }
-  const growth = (p.q4d - p.q3d) / p.q3d;
-  const topSlab = SLABS[SLABS.length - 1];
-  if(growth >= topSlab.growth){
-    const rows = calcSlabs(p.q3d, {shelf:'none', posm:false, full:false});
-    const topRow = rows[rows.length - 1];
-    return {
-      state:'max',
-      currentGrowth: growth,
-      slabLabel: topSlab.label,
-      cashback: topRow.cashback,
-      target: topRow.target
-    };
-  }
-  const next = SLABS.find(s => growth < s.growth);
-  // Match calcSlabs' own floor logic (including the low-value override) so the
-  // "remaining" amount shown here always lines up with the actual target used in
-  // the calculator table below -- not just the raw growth-rate implied figure.
-  const nextFloor = (p.q3d <= LOW_VALUE_THRESHOLD) ? LOW_VALUE_TARGET_FLOORS[next.key] : next.targetFloor;
-  const neededSales = Math.max(p.q3d * (1 + next.growth), nextFloor);
-  const remaining = Math.max(neededSales - p.q4d, 0);
-  return {
-    state:'remaining',
-    currentGrowth: growth,
-    nextLabel: next.label,
-    nextGrowth: next.growth,
-    remaining
-  };
+if(!p.q3d || p.q3d <= 0){
+return { state:'unknown' };
+}
+const growth = (p.q4d - p.q3d) / p.q3d;
+const topSlab = SLABS[SLABS.length - 1];
+if(growth >= topSlab.growth){
+const rows = calcSlabs(p.q3d, {shelf:'none', posm:false, full:false});
+const topRow = rows[rows.length - 1];
+return {
+state:'max',
+currentGrowth: growth,
+slabLabel: topSlab.label,
+cashback: topRow.cashback,
+target: topRow.target
+};
+}
+const next = SLABS.find(s => growth < s.growth);
+// Match calcSlabs' own floor logic (including the low-value override) so the
+// "remaining" amount shown here always lines up with the actual target used in
+// the calculator table below -- not just the raw growth-rate implied figure.
+const nextFloor = (p.q3d <= LOW_VALUE_THRESHOLD) ? LOW_VALUE_TARGET_FLOORS[next.key] : next.targetFloor;
+const neededSales = Math.max(p.q3d * (1 + next.growth), nextFloor);
+const remaining = Math.max(neededSales - p.q4d, 0);
+return {
+state:'remaining',
+currentGrowth: growth,
+nextLabel: next.label,
+nextGrowth: next.growth,
+remaining
+};
 }
 
 function slabStatusBadgeHtml(s){
-  if(s.state === 'max'){
-    return `<span class="badge slab-max">🏆 حقّق الحد الأقصى للنمو (+${pct(s.currentGrowth)}) — فوز مضمون بكاش باك ${fmt(s.cashback)} ج.م</span>`;
-  }
-  if(s.state === 'remaining'){
-    return `<span class="badge slab-remaining">📈 يحتاج ${fmt(s.remaining)} ج.م إضافية للوصول إلى ${s.nextLabel} (+${pct(s.nextGrowth)})</span>`;
-  }
-  return `<span class="badge slab-unknown">لا تتوفر بيانات كافية لحساب الشريحة (لا يوجد مبيعات ربع ثالث)</span>`;
+if(s.state === 'max'){
+return `<span class="badge slab-max">🏆 حقّق الحد الأقصى للنمو (+${pct(s.currentGrowth)}) — فوز مضمون بكاش باك ${fmt(s.cashback)} ج.م</span>`;
+}
+if(s.state === 'remaining'){
+return `<span class="badge slab-remaining">📈 يحتاج ${fmt(s.remaining)} ج.م إضافية للوصول إلى ${s.nextLabel} (+${pct(s.nextGrowth)})</span>`;
+}
+return `<span class="badge slab-unknown">لا تتوفر بيانات كافية لحساب الشريحة (لا يوجد مبيعات ربع ثالث)</span>`;
 }
 
 // ---------- Sales history line chart (per pharmacy) ----------
@@ -727,161 +727,161 @@ function slabStatusBadgeHtml(s){
 // periods are added, rather than squeezing everything into a fixed width.
 const ENGLISH_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function monthLabel(yyyymm){
-  const s = String(yyyymm);
-  const y = s.slice(0, 4), m = parseInt(s.slice(4, 6), 10);
-  return `${ENGLISH_MONTHS[m - 1]} ${y}`;
+const s = String(yyyymm);
+const y = s.slice(0, 4), m = parseInt(s.slice(4, 6), 10);
+return `${ENGLISH_MONTHS[m - 1]} ${y}`;
 }
 
 function renderHistoryChart(p){
-  const periods = [];
-  // Prefer the full monthly series ("mo", from a final_chc.xlsx-style build) when
-  // available -- it already covers Q3/Q4 2025 broken down month-by-month (plus
-  // everything back to Jan 2024 and forward through Jun 2026), so showing the old
-  // quarterly aggregate points alongside it would double-count the same sales as
-  // both a quarter total and its component months. Fall back to "s1" (the legacy
-  // merch-list + separate monthly-supplement-file shape) if present, and finally
-  // to the two quarterly points if neither monthly series is available.
-  if(p.mo){
-    Object.keys(p.mo).sort().forEach(m => {
-      periods.push({ lbl: monthLabel(m), val: p.mo[m] });
-    });
-  } else if(p.s1){
-    periods.push({ lbl: 'Q3 2025', val: p.q3d });
-    periods.push({ lbl: 'Q4 2025', val: p.q4d });
-    Object.keys(p.s1).sort().forEach(m => {
-      periods.push({ lbl: monthLabel(m), val: p.s1[m] });
-    });
-  } else {
-    periods.push({ lbl: 'Q3 2025', val: p.q3d });
-    periods.push({ lbl: 'Q4 2025', val: p.q4d });
-  }
-  if(SUPPLEMENT_LABEL && p.wk !== null && p.wk !== undefined){
-    periods.push({ lbl: SUPPLEMENT_LABEL, val: p.wk });
-  }
+const periods = [];
+// Prefer the full monthly series ("mo", from a final_chc.xlsx-style build) when
+// available -- it already covers Q3/Q4 2025 broken down month-by-month (plus
+// everything back to Jan 2024 and forward through Jun 2026), so showing the old
+// quarterly aggregate points alongside it would double-count the same sales as
+// both a quarter total and its component months. Fall back to "s1" (the legacy
+// merch-list + separate monthly-supplement-file shape) if present, and finally
+// to the two quarterly points if neither monthly series is available.
+if(p.mo){
+Object.keys(p.mo).sort().forEach(m => {
+periods.push({ lbl: monthLabel(m), val: p.mo[m] });
+});
+} else if(p.s1){
+periods.push({ lbl: 'Q3 2025', val: p.q3d });
+periods.push({ lbl: 'Q4 2025', val: p.q4d });
+Object.keys(p.s1).sort().forEach(m => {
+periods.push({ lbl: monthLabel(m), val: p.s1[m] });
+});
+} else {
+periods.push({ lbl: 'Q3 2025', val: p.q3d });
+periods.push({ lbl: 'Q4 2025', val: p.q4d });
+}
+if(SUPPLEMENT_LABEL && p.wk !== null && p.wk !== undefined){
+periods.push({ lbl: SUPPLEMENT_LABEL, val: p.wk });
+}
 
-  const H = 190, padL = 40, padR = 40, padT = 34, padB = 40;
-  const MIN_SPACING = 90;
-  const n = periods.length;
-  const plotW = Math.max((n - 1) * MIN_SPACING, 200);
-  const W = plotW + padL + padR;
-  const plotH = H - padT - padB;
-  const maxVal = Math.max(...periods.map(x => x.val), 1);
+const H = 190, padL = 40, padR = 40, padT = 34, padB = 40;
+const MIN_SPACING = 90;
+const n = periods.length;
+const plotW = Math.max((n - 1) * MIN_SPACING, 200);
+const W = plotW + padL + padR;
+const plotH = H - padT - padB;
+const maxVal = Math.max(...periods.map(x => x.val), 1);
 
-  const points = periods.map((x, i) => {
-    const px = n === 1 ? padL + plotW / 2 : padL + (plotW * i) / (n - 1);
-    const py = padT + plotH - (x.val / maxVal) * plotH;
-    return { ...x, px, py };
-  });
+const points = periods.map((x, i) => {
+const px = n === 1 ? padL + plotW / 2 : padL + (plotW * i) / (n - 1);
+const py = padT + plotH - (x.val / maxVal) * plotH;
+return { ...x, px, py };
+});
 
-  const pathD = points.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt.px.toFixed(1)},${pt.py.toFixed(1)}`).join(' ');
+const pathD = points.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt.px.toFixed(1)},${pt.py.toFixed(1)}`).join(' ');
 
-  const markers = points.map(pt => `
-    <text x="${pt.px.toFixed(1)}" y="${(pt.py - 14).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--primary-dark)">${fmt(pt.val)}</text>
-    <circle cx="${pt.px.toFixed(1)}" cy="${pt.py.toFixed(1)}" r="5" fill="var(--primary)" stroke="#fff" stroke-width="2"></circle>
-    <text x="${pt.px.toFixed(1)}" y="${H - 12}" text-anchor="middle" font-size="12" fill="var(--muted)">${pt.lbl}</text>
-  `).join('');
+const markers = points.map(pt => `
+<text x="${pt.px.toFixed(1)}" y="${(pt.py - 14).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--primary-dark)">${fmt(pt.val)}</text>
+<circle cx="${pt.px.toFixed(1)}" cy="${pt.py.toFixed(1)}" r="5" fill="var(--primary)" stroke="#fff" stroke-width="2"></circle>
+<text x="${pt.px.toFixed(1)}" y="${H - 12}" text-anchor="middle" font-size="12" fill="var(--muted)">${pt.lbl}</text>
+`).join('');
 
-  const needsScroll = W > 600;
-  const wrapStyle = needsScroll ? 'overflow-x:auto;' : '';
-  const svgStyle = needsScroll ? `width:${W}px;min-width:100%;` : 'width:100%;';
+const needsScroll = W > 600;
+const wrapStyle = needsScroll ? 'overflow-x:auto;' : '';
+const svgStyle = needsScroll ? `width:${W}px;min-width:100%;` : 'width:100%;';
 
-  return `
-    <div class="history-chart-wrap" style="${wrapStyle}">
-      <svg class="history-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="${svgStyle}">
-        <line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--border)" stroke-width="1"></line>
-        <path d="${pathD}" fill="none" stroke="var(--primary)" stroke-width="2.5"></path>
-        ${markers}
-      </svg>
-    </div>`;
+return `
+<div class="history-chart-wrap" style="${wrapStyle}">
+<svg class="history-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="${svgStyle}">
+<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--border)" stroke-width="1"></line>
+<path d="${pathD}" fill="none" stroke="var(--primary)" stroke-width="2.5"></path>
+${markers}
+</svg>
+</div>`;
 }
 
 // ---------- Status Overview tab ----------
 // "Remaining" pharmacies are split into two groups so a rep/DM can tell a pharmacy
 // that's actively trending toward its target apart from one that's flat or slipping,
 // instead of lumping every not-yet-maxed pharmacy into one undifferentiated list:
-//   - Best chance: growth is positive (already moving toward the goal) -- these are
-//     the ones worth a nudge right now, sorted by smallest remaining amount first.
-//   - Needs attention: growth is zero or negative (flat/declining) -- still shown so
-//     nothing is hidden, but separated since closing the gap here is a harder sell.
+// - Best chance: growth is positive (already moving toward the goal) -- these are
+// the ones worth a nudge right now, sorted by smallest remaining amount first.
+// - Needs attention: growth is zero or negative (flat/declining) -- still shown so
+// nothing is hidden, but separated since closing the gap here is a harder sell.
 function classifyRemaining(withStatus){
-  const remaining = withStatus.filter(x => x.s.state === 'remaining');
-  const bestChance = remaining.filter(x => x.s.currentGrowth > 0).sort((a,b) => a.s.remaining - b.s.remaining);
-  const needsAttention = remaining.filter(x => x.s.currentGrowth <= 0).sort((a,b) => a.s.remaining - b.s.remaining);
-  return { remaining, bestChance, needsAttention };
+const remaining = withStatus.filter(x => x.s.state === 'remaining');
+const bestChance = remaining.filter(x => x.s.currentGrowth > 0).sort((a,b) => a.s.remaining - b.s.remaining);
+const needsAttention = remaining.filter(x => x.s.currentGrowth <= 0).sort((a,b) => a.s.remaining - b.s.remaining);
+return { remaining, bestChance, needsAttention };
 }
 
 // Keeps the red count badge on the Overview tab button in sync with the current
 // MR/DM filter, even while the Search tab is the one showing -- so a rep can see
 // "12 pharmacies need a nudge" without having to click into Overview first.
 function updateOverviewBadge(){
-  const pool = getFilteredPharmacies();
-  const withStatus = pool.map(p => ({ p, s: getSlabStatus(p) }));
-  const { remaining } = classifyRemaining(withStatus);
-  const badge = document.getElementById('overviewBadge');
-  if(remaining.length > 0){
-    badge.textContent = remaining.length.toLocaleString('en-US');
-    badge.style.display = 'inline-block';
-  } else {
-    badge.style.display = 'none';
-  }
+const pool = getFilteredPharmacies();
+const withStatus = pool.map(p => ({ p, s: getSlabStatus(p) }));
+const { remaining } = classifyRemaining(withStatus);
+const badge = document.getElementById('overviewBadge');
+if(remaining.length > 0){
+badge.textContent = remaining.length.toLocaleString('en-US');
+badge.style.display = 'inline-block';
+} else {
+badge.style.display = 'none';
+}
 }
 
 function renderOverview(){
-  const overviewSection = document.getElementById('overviewSection');
-  const pool = getFilteredPharmacies();
-  const withStatus = pool.map(p => ({ p, s: getSlabStatus(p) }));
-  const maxed = withStatus.filter(x => x.s.state === 'max').sort((a,b) => b.s.currentGrowth - a.s.currentGrowth);
-  const { bestChance, needsAttention } = classifyRemaining(withStatus);
+const overviewSection = document.getElementById('overviewSection');
+const pool = getFilteredPharmacies();
+const withStatus = pool.map(p => ({ p, s: getSlabStatus(p) }));
+const maxed = withStatus.filter(x => x.s.state === 'max').sort((a,b) => b.s.currentGrowth - a.s.currentGrowth);
+const { bestChance, needsAttention } = classifyRemaining(withStatus);
 
-  const listItem = (p, s, cls, metaHtml, salesHtml) => `
-    <div class="pharm-list-item ${cls}" data-idx="${PHARMACIES.indexOf(p)}">
-      <div>
-        <div class="pli-name">${p.n}</div>
-        <div class="pli-meta">${p.mr||'—'} · ${metaHtml}</div>
-      </div>
-      <div class="pli-stats">
-        <div class="pli-sales">${salesHtml}</div>
-      </div>
-    </div>`;
+const listItem = (p, s, cls, metaHtml, salesHtml) => `
+<div class="pharm-list-item ${cls}" data-idx="${PHARMACIES.indexOf(p)}">
+<div>
+<div class="pli-name">${p.n}</div>
+<div class="pli-meta">${p.mr||'—'} · ${metaHtml}</div>
+</div>
+<div class="pli-stats">
+<div class="pli-sales">${salesHtml}</div>
+</div>
+</div>`;
 
-  const maxItemsHtml = maxed.map(({p,s}) => listItem(p, s, 'pli-slab-max',
-    `نمو +${pct(s.currentGrowth)}`, `🏆 ${fmt(s.cashback)} ج.م`)).join('');
+const maxItemsHtml = maxed.map(({p,s}) => listItem(p, s, 'pli-slab-max',
+`نمو +${pct(s.currentGrowth)}`, `🏆 ${fmt(s.cashback)} ج.م`)).join('');
 
-  const bestChanceHtml = bestChance.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-best-chance',
-    `نمو +${pct(s.currentGrowth)} · حتى ${s.nextLabel}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
+const bestChanceHtml = bestChance.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-best-chance',
+`نمو +${pct(s.currentGrowth)} · حتى ${s.nextLabel}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
 
-  const needsAttentionHtml = needsAttention.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
-    `نمو ${pct(s.currentGrowth)} · حتى ${s.nextLabel}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
+const needsAttentionHtml = needsAttention.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
+`نمو ${pct(s.currentGrowth)} · حتى ${s.nextLabel}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
 
-  overviewSection.innerHTML = `
-    <div class="card">
-      <h2>🏆 صيدليات حققت الحد الأقصى للنمو — فوز مضمون (${maxed.length})</h2>
-      <div class="pharm-list" id="maxListBox">${maxItemsHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
-    </div>
-    <div class="card">
-      <h2>✅ الأفضل حظاً لتحقيق المستهدف (${bestChance.length})</h2>
-      <div class="note">نمو إيجابي بالفعل بين الربع الثالث والرابع، ومرتّبة تصاعدياً حسب أقل مبلغ متبقٍ للوصول للشريحة التالية${bestChance.length > 150 ? ' — تُعرض أقرب 150 صيدلية فقط' : ''}.</div>
-      <div class="pharm-list" id="bestChanceListBox">${bestChanceHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
-    </div>
-    <div class="card">
-      <h2>⚠️ تحتاج متابعة (${needsAttention.length})</h2>
-      <div class="note">نمو صفري أو سلبي بين الربع الثالث والرابع — الوصول للشريحة التالية أصعب هنا حتى لو كان المبلغ المتبقي صغيراً${needsAttention.length > 150 ? ' — تُعرض أقرب 150 صيدلية فقط' : ''}.</div>
-      <div class="pharm-list" id="needsAttentionListBox">${needsAttentionHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
-    </div>`;
+overviewSection.innerHTML = `
+<div class="card">
+<h2>🏆 صيدليات حققت الحد الأقصى للنمو — فوز مضمون (${maxed.length})</h2>
+<div class="pharm-list" id="maxListBox">${maxItemsHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
+</div>
+<div class="card">
+<h2>✅ الأفضل حظاً لتحقيق المستهدف (${bestChance.length})</h2>
+<div class="note">نمو إيجابي بالفعل بين الربع الثالث والرابع، ومرتّبة تصاعدياً حسب أقل مبلغ متبقٍ للوصول للشريحة التالية${bestChance.length > 150 ? ' — تُعرض أقرب 150 صيدلية فقط' : ''}.</div>
+<div class="pharm-list" id="bestChanceListBox">${bestChanceHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
+</div>
+<div class="card">
+<h2>⚠️ تحتاج متابعة (${needsAttention.length})</h2>
+<div class="note">نمو صفري أو سلبي بين الربع الثالث والرابع — الوصول للشريحة التالية أصعب هنا حتى لو كان المبلغ المتبقي صغيراً${needsAttention.length > 150 ? ' — تُعرض أقرب 150 صيدلية فقط' : ''}.</div>
+<div class="pharm-list" id="needsAttentionListBox">${needsAttentionHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
+</div>`;
 
-  ['maxListBox', 'bestChanceListBox', 'needsAttentionListBox'].forEach(id => {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.addEventListener('click', (e) => {
-      const item = e.target.closest('.pharm-list-item');
-      if(!item) return;
-      const idx = parseInt(item.dataset.idx, 10);
-      selectPharmacy(PHARMACIES[idx]);
-      switchView('search');
-      const detail = document.getElementById('detailSection');
-      if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
-    });
-  });
+['maxListBox', 'bestChanceListBox', 'needsAttentionListBox'].forEach(id => {
+const el = document.getElementById(id);
+if(!el) return;
+el.addEventListener('click', (e) => {
+const item = e.target.closest('.pharm-list-item');
+if(!item) return;
+const idx = parseInt(item.dataset.idx, 10);
+selectPharmacy(PHARMACIES[idx]);
+switchView('search');
+const detail = document.getElementById('detailSection');
+if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
+});
+});
 }
 
 // ---------- Analysis tab: aggregate performance by region/territory/MR/DM ----------
@@ -893,166 +893,166 @@ let analysisGroup = 'rg';
 let analysisSort = { key: 'q4', dir: 'desc' };
 
 function computeAnalysisGroups(field){
-  const groups = {};
-  PHARMACIES.forEach(p => {
-    const key = p[field] || '—';
-    if(!groups[key]){
-      groups[key] = { name:key, count:0, q3:0, q4:0, maxed:0, bestChance:0, needsAttention:0, unknown:0 };
-    }
-    const g = groups[key];
-    g.count++;
-    g.q3 += p.q3d || 0;
-    g.q4 += p.q4d || 0;
-    const s = getSlabStatus(p);
-    if(s.state === 'max') g.maxed++;
-    else if(s.state === 'remaining' && s.currentGrowth > 0) g.bestChance++;
-    else if(s.state === 'remaining') g.needsAttention++;
-    else g.unknown++;
-  });
-  return Object.values(groups).map(g => ({
-    ...g,
-    growth: g.q3 > 0 ? (g.q4 - g.q3) / g.q3 : null,
-  }));
+const groups = {};
+PHARMACIES.forEach(p => {
+const key = p[field] || '—';
+if(!groups[key]){
+groups[key] = { name:key, count:0, q3:0, q4:0, maxed:0, bestChance:0, needsAttention:0, unknown:0 };
+}
+const g = groups[key];
+g.count++;
+g.q3 += p.q3d || 0;
+g.q4 += p.q4d || 0;
+const s = getSlabStatus(p);
+if(s.state === 'max') g.maxed++;
+else if(s.state === 'remaining' && s.currentGrowth > 0) g.bestChance++;
+else if(s.state === 'remaining') g.needsAttention++;
+else g.unknown++;
+});
+return Object.values(groups).map(g => ({
+...g,
+growth: g.q3 > 0 ? (g.q4 - g.q3) / g.q3 : null,
+}));
 }
 
 function sortAnalysisRows(rows, key, dir){
-  return [...rows].sort((a, b) => {
-    let av = a[key], bv = b[key];
-    if(typeof av === 'string' || typeof bv === 'string'){
-      return dir === 'asc' ? String(av).localeCompare(String(bv), 'ar') : String(bv).localeCompare(String(av), 'ar');
-    }
-    if(av === null) av = -Infinity;
-    if(bv === null) bv = -Infinity;
-    return dir === 'asc' ? av - bv : bv - av;
-  });
+return [...rows].sort((a, b) => {
+let av = a[key], bv = b[key];
+if(typeof av === 'string' || typeof bv === 'string'){
+return dir === 'asc' ? String(av).localeCompare(String(bv), 'ar') : String(bv).localeCompare(String(av), 'ar');
+}
+if(av === null) av = -Infinity;
+if(bv === null) bv = -Infinity;
+return dir === 'asc' ? av - bv : bv - av;
+});
 }
 
 const ANALYSIS_COLS = [
-  { key:'name', lbl: null },
-  { key:'count', lbl:'عدد الصيدليات' },
-  { key:'q3', lbl:'إجمالي الربع الثالث' },
-  { key:'q4', lbl:'إجمالي الربع الرابع' },
-  { key:'growth', lbl:'نسبة النمو' },
-  { key:'maxed', lbl:'🏆 حقق الحد الأقصى' },
-  { key:'bestChance', lbl:'📈 الأفضل حظاً' },
-  { key:'needsAttention', lbl:'⚠️ تحتاج متابعة' },
+{ key:'name', lbl: null },
+{ key:'count', lbl:'عدد الصيدليات' },
+{ key:'q3', lbl:'إجمالي الربع الثالث' },
+{ key:'q4', lbl:'إجمالي الربع الرابع' },
+{ key:'growth', lbl:'نسبة النمو' },
+{ key:'maxed', lbl:'🏆 حقق الحد الأقصى' },
+{ key:'bestChance', lbl:'📈 الأفضل حظاً' },
+{ key:'needsAttention', lbl:'⚠️ تحتاج متابعة' },
 ];
 
 function renderAnalysis(){
-  document.getElementById('analysisTotalCount').textContent = PHARMACIES.length.toLocaleString('en-US');
+document.getElementById('analysisTotalCount').textContent = PHARMACIES.length.toLocaleString('en-US');
 
-  const section = document.getElementById('analysisSection');
-  const rows = computeAnalysisGroups(analysisGroup);
-  const sorted = sortAnalysisRows(rows, analysisSort.key, analysisSort.dir);
-  const clickable = analysisGroup === 'mr' || analysisGroup === 'dm';
+const section = document.getElementById('analysisSection');
+const rows = computeAnalysisGroups(analysisGroup);
+const sorted = sortAnalysisRows(rows, analysisSort.key, analysisSort.dir);
+const clickable = analysisGroup === 'mr' || analysisGroup === 'dm';
 
-  const theadHtml = ANALYSIS_COLS.map(c => {
-    const lbl = c.key === 'name' ? ANALYSIS_GROUP_LABELS[analysisGroup] : c.lbl;
-    const arrow = analysisSort.key === c.key ? (analysisSort.dir === 'asc' ? ' ▲' : ' ▼') : '';
-    return `<th data-sort="${c.key}" style="cursor:pointer;white-space:nowrap;">${lbl}${arrow}</th>`;
-  }).join('');
+const theadHtml = ANALYSIS_COLS.map(c => {
+const lbl = c.key === 'name' ? ANALYSIS_GROUP_LABELS[analysisGroup] : c.lbl;
+const arrow = analysisSort.key === c.key ? (analysisSort.dir === 'asc' ? ' ▲' : ' ▼') : '';
+return `<th data-sort="${c.key}" style="cursor:pointer;white-space:nowrap;">${lbl}${arrow}</th>`;
+}).join('');
 
-  const rowsHtml = sorted.map(g => {
-    const gClass = g.growth === null ? '' : (g.growth >= 0 ? 'growth-pos' : 'growth-neg');
-    const gText = g.growth === null ? '—' : (g.growth >= 0 ? '+' : '') + pct(g.growth);
-    return `
-    <tr class="${clickable ? 'pharm-list-item' : ''}" ${clickable ? `data-name="${g.name}"` : ''} style="${clickable ? 'cursor:pointer;' : ''}">
-      <td class="name-cell">${g.name}</td>
-      <td>${g.count.toLocaleString('en-US')}</td>
-      <td>${fmt(g.q3)} ج.م</td>
-      <td>${fmt(g.q4)} ج.م</td>
-      <td class="${gClass}">${gText}</td>
-      <td>${g.maxed.toLocaleString('en-US')}</td>
-      <td>${g.bestChance.toLocaleString('en-US')}</td>
-      <td>${g.needsAttention.toLocaleString('en-US')}</td>
-    </tr>`;
-  }).join('');
+const rowsHtml = sorted.map(g => {
+const gClass = g.growth === null ? '' : (g.growth >= 0 ? 'growth-pos' : 'growth-neg');
+const gText = g.growth === null ? '—' : (g.growth >= 0 ? '+' : '') + pct(g.growth);
+return `
+<tr class="${clickable ? 'pharm-list-item' : ''}" ${clickable ? `data-name="${g.name}"` : ''} style="${clickable ? 'cursor:pointer;' : ''}">
+<td class="name-cell">${g.name}</td>
+<td>${g.count.toLocaleString('en-US')}</td>
+<td>${fmt(g.q3)} ج.م</td>
+<td>${fmt(g.q4)} ج.م</td>
+<td class="${gClass}">${gText}</td>
+<td>${g.maxed.toLocaleString('en-US')}</td>
+<td>${g.bestChance.toLocaleString('en-US')}</td>
+<td>${g.needsAttention.toLocaleString('en-US')}</td>
+</tr>`;
+}).join('');
 
-  section.innerHTML = `
-    <div class="card">
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr>${theadHtml}</tr></thead>
-        <tbody>${rowsHtml}</tbody>
-      </table>
-      </div>
-    </div>`;
+section.innerHTML = `
+<div class="card">
+<div style="overflow-x:auto;">
+<table>
+<thead><tr>${theadHtml}</tr></thead>
+<tbody>${rowsHtml}</tbody>
+</table>
+</div>
+</div>`;
 
-  section.querySelectorAll('th[data-sort]').forEach(th => {
-    th.addEventListener('click', () => {
-      const key = th.dataset.sort;
-      if(analysisSort.key === key){
-        analysisSort.dir = analysisSort.dir === 'asc' ? 'desc' : 'asc';
-      } else {
-        analysisSort = { key, dir: key === 'name' ? 'asc' : 'desc' };
-      }
-      renderAnalysis();
-    });
-  });
+section.querySelectorAll('th[data-sort]').forEach(th => {
+th.addEventListener('click', () => {
+const key = th.dataset.sort;
+if(analysisSort.key === key){
+analysisSort.dir = analysisSort.dir === 'asc' ? 'desc' : 'asc';
+} else {
+analysisSort = { key, dir: key === 'name' ? 'asc' : 'desc' };
+}
+renderAnalysis();
+});
+});
 
-  if(clickable){
-    section.querySelectorAll('tr[data-name]').forEach(tr => {
-      tr.addEventListener('click', () => {
-        const name = tr.dataset.name;
-        if(analysisGroup === 'mr'){
-          activeMR = name; mrFilter.value = name;
-          activeDM = ''; dmFilter.value = '';
-          updateMRFilterOptions();
-        } else {
-          activeDM = name; dmFilter.value = name;
-          activeMR = ''; updateMRFilterOptions();
-        }
-        renderTotals();
-        updateOverviewBadge();
-        switchView('search');
-      });
-    });
-  }
+if(clickable){
+section.querySelectorAll('tr[data-name]').forEach(tr => {
+tr.addEventListener('click', () => {
+const name = tr.dataset.name;
+if(analysisGroup === 'mr'){
+activeMR = name; mrFilter.value = name;
+activeDM = ''; dmFilter.value = '';
+updateMRFilterOptions();
+} else {
+activeDM = name; dmFilter.value = name;
+activeMR = ''; updateMRFilterOptions();
+}
+renderTotals();
+updateOverviewBadge();
+switchView('search');
+});
+});
+}
 }
 
 document.getElementById('analysisSubTabs').addEventListener('click', (e) => {
-  const btn = e.target.closest('.tab-btn');
-  if(!btn) return;
-  analysisGroup = btn.dataset.group;
-  analysisSort = { key: 'q4', dir: 'desc' };
-  document.querySelectorAll('#analysisSubTabs .tab-btn').forEach(b => b.classList.toggle('active', b === btn));
-  renderAnalysis();
+const btn = e.target.closest('.tab-btn');
+if(!btn) return;
+analysisGroup = btn.dataset.group;
+analysisSort = { key: 'q4', dir: 'desc' };
+document.querySelectorAll('#analysisSubTabs .tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+renderAnalysis();
 });
 
 function switchView(view){
-  document.getElementById('searchView').style.display = view === 'search' ? '' : 'none';
-  document.getElementById('overviewView').style.display = view === 'overview' ? '' : 'none';
-  document.getElementById('chainView').style.display = view === 'chain' ? '' : 'none';
-  document.getElementById('leaderboardView').style.display = view === 'leaderboard' ? '' : 'none';
-  document.getElementById('analysisView').style.display = view === 'analysis' ? '' : 'none';
-  document.querySelectorAll('.view-tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.view === view);
-  });
-  if(view === 'overview') renderOverview();
-  if(view === 'chain') renderChainSection();
-  if(view === 'leaderboard') renderLeaderboard();
-  if(view === 'analysis') renderAnalysis();
+document.getElementById('searchView').style.display = view === 'search' ? '' : 'none';
+document.getElementById('overviewView').style.display = view === 'overview' ? '' : 'none';
+document.getElementById('chainView').style.display = view === 'chain' ? '' : 'none';
+document.getElementById('leaderboardView').style.display = view === 'leaderboard' ? '' : 'none';
+document.getElementById('analysisView').style.display = view === 'analysis' ? '' : 'none';
+document.querySelectorAll('.view-tab-btn').forEach(btn => {
+btn.classList.toggle('active', btn.dataset.view === view);
+});
+if(view === 'overview') renderOverview();
+if(view === 'chain') renderChainSection();
+if(view === 'leaderboard') renderLeaderboard();
+if(view === 'analysis') renderAnalysis();
 }
 document.getElementById('viewTabs').addEventListener('click', (e) => {
-  const btn = e.target.closest('.view-tab-btn');
-  if(!btn) return;
-  switchView(btn.dataset.view);
+const btn = e.target.closest('.view-tab-btn');
+if(!btn) return;
+switchView(btn.dataset.view);
 });
 
 mrFilter.addEventListener('change', () => {
-  activeMR = mrFilter.value;
-  renderTotals();
-  updateOverviewBadge();
-  if(document.getElementById('overviewView').style.display !== 'none') renderOverview();
-  if(searchInput.value.trim().length) runSearch();
+activeMR = mrFilter.value;
+renderTotals();
+updateOverviewBadge();
+if(document.getElementById('overviewView').style.display !== 'none') renderOverview();
+if(searchInput.value.trim().length) runSearch();
 });
 dmFilter.addEventListener('change', () => {
-  activeDM = dmFilter.value;
-  updateMRFilterOptions();
-  updateOverviewBadge();
-  if(document.getElementById('overviewView').style.display !== 'none') renderOverview();
-  renderTotals();
-  if(searchInput.value.trim().length) runSearch();
+activeDM = dmFilter.value;
+updateMRFilterOptions();
+updateOverviewBadge();
+if(document.getElementById('overviewView').style.display !== 'none') renderOverview();
+renderTotals();
+if(searchInput.value.trim().length) runSearch();
 });
 
 // ---------- Search ----------
@@ -1063,89 +1063,89 @@ const clearSearchBtn = document.getElementById('clearSearchBtn');
 // Normalize Arabic text so minor spelling variants (diacritics, alef/hamza
 // forms, ta-marbuta vs ha) still match while the rep is typing.
 function normalize(s){
-  return String(s || '')
-    .replace(/[ً-ْٰـ]/g, '') // diacritics + tatweel
-    .replace(/[إأآا]/g, 'ا')
-    .replace(/ى/g, 'ي')
-    .replace(/ة/g, 'ه')
-    .trim()
-    .toLowerCase();
+return String(s || '')
+.replace(/[ً-ْٰـ]/g, '') // diacritics + tatweel
+.replace(/[إأآا]/g, 'ا')
+.replace(/ى/g, 'ي')
+.replace(/ة/g, 'ه')
+.trim()
+.toLowerCase();
 }
 
 // Loose "nearby" fallback: true if every character of the query appears in
 // the text in order (not necessarily adjacent). Catches typos/omissions
 // when the exact substring search comes up empty.
 function nearbyMatch(text, query){
-  let ti = 0;
-  for(let qi = 0; qi < query.length; qi++){
-    const ch = query[qi];
-    let found = false;
-    while(ti < text.length){
-      if(text[ti] === ch){ found = true; ti++; break; }
-      ti++;
-    }
-    if(!found) return false;
-  }
-  return true;
+let ti = 0;
+for(let qi = 0; qi < query.length; qi++){
+const ch = query[qi];
+let found = false;
+while(ti < text.length){
+if(text[ti] === ch){ found = true; ti++; break; }
+ti++;
+}
+if(!found) return false;
+}
+return true;
 }
 
 function runSearch(){
-  const raw = searchInput.value.trim();
-  clearSearchBtn.style.display = raw.length ? 'flex' : 'none';
-  if(raw.length < 1){ resultsBox.classList.remove('show'); return; }
+const raw = searchInput.value.trim();
+clearSearchBtn.style.display = raw.length ? 'flex' : 'none';
+if(raw.length < 1){ resultsBox.classList.remove('show'); return; }
 
-  const pool = getFilteredPharmacies();
-  const q = normalize(raw);
-  let matches = pool.filter(p =>
-    normalize(p.n).includes(q) ||
-    (p.c && String(p.c).includes(raw)) ||
-    normalize(p.tr).includes(q) ||
-    normalize(p.rg).includes(q) ||
-    normalize(p.mr).includes(q)
-  );
+const pool = getFilteredPharmacies();
+const q = normalize(raw);
+let matches = pool.filter(p =>
+normalize(p.n).includes(q) ||
+(p.c && String(p.c).includes(raw)) ||
+normalize(p.tr).includes(q) ||
+normalize(p.rg).includes(q) ||
+normalize(p.mr).includes(q)
+);
 
-  let fuzzy = false;
-  if(matches.length === 0 && q.length >= 2){
-    fuzzy = true;
-    matches = pool.filter(p => nearbyMatch(normalize(p.n), q) || nearbyMatch(normalize(p.mr), q));
-  }
-  matches = matches.slice(0, 25);
+let fuzzy = false;
+if(matches.length === 0 && q.length >= 2){
+fuzzy = true;
+matches = pool.filter(p => nearbyMatch(normalize(p.n), q) || nearbyMatch(normalize(p.mr), q));
+}
+matches = matches.slice(0, 25);
 
-  if(matches.length === 0){
-    resultsBox.innerHTML = '<div class="empty-msg">لا توجد نتائج مطابقة ' + (activeMR || activeDM ? '(ضمن الفلتر الحالي)' : '') + '</div>';
-  } else {
-    resultsBox.innerHTML = (fuzzy ? '<div class="empty-msg" style="text-align:right;">أقرب نتائج مطابقة:</div>' : '') +
-      matches.map((p) => `
-      <div class="result-item" data-idx="${PHARMACIES.indexOf(p)}">
-        <div class="rname">${p.n}</div>
-        <div class="rmeta">كود: ${p.c} · ${p.rg} / ${p.tr} · المندوب: ${p.mr}</div>
-      </div>`).join('');
-  }
-  resultsBox.classList.add('show');
+if(matches.length === 0){
+resultsBox.innerHTML = '<div class="empty-msg">لا توجد نتائج مطابقة ' + (activeMR || activeDM ? '(ضمن الفلتر الحالي)' : '') + '</div>';
+} else {
+resultsBox.innerHTML = (fuzzy ? '<div class="empty-msg" style="text-align:right;">أقرب نتائج مطابقة:</div>' : '') +
+matches.map((p) => `
+<div class="result-item" data-idx="${PHARMACIES.indexOf(p)}">
+<div class="rname">${p.n}</div>
+<div class="rmeta">كود: ${p.c} · ${p.rg} / ${p.tr} · المندوب: ${p.mr}</div>
+</div>`).join('');
+}
+resultsBox.classList.add('show');
 }
 
 searchInput.addEventListener('input', runSearch);
 searchInput.addEventListener('focus', () => { if(searchInput.value.trim().length) runSearch(); });
 
 clearSearchBtn.addEventListener('click', () => {
-  searchInput.value = '';
-  clearSearchBtn.style.display = 'none';
-  resultsBox.classList.remove('show');
-  searchInput.focus();
+searchInput.value = '';
+clearSearchBtn.style.display = 'none';
+resultsBox.classList.remove('show');
+searchInput.focus();
 });
 
 resultsBox.addEventListener('click', (e) => {
-  const item = e.target.closest('.result-item');
-  if(!item) return;
-  const idx = parseInt(item.dataset.idx, 10);
-  selectPharmacy(PHARMACIES[idx]);
-  resultsBox.classList.remove('show');
-  searchInput.value = PHARMACIES[idx].n;
-  clearSearchBtn.style.display = 'flex';
+const item = e.target.closest('.result-item');
+if(!item) return;
+const idx = parseInt(item.dataset.idx, 10);
+selectPharmacy(PHARMACIES[idx]);
+resultsBox.classList.remove('show');
+searchInput.value = PHARMACIES[idx].n;
+clearSearchBtn.style.display = 'flex';
 });
 
 document.addEventListener('click', (e) => {
-  if(!e.target.closest('.search-box')) resultsBox.classList.remove('show');
+if(!e.target.closest('.search-box')) resultsBox.classList.remove('show');
 });
 
 // ---------- Chain merge (live, session-only selection of 2+ pharmacies as one unit) ----------
@@ -1160,106 +1160,106 @@ const chainSearchInput = document.getElementById('chainSearchInput');
 const chainResultsBox = document.getElementById('chainResultsBox');
 
 function runChainSearch(){
-  const raw = chainSearchInput.value.trim();
-  if(raw.length < 1){ chainResultsBox.classList.remove('show'); return; }
-  const q = normalize(raw);
-  let matches = PHARMACIES.filter(p => !chainMembers.includes(p) && (
-    normalize(p.n).includes(q) || (p.c && String(p.c).includes(raw)) || normalize(p.mr).includes(q)
-  ));
-  if(matches.length === 0 && q.length >= 2){
-    matches = PHARMACIES.filter(p => !chainMembers.includes(p) && nearbyMatch(normalize(p.n), q));
-  }
-  matches = matches.slice(0, 20);
-  chainResultsBox.innerHTML = matches.length === 0
-    ? '<div class="empty-msg">لا توجد نتائج مطابقة</div>'
-    : matches.map(p => `
-      <div class="result-item" data-idx="${PHARMACIES.indexOf(p)}">
-        <div class="rname">${p.n}</div>
-        <div class="rmeta">كود: ${p.c} · ${p.rg} / ${p.tr} · المندوب: ${p.mr}</div>
-      </div>`).join('');
-  chainResultsBox.classList.add('show');
+const raw = chainSearchInput.value.trim();
+if(raw.length < 1){ chainResultsBox.classList.remove('show'); return; }
+const q = normalize(raw);
+let matches = PHARMACIES.filter(p => !chainMembers.includes(p) && (
+normalize(p.n).includes(q) || (p.c && String(p.c).includes(raw)) || normalize(p.mr).includes(q)
+));
+if(matches.length === 0 && q.length >= 2){
+matches = PHARMACIES.filter(p => !chainMembers.includes(p) && nearbyMatch(normalize(p.n), q));
+}
+matches = matches.slice(0, 20);
+chainResultsBox.innerHTML = matches.length === 0
+? '<div class="empty-msg">لا توجد نتائج مطابقة</div>'
+: matches.map(p => `
+<div class="result-item" data-idx="${PHARMACIES.indexOf(p)}">
+<div class="rname">${p.n}</div>
+<div class="rmeta">كود: ${p.c} · ${p.rg} / ${p.tr} · المندوب: ${p.mr}</div>
+</div>`).join('');
+chainResultsBox.classList.add('show');
 }
 
 chainSearchInput.addEventListener('input', runChainSearch);
 chainSearchInput.addEventListener('focus', () => { if(chainSearchInput.value.trim().length) runChainSearch(); });
 chainResultsBox.addEventListener('click', (e) => {
-  const item = e.target.closest('.result-item');
-  if(!item) return;
-  const idx = parseInt(item.dataset.idx, 10);
-  chainMembers.push(PHARMACIES[idx]);
-  chainSearchInput.value = '';
-  chainResultsBox.classList.remove('show');
-  renderChainSection();
+const item = e.target.closest('.result-item');
+if(!item) return;
+const idx = parseInt(item.dataset.idx, 10);
+chainMembers.push(PHARMACIES[idx]);
+chainSearchInput.value = '';
+chainResultsBox.classList.remove('show');
+renderChainSection();
 });
 document.addEventListener('click', (e) => {
-  if(!e.target.closest('#chainView .search-box')) chainResultsBox.classList.remove('show');
+if(!e.target.closest('#chainView .search-box')) chainResultsBox.classList.remove('show');
 });
 
 function removeChainMember(idx){
-  chainMembers.splice(idx, 1);
-  renderChainSection();
+chainMembers.splice(idx, 1);
+renderChainSection();
 }
 
 function renderChainSection(){
-  const chainSection = document.getElementById('chainSection');
-  if(!chainSection) return;
+const chainSection = document.getElementById('chainSection');
+if(!chainSection) return;
 
-  if(chainMembers.length === 0){
-    chainSection.innerHTML = `<div class="card"><div class="placeholder"><div class="big">🔗</div>ابحث وأضف صيدليتين أو أكثر لعرض إجمالي مبيعات السلسلة وحاسبة الكاش باك المجمّعة</div></div>`;
-    return;
-  }
+if(chainMembers.length === 0){
+chainSection.innerHTML = `<div class="card"><div class="placeholder"><div class="big">🔗</div>ابحث وأضف صيدليتين أو أكثر لعرض إجمالي مبيعات السلسلة وحاسبة الكاش باك المجمّعة</div></div>`;
+return;
+}
 
-  const membersHtml = chainMembers.map((p, i) => `
-    <div class="pharm-list-item">
-      <div>
-        <div class="pli-name">${p.n}</div>
-        <div class="pli-meta">كود: ${p.c} · ${p.tr} · المندوب: ${p.mr||'—'}</div>
-      </div>
-      <div class="pli-stats">
-        <button class="remove-compare-btn" data-remove="${i}" type="button">✕ إزالة</button>
-      </div>
-    </div>`).join('');
+const membersHtml = chainMembers.map((p, i) => `
+<div class="pharm-list-item">
+<div>
+<div class="pli-name">${p.n}</div>
+<div class="pli-meta">كود: ${p.c} · ${p.tr} · المندوب: ${p.mr||'—'}</div>
+</div>
+<div class="pli-stats">
+<button class="remove-compare-btn" data-remove="${i}" type="button">✕ إزالة</button>
+</div>
+</div>`).join('');
 
-  const sumQ3 = chainMembers.reduce((s,p) => s + p.q3d, 0);
-  const sumQ4 = chainMembers.reduce((s,p) => s + p.q4d, 0);
-  const growth = sumQ3 > 0 ? (sumQ4 - sumQ3) / sumQ3 : null;
-  const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
-  const growthText = growth === null ? '—' : (growth>=0?'+':'') + pct(growth);
-  const rows = calcSlabs(sumQ4, {shelf:'none', posm:false, full:false});
+const sumQ3 = chainMembers.reduce((s,p) => s + p.q3d, 0);
+const sumQ4 = chainMembers.reduce((s,p) => s + p.q4d, 0);
+const growth = sumQ3 > 0 ? (sumQ4 - sumQ3) / sumQ3 : null;
+const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
+const growthText = growth === null ? '—' : (growth>=0?'+':'') + pct(growth);
+const rows = calcSlabs(sumQ4, {shelf:'none', posm:false, full:false});
 
-  chainSection.innerHTML = `
-    <div class="card">
-      <h2>أعضاء السلسلة (${chainMembers.length})</h2>
-      <div class="pharm-list">${membersHtml}</div>
-    </div>
-    <div class="card">
-      <h2>إجمالي السلسلة</h2>
-      <div class="totals-grid">
-        <div class="sales-box"><div class="t">عدد الصيدليات في السلسلة</div><div class="v">${chainMembers.length}</div></div>
-        <div class="sales-box"><div class="t">إجمالي الربع الثالث</div><div class="v">${fmt(sumQ3)} ج.م</div></div>
-        <div class="sales-box"><div class="t">إجمالي الربع الرابع</div><div class="v">${fmt(sumQ4)} ج.م</div></div>
-        <div class="sales-box"><div class="t">نسبة نمو السلسلة</div><div class="v ${growthClass}">${growthText}</div></div>
-      </div>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>الشريحة</th><th>نسبة النمو</th><th>إجمالي المستهدف (على أساس الربع الرابع)</th><th>إجمالي كاش باك النمو الأساسي</th></tr></thead>
-        <tbody>
-          ${rows.map(r => `
-            <tr class="${r.color}">
-              <td class="name-cell">${r.label}</td>
-              <td>+${pct(r.growth)}</td>
-              <td>${fmt(r.target)} ج.م</td>
-              <td class="total-cell">${fmt(r.cashback)} ج.م</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-      </div>
-      <div class="note">حساب الكاش باك هنا على إجمالي مبيعات كل أعضاء السلسلة مجتمعة (معدل النمو الأساسي فقط، بدون أرفف أو POSM) -- لعرض عقد موحّد للسلسلة كوحدة واحدة.</div>
-    </div>`;
+chainSection.innerHTML = `
+<div class="card">
+<h2>أعضاء السلسلة (${chainMembers.length})</h2>
+<div class="pharm-list">${membersHtml}</div>
+</div>
+<div class="card">
+<h2>إجمالي السلسلة</h2>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">عدد الصيدليات في السلسلة</div><div class="v">${chainMembers.length}</div></div>
+<div class="sales-box"><div class="t">إجمالي الربع الثالث</div><div class="v">${fmt(sumQ3)} ج.م</div></div>
+<div class="sales-box"><div class="t">إجمالي الربع الرابع</div><div class="v">${fmt(sumQ4)} ج.م</div></div>
+<div class="sales-box"><div class="t">نسبة نمو السلسلة</div><div class="v ${growthClass}">${growthText}</div></div>
+</div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>الشريحة</th><th>نسبة النمو</th><th>إجمالي المستهدف (على أساس الربع الرابع)</th><th>إجمالي كاش باك النمو الأساسي</th></tr></thead>
+<tbody>
+${rows.map(r => `
+<tr class="${r.color}">
+<td class="name-cell">${r.label}</td>
+<td>+${pct(r.growth)}</td>
+<td>${fmt(r.target)} ج.م</td>
+<td class="total-cell">${fmt(r.cashback)} ج.م</td>
+</tr>`).join('')}
+</tbody>
+</table>
+</div>
+<div class="note">حساب الكاش باك هنا على إجمالي مبيعات كل أعضاء السلسلة مجتمعة (معدل النمو الأساسي فقط، بدون أرفف أو POSM) -- لعرض عقد موحّد للسلسلة كوحدة واحدة.</div>
+</div>`;
 
-  chainSection.querySelectorAll('[data-remove]').forEach(btn => {
-    btn.addEventListener('click', () => removeChainMember(parseInt(btn.dataset.remove, 10)));
-  });
+chainSection.querySelectorAll('[data-remove]').forEach(btn => {
+btn.addEventListener('click', () => removeChainMember(parseInt(btn.dataset.remove, 10)));
+});
 }
 
 // ---------- MR leaderboard (live, backed by the Deals API) ----------
@@ -1267,179 +1267,179 @@ function renderChainSection(){
 // for (not raw deal count -- re-agreeing the same pharmacy twice shouldn't inflate
 // the rank), per the explicit ranking choice made for this feature.
 async function renderLeaderboard(){
-  const section = document.getElementById('leaderboardSection');
-  if(!section) return;
-  section.innerHTML = `<div class="card"><div class="placeholder">جارٍ تحميل بيانات لوحة المتصدرين...</div></div>`;
+const section = document.getElementById('leaderboardSection');
+if(!section) return;
+section.innerHTML = `<div class="card"><div class="placeholder">جارٍ تحميل بيانات لوحة المتصدرين...</div></div>`;
 
-  let ranking;
-  try {
-    const res = await fetch(`${DEALS_API_URL}?token=${encodeURIComponent(DEALS_API_TOKEN)}`, { method:'GET' });
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'unknown error');
-    // Backend returns pre-aggregated {mr_name, count} pairs only -- it never sends
-    // raw pharmacy names, codes, or sales figures back to the browser.
-    ranking = (data.leaderboard || []).map(x => ({ mr: x.mr_name, count: x.count }));
-  } catch(err) {
-    section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">⚠️</div>تعذّر تحميل بيانات لوحة المتصدرين حالياً. حاول مرة أخرى لاحقاً.</div></div>`;
-    return;
-  }
+let ranking;
+try {
+const res = await fetch(`${DEALS_API_URL}?token=${encodeURIComponent(DEALS_API_TOKEN)}`, { method:'GET' });
+const data = await res.json();
+if(!data.ok) throw new Error(data.error || 'unknown error');
+// Backend returns pre-aggregated {mr_name, count} pairs only -- it never sends
+// raw pharmacy names, codes, or sales figures back to the browser.
+ranking = (data.leaderboard || []).map(x => ({ mr: x.mr_name, count: x.count }));
+} catch(err) {
+section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">⚠️</div>تعذّر تحميل بيانات لوحة المتصدرين حالياً. حاول مرة أخرى لاحقاً.</div></div>`;
+return;
+}
 
-  if(ranking.length === 0){
-    section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">🏆</div>لا توجد اتفاقات مسجَّلة بعد. أول اتفاق يظهر هنا فوراً.</div></div>`;
-    return;
-  }
+if(ranking.length === 0){
+section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">🏆</div>لا توجد اتفاقات مسجَّلة بعد. أول اتفاق يظهر هنا فوراً.</div></div>`;
+return;
+}
 
-  const medals = ['🥇','🥈','🥉'];
-  const rowsHtml = ranking.map((r, i) => `
-    <div class="pharm-list-item">
-      <div>
-        <div class="pli-name">${medals[i] || ('#' + (i+1))} ${r.mr}</div>
-      </div>
-      <div class="pli-stats">
-        <div class="pli-sales">${r.count.toLocaleString('en-US')} صيدلية</div>
-      </div>
-    </div>`).join('');
+const medals = ['🥇','🥈','🥉'];
+const rowsHtml = ranking.map((r, i) => `
+<div class="pharm-list-item">
+<div>
+<div class="pli-name">${medals[i] || ('#' + (i+1))} ${r.mr}</div>
+</div>
+<div class="pli-stats">
+<div class="pli-sales">${r.count.toLocaleString('en-US')} صيدلية</div>
+</div>
+</div>`).join('');
 
-  section.innerHTML = `
-    <div class="card">
-      <h2>الترتيب (${ranking.length} مندوب)</h2>
-      <div class="pharm-list">${rowsHtml}</div>
-    </div>`;
+section.innerHTML = `
+<div class="card">
+<h2>الترتيب (${ranking.length} مندوب)</h2>
+<div class="pharm-list">${rowsHtml}</div>
+</div>`;
 }
 
 // Logs an agreed deal for one slab of one pharmacy to the live backend. Called from
 // the "✅ اتفاق مع الصيدلية" button next to each slab row in the contract calculator.
 async function agreeDeal(p, row, baselineSales, btn){
-  if(agreedThisSession.has(p.c + ':' + row.key)) return;
-  btn.disabled = true;
-  btn.textContent = 'جارٍ الإرسال...';
-  const payload = {
-    token: DEALS_API_TOKEN,
-    pharmacy_code: p.c, pharmacy_name: p.n, region: p.rg, territory: p.tr,
-    mr_name: p.mr, dm_name: p.dm,
-    baseline_used: state.baseline, baseline_sales: baselineSales,
-    slab_key: row.key, slab_label: row.label, growth_pct: Math.round(row.growth * 1000) / 10,
-    target_sales: Math.round(row.target), cashback: Math.round(row.cashback),
-    shelf_option: state.shelf, posm: state.posm, full_period_bonus: state.full,
-    total_payout: Math.round(row.total), notes: ''
-  };
-  try {
-    const res = await fetch(DEALS_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'unknown error');
-    agreedThisSession.add(p.c + ':' + row.key);
-    btn.textContent = '✅ تم تسجيل الاتفاق';
-  } catch(err) {
-    btn.disabled = false;
-    btn.textContent = '⚠️ فشل الإرسال — أعد المحاولة';
-  }
+if(agreedThisSession.has(p.c + ':' + row.key)) return;
+btn.disabled = true;
+btn.textContent = 'جارٍ الإرسال...';
+const payload = {
+token: DEALS_API_TOKEN,
+pharmacy_code: p.c, pharmacy_name: p.n, region: p.rg, territory: p.tr,
+mr_name: p.mr, dm_name: p.dm,
+baseline_used: state.baseline, baseline_sales: baselineSales,
+slab_key: row.key, slab_label: row.label, growth_pct: Math.round(row.growth * 1000) / 10,
+target_sales: Math.round(row.target), cashback: Math.round(row.cashback),
+shelf_option: state.shelf, posm: state.posm, full_period_bonus: state.full,
+total_payout: Math.round(row.total), notes: ''
+};
+try {
+const res = await fetch(DEALS_API_URL, {
+method: 'POST',
+headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+body: JSON.stringify(payload)
+});
+const data = await res.json();
+if(!data.ok) throw new Error(data.error || 'unknown error');
+agreedThisSession.add(p.c + ':' + row.key);
+btn.textContent = '✅ تم تسجيل الاتفاق';
+} catch(err) {
+btn.disabled = false;
+btn.textContent = '⚠️ فشل الإرسال — أعد المحاولة';
+}
 }
 
 function selectPharmacy(p){
-  currentPharmacy = p;
-  compareWith = null;
-  state = { baseline:'q4', shelf:'none', posm:false, full:false, customBaseline:null };
-  renderDetail();
+currentPharmacy = p;
+compareWith = null;
+state = { baseline:'q4', shelf:'none', posm:false, full:false, customBaseline:null };
+renderDetail();
 }
 
 // ---------- Side-by-side comparison ----------
 function compareRowHtml(labelHtml, valA, valB){
-  return `<tr><td class="name-cell">${labelHtml}</td><td>${valA}</td><td>${valB}</td></tr>`;
+return `<tr><td class="name-cell">${labelHtml}</td><td>${valA}</td><td>${valB}</td></tr>`;
 }
 
 function renderCompareCardHtml(p){
-  if(!compareWith){
-    return `
-      <div class="card">
-        <h2>مقارنة مع صيدلية أخرى</h2>
-        <div class="search-box compare-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="compareInput" placeholder="اكتب اسم صيدلية أخرى للمقارنة معها..." autocomplete="off">
-          <div class="results" id="compareResultsBox"></div>
-        </div>
-      </div>`;
-  }
+if(!compareWith){
+return `
+<div class="card">
+<h2>مقارنة مع صيدلية أخرى</h2>
+<div class="search-box compare-box">
+<span class="search-icon">🔍</span>
+<input type="text" id="compareInput" placeholder="اكتب اسم صيدلية أخرى للمقارنة معها..." autocomplete="off">
+<div class="results" id="compareResultsBox"></div>
+</div>
+</div>`;
+}
 
-  const c = compareWith;
-  const gA = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
-  const gB = c.q3d > 0 ? (c.q4d - c.q3d) / c.q3d : null;
-  const sA = getSlabStatus(p);
-  const sB = getSlabStatus(c);
-  const rowsA = calcSlabs(p.q3d > 0 ? p.q3d : p.q4d, {shelf:'none', posm:false, full:false});
-  const rowsB = calcSlabs(c.q3d > 0 ? c.q3d : c.q4d, {shelf:'none', posm:false, full:false});
-  const topA = rowsA[rowsA.length - 1];
-  const topB = rowsB[rowsB.length - 1];
+const c = compareWith;
+const gA = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
+const gB = c.q3d > 0 ? (c.q4d - c.q3d) / c.q3d : null;
+const sA = getSlabStatus(p);
+const sB = getSlabStatus(c);
+const rowsA = calcSlabs(p.q3d > 0 ? p.q3d : p.q4d, {shelf:'none', posm:false, full:false});
+const rowsB = calcSlabs(c.q3d > 0 ? c.q3d : c.q4d, {shelf:'none', posm:false, full:false});
+const topA = rowsA[rowsA.length - 1];
+const topB = rowsB[rowsB.length - 1];
 
-  return `
-    <div class="card">
-      <h2>مقارنة مع صيدلية أخرى</h2>
-      <div class="compare-active-row">
-        <span>تتم المقارنة مع: <strong>${c.n}</strong></span>
-        <button class="remove-compare-btn" id="removeCompareBtn" type="button">✕ إزالة المقارنة</button>
-      </div>
-      <div style="overflow-x:auto;margin-top:12px;">
-      <table class="compare-table">
-        <thead><tr><th></th><th>${p.n}</th><th>${c.n}</th></tr></thead>
-        <tbody>
-          ${compareRowHtml('المندوب الطبي', p.mr||'—', c.mr||'—')}
-          ${compareRowHtml('مدير المنطقة', p.dm||'—', c.dm||'—')}
-          ${compareRowHtml('مبيعات الربع الثالث', fmt(p.q3d)+' ج.م', fmt(c.q3d)+' ج.م')}
-          ${compareRowHtml('مبيعات الربع الرابع', fmt(p.q4d)+' ج.م', fmt(c.q4d)+' ج.م')}
-          ${compareRowHtml('نسبة النمو', gA===null?'—':(gA>=0?'+':'')+pct(gA), gB===null?'—':(gB>=0?'+':'')+pct(gB))}
-          ${compareRowHtml('حالة الشريحة', sA.state==='max' ? '🏆 فوز مضمون' : sA.state==='remaining' ? `${fmt(sA.remaining)} ج.م لـ${sA.nextLabel}` : '—', sB.state==='max' ? '🏆 فوز مضمون' : sB.state==='remaining' ? `${fmt(sB.remaining)} ج.م لـ${sB.nextLabel}` : '—')}
-          ${compareRowHtml('كاش باك الشريحة القصوى (أساس الربع الثالث)', fmt(topA.cashback)+' ج.م', fmt(topB.cashback)+' ج.م')}
-        </tbody>
-      </table>
-      </div>
-      <div class="note">المقارنة تعتمد على مبيعات الربع الثالث كأساس لحساب الشريحة القصوى، بدون أرفف أو POSM، لتوفير مقارنة مباشرة بين الصيدليتين.</div>
-    </div>`;
+return `
+<div class="card">
+<h2>مقارنة مع صيدلية أخرى</h2>
+<div class="compare-active-row">
+<span>تتم المقارنة مع: <strong>${c.n}</strong></span>
+<button class="remove-compare-btn" id="removeCompareBtn" type="button">✕ إزالة المقارنة</button>
+</div>
+<div style="overflow-x:auto;margin-top:12px;">
+<table class="compare-table">
+<thead><tr><th></th><th>${p.n}</th><th>${c.n}</th></tr></thead>
+<tbody>
+${compareRowHtml('المندوب الطبي', p.mr||'—', c.mr||'—')}
+${compareRowHtml('مدير المنطقة', p.dm||'—', c.dm||'—')}
+${compareRowHtml('مبيعات الربع الثالث', fmt(p.q3d)+' ج.م', fmt(c.q3d)+' ج.م')}
+${compareRowHtml('مبيعات الربع الرابع', fmt(p.q4d)+' ج.م', fmt(c.q4d)+' ج.م')}
+${compareRowHtml('نسبة النمو', gA===null?'—':(gA>=0?'+':'')+pct(gA), gB===null?'—':(gB>=0?'+':'')+pct(gB))}
+${compareRowHtml('حالة الشريحة', sA.state==='max' ? '🏆 فوز مضمون' : sA.state==='remaining' ? `${fmt(sA.remaining)} ج.م لـ${sA.nextLabel}` : '—', sB.state==='max' ? '🏆 فوز مضمون' : sB.state==='remaining' ? `${fmt(sB.remaining)} ج.م لـ${sB.nextLabel}` : '—')}
+${compareRowHtml('كاش باك الشريحة القصوى (أساس الربع الثالث)', fmt(topA.cashback)+' ج.م', fmt(topB.cashback)+' ج.م')}
+</tbody>
+</table>
+</div>
+<div class="note">المقارنة تعتمد على مبيعات الربع الثالث كأساس لحساب الشريحة القصوى، بدون أرفف أو POSM، لتوفير مقارنة مباشرة بين الصيدليتين.</div>
+</div>`;
 }
 
 function attachCompareHandlers(p){
-  const removeBtn = document.getElementById('removeCompareBtn');
-  if(removeBtn){
-    removeBtn.addEventListener('click', () => {
-      compareWith = null;
-      renderDetail();
-    });
-    return;
-  }
-  const compareInput = document.getElementById('compareInput');
-  const compareResultsBox = document.getElementById('compareResultsBox');
-  if(!compareInput) return;
-  compareInput.addEventListener('input', () => {
-    const raw = compareInput.value.trim();
-    if(raw.length < 1){ compareResultsBox.classList.remove('show'); return; }
-    const q = normalize(raw);
-    let matches = PHARMACIES.filter(x => x !== p && (normalize(x.n).includes(q) || (x.c && String(x.c).includes(raw))));
-    if(matches.length === 0 && q.length >= 2){
-      matches = PHARMACIES.filter(x => x !== p && nearbyMatch(normalize(x.n), q));
-    }
-    matches = matches.slice(0, 15);
-    compareResultsBox.innerHTML = matches.length === 0
-      ? '<div class="empty-msg">لا توجد نتائج مطابقة</div>'
-      : matches.map(x => `
-        <div class="result-item" data-idx="${PHARMACIES.indexOf(x)}">
-          <div class="rname">${x.n}</div>
-          <div class="rmeta">كود: ${x.c} · ${x.rg} / ${x.tr} · المندوب: ${x.mr}</div>
-        </div>`).join('');
-    compareResultsBox.classList.add('show');
-  });
-  compareResultsBox.addEventListener('click', (e) => {
-    const item = e.target.closest('.result-item');
-    if(!item) return;
-    compareWith = PHARMACIES[parseInt(item.dataset.idx, 10)];
-    renderDetail();
-  });
-  document.addEventListener('click', function closeCompareOnOutsideClick(e){
-    if(!e.target.closest('.compare-box')){
-      compareResultsBox.classList.remove('show');
-    }
-  });
+const removeBtn = document.getElementById('removeCompareBtn');
+if(removeBtn){
+removeBtn.addEventListener('click', () => {
+compareWith = null;
+renderDetail();
+});
+return;
+}
+const compareInput = document.getElementById('compareInput');
+const compareResultsBox = document.getElementById('compareResultsBox');
+if(!compareInput) return;
+compareInput.addEventListener('input', () => {
+const raw = compareInput.value.trim();
+if(raw.length < 1){ compareResultsBox.classList.remove('show'); return; }
+const q = normalize(raw);
+let matches = PHARMACIES.filter(x => x !== p && (normalize(x.n).includes(q) || (x.c && String(x.c).includes(raw))));
+if(matches.length === 0 && q.length >= 2){
+matches = PHARMACIES.filter(x => x !== p && nearbyMatch(normalize(x.n), q));
+}
+matches = matches.slice(0, 15);
+compareResultsBox.innerHTML = matches.length === 0
+? '<div class="empty-msg">لا توجد نتائج مطابقة</div>'
+: matches.map(x => `
+<div class="result-item" data-idx="${PHARMACIES.indexOf(x)}">
+<div class="rname">${x.n}</div>
+<div class="rmeta">كود: ${x.c} · ${x.rg} / ${x.tr} · المندوب: ${x.mr}</div>
+</div>`).join('');
+compareResultsBox.classList.add('show');
+});
+compareResultsBox.addEventListener('click', (e) => {
+const item = e.target.closest('.result-item');
+if(!item) return;
+compareWith = PHARMACIES[parseInt(item.dataset.idx, 10)];
+renderDetail();
+});
+document.addEventListener('click', function closeCompareOnOutsideClick(e){
+if(!e.target.closest('.compare-box')){
+compareResultsBox.classList.remove('show');
+}
+});
 }
 
 // ---------- Week-1-of-month pacing card ----------
@@ -1450,269 +1450,269 @@ function attachCompareHandlers(p){
 // after week 1's order. Purely a pacing/early-signal view -- it doesn't feed back
 // into growth %, slab, or cashback calculations.
 function renderWeek1PacingCard(p){
-  if(!WEEK1_LABEL) return '';
+if(!WEEK1_LABEL) return '';
 
-  const quarterBaseline = p.q4d;
-  const monthlyShare = quarterBaseline / 3;
-  const hasWk1 = p.wk1 !== null && p.wk1 !== undefined;
-  const wk1Val = hasWk1 ? p.wk1 : 0;
-  const remainingMonth = Math.max(monthlyShare - wk1Val, 0);
-  const remainingQuarter = Math.max(quarterBaseline - wk1Val, 0);
-  const pctOfMonth = monthlyShare > 0 ? Math.min(wk1Val / monthlyShare, 1) : 0;
+const quarterBaseline = p.q4d;
+const monthlyShare = quarterBaseline / 3;
+const hasWk1 = p.wk1 !== null && p.wk1 !== undefined;
+const wk1Val = hasWk1 ? p.wk1 : 0;
+const remainingMonth = Math.max(monthlyShare - wk1Val, 0);
+const remainingQuarter = Math.max(quarterBaseline - wk1Val, 0);
+const pctOfMonth = monthlyShare > 0 ? Math.min(wk1Val / monthlyShare, 1) : 0;
 
-  return `
-    <div class="card">
-      <h2>📆 وتيرة الأسبوع الأول من الشهر</h2>
-      <div class="note" style="margin-top:0;">
-        بافتراض تقسيم إجمالي الربع الحالي (${fmt(quarterBaseline)} ج.م) بالتساوي على 3 أشهر (حصة الشهر: ${fmt(monthlyShare)} ج.م)، وبناءً على طلبية ${WEEK1_LABEL}.
-      </div>
-      <div class="sales-grid">
-        <div class="sales-box">
-          <div class="t">${WEEK1_LABEL}</div>
-          <div class="v">${hasWk1 ? fmt(wk1Val)+' ج.م' : '—'}</div>
-          <div class="sub">${hasWk1 ? '' : 'لا توجد بيانات مطابقة لهذه الصيدلية بعد'}</div>
-        </div>
-        <div class="sales-box">
-          <div class="t">حصة الشهر من الربع (÷3)</div>
-          <div class="v">${fmt(monthlyShare)} ج.م</div>
-        </div>
-        <div class="sales-box">
-          <div class="t">المتبقي لإتمام حصة الشهر</div>
-          <div class="v">${fmt(remainingMonth)} ج.م</div>
-          <div class="sub">${(pctOfMonth*100).toFixed(0)}% من حصة الشهر مُحقق حتى الآن</div>
-        </div>
-        <div class="sales-box">
-          <div class="t">المتبقي لإتمام إجمالي الربع</div>
-          <div class="v">${fmt(remainingQuarter)} ج.م</div>
-        </div>
-      </div>
-    </div>`;
+return `
+<div class="card">
+<h2>📆 وتيرة الأسبوع الأول من الشهر</h2>
+<div class="note" style="margin-top:0;">
+بافتراض تقسيم إجمالي الربع الحالي (${fmt(quarterBaseline)} ج.م) بالتساوي على 3 أشهر (حصة الشهر: ${fmt(monthlyShare)} ج.م)، وبناءً على طلبية ${WEEK1_LABEL}.
+</div>
+<div class="sales-grid">
+<div class="sales-box">
+<div class="t">${WEEK1_LABEL}</div>
+<div class="v">${hasWk1 ? fmt(wk1Val)+' ج.م' : '—'}</div>
+<div class="sub">${hasWk1 ? '' : 'لا توجد بيانات مطابقة لهذه الصيدلية بعد'}</div>
+</div>
+<div class="sales-box">
+<div class="t">حصة الشهر من الربع (÷3)</div>
+<div class="v">${fmt(monthlyShare)} ج.م</div>
+</div>
+<div class="sales-box">
+<div class="t">المتبقي لإتمام حصة الشهر</div>
+<div class="v">${fmt(remainingMonth)} ج.م</div>
+<div class="sub">${(pctOfMonth*100).toFixed(0)}% من حصة الشهر مُحقق حتى الآن</div>
+</div>
+<div class="sales-box">
+<div class="t">المتبقي لإتمام إجمالي الربع</div>
+<div class="v">${fmt(remainingQuarter)} ج.م</div>
+</div>
+</div>
+</div>`;
 }
 
 // ---------- Rendering ----------
 function renderDetail(){
-  const p = currentPharmacy;
-  if(!p) return;
+const p = currentPharmacy;
+if(!p) return;
 
-  const growth = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
-  const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
-  const growthText = growth === null ? 'لا توجد بيانات كافية' : (growth>=0?'+':'') + pct(growth);
+const growth = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
+const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
+const growthText = growth === null ? 'لا توجد بيانات كافية' : (growth>=0?'+':'') + pct(growth);
 
-  // For a CHC-based build, "st" reflects merch_flag: "Exist" = this pharmacy was
-  // already part of the merchandising program (on both the PH and Merch lists),
-  // "New" = it only shows up here because it's a pharmacy in the CHC master, but
-  // was never on the merchandising list before. Not every data source carries
-  // this (older merch-list-only builds leave "st" blank), so only show the badge
-  // when we actually have the value.
-  const statusBadge = p.st === 'Exist' ? '<span class="badge exist">🏷️ PH + Merch (كانت ضمن قائمة الميرشندايزينج)</span>'
-    : p.st === 'New' ? '<span class="badge new">🆕 PH فقط (جديدة على قائمة الميرشندايزينج)</span>'
-    : '';
+// For a CHC-based build, "st" reflects merch_flag: "Exist" = this pharmacy was
+// already part of the merchandising program (on both the PH and Merch lists),
+// "New" = it only shows up here because it's a pharmacy in the CHC master, but
+// was never on the merchandising list before. Not every data source carries
+// this (older merch-list-only builds leave "st" blank), so only show the badge
+// when we actually have the value.
+const statusBadge = p.st === 'Exist' ? '<span class="badge exist">🏷️ PH + Merch (كانت ضمن قائمة الميرشندايزينج)</span>'
+: p.st === 'New' ? '<span class="badge new">🆕 PH فقط (جديدة على قائمة الميرشندايزينج)</span>'
+: '';
 
-  const tabBaseline = state.baseline === 'q3' ? p.q3d : (state.baseline === 'q4' ? p.q4d : (p.q3d + p.q4d));
-  const usingCustom = state.customBaseline != null && !isNaN(state.customBaseline) && state.customBaseline > 0;
-  const baselineSales = usingCustom ? state.customBaseline : tabBaseline;
-  const rows = calcSlabs(baselineSales, state);
-  const slabStatus = getSlabStatus(p);
+const tabBaseline = state.baseline === 'q3' ? p.q3d : (state.baseline === 'q4' ? p.q4d : (p.q3d + p.q4d));
+const usingCustom = state.customBaseline != null && !isNaN(state.customBaseline) && state.customBaseline > 0;
+const baselineSales = usingCustom ? state.customBaseline : tabBaseline;
+const rows = calcSlabs(baselineSales, state);
+const slabStatus = getSlabStatus(p);
 
-  document.getElementById('detailSection').innerHTML = `
-    <div class="card">
-      <div class="pharma-header">
-        <div>
-          <div class="name">${p.n}</div>
-          <div class="code">كود العميل: ${p.c}</div>
-        </div>
-        ${statusBadge}
-      </div>
-      <div class="badge-row">${slabStatusBadgeHtml(slabStatus)}</div>
-      <div class="meta-grid">
-        <div class="meta-item"><div class="lbl">المندوب الطبي</div><div class="val">${p.mr||'—'}</div></div>
-        <div class="meta-item"><div class="lbl">مدير المنطقة</div><div class="val">${p.dm||'—'}</div></div>
-        <div class="meta-item"><div class="lbl">المنطقة</div><div class="val">${p.rg||'—'}</div></div>
-        <div class="meta-item"><div class="lbl">القطاع</div><div class="val">${p.tr||'—'}</div></div>
-        <div class="meta-item"><div class="lbl">نوع الصيدلية</div><div class="val">${ctLabel(p.ct)}</div></div>
-      </div>
-    </div>
+document.getElementById('detailSection').innerHTML = `
+<div class="card">
+<div class="pharma-header">
+<div>
+<div class="name">${p.n}</div>
+<div class="code">كود العميل: ${p.c}</div>
+</div>
+${statusBadge}
+</div>
+<div class="badge-row">${slabStatusBadgeHtml(slabStatus)}</div>
+<div class="meta-grid">
+<div class="meta-item"><div class="lbl">المندوب الطبي</div><div class="val">${p.mr||'—'}</div></div>
+<div class="meta-item"><div class="lbl">مدير المنطقة</div><div class="val">${p.dm||'—'}</div></div>
+<div class="meta-item"><div class="lbl">المنطقة</div><div class="val">${p.rg||'—'}</div></div>
+<div class="meta-item"><div class="lbl">القطاع</div><div class="val">${p.tr||'—'}</div></div>
+<div class="meta-item"><div class="lbl">نوع الصيدلية</div><div class="val">${ctLabel(p.ct)}</div></div>
+</div>
+</div>
 
-    <div class="card">
-      <h2>مبيعات الربعين الأخيرين (مبيعات الموزع)</h2>
-      <div class="sales-grid">
-        <div class="sales-box">
-          <div class="t">الربع الثالث 2025</div>
-          <div class="v">${fmt(p.q3d)} ج.م</div>
-          <div class="sub">مبيعات فعلية (IMS): ${fmt(p.q3a)} ج.م</div>
-        </div>
-        <div class="sales-box">
-          <div class="t">الربع الرابع 2025</div>
-          <div class="v">${fmt(p.q4d)} ج.م</div>
-          <div class="sub">مبيعات فعلية (IMS): ${fmt(p.q4a)} ج.م</div>
-        </div>
-        <div class="sales-box">
-          <div class="t">نسبة النمو (الرابع مقابل الثالث)</div>
-          <div class="v ${growthClass}">${growthText}</div>
-          <div class="sub">إجمالي الربعين: ${fmt(p.q3d+p.q4d)} ج.م</div>
-        </div>
-        ${SUPPLEMENT_LABEL ? `
-        <div class="sales-box">
-          <div class="t">${SUPPLEMENT_LABEL}</div>
-          <div class="v">${(p.wk === null || p.wk === undefined) ? '—' : fmt(p.wk) + ' ج.م'}</div>
-          <div class="sub">${(p.wk === null || p.wk === undefined) ? 'لا توجد بيانات مطابقة لهذه الصيدلية في هذا الملف' : 'بيانات إضافية — لا تؤثر على حساب النمو أو الشرائح'}</div>
-        </div>` : ''}
-      </div>
-    </div>
+<div class="card">
+<h2>مبيعات الربعين الأخيرين (مبيعات الموزع)</h2>
+<div class="sales-grid">
+<div class="sales-box">
+<div class="t">الربع الثالث 2025</div>
+<div class="v">${fmt(p.q3d)} ج.م</div>
+<div class="sub">مبيعات فعلية (IMS): ${fmt(p.q3a)} ج.م</div>
+</div>
+<div class="sales-box">
+<div class="t">الربع الرابع 2025</div>
+<div class="v">${fmt(p.q4d)} ج.م</div>
+<div class="sub">مبيعات فعلية (IMS): ${fmt(p.q4a)} ج.م</div>
+</div>
+<div class="sales-box">
+<div class="t">نسبة النمو (الرابع مقابل الثالث)</div>
+<div class="v ${growthClass}">${growthText}</div>
+<div class="sub">إجمالي الربعين: ${fmt(p.q3d+p.q4d)} ج.م</div>
+</div>
+${SUPPLEMENT_LABEL ? `
+<div class="sales-box">
+<div class="t">${SUPPLEMENT_LABEL}</div>
+<div class="v">${(p.wk === null || p.wk === undefined) ? '—' : fmt(p.wk) + ' ج.م'}</div>
+<div class="sub">${(p.wk === null || p.wk === undefined) ? 'لا توجد بيانات مطابقة لهذه الصيدلية في هذا الملف' : 'بيانات إضافية — لا تؤثر على حساب النمو أو الشرائح'}</div>
+</div>` : ''}
+</div>
+</div>
 
-    <div class="card">
-      <h2>📊 سجل المبيعات — للاستدلال على الإمكانية الفعلية للصيدلية</h2>
-      ${renderHistoryChart(p)}
-      <div class="note">نقاط متصلة بنفس المقياس لتوضيح اتجاه النمو الفعلي. كلما زادت نقاط البيانات المتاحة مستقبلاً (مثل بيانات نصف السنة)، ستظهر هنا تلقائياً.</div>
-    </div>
+<div class="card">
+<h2>📊 سجل المبيعات — للاستدلال على الإمكانية الفعلية للصيدلية</h2>
+${renderHistoryChart(p)}
+<div class="note">نقاط متصلة بنفس المقياس لتوضيح اتجاه النمو الفعلي. كلما زادت نقاط البيانات المتاحة مستقبلاً (مثل بيانات نصف السنة)، ستظهر هنا تلقائياً.</div>
+</div>
 
-    ${renderWeek1PacingCard(p)}
+${renderWeek1PacingCard(p)}
 
-    <div class="card">
-      <h2>حاسبة عرض العقد الجديد</h2>
+<div class="card">
+<h2>حاسبة عرض العقد الجديد</h2>
 
-      <div class="tabs" id="baselineTabs" style="${usingCustom ? 'opacity:.45;pointer-events:none;' : ''}">
-        <div class="tab-btn ${state.baseline==='q3'?'active':''}" data-baseline="q3">أساس: الربع الثالث 2025</div>
-        <div class="tab-btn ${state.baseline==='q4'?'active':''}" data-baseline="q4">أساس: الربع الرابع 2025</div>
-        <div class="tab-btn ${state.baseline==='s2'?'active':''}" data-baseline="s2">أساس: الربعين معاً</div>
-      </div>
+<div class="tabs" id="baselineTabs" style="${usingCustom ? 'opacity:.45;pointer-events:none;' : ''}">
+<div class="tab-btn ${state.baseline==='q3'?'active':''}" data-baseline="q3">أساس: الربع الثالث 2025</div>
+<div class="tab-btn ${state.baseline==='q4'?'active':''}" data-baseline="q4">أساس: الربع الرابع 2025</div>
+<div class="tab-btn ${state.baseline==='s2'?'active':''}" data-baseline="s2">أساس: الربعين معاً</div>
+</div>
 
-      <div class="custom-baseline">
-        <label>أو مبلغ مخصص (سيناريو ماذا لو):</label>
-        <input type="number" id="customBaselineInput" placeholder="اكتب رقم مبيعات مخصص..." value="${usingCustom ? state.customBaseline : ''}" class="${usingCustom ? 'custom-active' : ''}">
-        ${usingCustom ? '<button class="reset-btn" id="resetCustomBtn" type="button">إلغاء المخصص</button>' : ''}
-      </div>
+<div class="custom-baseline">
+<label>أو مبلغ مخصص (سيناريو ماذا لو):</label>
+<input type="number" id="customBaselineInput" placeholder="اكتب رقم مبيعات مخصص..." value="${usingCustom ? state.customBaseline : ''}" class="${usingCustom ? 'custom-active' : ''}">
+${usingCustom ? '<button class="reset-btn" id="resetCustomBtn" type="button">إلغاء المخصص</button>' : ''}
+</div>
 
-      <div class="options-row">
-        <div class="opt-group">
-          <div class="g-lbl">عدد الأرفف (اختيار واحد)</div>
-          <div class="opt-choices" id="shelfChoices">
-            <div class="chip ${state.shelf==='none'?'active':''}" data-shelf="none">بدون رف إضافي</div>
-            <div class="chip ${state.shelf==='2'?'active':''}" data-shelf="2">2 أرفف</div>
-            <div class="chip ${state.shelf==='3'?'active':''}" data-shelf="3">3 أرفف</div>
-            <div class="chip ${state.shelf==='4'?'active':''}" data-shelf="4">4 أرفف</div>
-          </div>
-        </div>
-        <div class="opt-group">
-          <div class="g-lbl">مكافآت إضافية</div>
-          <div class="opt-choices">
-            <label class="checkbox-chip ${state.posm?'active':''}" id="posmChip">
-              <input type="checkbox" id="posmCheck" ${state.posm?'checked':''}> مواد عرض إضافية (POSM)
-            </label>
-            <label class="checkbox-chip ${state.full?'active':''}" id="fullChip">
-              <input type="checkbox" id="fullCheck" ${state.full?'checked':''}> تحقيق الهدف في الربعين معاً (مكافأة نهاية الفترة)
-            </label>
-          </div>
-        </div>
-      </div>
+<div class="options-row">
+<div class="opt-group">
+<div class="g-lbl">عدد الأرفف (اختيار واحد)</div>
+<div class="opt-choices" id="shelfChoices">
+<div class="chip ${state.shelf==='none'?'active':''}" data-shelf="none">بدون رف إضافي</div>
+<div class="chip ${state.shelf==='2'?'active':''}" data-shelf="2">2 أرفف</div>
+<div class="chip ${state.shelf==='3'?'active':''}" data-shelf="3">3 أرفف</div>
+<div class="chip ${state.shelf==='4'?'active':''}" data-shelf="4">4 أرفف</div>
+</div>
+</div>
+<div class="opt-group">
+<div class="g-lbl">مكافآت إضافية</div>
+<div class="opt-choices">
+<label class="checkbox-chip ${state.posm?'active':''}" id="posmChip">
+<input type="checkbox" id="posmCheck" ${state.posm?'checked':''}> مواد عرض إضافية (POSM)
+</label>
+<label class="checkbox-chip ${state.full?'active':''}" id="fullChip">
+<input type="checkbox" id="fullCheck" ${state.full?'checked':''}> تحقيق الهدف في الربعين معاً (مكافأة نهاية الفترة)
+</label>
+</div>
+</div>
+</div>
 
-      <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>الشريحة</th>
-            <th>نسبة النمو المطلوبة</th>
-            <th>المبيعات المستهدفة</th>
-            <th>كاش باك النمو</th>
-            <th>مكافأة الأرفف</th>
-            <th>مكافأة POSM</th>
-            <th>مكافأة نهاية الفترة</th>
-            <th>الإجمالي</th>
-            <th>اتفاق</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map((r, ri) => `
-            <tr class="${r.color}">
-              <td class="name-cell">${r.label}</td>
-              <td>+${pct(r.growth)}</td>
-              <td>${fmt(r.target)} ج.م</td>
-              <td>${fmt(r.cashback)} ج.م</td>
-              <td>${r.shelfBonus>0?fmt(r.shelfBonus)+' ج.م':'—'}</td>
-              <td>${r.posmBonus>0?fmt(r.posmBonus)+' ج.م':'—'}</td>
-              <td>${r.rebateBonus>0?fmt(r.rebateBonus)+' ج.م':'—'}</td>
-              <td class="total-cell">${fmt(r.total)} ج.م</td>
-              <td><button class="reset-btn agree-deal-btn" data-slab-idx="${ri}" type="button" ${agreedThisSession.has(p.c + ':' + r.key) ? 'disabled' : ''}>${agreedThisSession.has(p.c + ':' + r.key) ? '✅ تم تسجيل الاتفاق' : '✅ اتفاق مع الصيدلية'}</button></td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-      </div>
+<div style="overflow-x:auto;">
+<table>
+<thead>
+<tr>
+<th>الشريحة</th>
+<th>نسبة النمو المطلوبة</th>
+<th>المبيعات المستهدفة</th>
+<th>كاش باك النمو</th>
+<th>مكافأة الأرفف</th>
+<th>مكافأة POSM</th>
+<th>مكافأة نهاية الفترة</th>
+<th>الإجمالي</th>
+<th>اتفاق</th>
+</tr>
+</thead>
+<tbody>
+${rows.map((r, ri) => `
+<tr class="${r.color}">
+<td class="name-cell">${r.label}</td>
+<td>+${pct(r.growth)}</td>
+<td>${fmt(r.target)} ج.م</td>
+<td>${fmt(r.cashback)} ج.م</td>
+<td>${r.shelfBonus>0?fmt(r.shelfBonus)+' ج.م':'—'}</td>
+<td>${r.posmBonus>0?fmt(r.posmBonus)+' ج.م':'—'}</td>
+<td>${r.rebateBonus>0?fmt(r.rebateBonus)+' ج.م':'—'}</td>
+<td class="total-cell">${fmt(r.total)} ج.م</td>
+<td><button class="reset-btn agree-deal-btn" data-slab-idx="${ri}" type="button" ${agreedThisSession.has(p.c + ':' + r.key) ? 'disabled' : ''}>${agreedThisSession.has(p.c + ':' + r.key) ? '✅ تم تسجيل الاتفاق' : '✅ اتفاق مع الصيدلية'}</button></td>
+</tr>`).join('')}
+</tbody>
+</table>
+</div>
 
-      <div class="note">
-        المبلغ الأساسي: ${fmt(baselineSales)} ج.م (${usingCustom ? 'رقم مخصص من إدخال المستخدم -- سيناريو ماذا لو' : (state.baseline==='q3'?'مبيعات الربع الثالث':state.baseline==='q4'?'مبيعات الربع الرابع':'إجمالي الربعين معاً')}).
-        الحد الأدنى للمبيعات المستهدفة والكاش باك مطبّق تلقائياً حسب سياسة الشركة (5,000/6,000/7,000 ج.م للمستهدف، و500/700/1,000 ج.م للكاش باك) للصيدليات التي كان أساس مبيعاتها 5,000 ج.م أو أقل.
-        هذه الأرقام لعرضها على الصيدلي قبل توقيع العقد، وتُحسب من مبيعات الموزع فقط.
-      </div>
-    </div>
+<div class="note">
+المبلغ الأساسي: ${fmt(baselineSales)} ج.م (${usingCustom ? 'رقم مخصص من إدخال المستخدم -- سيناريو ماذا لو' : (state.baseline==='q3'?'مبيعات الربع الثالث':state.baseline==='q4'?'مبيعات الربع الرابع':'إجمالي الربعين معاً')}).
+الحد الأدنى للمبيعات المستهدفة والكاش باك مطبّق تلقائياً حسب سياسة الشركة (5,000/6,000/7,000 ج.م للمستهدف، و500/700/1,000 ج.م للكاش باك) للصيدليات التي كان أساس مبيعاتها 5,000 ج.م أو أقل.
+هذه الأرقام لعرضها على الصيدلي قبل توقيع العقد، وتُحسب من مبيعات الموزع فقط.
+</div>
+</div>
 
-    ${renderCompareCardHtml(p)}
-  `;
+${renderCompareCardHtml(p)}
+`;
 
-  attachCompareHandlers(p);
+attachCompareHandlers(p);
 
-  document.getElementById('baselineTabs').addEventListener('click', (e) => {
-    const btn = e.target.closest('.tab-btn');
-    if(!btn) return;
-    state.baseline = btn.dataset.baseline;
-    renderDetail();
-  });
-  document.getElementById('shelfChoices').addEventListener('click', (e) => {
-    const chip = e.target.closest('.chip');
-    if(!chip) return;
-    state.shelf = chip.dataset.shelf;
-    renderDetail();
-  });
-  document.getElementById('posmCheck').addEventListener('change', (e) => {
-    state.posm = e.target.checked;
-    renderDetail();
-  });
-  document.getElementById('customBaselineInput').addEventListener('change', (e) => {
-    const v = parseFloat(e.target.value);
-    state.customBaseline = (e.target.value.trim() !== '' && !isNaN(v) && v > 0) ? v : null;
-    renderDetail();
-  });
-  const resetCustomBtn = document.getElementById('resetCustomBtn');
-  if(resetCustomBtn){
-    resetCustomBtn.addEventListener('click', () => {
-      state.customBaseline = null;
-      renderDetail();
-    });
-  }
-  document.getElementById('fullCheck').addEventListener('change', (e) => {
-    state.full = e.target.checked;
-    renderDetail();
-  });
-  document.querySelectorAll('.agree-deal-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.slabIdx, 10);
-      agreeDeal(p, rows[idx], baselineSales, btn);
-    });
-  });
+document.getElementById('baselineTabs').addEventListener('click', (e) => {
+const btn = e.target.closest('.tab-btn');
+if(!btn) return;
+state.baseline = btn.dataset.baseline;
+renderDetail();
+});
+document.getElementById('shelfChoices').addEventListener('click', (e) => {
+const chip = e.target.closest('.chip');
+if(!chip) return;
+state.shelf = chip.dataset.shelf;
+renderDetail();
+});
+document.getElementById('posmCheck').addEventListener('change', (e) => {
+state.posm = e.target.checked;
+renderDetail();
+});
+document.getElementById('customBaselineInput').addEventListener('change', (e) => {
+const v = parseFloat(e.target.value);
+state.customBaseline = (e.target.value.trim() !== '' && !isNaN(v) && v > 0) ? v : null;
+renderDetail();
+});
+const resetCustomBtn = document.getElementById('resetCustomBtn');
+if(resetCustomBtn){
+resetCustomBtn.addEventListener('click', () => {
+state.customBaseline = null;
+renderDetail();
+});
+}
+document.getElementById('fullCheck').addEventListener('change', (e) => {
+state.full = e.target.checked;
+renderDetail();
+});
+document.querySelectorAll('.agree-deal-btn').forEach(btn => {
+btn.addEventListener('click', () => {
+const idx = parseInt(btn.dataset.slabIdx, 10);
+agreeDeal(p, rows[idx], baselineSales, btn);
+});
+});
 }
 
 function calcSlabs(baseSales, opts){
-  // Pharmacies with low baseline sales get a higher target floor per slab, and the
-  // cashback floor also applies -- whatever amount is passed in as baseSales here is
-  // whatever the caller is using as "the baseline" (Q3 / Q4 / combined / a custom
-  // what-if figure, or a pharmacy's own Q3 sales for badges/comparisons), so this
-  // rule applies consistently everywhere calcSlabs is used, not just one screen.
-  // Threshold is inclusive: a pharmacy whose baseline is exactly 5,000 EGP still
-  // gets the low-value floors, matching company policy ("5000 or less").
-  const useLowValueFloors = baseSales <= LOW_VALUE_THRESHOLD;
-  return SLABS.map(s => {
-    const rawTarget = baseSales * (1 + s.growth);
-    const floor = useLowValueFloors ? LOW_VALUE_TARGET_FLOORS[s.key] : s.targetFloor;
-    const target = Math.max(rawTarget, floor);
-    const cashback = useLowValueFloors ? Math.max(target * s.cashRate, s.cashFloor) : target * s.cashRate;
-    const shelfBonus = target * (SHELF_RATES[opts.shelf] || 0);
-    const posmBonus = opts.posm ? target * POSM_RATE : 0;
-    const rebateBonus = opts.full ? target * s.rebateRate : 0;
-    const total = cashback + shelfBonus + posmBonus + rebateBonus;
-    return {
-      key:s.key, label:s.label, color:s.color, growth:s.growth,
-      target, cashback, shelfBonus, posmBonus, rebateBonus, total
-    };
-  });
+// Pharmacies with low baseline sales get a higher target floor per slab, and the
+// cashback floor also applies -- whatever amount is passed in as baseSales here is
+// whatever the caller is using as "the baseline" (Q3 / Q4 / combined / a custom
+// what-if figure, or a pharmacy's own Q3 sales for badges/comparisons), so this
+// rule applies consistently everywhere calcSlabs is used, not just one screen.
+// Threshold is inclusive: a pharmacy whose baseline is exactly 5,000 EGP still
+// gets the low-value floors, matching company policy ("5000 or less").
+const useLowValueFloors = baseSales <= LOW_VALUE_THRESHOLD;
+return SLABS.map(s => {
+const rawTarget = baseSales * (1 + s.growth);
+const floor = useLowValueFloors ? LOW_VALUE_TARGET_FLOORS[s.key] : s.targetFloor;
+const target = Math.max(rawTarget, floor);
+const cashback = useLowValueFloors ? Math.max(target * s.cashRate, s.cashFloor) : target * s.cashRate;
+const shelfBonus = target * (SHELF_RATES[opts.shelf] || 0);
+const posmBonus = opts.posm ? target * POSM_RATE : 0;
+const rebateBonus = opts.full ? target * s.rebateRate : 0;
+const total = cashback + shelfBonus + posmBonus + rebateBonus;
+return {
+key:s.key, label:s.label, color:s.color, growth:s.growth,
+target, cashback, shelfBonus, posmBonus, rebateBonus, total
+};
+});
 }
 
 populateFilters();

@@ -196,8 +196,8 @@ def extract_data(xlsx_path, overrides=None, forced_header_row=None):
             continue
         blank_streak = 0
         rows.append({
-            "c":  val(row_vals, auto_cols["c"]),
-            "n":  str(name).strip(),
+            "c": val(row_vals, auto_cols["c"]),
+            "n": str(name).strip(),
             "mr": str(val(row_vals, auto_cols["mr"]) or "").strip(),
             "dm": str(val(row_vals, auto_cols["dm"]) or "").strip(),
             "rg": str(val(row_vals, auto_cols["rg"]) or "").strip(),
@@ -214,7 +214,7 @@ def extract_data(xlsx_path, overrides=None, forced_header_row=None):
 
 CHC_REQUIRED_COLS = [
     "customer_code", "ims_customer_name", "region_name", "territory_name",
-    "mr_name", "dm_name", "ims_cust_type", "ph_flag", "merch_flag",
+    "mr_name", "dm_name", "ims_cust_type", "ph_flag", "merch_flag", "medical_flag",
 ]
 
 def extract_chc_data(xlsx_path, ph_flag_only=True):
@@ -315,6 +315,73 @@ def extract_chc_data(xlsx_path, ph_flag_only=True):
     wb.close()
     return rows
 
+def strip_medical_leaked_mr_names(xlsx_path, rows):
+    """Some names appearing as mr_name on a handful of pharmacy rows are, in reality,
+    medical-channel reps (hospitals/universities/etc.) whose name leaked onto those
+    rows by a data error in final_chc.xlsx -- their real account book is overwhelmingly
+    medical (ph_flag=FALSE, medical_flag=TRUE) accounts, not pharmacies. Confirmed by
+    inspection: e.g. "Abdelrahman Hussein Mohamed Abdelsamad" sits on just 1 pharmacy
+    row but 20 medical-only rows; "Aya Khaled el sayed refaat el saeid" on 1 pharmacy
+    row but 10 medical-only rows. Meanwhile a legitimate pharmacy MR who also happens
+    to touch a couple of medical accounts (e.g. "Amr Hussein Kamel Ali Nasser": 191
+    pharmacy rows vs. 3 medical-only rows) is left untouched.
+
+    Rule: for each mr_name, compare how many pharmacy rows (ph_flag=TRUE, already in
+    `rows`) carry that name vs. how many medical-only rows (ph_flag=FALSE,
+    medical_flag=TRUE) do. If the medical-only count exceeds the pharmacy count, that
+    name is not really a pharmacy MR -- blank out mr_name on those specific pharmacy
+    rows (the pharmacy itself, its sales data, dm_name, etc. are left untouched; only
+    the wrong mr_name field is cleared, so the tool shows "unassigned" instead of a
+    medical rep's name).
+
+    Returns a list of (name, pharmacy_row_count, medical_only_row_count) for every
+    name that got stripped, for the caller to report.
+    """
+    wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
+    ws = wb[wb.sheetnames[0]]
+    rows_iter = ws.iter_rows(values_only=True)
+    header = next(rows_iter)
+    idx = {h: i for i, h in enumerate(header)}
+
+    def val(row, key):
+        i = idx.get(key)
+        return row[i] if i is not None and i < len(row) else None
+
+    medical_only_counts = {}
+    for row in rows_iter:
+        ph = val(row, "ph_flag")
+        is_ph = (ph is True) or (str(ph).strip().upper() == "TRUE")
+        if is_ph:
+            continue
+        med = val(row, "medical_flag")
+        is_med = (med is True) or (str(med).strip().upper() == "TRUE")
+        if not is_med:
+            continue
+        mr = str(val(row, "mr_name") or "").strip()
+        if mr:
+            medical_only_counts[mr] = medical_only_counts.get(mr, 0) + 1
+    wb.close()
+
+    pharmacy_counts = {}
+    for row in rows:
+        mr = row.get("mr")
+        if mr:
+            pharmacy_counts[mr] = pharmacy_counts.get(mr, 0) + 1
+
+    stripped = []
+    for name, med_count in medical_only_counts.items():
+        ph_count = pharmacy_counts.get(name, 0)
+        if ph_count and med_count > ph_count:
+            stripped.append((name, ph_count, med_count))
+
+    stripped_names = {name for name, _, _ in stripped}
+    if stripped_names:
+        for row in rows:
+            if row.get("mr") in stripped_names:
+                row["mr"] = ""
+
+    return stripped
+
 def load_mr_dm_override_map(xlsx_path, forced_header_row=None):
     """Load MR/DM name overrides from a merchandising-list-shaped file (e.g.
     merch8.xlsx), keyed by customer code. Reuses the same fuzzy header detection as
@@ -372,7 +439,6 @@ def load_mr_dm_override_map(xlsx_path, forced_header_row=None):
             str(dm).strip() if dm else "",
         )
     return override
-
 
 def canonicalize_rep_names(rows, fields=("mr", "dm")):
     """Merges near-duplicate rep names that differ only in case/spacing/hyphenation
@@ -690,6 +756,17 @@ def main():
         for canonical, variants in merges:
             others = [v for v in variants if v != canonical]
             print(f"Merged duplicate {field} name(s) into \"{canonical}\": {others}")
+
+    # Only meaningful for a CHC-shaped source (it needs ph_flag/medical_flag on the
+    # same file) -- strip mr_name from pharmacy rows where the name is really a
+    # medical-channel rep who leaked onto a handful of pharmacy rows by data error.
+    if args.chc_file:
+        stripped = strip_medical_leaked_mr_names(args.chc_file, rows)
+        for name, ph_count, med_count in stripped:
+            print(
+                f"Stripped medical-leaked mr_name \"{name}\" from {ph_count} pharmacy "
+                f"row(s) -- has {med_count} medical-only row(s), so not a real pharmacy MR."
+            )
 
     supplement_label = None
     if args.supplement_file:
