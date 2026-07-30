@@ -291,6 +291,73 @@ vertical-align:middle;
 .history-chart-svg{width:100%;height:190px;display:block;overflow:visible;}
 .pli-slab-remaining .pli-sales{color:var(--primary-dark);}
 
+/* Priority call list -- the rep's short, ranked "start here" list */
+.prio-item{
+display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+padding:12px 14px;border-bottom:1px solid var(--border);
+}
+.prio-item:last-child{border-bottom:none;}
+.prio-rank{
+flex:0 0 26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;
+font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;
+}
+.prio-main{flex:1 1 auto;min-width:0;cursor:pointer;}
+.prio-main:hover .prio-name{color:var(--primary-dark);}
+.prio-name{font-weight:600;font-size:13px;}
+.prio-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+.prio-ask{font-size:11.5px;color:var(--text);margin-top:6px;line-height:1.55;background:var(--bg);padding:7px 10px;border-radius:8px;}
+.prio-side{flex:0 0 auto;text-align:left;white-space:nowrap;}
+.prio-egp{font-weight:700;font-size:13px;color:var(--danger);}
+.problem-tag{
+display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;
+background:#fdf3f2;border:1px solid #f3d3ce;color:#c0392b;margin-top:4px;
+}
+.problem-tag.neutral{background:var(--bg);border-color:var(--border);color:var(--muted);}
+.help-btn{
+margin-top:6px;border:1px solid var(--border);background:#fff;color:var(--muted);
+font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;cursor:pointer;font-family:inherit;
+}
+.help-btn:hover{border-color:var(--primary);color:var(--primary-dark);background:#fff8f0;}
+.help-btn.sent{border-color:#c7e9d6;color:#1a7a4d;background:#f2fbf6;cursor:default;}
+
+/* Help-request modal */
+.help-overlay{
+position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;
+display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.help-modal{
+background:var(--card);border-radius:14px;padding:20px;max-width:440px;width:100%;
+box-shadow:0 18px 50px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto;
+}
+.help-modal h3{margin:0 0 4px;font-size:15px;color:var(--primary-dark);}
+.help-modal .hm-sub{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
+.help-reason{
+display:block;width:100%;text-align:right;border:1px solid var(--border);background:#fff;
+border-radius:10px;padding:10px 12px;margin-bottom:7px;font-size:12.5px;cursor:pointer;
+font-family:inherit;color:var(--text);
+}
+.help-reason:hover{border-color:var(--primary);background:#fff8f0;}
+.help-reason.selected{border-color:var(--primary);background:#fff8f0;font-weight:600;}
+.help-note-input{
+width:100%;border:1px solid var(--border);border-radius:10px;padding:9px 12px;
+font-size:12.5px;font-family:inherit;margin-top:4px;resize:vertical;min-height:56px;
+}
+.help-actions{display:flex;gap:8px;margin-top:14px;}
+.help-actions button{
+flex:1;border-radius:10px;padding:10px;font-size:12.5px;font-weight:600;
+cursor:pointer;font-family:inherit;border:1px solid var(--border);background:#fff;color:var(--muted);
+}
+.help-actions .hm-send{background:var(--primary);border-color:var(--primary);color:#fff;}
+.help-actions .hm-send:disabled{opacity:.6;cursor:default;}
+
+/* Gap-to-target board */
+.gap-hero{display:flex;flex-wrap:wrap;gap:10px;}
+.gap-hero .sales-box{flex:1 1 150px;}
+.gap-bar-wrap{margin-top:12px;background:var(--bg);border-radius:999px;height:12px;overflow:hidden;}
+.gap-bar{height:100%;background:var(--primary);border-radius:999px;}
+.gap-bar.ok{background:#1a7a4d;}
+tr.rep-behind td{background:#fdf3f2;}
+
 .compare-box{position:relative;margin-top:6px;}
 .compare-active-row{
 display:flex;
@@ -407,7 +474,6 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="view-tab-btn" data-view="chain">🔗 دمج صيدليات (سلسلة)</div>
 <div class="view-tab-btn" data-view="leaderboard">🏆 لوحة المتصدرين</div>
 <div class="view-tab-btn" data-view="myperf">👤 My Performance</div>
-<div class="view-tab-btn" data-view="merch">🛒 Merchandising</div>
 <div class="view-tab-btn" data-view="analysis">📈 Analysis</div>
 </div>
 
@@ -479,23 +545,17 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div id="myperfSection"></div>
 </div>
 
-<div id="merchView" style="display:none;">
-<div class="card">
-<h2>🛒 Merchandising</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">Where to put merchandising investment next, based on who's already growing on their own vs. who already got materials and is still declining. "YoY %" here uses the same self-correcting current-year window as the rest of the tool (auto-excludes any not-yet-fully-reported month) -- separate from the contractual Q3→Q4 2025 figure.</div>
-</div>
-<div id="merchSection"></div>
-</div>
-
 <div id="analysisView" style="display:none;">
 <div class="card">
 <h2>📈 Performance Analysis</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">Aggregate analysis across all <span id="analysisTotalCount"></span> pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). "Growth % (Q3→Q4)" is the contractual figure that determines cashback slabs. The "YoY %" column is a separate, informational read on current-year momentum, computed from whichever recent months are fully reported (auto-excludes any month with incomplete distributor data) -- it does not affect cashback. Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.</div>
+<div class="note" style="margin-top:0;margin-bottom:12px;" id="analysisIntroNote"></div>
 <div class="tabs" id="analysisSubTabs">
 <div class="tab-btn active" data-group="rg">By Region</div>
 <div class="tab-btn" data-group="tr">By Territory</div>
 <div class="tab-btn" data-group="mr">By Medical Representative</div>
 <div class="tab-btn" data-group="dm">By District Manager</div>
+<div class="tab-btn" data-group="gap">🎯 Gap to 15%</div>
+<div class="tab-btn" data-group="invest">🛒 Where to Invest</div>
 </div>
 </div>
 <div id="companyTrendSection"></div>
@@ -691,6 +751,27 @@ return `
 <div class="v ${growthClass}">${growthText}</div>
 </div>
 </div>
+${renderProblemBlockHtml(p)}
+</div>`;
+}
+
+// Shows the diagnosed problem shape and the help-request button right on the
+// pharmacy's own card, so a rep who arrives via search (not via the priority
+// list) still gets the same read and the same escalation route.
+function renderProblemBlockHtml(p){
+const problem = classifyProblem(p);
+if(!problem) return '';
+const detail = problem.brokeAt ? ` — الانخفاض بدأ في ${problem.brokeAt}`
+: (problem.downMonths ? ` — منخفضة في ${problem.downMonths} من ${problem.totalMonths} أشهر` : '');
+const sent = helpSentThisSession.has(p.c);
+return `
+<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+<div><span class="problem-tag ${problem.cls === '' ? 'neutral' : ''}">${problem.icon} ${problem.label}${detail}</span></div>
+<div class="prio-ask" style="margin-top:8px;">${problem.ask}</div>
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;">
+<button type="button" class="help-btn ${sent ? 'sent' : ''}" data-help-idx="${PHARMACIES.indexOf(p)}" data-help-code="${p.c}">${sent ? '✅ تم إرسال طلب المساعدة' : '🚨 محتاج مساعدة من المدير'}</button>
+<span class="prio-meta">${fmt(problem.recoverEGP)} ج.م ممكن استرجاعها</span>
+</div>
 </div>`;
 }
 
@@ -715,6 +796,131 @@ function dormancyBadgeHtml(p){
 const d = getDormancyInfo(p);
 if(!d.isDormant) return '';
 return `<span class="yoy-chip growth-neg">🚨 توقفت عن الشراء — ${fmt(d.atRiskEGP)} ج.م معرضة للخطر</span>`;
+}
+
+// ---------- Problem classification ----------
+// A rep looking at a list of declining pharmacies still has to guess WHAT went
+// wrong before they can do anything about it. The shape of the monthly curve
+// tells you a lot: a pharmacy that fell off a cliff in one month has a
+// different cause (and a different fix) than one that has been sliding for
+// six. This classifies the shape so the rep walks in already knowing what
+// kind of conversation to have. It deliberately does not guess the CAUSE --
+// only the pattern -- and reps confirm the real cause via the help-request
+// reason codes, which is the one thing data can never tell us.
+const PROBLEM_TYPES = {
+quiet:  { label:'Stopped completely', icon:'🚨', cls:'growth-neg',
+          ask:'Went from regular orders to zero. Find out today whether this is a stock-out, a credit hold, a competitor takeover, or an ownership change -- all four are recoverable if caught early.' },
+cliff:  { label:'Sudden drop',        icon:'⛰️', cls:'growth-neg',
+          ask:'Was steady, then fell off in one specific month. Something changed on a date -- ask what happened that month. Usually a stock-out, a new competitor deal, or a pharmacist who left.' },
+steady: { label:'Sliding every month',icon:'📉', cls:'growth-neg',
+          ask:'Losing ground month after month, not one big event. Usually shelf position, a competitor slowly taking share, or an owner who stopped pushing the brand. Needs a re-set visit, not a phone call.' },
+bleed:  { label:'Big account slipping',icon:'💧', cls:'growth-neg',
+          ask:'The % drop looks small but this is a large account, so the EGP loss is heavy. Protect this one first -- it is worth more than several small recoveries combined.' },
+watch:  { label:'Softening',          icon:'👀', cls:'',
+          ask:'Down slightly. Worth a check-in before it becomes one of the categories above.' }
+};
+
+// A pharmacy counts as a "big account" if its prior-year revenue in the
+// comparison window puts it in the top tier of the whole base. Computed once
+// from the real distribution rather than hardcoded, so it stays meaningful if
+// the book changes shape.
+const BIG_ACCOUNT_THRESHOLD = (function(){
+const sums = PHARMACIES.map(p => sumMonths(p.mo, YOY_PRIOR_MONTHS)).filter(v => v > 0).sort((a,b) => a - b);
+if(!sums.length) return Infinity;
+return sums[Math.floor(sums.length * 0.90)]; // top 10% by prior-year revenue
+})();
+
+function classifyProblem(p){
+const y = getYoYGrowth(p);
+const d = getDormancyInfo(p);
+if(d.isDormant) return { type:'quiet', ...PROBLEM_TYPES.quiet, recoverEGP: d.atRiskEGP, y, d };
+if(y.growth === null || y.deltaEGP >= 0) return null;
+
+const recoverEGP = Math.abs(y.deltaEGP);
+const mo = p.mo || {};
+
+// Compare each current month against the same month last year. A "cliff" is a
+// clean break: the early part of the window was roughly holding, then it
+// dropped hard and stayed down.
+const ratios = YOY_WINDOW.map(w => {
+const prior = mo[w.prior] || 0;
+return prior > 0 ? (mo[w.cur] || 0) / prior : null;
+}).filter(r => r !== null);
+
+if(ratios.length >= 4){
+for(let split = 1; split < ratios.length - 1; split++){
+const before = ratios.slice(0, split), after = ratios.slice(split);
+const avgBefore = before.reduce((s,v) => s+v, 0) / before.length;
+const avgAfter = after.reduce((s,v) => s+v, 0) / after.length;
+if(avgBefore >= 0.85 && avgAfter <= avgBefore * 0.6){
+return { type:'cliff', ...PROBLEM_TYPES.cliff, recoverEGP, y, d,
+brokeAt: monthAbbr(YOY_WINDOW[split].cur) + ' ' + YOY_WINDOW[split].cur.slice(0,4) };
+}
+}
+}
+
+// Down in most months of the window = a slide, not an event.
+const downMonths = ratios.filter(r => r < 0.95).length;
+if(ratios.length >= 3 && downMonths >= Math.ceil(ratios.length * 0.6)){
+return { type:'steady', ...PROBLEM_TYPES.steady, recoverEGP, y, d, downMonths, totalMonths: ratios.length };
+}
+
+if(y.priorSum >= BIG_ACCOUNT_THRESHOLD){
+return { type:'bleed', ...PROBLEM_TYPES.bleed, recoverEGP, y, d };
+}
+
+return { type:'watch', ...PROBLEM_TYPES.watch, recoverEGP, y, d };
+}
+
+// ---------- Gap to 15% ----------
+// The company needs 15% growth. "Grow more" is not a target a rep can act on,
+// so this converts it into that rep's own number: what their book has to do
+// over the months still left in the year, expressed in EGP and as a required
+// growth rate against the same months last year. Every figure is derived from
+// their actual book, so a rep with 100 pharmacies is not handed the same
+// target as a rep with 210.
+const GROWTH_TARGET = 0.15;
+const LATEST_YEAR = YOY_CUR_MONTHS.length ? YOY_CUR_MONTHS[0].slice(0,4) : null;
+const PRIOR_YEAR = YOY_PRIOR_MONTHS.length ? YOY_PRIOR_MONTHS[0].slice(0,4) : null;
+const MONTHS_OF_YEAR = (y) => Array.from({length:12}, (_,i) => `${y}${String(i+1).padStart(2,'0')}`);
+// Months of the current year we don't have reliable data for yet -- the runway
+// the team still has to close the gap in.
+const REMAINING_CUR_MONTHS = LATEST_YEAR ? MONTHS_OF_YEAR(LATEST_YEAR).filter(m => !YOY_CUR_MONTHS.includes(m)) : [];
+const REMAINING_PRIOR_MONTHS = REMAINING_CUR_MONTHS.map(m => PRIOR_YEAR + m.slice(4));
+
+function computeGapToTarget(pool){
+if(!LATEST_YEAR || !PRIOR_YEAR) return null;
+const priorFullYear = pool.reduce((s,p) => s + sumMonths(p.mo, MONTHS_OF_YEAR(PRIOR_YEAR)), 0);
+const actualSoFar = pool.reduce((s,p) => s + sumMonths(p.mo, YOY_CUR_MONTHS), 0);
+const priorSoFar = pool.reduce((s,p) => s + sumMonths(p.mo, YOY_PRIOR_MONTHS), 0);
+const priorRemaining = pool.reduce((s,p) => s + sumMonths(p.mo, REMAINING_PRIOR_MONTHS), 0);
+
+const target = priorFullYear * (1 + GROWTH_TARGET);
+const needRemaining = target - actualSoFar;
+const monthsLeft = REMAINING_CUR_MONTHS.length;
+const growthSoFar = priorSoFar > 0 ? (actualSoFar - priorSoFar) / priorSoFar : null;
+
+// Two different "gap" numbers, and conflating them causes real confusion.
+// needRemaining is the total still to book this year (large by definition --
+// most of the year is still ahead). extraVsTrend is the genuinely useful one:
+// how much MORE than the current trajectory already delivers. That second
+// number is the size of the actual problem, and it's what the recovery lists
+// below are sized against.
+const projectedFullYear = actualSoFar + priorRemaining * (1 + (growthSoFar === null ? 0 : growthSoFar));
+const extraVsTrend = target - projectedFullYear;
+return {
+priorFullYear, actualSoFar, priorSoFar, priorRemaining, target,
+growthSoFar,
+needRemaining, projectedFullYear, extraVsTrend,
+projectedGrowth: priorFullYear > 0 ? (projectedFullYear - priorFullYear) / priorFullYear : null,
+extraPerMonth: monthsLeft > 0 ? extraVsTrend / monthsLeft : null,
+perMonth: monthsLeft > 0 ? needRemaining / monthsLeft : null,
+monthsLeft,
+// What growth rate the remaining months have to run at vs. the same months
+// last year. This is the number that tells you if the target is realistic.
+requiredRemainingGrowth: priorRemaining > 0 ? (needRemaining - priorRemaining) / priorRemaining : null,
+onTrack: priorSoFar > 0 ? ((actualSoFar - priorSoFar) / priorSoFar) >= GROWTH_TARGET : false
+};
 }
 
 // ---------- MR / DM filters ----------
@@ -1139,6 +1345,120 @@ myperfActiveMR = myperfMrSelect.value;
 renderMyPerf();
 });
 
+// ---------- Priority call list ----------
+// A 200-pharmacy book is not a plan. Company-wide, recovering roughly the top
+// 400 declining pharmacies closes the entire gap to 15% -- which is about a
+// dozen per rep. So this hands each rep a short, ranked, finite list instead
+// of "your whole territory is declining": biggest recoverable EGP first,
+// dormant accounts pushed to the top because they decay fastest.
+const PRIORITY_LIST_CAP = 15;
+// A pharmacy that stopped buying outright is more urgent than a percentage
+// slide of the same size -- it decays fast and is often still recoverable if
+// caught this month. But urgency is a tiebreaker, not an override: a 500 EGP
+// dormant account must never outrank a 300,000 EGP decline. So dormancy gets a
+// weighting on the EGP figure rather than its own tier.
+const DORMANT_URGENCY_WEIGHT = 1.5;
+function priorityScore(problem){
+return problem.recoverEGP * (problem.type === 'quiet' ? DORMANT_URGENCY_WEIGHT : 1);
+}
+function buildPriorityList(pool){
+return pool.map(p => ({ p, problem: classifyProblem(p) }))
+.filter(x => x.problem && x.problem.type !== 'watch')
+.sort((a,b) => priorityScore(b.problem) - priorityScore(a.problem))
+.slice(0, PRIORITY_LIST_CAP);
+}
+
+function priorityListHtml(list, mrName){
+if(!list.length) return '<div class="empty-msg">Nothing urgent in your book right now — good place to be.</div>';
+return list.map(({p, problem}, i) => {
+const detail = problem.brokeAt ? ` · dropped in ${problem.brokeAt}`
+: (problem.downMonths ? ` · down in ${problem.downMonths} of ${problem.totalMonths} months` : '');
+const sent = helpSentThisSession.has(p.c);
+return `
+<div class="prio-item">
+<div class="prio-rank">${i+1}</div>
+<div class="prio-main" data-idx="${PHARMACIES.indexOf(p)}">
+<div class="prio-name">${p.n}</div>
+<div class="prio-meta">${p.tr || '—'} · ${p.rg || '—'}${detail}</div>
+<div><span class="problem-tag ${problem.cls === '' ? 'neutral' : ''}">${problem.icon} ${problem.label}</span></div>
+<div class="prio-ask">${problem.ask}</div>
+</div>
+<div class="prio-side">
+<div class="prio-egp">${fmt(problem.recoverEGP)} EGP</div>
+<div class="prio-meta">recoverable</div>
+<button type="button" class="help-btn ${sent ? 'sent' : ''}" data-help-idx="${PHARMACIES.indexOf(p)}" data-help-code="${p.c}">${sent ? '✅ تم إرسال طلب المساعدة' : '🚨 محتاج مساعدة'}</button>
+</div>
+</div>`;
+}).join('');
+}
+
+// Wires up both the click-through to the pharmacy detail and the help button.
+// Kept separate from the HTML builder so the same list can be dropped into the
+// rep view and the management board without duplicating the handlers.
+function wirePriorityList(container, mrName){
+container.querySelectorAll('.prio-main[data-idx]').forEach(el => {
+el.addEventListener('click', () => {
+const p = PHARMACIES[parseInt(el.dataset.idx, 10)];
+selectPharmacy(p);
+if(mrName){ activeMR = mrName; mrFilter.value = mrName; updateMRFilterOptions(); }
+switchView('search');
+const detail = document.getElementById('detailSection');
+if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
+});
+});
+container.querySelectorAll('.help-btn[data-help-idx]').forEach(btn => {
+btn.addEventListener('click', (e) => {
+e.stopPropagation();
+if(btn.classList.contains('sent')) return;
+const p = PHARMACIES[parseInt(btn.dataset.helpIdx, 10)];
+openHelpModal(p, classifyProblem(p), mrName);
+});
+});
+}
+
+function gapCardHtml(gap, opts){
+const o = opts || {};
+if(!gap || !gap.priorFullYear) return '';
+const who = o.who || 'Your book';
+const pctToTarget = gap.target > 0 ? Math.min(gap.actualSoFar / gap.target, 1) : 0;
+const reqText = gap.requiredRemainingGrowth === null ? '—'
+: (gap.requiredRemainingGrowth >= 0 ? '+' : '') + pct(gap.requiredRemainingGrowth);
+const soFarText = gap.growthSoFar === null ? '—' : (gap.growthSoFar >= 0 ? '+' : '') + pct(gap.growthSoFar);
+const soFarClass = gap.growthSoFar === null ? '' : (gap.growthSoFar >= GROWTH_TARGET ? 'growth-pos' : 'growth-neg');
+const projText = gap.projectedGrowth === null ? '—' : (gap.projectedGrowth >= 0 ? '+' : '') + pct(gap.projectedGrowth);
+const remainLabel = REMAINING_CUR_MONTHS.length
+? `${monthAbbr(REMAINING_CUR_MONTHS[0])}–${monthAbbr(REMAINING_CUR_MONTHS[REMAINING_CUR_MONTHS.length-1])} ${LATEST_YEAR}`
+: '—';
+return `
+<div class="card">
+<h2>🎯 ${who}'s Road to 15%</h2>
+<div class="note" style="margin-top:0;">
+${who === 'Your book' ? 'Your' : 'This'} own target, worked out from ${who === 'Your book' ? 'your' : 'their'} actual ${PRIOR_YEAR} book — not a flat number handed to everyone.
+A 15% year means <b>${fmt(gap.target)} EGP</b> across ${LATEST_YEAR}.
+</div>
+<div class="gap-hero">
+<div class="sales-box"><div class="t">${PRIOR_YEAR} Full Year</div><div class="v">${fmt(gap.priorFullYear)} EGP</div></div>
+<div class="sales-box"><div class="t">15% Target for ${LATEST_YEAR}</div><div class="v">${fmt(gap.target)} EGP</div></div>
+<div class="sales-box"><div class="t">On Current Pace</div><div class="v">${fmt(gap.projectedFullYear)} EGP</div><div class="sub">${projText} if nothing changes</div></div>
+<div class="sales-box"><div class="t">The Real Gap</div><div class="v ${gap.extraVsTrend > 0 ? 'growth-neg' : 'growth-pos'}">${fmt(Math.max(gap.extraVsTrend, 0))} EGP</div><div class="sub">extra, on top of current pace</div></div>
+</div>
+<div class="gap-bar-wrap"><div class="gap-bar ${pctToTarget >= 1 ? 'ok' : ''}" style="width:${(pctToTarget*100).toFixed(1)}%"></div></div>
+<div class="totals-grid" style="margin-top:14px;">
+<div class="sales-box"><div class="t">Extra Per Month</div><div class="v">${gap.extraPerMonth === null ? '—' : fmt(Math.max(gap.extraPerMonth, 0))} EGP</div><div class="sub">above current pace, for ${gap.monthsLeft} months</div></div>
+<div class="sales-box"><div class="t">Growth So Far</div><div class="v ${soFarClass}">${soFarText}</div><div class="sub">target is +15%</div></div>
+<div class="sales-box"><div class="t">Required From Here</div><div class="v ${gap.requiredRemainingGrowth !== null && gap.requiredRemainingGrowth > 0.30 ? 'growth-neg' : ''}">${reqText}</div><div class="sub">vs ${remainLabel} last year</div></div>
+</div>
+<div class="note">
+"The Real Gap" is the number that matters: total still to book this year is ${fmt(Math.max(gap.needRemaining, 0))} EGP, but most of that is already covered by ${who === 'Your book' ? 'your' : 'the'} existing pace — only <b>${fmt(Math.max(gap.extraVsTrend, 0))} EGP</b> of it is genuinely new work.
+${gap.onTrack
+? `✅ Already running at or above 15%. Hold this and the year lands — protect the accounts on the list below so it doesn't slip.`
+: gap.requiredRemainingGrowth !== null && gap.requiredRemainingGrowth > 0.40
+? `⚠️ Getting to 15% from here needs ${reqText} over the remaining months, which is a big ask on ${who === 'Your book' ? 'your' : 'this'} current base. Recovering the accounts below is the realistic route — and this is a case to ask for help rather than absorb alone.`
+: `That works out to ${gap.extraPerMonth === null ? '—' : fmt(Math.max(gap.extraPerMonth, 0))} EGP a month. The list below is where that money already exists — it was being booked last year and stopped.`}
+</div>
+</div>`;
+}
+
 function renderMyPerf(){
 const section = document.getElementById('myperfSection');
 if(!section) return;
@@ -1201,6 +1521,12 @@ const yoyDeclinesMine = subset.map(p => ({ p, y: getYoYGrowth(p) }))
 .filter(x => x.y.growth !== null && x.y.deltaEGP < 0)
 .sort((a,b) => a.y.deltaEGP - b.y.deltaEGP);
 
+// This rep's own 15% number, and the short list that actually gets them there.
+const gap = computeGapToTarget(subset);
+const priority = buildPriorityList(subset);
+const priorityHtml = priorityListHtml(priority, myperfActiveMR);
+const priorityRecoverable = priority.reduce((s,x) => s + x.problem.recoverEGP, 0);
+
 const listItem = (p, s, cls, metaHtml, salesHtml) => `
 <div class="pharm-list-item ${cls}" data-idx="${PHARMACIES.indexOf(p)}">
 <div>
@@ -1240,6 +1566,15 @@ section.innerHTML = `
 <div class="sales-box"><div class="t">Your Growth</div><div class="v ${yoyGrowthClass}">${yoyGrowthText}</div></div>
 </div>
 <div class="note">Company-wide growth over the same period: ${companyYoYGrowth===null?'—':(companyYoYGrowth>=0?'+':'')+pct(companyYoYGrowth)}. ${yoyGrowth!==null && companyYoYGrowth!==null ? (yoyGrowth > companyYoYGrowth ? 'You are outperforming the company average so far this year.' : 'You are behind the company average so far this year.') : ''}</div>
+</div>
+${gapCardHtml(gap, { who: 'Your book' })}
+<div class="card">
+<h2>🎯 Start Here — Your ${priority.length} Priority Pharmacies</h2>
+<div class="note" style="margin-top:0;">
+Out of your ${count} pharmacies, these are the ones worth acting on first, biggest recoverable EGP at the top. Together they account for <b>${fmt(priorityRecoverable)} EGP</b> that your book was booking last year and isn't now${gap && gap.extraVsTrend > 0 ? ` — that covers ${Math.round(priorityRecoverable / gap.extraVsTrend * 100)}% of the gap between your current pace and 15%` : ''}.
+Each one is tagged with what kind of problem it is, so you know what to ask before you walk in. If you can't fix it alone, hit <b>محتاج مساعدة</b> and it goes straight to your manager.
+</div>
+<div class="pharm-list" id="myperfPriorityList">${priorityHtml}</div>
 </div>
 <div class="card">
 <h2>📊 Your Ranking (of ${totalMRs} reps)</h2>
@@ -1285,9 +1620,11 @@ const detail = document.getElementById('detailSection');
 if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
 });
 });
+
+wirePriorityList(section, myperfActiveMR);
 }
 
-// ---------- Merchandising tab ----------
+// ---------- Where to Invest (merchandising) ----------
 // Two questions the merchandising team actually needs answered: (1) is our
 // money going where it should -- are chain vs. independent, and
 // new-vs-already-merchandised, pharmacies behaving differently enough to
@@ -1333,7 +1670,7 @@ return `<table><thead><tr><th></th><th>Pharmacy Count</th><th>Q4 Total</th><th>Y
 }
 
 function renderMerch(){
-const section = document.getElementById('merchSection');
+const section = document.getElementById('analysisSection');
 if(!section) return;
 
 const ctGroups = computeSimpleGroups('ct');
@@ -1401,6 +1738,121 @@ selectPharmacy(PHARMACIES[idx]);
 switchView('search');
 const detail = document.getElementById('detailSection');
 if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
+});
+});
+}
+
+// ---------- Gap to 15%: the management support board ----------
+// Answers the question a manager actually has: who is behind, by how much, and
+// is their target realistic from where they stand. A rep needing +20% over the
+// rest of the year is a coaching conversation; a rep needing +90% has a
+// structural problem (lost a chain, a territory issue, a credit freeze) that
+// no amount of extra visits fixes, and management has to step in. Sorting by
+// EGP short rather than % keeps attention on where the money is.
+function renderGapBoard(){
+const section = document.getElementById('analysisSection');
+if(!section) return;
+
+const companyGap = computeGapToTarget(PHARMACIES);
+const reps = [...new Set(PHARMACIES.map(p => p.mr).filter(Boolean))];
+const rows = reps.map(mr => {
+const pool = PHARMACIES.filter(p => p.mr === mr);
+const g = computeGapToTarget(pool);
+const prio = buildPriorityList(pool);
+const recoverable = prio.reduce((s,x) => s + x.problem.recoverEGP, 0);
+// Does the money sitting in this rep's priority list cover the gap they
+// actually have to close? Above 100% means the target is reachable through
+// recovery alone, with no new business needed -- which changes the
+// conversation from "go find growth" to "go win these back".
+const coverage = g && g.extraVsTrend > 0 ? recoverable / g.extraVsTrend : Infinity;
+return { mr, count: pool.length, g, recoverable, coverage, prioCount: prio.length };
+}).filter(r => r.g && r.g.priorFullYear > 0)
+.sort((a,b) => (a.g.growthSoFar === null ? 1 : a.g.growthSoFar) - (b.g.growthSoFar === null ? 1 : b.g.growthSoFar));
+
+const behind = rows.filter(r => !r.g.onTrack);
+const onTrack = rows.filter(r => r.g.onTrack);
+const structural = rows.filter(r => r.g.requiredRemainingGrowth !== null && r.g.requiredRemainingGrowth > 0.40);
+const fullyCovered = rows.filter(r => r.coverage >= 1 && !r.g.onTrack);
+
+// How far the recovery lists get the company on their own. Stated explicitly
+// rather than implied, because the honest answer is "most of the way, not all
+// of it" -- the remainder has to come from new volume, and pretending
+// otherwise would set the team up to miss.
+const totalPriorityAccounts = rows.reduce((s,r) => s + r.prioCount, 0);
+const totalRecoverable = rows.reduce((s,r) => s + r.recoverable, 0);
+const companyCoverage = companyGap && companyGap.extraVsTrend > 0
+? totalRecoverable / companyGap.extraVsTrend : null;
+
+const rowsHtml = rows.map(r => {
+const sf = r.g.growthSoFar;
+const sfText = sf === null ? '—' : (sf >= 0 ? '+' : '') + pct(sf);
+const sfClass = sf === null ? '' : (sf >= GROWTH_TARGET ? 'growth-pos' : 'growth-neg');
+const rr = r.g.requiredRemainingGrowth;
+const rrText = rr === null ? '—' : (rr >= 0 ? '+' : '') + pct(rr);
+const needsSupport = rr !== null && rr > 0.40;
+return `<tr class="${r.g.onTrack ? '' : 'rep-behind'} pharm-list-item" data-name="${r.mr}" style="cursor:pointer;">
+<td class="name-cell">${needsSupport ? '🆘 ' : ''}${r.mr}</td>
+<td>${r.count.toLocaleString('en-US')}</td>
+<td>${fmt(r.g.priorFullYear)} EGP</td>
+<td>${fmt(r.g.target)} EGP</td>
+<td class="${sfClass}">${sfText}</td>
+<td class="${r.g.extraVsTrend > 0 ? 'growth-neg' : 'growth-pos'}">${fmt(Math.max(r.g.extraVsTrend, 0))} EGP</td>
+<td>${r.g.extraPerMonth === null ? '—' : fmt(Math.max(r.g.extraPerMonth, 0))} EGP</td>
+<td class="${needsSupport ? 'growth-neg' : ''}">${rrText}</td>
+<td>${fmt(r.recoverable)} EGP</td>
+<td class="${r.coverage >= 1 ? 'growth-pos' : ''}">${r.g.extraVsTrend > 0 ? Math.round(r.coverage*100) + '%' : '✅'}</td>
+</tr>`;
+}).join('');
+
+section.innerHTML = `
+${gapCardHtml(companyGap, { who: 'The company' })}
+<div class="card">
+<h2>📋 What the Recovery Lists Actually Cover</h2>
+<div class="note" style="margin-top:0;">
+Across all ${rows.length} reps, the priority lists total <b>${totalPriorityAccounts} pharmacies</b> holding <b>${fmt(totalRecoverable)} EGP</b> of recoverable revenue${companyCoverage !== null ? ` — that is <b>${Math.round(companyCoverage*100)}%</b> of the ${fmt(companyGap.extraVsTrend)} EGP gap to 15%` : ''}.
+${companyCoverage !== null && companyCoverage < 1
+? `So recovery gets most of the way, but not all of it. The remaining ${Math.round((1-companyCoverage)*100)}% has to come from new volume — that's what the "Where to Invest" tab is for. Planning as if recovery alone closes the gap would set the team up to miss.`
+: `That covers the full gap through recovery alone, before any new business is counted.`}
+</div>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">Priority Accounts</div><div class="v">${totalPriorityAccounts}</div><div class="sub">of ${PHARMACIES.length.toLocaleString('en-US')} pharmacies — ${(totalPriorityAccounts/PHARMACIES.length*100).toFixed(1)}%</div></div>
+<div class="sales-box"><div class="t">Recoverable</div><div class="v">${fmt(totalRecoverable)} EGP</div><div class="sub">was booked last year, isn't now</div></div>
+<div class="sales-box"><div class="t">Covers</div><div class="v ${companyCoverage !== null && companyCoverage >= 1 ? 'growth-pos' : ''}">${companyCoverage === null ? '—' : Math.round(companyCoverage*100) + '%'}</div><div class="sub">of the gap to 15%</div></div>
+<div class="sales-box"><div class="t">Reps Who Can Close It Alone</div><div class="v">${fullyCovered.length + onTrack.length} of ${rows.length}</div><div class="sub">by recovery only, no new business</div></div>
+</div>
+</div>
+<div class="card">
+<h2>🆘 Who Needs Help (${behind.length} of ${rows.length} reps behind)</h2>
+<div class="note" style="margin-top:0;">
+${onTrack.length} rep${onTrack.length === 1 ? '' : 's'} already at or above 15%; ${behind.length} below.
+The ${structural.length} marked <b>🆘</b> would need more than +40% over the remaining months to reach 15% — that is usually structural (a lost chain, a credit freeze, a territory problem), not effort, and worth a direct conversation rather than a push.
+Sorted by growth so far, worst first. Click a rep to open their book in the Search tab.
+</div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr>
+<th>Medical Representative</th><th>Pharmacies</th><th>${PRIOR_YEAR} Actual</th><th>15% Target</th>
+<th>Growth So Far</th><th>Real Gap</th><th>Extra / Month</th><th>Required From Here</th>
+<th>Recoverable on List</th><th>Gap Covered</th>
+</tr></thead>
+<tbody>${rowsHtml}</tbody>
+</table>
+</div>
+<div class="note">
+<b>Real Gap</b> is what the rep needs on top of their current pace — not the total left to book, which is mostly already covered by normal business.
+<b>Recoverable on List</b> is the EGP sitting in their priority pharmacies: revenue their book was booking last year and isn't now.
+<b>Gap Covered</b> is the ratio of the two — at 100% or above, that rep can hit 15% by winning back existing accounts alone, with no new business at all. Below that, they need recovery <i>and</i> new volume, which is where support has to come in.
+</div>
+</div>`;
+
+section.querySelectorAll('tr[data-name]').forEach(tr => {
+tr.addEventListener('click', () => {
+activeMR = tr.dataset.name; mrFilter.value = tr.dataset.name;
+activeDM = ''; dmFilter.value = '';
+updateMRFilterOptions();
+renderTotals();
+updateOverviewBadge();
+switchView('search');
 });
 });
 }
@@ -1599,8 +2051,30 @@ const ANALYSIS_COLS = [
 { key:'dormantCount', lbl:'🚨 Dormant' },
 ];
 
+// Notes are per-view because the three views answer different questions and a
+// single combined paragraph ended up explaining none of them well.
+const ANALYSIS_NOTES = {
+group: () => `Aggregate analysis across all ${PHARMACIES.length.toLocaleString('en-US')} pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). "Growth % (Q3→Q4)" is the contractual figure that determines cashback slabs. The "YoY %" column is a separate, informational read on current-year momentum, computed from whichever recent months are fully reported (auto-excludes any month with incomplete distributor data) -- it does not affect cashback. Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.`,
+gap: () => `The company's 15% growth goal, broken down into each rep's own number based on their actual ${PRIOR_YEAR} book -- so a rep with 100 pharmacies isn't handed the same target as a rep with 210. "Required From Here" is the growth rate the remaining months have to run at versus the same months last year; it's the figure that tells you whether a target is reachable or whether the rep needs structural help.`,
+invest: () => `Where to put merchandising investment next, based on who's already growing on their own versus who already received materials and is still declining. "YoY %" uses the same self-correcting current-year window as the rest of the tool (auto-excludes any not-yet-fully-reported month) -- separate from the contractual Q3→Q4 2025 figure.`
+};
+
 function renderAnalysis(){
-document.getElementById('analysisTotalCount').textContent = PHARMACIES.length.toLocaleString('en-US');
+const noteEl = document.getElementById('analysisIntroNote');
+if(noteEl){
+const kind = analysisGroup === 'gap' ? 'gap' : (analysisGroup === 'invest' ? 'invest' : 'group');
+noteEl.innerHTML = ANALYSIS_NOTES[kind]();
+}
+
+// The company trend/projection charts belong to the aggregate group views; the
+// Gap and Where-to-Invest views carry their own framing and would be noisier
+// with them repeated on top.
+const trendSection = document.getElementById('companyTrendSection');
+if(analysisGroup === 'gap' || analysisGroup === 'invest'){
+if(trendSection) trendSection.innerHTML = '';
+if(analysisGroup === 'gap') renderGapBoard(); else renderMerch();
+return;
+}
 renderCompanyTrend();
 
 const section = document.getElementById('analysisSection');
@@ -1691,7 +2165,6 @@ document.getElementById('overviewView').style.display = view === 'overview' ? ''
 document.getElementById('chainView').style.display = view === 'chain' ? '' : 'none';
 document.getElementById('leaderboardView').style.display = view === 'leaderboard' ? '' : 'none';
 document.getElementById('myperfView').style.display = view === 'myperf' ? '' : 'none';
-document.getElementById('merchView').style.display = view === 'merch' ? '' : 'none';
 document.getElementById('analysisView').style.display = view === 'analysis' ? '' : 'none';
 document.querySelectorAll('.view-tab-btn').forEach(btn => {
 btn.classList.toggle('active', btn.dataset.view === view);
@@ -1700,7 +2173,6 @@ if(view === 'overview') renderOverview();
 if(view === 'chain') renderChainSection();
 if(view === 'leaderboard') renderLeaderboard();
 if(view === 'myperf') renderMyPerf();
-if(view === 'merch') renderMerch();
 if(view === 'analysis') renderAnalysis();
 }
 document.getElementById('viewTabs').addEventListener('click', (e) => {
@@ -2007,6 +2479,106 @@ btn.textContent = '✅ تم تسجيل الاتفاق';
 btn.disabled = false;
 btn.textContent = '⚠️ فشل الإرسال — أعد المحاولة';
 }
+}
+
+// ---------- Help requests ----------
+// The one thing the data genuinely cannot tell us is WHY a pharmacy dropped.
+// A rep standing in the pharmacy knows in thirty seconds. This captures that
+// answer at the moment they find out, and routes it to management so support
+// (credit release, stock push, a manager visit) can actually be arranged
+// instead of the reason dying in a WhatsApp thread.
+const HELP_REASONS = [
+{ key:'stockout',   label:'نافذ من المخزون — الصيدلية عايزة تشتري ومفيش بضاعة' },
+{ key:'competitor', label:'منافس أخذ المساحة / عرض أفضل' },
+{ key:'credit',     label:'حد ائتماني أو مديونية موقفة الشراء' },
+{ key:'ownership',  label:'تغيير مالك أو صيدلي مسؤول' },
+{ key:'noresponse', label:'الصيدلية لا ترد / رفضت التعامل' },
+{ key:'distributor',label:'مشكلة في التوزيع أو التوصيل' },
+{ key:'other',      label:'أخرى — أشرح بالتفصيل' }
+];
+const helpSentThisSession = new Set();
+
+function openHelpModal(p, problem, mrName){
+const existing = document.querySelector('.help-overlay');
+if(existing) existing.remove();
+
+const y = getYoYGrowth(p);
+const overlay = document.createElement('div');
+overlay.className = 'help-overlay';
+overlay.innerHTML = `
+<div class="help-modal">
+<h3>🚨 طلب مساعدة — ${p.n}</h3>
+<div class="hm-sub">
+${p.tr || '—'} · ${mrName || p.mr || '—'}<br>
+${problem ? `${problem.icon} ${problem.label} · ` : ''}${fmt(problem ? problem.recoverEGP : Math.abs(y.deltaEGP))} ج.م معرضة للخطر
+</div>
+<div style="font-size:12.5px;font-weight:600;margin-bottom:8px;">إيه المشكلة الحقيقية؟</div>
+<div id="helpReasons">
+${HELP_REASONS.map(r => `<button type="button" class="help-reason" data-reason="${r.key}">${r.label}</button>`).join('')}
+</div>
+<textarea class="help-note-input" id="helpNote" placeholder="تفاصيل إضافية للمدير (اختياري)..."></textarea>
+<div class="help-actions">
+<button type="button" class="hm-cancel">إلغاء</button>
+<button type="button" class="hm-send" disabled>إرسال للمدير</button>
+</div>
+<div class="hm-status note" style="margin-top:8px;"></div>
+</div>`;
+document.body.appendChild(overlay);
+
+let chosen = null;
+const sendBtn = overlay.querySelector('.hm-send');
+const statusEl = overlay.querySelector('.hm-status');
+
+overlay.querySelectorAll('.help-reason').forEach(btn => {
+btn.addEventListener('click', () => {
+overlay.querySelectorAll('.help-reason').forEach(b => b.classList.toggle('selected', b === btn));
+chosen = btn.dataset.reason;
+sendBtn.disabled = false;
+});
+});
+
+const close = () => overlay.remove();
+overlay.querySelector('.hm-cancel').addEventListener('click', close);
+overlay.addEventListener('click', (e) => { if(e.target === overlay) close(); });
+
+sendBtn.addEventListener('click', async () => {
+if(!chosen) return;
+sendBtn.disabled = true;
+sendBtn.textContent = 'جارٍ الإرسال...';
+const reason = HELP_REASONS.find(r => r.key === chosen);
+const payload = {
+token: DEALS_API_TOKEN,
+record_type: 'help_request',
+pharmacy_code: p.c, pharmacy_name: p.n, region: p.rg, territory: p.tr,
+mr_name: mrName || p.mr || '', dm_name: p.dm || '',
+problem_type: problem ? problem.type : '', problem_label: problem ? problem.label : '',
+reason_code: chosen, reason_label: reason ? reason.label : '',
+egp_at_risk: Math.round(problem ? problem.recoverEGP : Math.abs(y.deltaEGP)),
+yoy_growth_pct: y.growth === null ? '' : Math.round(y.growth * 1000) / 10,
+prior_sales: Math.round(y.priorSum), current_sales: Math.round(y.curSum),
+notes: (overlay.querySelector('#helpNote').value || '').slice(0, 500)
+};
+try {
+const res = await fetch(DEALS_API_URL, {
+method: 'POST',
+headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+body: JSON.stringify(payload)
+});
+const data = await res.json();
+if(!data.ok) throw new Error(data.error || 'unknown error');
+helpSentThisSession.add(p.c);
+statusEl.textContent = '✅ تم إرسال الطلب للمدير.';
+sendBtn.textContent = '✅ تم الإرسال';
+document.querySelectorAll(`.help-btn[data-help-code="${p.c}"]`).forEach(b => {
+b.classList.add('sent'); b.textContent = '✅ تم إرسال طلب المساعدة';
+});
+setTimeout(close, 1200);
+} catch(err){
+sendBtn.disabled = false;
+sendBtn.textContent = '⚠️ فشل الإرسال — أعد المحاولة';
+statusEl.textContent = 'لم يتم الحفظ. تأكد من الاتصال بالإنترنت وحاول مرة أخرى.';
+}
+});
 }
 
 function selectPharmacy(p){
@@ -2321,6 +2893,15 @@ ${renderCompareCardHtml(p)}
 `;
 
 attachCompareHandlers(p);
+
+document.querySelectorAll('#detailSection .help-btn[data-help-idx]').forEach(btn => {
+btn.addEventListener('click', (e) => {
+e.stopPropagation();
+if(btn.classList.contains('sent')) return;
+const target = PHARMACIES[parseInt(btn.dataset.helpIdx, 10)];
+openHelpModal(target, classifyProblem(target), target.mr);
+});
+});
 
 document.getElementById('baselineTabs').addEventListener('click', (e) => {
 const btn = e.target.closest('.tab-btn');
