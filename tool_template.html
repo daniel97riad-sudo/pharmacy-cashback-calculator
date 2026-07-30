@@ -232,7 +232,7 @@ border-radius:20px;
 font-weight:600;
 }
 .badge.exist{background:#e3f5ec;color:#1a7a4d;}
-.h1-chip{
+.yoy-chip{
 display:inline-block;
 font-size:11px;
 padding:2px 8px;
@@ -243,8 +243,8 @@ border:1px solid var(--border);
 margin-inline-start:6px;
 white-space:nowrap;
 }
-.h1-chip.growth-pos{color:#1a7a4d;border-color:#c7e9d6;}
-.h1-chip.growth-neg{color:#c0392b;border-color:#f3d3ce;}
+.yoy-chip.growth-pos{color:#1a7a4d;border-color:#c7e9d6;}
+.yoy-chip.growth-neg{color:#c0392b;border-color:#f3d3ce;}
 .badge.new{background:#fdf1de;color:#a0680d;}
 .badge.slab-max{background:#e3f5ec;color:#1a7a4d;}
 .badge.slab-remaining{background:#fdf1de;color:#a0680d;}
@@ -284,6 +284,8 @@ vertical-align:middle;
 .pli-slab-max .pli-sales{color:#1a7a4d;}
 .pli-best-chance .pli-sales{color:#1a7a4d;}
 .pli-needs-attention .pli-sales{color:var(--danger);}
+.pli-dormant .pli-sales{color:var(--danger);}
+.pli-dormant{background:#fdf3f2;}
 
 .history-chart-wrap{padding:6px 2px 0;}
 .history-chart-svg{width:100%;height:190px;display:block;overflow:visible;}
@@ -405,6 +407,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="view-tab-btn" data-view="chain">🔗 دمج صيدليات (سلسلة)</div>
 <div class="view-tab-btn" data-view="leaderboard">🏆 لوحة المتصدرين</div>
 <div class="view-tab-btn" data-view="myperf">👤 My Performance</div>
+<div class="view-tab-btn" data-view="merch">🛒 Merchandising</div>
 <div class="view-tab-btn" data-view="analysis">📈 Analysis</div>
 </div>
 
@@ -440,7 +443,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div id="overviewView" style="display:none;">
 <div class="card">
 <div class="overview-note">
-هذه النظرة العامة تعتمد على نمو مبيعات الموزع من الربع الثالث إلى الربع الرابع 2025 (الرقم التعاقدي)، وتُفلتر حسب المندوب/مدير المنطقة المختار أعلاه في تبويب البحث. الوسم 📈/📉 "H1 2026 vs 2025" بجانب كل صيدلية هو مؤشر إعلامي إضافي عن الاتجاه الحالي (النصف الأول من هذا العام مقابل النصف الأول من العام الماضي) — لا يغيّر التصنيف أو الكاش باك.
+تصنيفات "الحد الأقصى/الأفضل حظاً/تحتاج متابعة" تعتمد على نمو مبيعات الموزع من الربع الثالث إلى الربع الرابع 2025 (الرقم التعاقدي)، وتُفلتر حسب المندوب/مدير المنطقة المختار أعلاه في تبويب البحث. القسمان الأولان ("توقفت عن الشراء" و"أكبر انخفاض بالجنيه") مبنيان على أحدث الأشهر الموثوقة من بيانات المبيعات الشهرية (تُستبعد تلقائياً أي أشهر لم تكتمل بياناتها بعد من الموزع) — وكذلك الوسم 📈/📉 بجانب كل صيدلية. كل هذا إعلامي فقط ولا يغيّر التصنيف التعاقدي أو الكاش باك.
 </div>
 </div>
 <div id="overviewSection"></div>
@@ -476,10 +479,18 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div id="myperfSection"></div>
 </div>
 
+<div id="merchView" style="display:none;">
+<div class="card">
+<h2>🛒 Merchandising</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">Where to put merchandising investment next, based on who's already growing on their own vs. who already got materials and is still declining. "YoY %" here uses the same self-correcting current-year window as the rest of the tool (auto-excludes any not-yet-fully-reported month) -- separate from the contractual Q3→Q4 2025 figure.</div>
+</div>
+<div id="merchSection"></div>
+</div>
+
 <div id="analysisView" style="display:none;">
 <div class="card">
 <h2>📈 Performance Analysis</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">Aggregate analysis across all <span id="analysisTotalCount"></span> pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). "Growth % (Q3→Q4)" is the contractual figure that determines cashback slabs. "H1 '26 vs '25 %" is a separate, informational read on current-year momentum (Jan-Jun 2026 vs Jan-Jun 2025) -- it does not affect cashback. Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.</div>
+<div class="note" style="margin-top:0;margin-bottom:12px;">Aggregate analysis across all <span id="analysisTotalCount"></span> pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). "Growth % (Q3→Q4)" is the contractual figure that determines cashback slabs. The "YoY %" column is a separate, informational read on current-year momentum, computed from whichever recent months are fully reported (auto-excludes any month with incomplete distributor data) -- it does not affect cashback. Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.</div>
 <div class="tabs" id="analysisSubTabs">
 <div class="tab-btn active" data-group="rg">By Region</div>
 <div class="tab-btn" data-group="tr">By Territory</div>
@@ -487,6 +498,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="tab-btn" data-group="dm">By District Manager</div>
 </div>
 </div>
+<div id="companyTrendSection"></div>
 <div id="analysisSection"></div>
 </div>
 
@@ -562,65 +574,147 @@ function pct(n){
 return (n*100).toFixed(1) + '%';
 }
 
-// ---------- H1 2026 vs H1 2025 (current-year momentum, separate from the
-// contractual Q3/Q4 2025 slab calculation) ----------
+// ---------- Year-over-year momentum (self-correcting window, separate from
+// the contractual Q3/Q4 2025 slab calculation) ----------
 // The Q3/Q4 2025 growth above is a fixed, one-time number: it's literally what
 // determines the cashback owed under the already-agreed contract, so it never
 // changes and always stays as the "official" figure. But by the time anyone is
-// using this tool (mid/late 2026), that number is old news -- it doesn't tell you
-// whether a pharmacy is actually doing better or worse *right now*. Every
-// pharmacy's "mo" monthly series already covers Jan 2024 through Jun 2026, so
-// H1 2025 (Jan-Jun) vs H1 2026 (Jan-Jun) is a full, same-length, same-season
-// comparison we can compute for free -- a live pulse to sit alongside the
-// contractual number, not replace it.
-const H1_2025_MONTHS = ['202501','202502','202503','202504','202505','202506'];
-const H1_2026_MONTHS = ['202601','202602','202603','202604','202605','202606'];
+// using this tool (mid/late 2026), that number is old news -- it doesn't tell
+// you whether a pharmacy is actually doing better or worse *right now*.
+//
+// A fixed "Jan-Jun" window is dangerous here: distributor sales feeds lag, so
+// the most recent month (or two) in "mo" is often still partially posted.
+// Blindly including it silently understates performance -- e.g. June 2026
+// initially looked like a ~-60% collapse company-wide purely because ~40% of
+// pharmacies hadn't posted their June figures yet, not because business
+// actually fell off a cliff. So instead of a hardcoded range, this walks
+// backward from the most recent month and drops any trailing month whose
+// reporting coverage (the % of normally-active pharmacies showing *any*
+// sales that month) is well below the typical coverage seen across the full
+// history -- then compares whatever reliable months remain this year against
+// the same calendar months one year earlier. The window (and its label)
+// automatically grows as later months become fully reported at the next
+// data refresh -- nothing to remember to update by hand.
+const ALL_MONTHS = (PHARMACIES.length && PHARMACIES[0].mo) ? Object.keys(PHARMACIES[0].mo).sort() : [];
+const EVER_ACTIVE_PHARMACIES = PHARMACIES.filter(p => p.mo && Object.values(p.mo).some(v => v > 0));
+
+function computeReliableMonths(){
+if(!ALL_MONTHS.length || !EVER_ACTIVE_PHARMACIES.length) return [];
+const coverage = {};
+ALL_MONTHS.forEach(m => {
+const nz = EVER_ACTIVE_PHARMACIES.filter(p => (p.mo[m] || 0) > 0).length;
+coverage[m] = nz / EVER_ACTIVE_PHARMACIES.length;
+});
+const sortedCoverage = Object.values(coverage).slice().sort((a,b) => a - b);
+const median = sortedCoverage[Math.floor(sortedCoverage.length / 2)];
+const months = [...ALL_MONTHS];
+while(months.length && coverage[months[months.length - 1]] < median * 0.75){
+months.pop();
+}
+return months;
+}
+const RELIABLE_MONTHS = computeReliableMonths();
+
+// Pairs each reliable month in the latest year with the same calendar month
+// one year earlier (e.g. 202603 <-> 202503), so the comparison always stays
+// season-matched.
+function computeYoYWindow(){
+if(!RELIABLE_MONTHS.length) return [];
+const years = [...new Set(RELIABLE_MONTHS.map(m => m.slice(0,4)))].sort();
+const latestYear = years[years.length - 1];
+const curMonths = RELIABLE_MONTHS.filter(m => m.startsWith(latestYear));
+return curMonths
+.map(m => ({ cur: m, prior: String(parseInt(m.slice(0,4),10) - 1) + m.slice(4) }))
+.filter(pair => ALL_MONTHS.includes(pair.prior));
+}
+const YOY_WINDOW = computeYoYWindow();
+const YOY_CUR_MONTHS = YOY_WINDOW.map(w => w.cur);
+const YOY_PRIOR_MONTHS = YOY_WINDOW.map(w => w.prior);
+
 function sumMonths(mo, months){
 if(!mo) return 0;
 return months.reduce((s,m) => s + (mo[m] || 0), 0);
 }
-function getH1Growth(p){
-const h1_25 = sumMonths(p.mo, H1_2025_MONTHS);
-const h1_26 = sumMonths(p.mo, H1_2026_MONTHS);
-const growth = h1_25 > 0 ? (h1_26 - h1_25) / h1_25 : null;
-return { h1_25, h1_26, growth };
+function getYoYGrowth(p){
+const priorSum = sumMonths(p.mo, YOY_PRIOR_MONTHS);
+const curSum = sumMonths(p.mo, YOY_CUR_MONTHS);
+const growth = priorSum > 0 ? (curSum - priorSum) / priorSum : null;
+return { priorSum, curSum, growth, deltaEGP: curSum - priorSum };
 }
-function h1GrowthBadgeHtml(p){
-const h = getH1Growth(p);
-if(h.growth === null) return '';
-const cls = h.growth >= 0 ? 'growth-pos' : 'growth-neg';
-const arrow = h.growth >= 0 ? '📈' : '📉';
-return `<span class="h1-chip ${cls}">${arrow} H1 2026 vs 2025: ${h.growth>=0?'+':''}${pct(h.growth)}</span>`;
+// English month abbreviation without relying on ENGLISH_MONTHS/monthLabel
+// (defined further down the file, but safe to reference here since this
+// function is only ever called after the whole script has loaded).
+function monthAbbr(yyyymm){
+return ENGLISH_MONTHS[parseInt(String(yyyymm).slice(4,6), 10) - 1];
+}
+function yoyRangeLabels(){
+if(!YOY_CUR_MONTHS.length) return { curRange:'—', priorRange:'—' };
+const curYear = YOY_CUR_MONTHS[0].slice(0,4), priorYear = YOY_PRIOR_MONTHS[0].slice(0,4);
+const startAbbr = monthAbbr(YOY_CUR_MONTHS[0]), endAbbr = monthAbbr(YOY_CUR_MONTHS[YOY_CUR_MONTHS.length-1]);
+const span = startAbbr === endAbbr ? startAbbr : `${startAbbr}-${endAbbr}`;
+return { curRange: `${span} ${curYear}`, priorRange: `${span} ${priorYear}` };
+}
+function yoyGrowthBadgeHtml(p){
+const y = getYoYGrowth(p);
+if(y.growth === null) return '';
+const cls = y.growth >= 0 ? 'growth-pos' : 'growth-neg';
+const arrow = y.growth >= 0 ? '📈' : '📉';
+const { curRange, priorRange } = yoyRangeLabels();
+return `<span class="yoy-chip ${cls}">${arrow} ${curRange} vs ${priorRange}: ${y.growth>=0?'+':''}${pct(y.growth)}</span>`;
 }
 
-// Separate card on the pharmacy detail view so the current-year (H1) trend is
+// Separate card on the pharmacy detail view so the current-year trend is
 // never confused with the Q3/Q4 2025 numbers above it -- that card is the
 // contractual figure that decides cashback; this one is just "how is this
 // pharmacy doing right now."
-function renderH1Card(p){
-const h = getH1Growth(p);
-if(h.h1_25 === 0 && h.h1_26 === 0) return '';
-const growthClass = h.growth === null ? '' : (h.growth >= 0 ? 'growth-pos' : 'growth-neg');
-const growthText = h.growth === null ? 'لا توجد بيانات كافية' : (h.growth>=0?'+':'') + pct(h.growth);
+function renderYoYCard(p){
+const y = getYoYGrowth(p);
+if(y.priorSum === 0 && y.curSum === 0) return '';
+const { curRange, priorRange } = yoyRangeLabels();
+const growthClass = y.growth === null ? '' : (y.growth >= 0 ? 'growth-pos' : 'growth-neg');
+const growthText = y.growth === null ? 'لا توجد بيانات كافية' : (y.growth>=0?'+':'') + pct(y.growth);
 return `
 <div class="card">
-<h2>📅 اتجاه العام الحالي (النصف الأول 2026 مقابل النصف الأول 2025)</h2>
-<div class="note" style="margin-top:0;">هذا الرقم إعلامي فقط لمعرفة الاتجاه الحالي للصيدلية -- لا يدخل في حساب الشريحة أو الكاش باك الخاص بالعقد، والذي يظل مبنياً على مقارنة الربع الثالث والرابع 2025 أعلاه.</div>
+<h2>📅 اتجاه العام الحالي (${curRange} مقابل ${priorRange})</h2>
+<div class="note" style="margin-top:0;">هذا الرقم إعلامي فقط لمعرفة الاتجاه الحالي للصيدلية -- لا يدخل في حساب الشريحة أو الكاش باك الخاص بالعقد، والذي يظل مبنياً على مقارنة الربع الثالث والرابع 2025 أعلاه. الأشهر الأخيرة التي لم تكتمل بياناتها من الموزع بعد يتم استبعادها تلقائياً من هذه المقارنة.</div>
 <div class="sales-grid">
 <div class="sales-box">
-<div class="t">النصف الأول 2025 (يناير-يونيو)</div>
-<div class="v">${fmt(h.h1_25)} ج.م</div>
+<div class="t">${priorRange}</div>
+<div class="v">${fmt(y.priorSum)} ج.م</div>
 </div>
 <div class="sales-box">
-<div class="t">النصف الأول 2026 (يناير-يونيو)</div>
-<div class="v">${fmt(h.h1_26)} ج.م</div>
+<div class="t">${curRange}</div>
+<div class="v">${fmt(y.curSum)} ج.م</div>
 </div>
 <div class="sales-box">
-<div class="t">نسبة النمو (2026 مقابل 2025)</div>
+<div class="t">نسبة النمو</div>
 <div class="v ${growthClass}">${growthText}</div>
 </div>
 </div>
 </div>`;
+}
+
+// ---------- Dormant pharmacies (went quiet) ----------
+// Distinct from "declining": a declining pharmacy is still buying, just less.
+// A dormant one had real sales as recently as a few months ago and then
+// stopped completely -- a different, more urgent signal that something
+// specific happened (lost the account, stock-out, competitor took the shelf)
+// and worth a call regardless of what the YoY % says.
+const DORMANT_MIN_PRIOR_SALES = 1000;
+function getDormancyInfo(p){
+if(YOY_CUR_MONTHS.length < 2) return { isDormant:false };
+const mo = p.mo || {};
+const lastTwo = YOY_CUR_MONTHS.slice(-2);
+const priorWindow = YOY_CUR_MONTHS.slice(0, -2);
+const recentSum = sumMonths(mo, lastTwo);
+const priorSum = sumMonths(mo, priorWindow.length ? priorWindow : YOY_CUR_MONTHS);
+const isDormant = recentSum === 0 && priorSum >= DORMANT_MIN_PRIOR_SALES;
+return { isDormant, atRiskEGP: priorSum, lastTwo };
+}
+function dormancyBadgeHtml(p){
+const d = getDormancyInfo(p);
+if(!d.isDormant) return '';
+return `<span class="yoy-chip growth-neg">🚨 توقفت عن الشراء — ${fmt(d.atRiskEGP)} ج.م معرضة للخطر</span>`;
 }
 
 // ---------- MR / DM filters ----------
@@ -931,6 +1025,20 @@ const withStatus = pool.map(p => ({ p, s: getSlabStatus(p) }));
 const maxed = withStatus.filter(x => x.s.state === 'max').sort((a,b) => b.s.currentGrowth - a.s.currentGrowth);
 const { bestChance, needsAttention } = classifyRemaining(withStatus);
 
+// Dormant: went completely quiet after real recent activity -- a different,
+// more urgent signal than "still buying but slower." Sorted by revenue at
+// risk (biggest accounts that went quiet first), not alphabetically.
+const dormant = pool.map(p => ({ p, d: getDormancyInfo(p) })).filter(x => x.d.isDormant)
+.sort((a,b) => b.d.atRiskEGP - a.d.atRiskEGP);
+
+// Biggest EGP declines: ranked by absolute EGP lost in the YoY window, not
+// percentage -- a 90% drop on a tiny pharmacy matters less than a 10% drop
+// on a big one, and percentage-only views miss that.
+const yoyDeclines = pool.map(p => ({ p, y: getYoYGrowth(p) }))
+.filter(x => x.y.growth !== null && x.y.deltaEGP < 0)
+.sort((a,b) => a.y.deltaEGP - b.y.deltaEGP);
+const { curRange, priorRange } = yoyRangeLabels();
+
 const listItem = (p, s, cls, metaHtml, salesHtml) => `
 <div class="pharm-list-item ${cls}" data-idx="${PHARMACIES.indexOf(p)}">
 <div>
@@ -943,15 +1051,40 @@ const listItem = (p, s, cls, metaHtml, salesHtml) => `
 </div>`;
 
 const maxItemsHtml = maxed.map(({p,s}) => listItem(p, s, 'pli-slab-max',
-`نمو +${pct(s.currentGrowth)} ${h1GrowthBadgeHtml(p)}`, `🏆 ${fmt(s.cashback)} ج.م`)).join('');
+`نمو +${pct(s.currentGrowth)} ${yoyGrowthBadgeHtml(p)}`, `🏆 ${fmt(s.cashback)} ج.م`)).join('');
 
 const bestChanceHtml = bestChance.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-best-chance',
-`نمو +${pct(s.currentGrowth)} · حتى ${s.nextLabel} ${h1GrowthBadgeHtml(p)}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
+`نمو +${pct(s.currentGrowth)} · حتى ${s.nextLabel} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
 
 const needsAttentionHtml = needsAttention.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
-`نمو ${pct(s.currentGrowth)} · حتى ${s.nextLabel} ${h1GrowthBadgeHtml(p)}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
+`نمو ${pct(s.currentGrowth)} · حتى ${s.nextLabel} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
+
+const dormantHtml = dormant.slice(0, 150).map(({p,d}) => listItem(p, d, 'pli-dormant',
+`${p.tr||'—'} · توقفت تماماً منذ آخر ${d.lastTwo.length} شهر`, `🚨 ${fmt(d.atRiskEGP)} ج.م معرضة للخطر`)).join('');
+
+const declineItem = ({p,y}) => `
+<div class="pharm-list-item pli-needs-attention" data-idx="${PHARMACIES.indexOf(p)}">
+<div>
+<div class="pli-name">${p.n}</div>
+<div class="pli-meta">${p.mr||'—'} · ${p.tr||'—'} · ${y.growth!==null?(y.growth>=0?'+':'')+pct(y.growth):'—'}</div>
+</div>
+<div class="pli-stats">
+<div class="pli-sales">📉 ${fmt(y.deltaEGP)} ج.م</div>
+</div>
+</div>`;
+const yoyDeclinesHtml = yoyDeclines.slice(0, 150).map(declineItem).join('');
 
 overviewSection.innerHTML = `
+<div class="card">
+<h2>🚨 توقفت عن الشراء تماماً (${dormant.length})</h2>
+<div class="note" style="margin-top:0;">كانت تشتري بانتظام ثم توقفت تماماً في آخر شهرين موثوقين من البيانات — على الأرجح فقدان الحساب لصالح منافس، نفاد مخزون، أو مشكلة توزيع. مرتّبة حسب أكبر قيمة مبيعات معرضة للخطر.</div>
+<div class="pharm-list" id="dormantListBox">${dormantHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
+</div>
+<div class="card">
+<h2>📉 أكبر انخفاض بالجنيه (${curRange} مقابل ${priorRange}) (${yoyDeclines.length})</h2>
+<div class="note" style="margin-top:0;">مرتّبة حسب قيمة الانخفاض بالجنيه لا بالنسبة -- انخفاض 10% في صيدلية كبيرة يهم أكثر من انخفاض 90% في صيدلية صغيرة.</div>
+<div class="pharm-list" id="yoyDeclineListBox">${yoyDeclinesHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
+</div>
 <div class="card">
 <h2>🏆 صيدليات حققت الحد الأقصى للنمو — فوز مضمون (${maxed.length})</h2>
 <div class="pharm-list" id="maxListBox">${maxItemsHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
@@ -967,7 +1100,7 @@ overviewSection.innerHTML = `
 <div class="pharm-list" id="needsAttentionListBox">${needsAttentionHtml || '<div class="empty-msg">لا توجد صيدليات في هذه الفئة ضمن الفلتر الحالي</div>'}</div>
 </div>`;
 
-['maxListBox', 'bestChanceListBox', 'needsAttentionListBox'].forEach(id => {
+['dormantListBox', 'yoyDeclineListBox', 'maxListBox', 'bestChanceListBox', 'needsAttentionListBox'].forEach(id => {
 const el = document.getElementById(id);
 if(!el) return;
 el.addEventListener('click', (e) => {
@@ -1027,19 +1160,21 @@ const companyQ3 = PHARMACIES.reduce((s,p) => s + p.q3d, 0);
 const companyQ4 = PHARMACIES.reduce((s,p) => s + p.q4d, 0);
 const companyGrowth = companyQ3 > 0 ? (companyQ4 - companyQ3) / companyQ3 : null;
 
-// Same idea as the Q3/Q4 numbers above, but for the current year (H1 2026 vs
-// H1 2025) -- a live read on the rep's book, separate from the contractual
-// Q3/Q4 figure, since that one is locked in and can't tell them how this year
-// is actually going so far.
-const sumH1_25 = subset.reduce((s,p) => s + getH1Growth(p).h1_25, 0);
-const sumH1_26 = subset.reduce((s,p) => s + getH1Growth(p).h1_26, 0);
-const h1Growth = sumH1_25 > 0 ? (sumH1_26 - sumH1_25) / sumH1_25 : null;
-const h1GrowthClass = h1Growth === null ? '' : (h1Growth >= 0 ? 'growth-pos' : 'growth-neg');
-const h1GrowthText = h1Growth === null ? '—' : (h1Growth>=0?'+':'') + pct(h1Growth);
+// Same idea as the Q3/Q4 numbers above, but for the current year -- a live
+// read on the rep's book, separate from the contractual Q3/Q4 figure, since
+// that one is locked in and can't tell them how this year is actually going
+// so far. The window is dynamic (see getYoYGrowth) so it never silently
+// includes a half-reported trailing month.
+const { curRange, priorRange } = yoyRangeLabels();
+const sumYoYPrior = subset.reduce((s,p) => s + getYoYGrowth(p).priorSum, 0);
+const sumYoYCur = subset.reduce((s,p) => s + getYoYGrowth(p).curSum, 0);
+const yoyGrowth = sumYoYPrior > 0 ? (sumYoYCur - sumYoYPrior) / sumYoYPrior : null;
+const yoyGrowthClass = yoyGrowth === null ? '' : (yoyGrowth >= 0 ? 'growth-pos' : 'growth-neg');
+const yoyGrowthText = yoyGrowth === null ? '—' : (yoyGrowth>=0?'+':'') + pct(yoyGrowth);
 
-const companyH1_25 = PHARMACIES.reduce((s,p) => s + getH1Growth(p).h1_25, 0);
-const companyH1_26 = PHARMACIES.reduce((s,p) => s + getH1Growth(p).h1_26, 0);
-const companyH1Growth = companyH1_25 > 0 ? (companyH1_26 - companyH1_25) / companyH1_25 : null;
+const companyYoYPrior = PHARMACIES.reduce((s,p) => s + getYoYGrowth(p).priorSum, 0);
+const companyYoYCur = PHARMACIES.reduce((s,p) => s + getYoYGrowth(p).curSum, 0);
+const companyYoYGrowth = companyYoYPrior > 0 ? (companyYoYCur - companyYoYPrior) / companyYoYPrior : null;
 
 const mrGroups = computeAnalysisGroups('mr');
 const totalMRs = mrGroups.length;
@@ -1047,8 +1182,8 @@ const byQ4Rank = [...mrGroups].sort((a,b) => b.q4 - a.q4);
 const q4Rank = byQ4Rank.findIndex(g => g.name === myperfActiveMR) + 1;
 const byGrowthRank = mrGroups.filter(g => g.growth !== null).sort((a,b) => b.growth - a.growth);
 const growthRank = growth !== null ? byGrowthRank.findIndex(g => g.name === myperfActiveMR) + 1 : null;
-const byH1GrowthRank = mrGroups.filter(g => g.h1Growth !== null).sort((a,b) => b.h1Growth - a.h1Growth);
-const h1GrowthRank = h1Growth !== null ? byH1GrowthRank.findIndex(g => g.name === myperfActiveMR) + 1 : null;
+const byYoYGrowthRank = mrGroups.filter(g => g.yoyGrowth !== null).sort((a,b) => b.yoyGrowth - a.yoyGrowth);
+const yoyGrowthRank = yoyGrowth !== null ? byYoYGrowthRank.findIndex(g => g.name === myperfActiveMR) + 1 : null;
 
 const withStatus = subset.map(p => ({ p, s: getSlabStatus(p) }));
 const maxed = withStatus.filter(x => x.s.state === 'max');
@@ -1057,6 +1192,14 @@ const lockedCashback = maxed.reduce((sum, {p}) => {
 const rows = calcSlabs(p.q3d, {shelf:'none', posm:false, full:false});
 return sum + rows[rows.length - 1].cashback;
 }, 0);
+
+// Dormant + biggest-EGP-decline in this rep's own book -- the two most
+// actionable "who do I call this week" lists, same logic as the Overview tab.
+const dormantMine = subset.map(p => ({ p, d: getDormancyInfo(p) })).filter(x => x.d.isDormant)
+.sort((a,b) => b.d.atRiskEGP - a.d.atRiskEGP);
+const yoyDeclinesMine = subset.map(p => ({ p, y: getYoYGrowth(p) }))
+.filter(x => x.y.growth !== null && x.y.deltaEGP < 0)
+.sort((a,b) => a.y.deltaEGP - b.y.deltaEGP);
 
 const listItem = (p, s, cls, metaHtml, salesHtml) => `
 <div class="pharm-list-item ${cls}" data-idx="${PHARMACIES.indexOf(p)}">
@@ -1070,9 +1213,13 @@ const listItem = (p, s, cls, metaHtml, salesHtml) => `
 </div>`;
 
 const bestChanceHtml = bestChance.slice(0, 5).map(({p,s}) => listItem(p, s, 'pli-best-chance',
-`${p.tr} · growth +${pct(s.currentGrowth)} ${h1GrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
+`${p.tr} · growth +${pct(s.currentGrowth)} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
 const needsAttentionHtml = needsAttention.slice(0, 5).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
-`${p.tr} · growth ${pct(s.currentGrowth)} ${h1GrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
+`${p.tr} · growth ${pct(s.currentGrowth)} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
+const dormantMineHtml = dormantMine.slice(0, 5).map(({p,d}) => listItem(p, d, 'pli-dormant',
+`${p.tr||'—'} · quiet for ${d.lastTwo.length} months`, `🚨 ${fmt(d.atRiskEGP)} EGP at risk`)).join('');
+const yoyDeclinesMineHtml = yoyDeclinesMine.slice(0, 5).map(({p,y}) => listItem(p, y, 'pli-needs-attention',
+`${p.tr||'—'} · ${y.growth!==null?(y.growth>=0?'+':'')+pct(y.growth):'—'}`, `📉 ${fmt(y.deltaEGP)} EGP`)).join('');
 
 section.innerHTML = `
 <div class="card">
@@ -1085,26 +1232,36 @@ section.innerHTML = `
 <div class="note">Company-wide growth this period: ${companyGrowth===null?'—':(companyGrowth>=0?'+':'')+pct(companyGrowth)}. ${growth!==null && companyGrowth!==null ? (growth > companyGrowth ? 'You are outperforming the company average.' : 'You are behind the company average.') : ''}</div>
 </div>
 <div class="card">
-<h2>📅 Your Current-Year Trend (H1 2026 vs H1 2025)</h2>
-<div class="note" style="margin-top:0;">Informational only -- doesn't affect cashback, but tells you how your book is doing right now instead of waiting for the next contract cycle.</div>
+<h2>📅 Your Current-Year Trend (${curRange} vs ${priorRange})</h2>
+<div class="note" style="margin-top:0;">Informational only -- doesn't affect cashback, but tells you how your book is doing right now instead of waiting for the next contract cycle. Any recent month that isn't fully reported by the distributor yet is automatically left out of this comparison.</div>
 <div class="totals-grid">
-<div class="sales-box"><div class="t">H1 2025 Total</div><div class="v">${fmt(sumH1_25)} EGP</div></div>
-<div class="sales-box"><div class="t">H1 2026 Total</div><div class="v">${fmt(sumH1_26)} EGP</div></div>
-<div class="sales-box"><div class="t">Your H1 Growth</div><div class="v ${h1GrowthClass}">${h1GrowthText}</div></div>
+<div class="sales-box"><div class="t">${priorRange} Total</div><div class="v">${fmt(sumYoYPrior)} EGP</div></div>
+<div class="sales-box"><div class="t">${curRange} Total</div><div class="v">${fmt(sumYoYCur)} EGP</div></div>
+<div class="sales-box"><div class="t">Your Growth</div><div class="v ${yoyGrowthClass}">${yoyGrowthText}</div></div>
 </div>
-<div class="note">Company-wide H1 growth: ${companyH1Growth===null?'—':(companyH1Growth>=0?'+':'')+pct(companyH1Growth)}. ${h1Growth!==null && companyH1Growth!==null ? (h1Growth > companyH1Growth ? 'You are outperforming the company average so far this year.' : 'You are behind the company average so far this year.') : ''}</div>
+<div class="note">Company-wide growth over the same period: ${companyYoYGrowth===null?'—':(companyYoYGrowth>=0?'+':'')+pct(companyYoYGrowth)}. ${yoyGrowth!==null && companyYoYGrowth!==null ? (yoyGrowth > companyYoYGrowth ? 'You are outperforming the company average so far this year.' : 'You are behind the company average so far this year.') : ''}</div>
 </div>
 <div class="card">
 <h2>📊 Your Ranking (of ${totalMRs} reps)</h2>
 <div class="totals-grid">
 <div class="sales-box"><div class="t">By Revenue (Q4)</div><div class="v">#${q4Rank}</div></div>
 <div class="sales-box"><div class="t">By Growth % (Q3→Q4)</div><div class="v">${growthRank ? '#'+growthRank+' of '+byGrowthRank.length : 'n/a'}</div></div>
-<div class="sales-box"><div class="t">By H1 Growth %</div><div class="v">${h1GrowthRank ? '#'+h1GrowthRank+' of '+byH1GrowthRank.length : 'n/a'}</div></div>
+<div class="sales-box"><div class="t">By Current-Year Growth %</div><div class="v">${yoyGrowthRank ? '#'+yoyGrowthRank+' of '+byYoYGrowthRank.length : 'n/a'}</div></div>
 </div>
 </div>
 <div class="card">
 <h2>🏆 Already Locked In (${maxed.length})</h2>
 <div class="note" style="margin-top:0;">Guaranteed cashback already earned across pharmacies that hit the top growth slab: <b>${fmt(lockedCashback)} EGP</b></div>
+</div>
+<div class="card">
+<h2>🚨 Went Quiet (${dormantMine.length})</h2>
+<div class="note" style="margin-top:0;">Was buying regularly, then stopped completely in the last two reliable months -- call these first, before the slow decliners below.</div>
+<div class="pharm-list">${dormantMineHtml || '<div class="empty-msg">None right now</div>'}</div>
+</div>
+<div class="card">
+<h2>📉 Biggest EGP Declines This Year (${yoyDeclinesMine.length})</h2>
+<div class="note" style="margin-top:0;">Ranked by EGP lost, not %, so the pharmacies actually worth the most revenue show up first.</div>
+<div class="pharm-list">${yoyDeclinesMineHtml || '<div class="empty-msg">None right now</div>'}</div>
 </div>
 <div class="card">
 <h2>📈 Best Chance to Push (${bestChance.length})</h2>
@@ -1130,6 +1287,124 @@ if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', bl
 });
 }
 
+// ---------- Merchandising tab ----------
+// Two questions the merchandising team actually needs answered: (1) is our
+// money going where it should -- are chain vs. independent, and
+// new-vs-already-merchandised, pharmacies behaving differently enough to
+// change strategy; and (2) which specific pharmacies should get attention
+// next -- pharmacies already growing well with zero merchandising spend
+// (cheap wins to lock in with POSM) vs. pharmacies that already got
+// merchandising and are still declining (a materials/placement problem, not
+// a spend problem).
+const CT_GROUP_LABELS = { PHAR: 'Independent Pharmacies (PHAR)', CHPH: 'Chain Pharmacies (CHPH)', EGPH: 'EGPH' };
+const ST_GROUP_LABELS = { Exist: 'PH + Merch (Already Merchandised)', New: 'PH Only (Never Merchandised)' };
+
+function computeSimpleGroups(field){
+const groups = {};
+PHARMACIES.forEach(p => {
+const key = p[field];
+if(!key) return;
+if(!groups[key]) groups[key] = { name:key, count:0, q4:0, yoyPrior:0, yoyCur:0 };
+const g = groups[key];
+g.count++;
+g.q4 += p.q4d || 0;
+const y = getYoYGrowth(p);
+g.yoyPrior += y.priorSum;
+g.yoyCur += y.curSum;
+});
+return Object.values(groups)
+.map(g => ({ ...g, yoyGrowth: g.yoyPrior > 0 ? (g.yoyCur - g.yoyPrior) / g.yoyPrior : null }))
+.sort((a,b) => b.q4 - a.q4);
+}
+
+function simpleGroupTableHtml(rows, labelMap){
+const { curRange, priorRange } = yoyRangeLabels();
+const rowsHtml = rows.map(g => {
+const yClass = g.yoyGrowth === null ? '' : (g.yoyGrowth >= 0 ? 'growth-pos' : 'growth-neg');
+const yText = g.yoyGrowth === null ? '—' : (g.yoyGrowth >= 0 ? '+' : '') + pct(g.yoyGrowth);
+return `<tr>
+<td class="name-cell">${(labelMap && labelMap[g.name]) || g.name}</td>
+<td>${g.count.toLocaleString('en-US')}</td>
+<td>${fmt(g.q4)} EGP</td>
+<td class="${yClass}">${yText}</td>
+</tr>`;
+}).join('');
+return `<table><thead><tr><th></th><th>Pharmacy Count</th><th>Q4 Total</th><th>YoY % (${curRange} vs ${priorRange})</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+}
+
+function renderMerch(){
+const section = document.getElementById('merchSection');
+if(!section) return;
+
+const ctGroups = computeSimpleGroups('ct');
+const stGroups = computeSimpleGroups('st');
+
+// Never merchandised, already growing well on their own -- the highest-ROI
+// candidates for new POSM investment, since they're proving demand exists
+// before any spend at all. A minimum revenue floor keeps tiny pharmacies
+// with noisy percentage swings from crowding out real candidates.
+const MIN_EXPANSION_REVENUE = 3000;
+const expansion = PHARMACIES.filter(p => p.st === 'New')
+.map(p => ({ p, y: getYoYGrowth(p) }))
+.filter(x => x.y.growth !== null && x.y.growth > 0.10 && x.y.curSum >= MIN_EXPANSION_REVENUE)
+.sort((a,b) => b.y.growth - a.y.growth);
+
+// Already merchandised and still declining -- a materials/placement
+// question, not a "should we invest here" question. Sorted by revenue so
+// the biggest existing accounts surface first.
+const review = PHARMACIES.filter(p => p.st === 'Exist')
+.map(p => ({ p, y: getYoYGrowth(p) }))
+.filter(x => x.y.growth !== null && x.y.growth < 0)
+.sort((a,b) => (b.p.q4d||0) - (a.p.q4d||0));
+
+const { curRange, priorRange } = yoyRangeLabels();
+
+const listItem = (p, metaHtml, salesHtml) => `
+<div class="pharm-list-item" data-idx="${PHARMACIES.indexOf(p)}">
+<div>
+<div class="pli-name">${p.n}</div>
+<div class="pli-meta">${metaHtml}</div>
+</div>
+<div class="pli-stats"><div class="pli-sales">${salesHtml}</div></div>
+</div>`;
+
+const expansionHtml = expansion.slice(0, 50).map(({p,y}) => listItem(p,
+`${p.mr||'—'} · ${p.tr||'—'} · never merchandised`, `📈 +${pct(y.growth)} (${fmt(y.curSum)} EGP)`)).join('');
+const reviewHtml = review.slice(0, 50).map(({p,y}) => listItem(p,
+`${p.mr||'—'} · ${p.tr||'—'} · already merchandised`, `📉 ${(y.growth>=0?'+':'')+pct(y.growth)} (${fmt(p.q4d)} EGP)`)).join('');
+
+section.innerHTML = `
+<div class="card">
+<h2>By Pharmacy Type</h2>
+<div style="overflow-x:auto;">${simpleGroupTableHtml(ctGroups, CT_GROUP_LABELS)}</div>
+<div class="note">Chain pharmacies (CHPH) are often worth one corporate-level conversation rather than store-by-store visits -- worth flagging if one type is growing meaningfully faster than the other.</div>
+</div>
+<div class="card">
+<h2>New vs. Already-Merchandised</h2>
+<div style="overflow-x:auto;">${simpleGroupTableHtml(stGroups, ST_GROUP_LABELS)}</div>
+</div>
+<div class="card">
+<h2>📈 Expansion Candidates — Never Merchandised, Already Growing (${expansion.length})</h2>
+<div class="note" style="margin-top:0;">Pharmacies with no prior merchandising investment that are already growing double digits (${curRange} vs ${priorRange}) on their own. Showing up to 50, sorted by growth.</div>
+<div class="pharm-list">${expansionHtml || '<div class="empty-msg">None right now</div>'}</div>
+</div>
+<div class="card">
+<h2>📉 Review Candidates — Already Merchandised, Still Declining (${review.length})</h2>
+<div class="note" style="margin-top:0;">Pharmacies that already received merchandising investment and are still declining this year. Sorted by revenue (biggest accounts first), showing up to 50.</div>
+<div class="pharm-list">${reviewHtml || '<div class="empty-msg">None right now</div>'}</div>
+</div>`;
+
+section.querySelectorAll('.pharm-list-item').forEach(item => {
+item.addEventListener('click', () => {
+const idx = parseInt(item.dataset.idx, 10);
+selectPharmacy(PHARMACIES[idx]);
+switchView('search');
+const detail = document.getElementById('detailSection');
+if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', block:'start'});
+});
+});
+}
+
 // ---------- Analysis tab: aggregate performance by region/territory/MR/DM ----------
 // Deliberately independent of the search tab's activeMR/activeDM filter -- this is
 // a standing company-wide dashboard, not a filtered view, so it always summarizes
@@ -1148,15 +1423,17 @@ PHARMACIES.forEach(p => {
 const key = p[field];
 if(!key) return;
 if(!groups[key]){
-groups[key] = { name:key, count:0, q3:0, q4:0, h1_25:0, h1_26:0, maxed:0, bestChance:0, needsAttention:0, unknown:0 };
+groups[key] = { name:key, count:0, q3:0, q4:0, yoyPrior:0, yoyCur:0, dormantCount:0, dormantEGP:0, maxed:0, bestChance:0, needsAttention:0, unknown:0 };
 }
 const g = groups[key];
 g.count++;
 g.q3 += p.q3d || 0;
 g.q4 += p.q4d || 0;
-const h = getH1Growth(p);
-g.h1_25 += h.h1_25;
-g.h1_26 += h.h1_26;
+const y = getYoYGrowth(p);
+g.yoyPrior += y.priorSum;
+g.yoyCur += y.curSum;
+const d = getDormancyInfo(p);
+if(d.isDormant){ g.dormantCount++; g.dormantEGP += d.atRiskEGP; }
 const s = getSlabStatus(p);
 if(s.state === 'max') g.maxed++;
 else if(s.state === 'remaining' && s.currentGrowth > 0) g.bestChance++;
@@ -1166,7 +1443,7 @@ else g.unknown++;
 return Object.values(groups).map(g => ({
 ...g,
 growth: g.q3 > 0 ? (g.q4 - g.q3) / g.q3 : null,
-h1Growth: g.h1_25 > 0 ? (g.h1_26 - g.h1_25) / g.h1_25 : null,
+yoyGrowth: g.yoyPrior > 0 ? (g.yoyCur - g.yoyPrior) / g.yoyPrior : null,
 }));
 }
 
@@ -1182,20 +1459,149 @@ return dir === 'asc' ? av - bv : bv - av;
 });
 }
 
+// ---------- Management dashboard: company-wide trend, full-year projection,
+// and inactivity trend over time ----------
+// Reusable generic line chart (mirrors the per-pharmacy history chart's
+// approach) that can plot either raw EGP totals or a percentage series.
+// Per-point value labels are left off (too many months to fit legibly) --
+// each point gets a native hover tooltip via <title> instead.
+function renderTrendLineChart(points){
+if(!points.length) return '<div class="empty-msg">No data</div>';
+const H = 190, padL = 20, padR = 20, padT = 20, padB = 34;
+const MIN_SPACING = 46;
+const n = points.length;
+const plotW = Math.max((n - 1) * MIN_SPACING, 200);
+const W = plotW + padL + padR;
+const plotH = H - padT - padB;
+const vals = points.map(x => x.val);
+const maxVal = Math.max(...vals, 0);
+const minVal = Math.min(...vals, 0);
+const range = (maxVal - minVal) || 1;
+const mapped = points.map((x, i) => {
+const px = n === 1 ? padL + plotW / 2 : padL + (plotW * i) / (n - 1);
+const py = padT + plotH - ((x.val - minVal) / range) * plotH;
+return { ...x, px, py };
+});
+const pathD = mapped.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt.px.toFixed(1)},${pt.py.toFixed(1)}`).join(' ');
+const showEvery = n > 16 ? Math.ceil(n / 16) : 1;
+const markers = mapped.map((pt, i) => `
+${i % showEvery === 0 ? `<text x="${pt.px.toFixed(1)}" y="${H - 10}" text-anchor="middle" font-size="11" fill="var(--muted)">${pt.lbl}</text>` : ''}
+<circle cx="${pt.px.toFixed(1)}" cy="${pt.py.toFixed(1)}" r="3.5" fill="var(--primary)" stroke="#fff" stroke-width="1.5"><title>${pt.tip}</title></circle>
+`).join('');
+const needsScroll = W > 700;
+const wrapStyle = needsScroll ? 'overflow-x:auto;' : '';
+const svgStyle = needsScroll ? `width:${W}px;min-width:100%;` : 'width:100%;';
+return `<div style="${wrapStyle}"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="${svgStyle}height:${H}px;display:block;overflow:visible;">
+<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--border)" stroke-width="1"></line>
+<path d="${pathD}" fill="none" stroke="var(--primary)" stroke-width="2.5"></path>
+${markers}
+</svg></div>`;
+}
+
+function shortMonthLabel(yyyymm){
+return monthAbbr(yyyymm) + " '" + String(yyyymm).slice(2,4);
+}
+
+// Every reliable month's company-wide total, in chronological order -- the
+// running "is the business actually growing" line management asked for,
+// instead of only the two Q3/Q4 snapshot points.
+function computeCompanyTrendPoints(){
+return RELIABLE_MONTHS.map(m => {
+const total = PHARMACIES.reduce((s,p) => s + ((p.mo && p.mo[m]) || 0), 0);
+return { lbl: shortMonthLabel(m), val: total, tip: `${monthAbbr(m)} ${m.slice(0,4)}: ${fmt(total)} EGP` };
+});
+}
+
+// Extrapolates a full-year 2026 total: actual sales for whichever 2026
+// months are already reliable, plus the same months' 2025 actuals grown by
+// the trend growth rate observed so far, for every month still ahead.
+function computeFullYearProjection(){
+const monthsOfYear = (y) => Array.from({length:12}, (_,i) => `${y}${String(i+1).padStart(2,'0')}`);
+const sumForMonths = (months) => months.reduce((s,m) => s + PHARMACIES.reduce((s2,p) => s2 + ((p.mo && p.mo[m]) || 0), 0), 0);
+
+const months2025 = monthsOfYear('2025');
+const total2025 = sumForMonths(months2025);
+
+const months2026 = monthsOfYear('2026');
+const reliable2026 = months2026.filter(m => RELIABLE_MONTHS.includes(m));
+const remaining2026 = months2026.filter(m => !reliable2026.includes(m));
+
+const actual2026Sum = sumForMonths(reliable2026);
+const matchingPrior2025Sum = sumForMonths(reliable2026.map(m => '2025' + m.slice(4)));
+const trendGrowth = matchingPrior2025Sum > 0 ? (actual2026Sum - matchingPrior2025Sum) / matchingPrior2025Sum : 0;
+
+const remainingProjected = remaining2026.reduce((s,m) => {
+const m25 = '2025' + m.slice(4);
+const priorVal = PHARMACIES.reduce((s2,p) => s2 + ((p.mo && p.mo[m25]) || 0), 0);
+return s + priorVal * (1 + trendGrowth);
+}, 0);
+
+const projectedFullYear2026 = actual2026Sum + remainingProjected;
+const projectedGrowth = total2025 > 0 ? (projectedFullYear2026 - total2025) / total2025 : null;
+return { total2025, actual2026Sum, reliableMonthsCount: reliable2026.length, projectedFullYear2026, projectedGrowth, trendGrowth };
+}
+
+// % of ever-active pharmacies with zero sales in each reliable month -- a
+// simple, robust proxy for how much of the base has gone quiet, plotted over
+// time so a rising or falling trend is visible at a glance.
+function computeInactivityTrendPoints(){
+if(!EVER_ACTIVE_PHARMACIES.length) return [];
+return RELIABLE_MONTHS.map(m => {
+const zero = EVER_ACTIVE_PHARMACIES.filter(p => !((p.mo[m] || 0) > 0)).length;
+const rate = zero / EVER_ACTIVE_PHARMACIES.length;
+return { lbl: shortMonthLabel(m), val: rate, tip: `${monthAbbr(m)} ${m.slice(0,4)}: ${(rate*100).toFixed(1)}% inactive` };
+});
+}
+
+function renderCompanyTrend(){
+const section = document.getElementById('companyTrendSection');
+if(!section) return;
+
+const trendPoints = computeCompanyTrendPoints();
+const proj = computeFullYearProjection();
+const projClass = proj.projectedGrowth === null ? '' : (proj.projectedGrowth >= 0 ? 'growth-pos' : 'growth-neg');
+const projText = proj.projectedGrowth === null ? '—' : (proj.projectedGrowth >= 0 ? '+' : '') + pct(proj.projectedGrowth);
+const trendGrowthText = (proj.trendGrowth >= 0 ? '+' : '') + pct(proj.trendGrowth);
+const inactivityPoints = computeInactivityTrendPoints();
+
+section.innerHTML = `
+<div class="card">
+<h2>📈 Company-Wide Monthly Revenue Trend</h2>
+<div class="note" style="margin-top:0;">Every reliable month of distributor sales, company-wide (Jan 2024 onward). Any trailing month that isn't fully reported yet is left off rather than shown as a misleading dip. Hover a point for the exact figure.</div>
+${renderTrendLineChart(trendPoints)}
+</div>
+<div class="card">
+<h2>🔮 Full-Year 2026 Projection</h2>
+<div class="note" style="margin-top:0;">Based on ${proj.reliableMonthsCount} reliable 2026 months so far (trend growth ${trendGrowthText} vs the same months in 2025), extrapolated across the rest of the year. A planning estimate, not a guarantee.</div>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">2025 Full Year (actual)</div><div class="v">${fmt(proj.total2025)} EGP</div></div>
+<div class="sales-box"><div class="t">2026 Actual So Far</div><div class="v">${fmt(proj.actual2026Sum)} EGP</div></div>
+<div class="sales-box"><div class="t">2026 Projected Full Year</div><div class="v ${projClass}">${fmt(proj.projectedFullYear2026)} EGP (${projText})</div></div>
+</div>
+</div>
+<div class="card">
+<h2>📊 Inactivity Trend — % of Pharmacies With Zero Sales Each Month</h2>
+<div class="note" style="margin-top:0;">Among pharmacies that have ever had sales. A rising line means more of the base is going quiet each month; a falling line means recovery.</div>
+${renderTrendLineChart(inactivityPoints)}
+</div>`;
+}
+
 const ANALYSIS_COLS = [
 { key:'name', lbl: null },
 { key:'count', lbl:'Pharmacy Count' },
 { key:'q3', lbl:'Q3 Total' },
 { key:'q4', lbl:'Q4 Total' },
 { key:'growth', lbl:'Growth % (Q3→Q4)' },
-{ key:'h1Growth', lbl:'H1 \'26 vs \'25 %' },
+{ key:'yoyGrowth', lbl:'YoY %' },
 { key:'maxed', lbl:'🏆 Maxed Out' },
 { key:'bestChance', lbl:'📈 Best Chance' },
 { key:'needsAttention', lbl:'⚠️ Needs Attention' },
+{ key:'dormantCount', lbl:'🚨 Dormant' },
 ];
 
 function renderAnalysis(){
 document.getElementById('analysisTotalCount').textContent = PHARMACIES.length.toLocaleString('en-US');
+renderCompanyTrend();
 
 const section = document.getElementById('analysisSection');
 const rows = computeAnalysisGroups(analysisGroup);
@@ -1211,8 +1617,8 @@ return `<th data-sort="${c.key}" style="cursor:pointer;white-space:nowrap;">${lb
 const rowsHtml = sorted.map(g => {
 const gClass = g.growth === null ? '' : (g.growth >= 0 ? 'growth-pos' : 'growth-neg');
 const gText = g.growth === null ? '—' : (g.growth >= 0 ? '+' : '') + pct(g.growth);
-const h1Class = g.h1Growth === null ? '' : (g.h1Growth >= 0 ? 'growth-pos' : 'growth-neg');
-const h1Text = g.h1Growth === null ? '—' : (g.h1Growth >= 0 ? '+' : '') + pct(g.h1Growth);
+const yClass = g.yoyGrowth === null ? '' : (g.yoyGrowth >= 0 ? 'growth-pos' : 'growth-neg');
+const yText = g.yoyGrowth === null ? '—' : (g.yoyGrowth >= 0 ? '+' : '') + pct(g.yoyGrowth);
 return `
 <tr class="${clickable ? 'pharm-list-item' : ''}" ${clickable ? `data-name="${g.name}"` : ''} style="${clickable ? 'cursor:pointer;' : ''}">
 <td class="name-cell">${g.name}</td>
@@ -1220,10 +1626,11 @@ return `
 <td>${fmt(g.q3)} EGP</td>
 <td>${fmt(g.q4)} EGP</td>
 <td class="${gClass}">${gText}</td>
-<td class="${h1Class}">${h1Text}</td>
+<td class="${yClass}">${yText}</td>
 <td>${g.maxed.toLocaleString('en-US')}</td>
 <td>${g.bestChance.toLocaleString('en-US')}</td>
 <td>${g.needsAttention.toLocaleString('en-US')}</td>
+<td class="${g.dormantCount>0?'growth-neg':''}">${g.dormantCount.toLocaleString('en-US')}</td>
 </tr>`;
 }).join('');
 
@@ -1284,6 +1691,7 @@ document.getElementById('overviewView').style.display = view === 'overview' ? ''
 document.getElementById('chainView').style.display = view === 'chain' ? '' : 'none';
 document.getElementById('leaderboardView').style.display = view === 'leaderboard' ? '' : 'none';
 document.getElementById('myperfView').style.display = view === 'myperf' ? '' : 'none';
+document.getElementById('merchView').style.display = view === 'merch' ? '' : 'none';
 document.getElementById('analysisView').style.display = view === 'analysis' ? '' : 'none';
 document.querySelectorAll('.view-tab-btn').forEach(btn => {
 btn.classList.toggle('active', btn.dataset.view === view);
@@ -1292,6 +1700,7 @@ if(view === 'overview') renderOverview();
 if(view === 'chain') renderChainSection();
 if(view === 'leaderboard') renderLeaderboard();
 if(view === 'myperf') renderMyPerf();
+if(view === 'merch') renderMerch();
 if(view === 'analysis') renderAnalysis();
 }
 document.getElementById('viewTabs').addEventListener('click', (e) => {
@@ -1784,7 +2193,7 @@ document.getElementById('detailSection').innerHTML = `
 </div>
 ${statusBadge}
 </div>
-<div class="badge-row">${slabStatusBadgeHtml(slabStatus)}</div>
+<div class="badge-row">${slabStatusBadgeHtml(slabStatus)} ${dormancyBadgeHtml(p)}</div>
 <div class="meta-grid">
 <div class="meta-item"><div class="lbl">المندوب الطبي</div><div class="val">${p.mr||'—'}</div></div>
 <div class="meta-item"><div class="lbl">مدير المنطقة</div><div class="val">${p.dm||'—'}</div></div>
@@ -1821,7 +2230,7 @@ ${SUPPLEMENT_LABEL ? `
 </div>
 </div>
 
-${renderH1Card(p)}
+${renderYoYCard(p)}
 
 <div class="card">
 <h2>📊 سجل المبيعات — للاستدلال على الإمكانية الفعلية للصيدلية</h2>
