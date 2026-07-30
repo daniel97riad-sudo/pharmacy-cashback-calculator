@@ -232,6 +232,19 @@ border-radius:20px;
 font-weight:600;
 }
 .badge.exist{background:#e3f5ec;color:#1a7a4d;}
+.h1-chip{
+display:inline-block;
+font-size:11px;
+padding:2px 8px;
+border-radius:10px;
+font-weight:600;
+background:var(--bg);
+border:1px solid var(--border);
+margin-inline-start:6px;
+white-space:nowrap;
+}
+.h1-chip.growth-pos{color:#1a7a4d;border-color:#c7e9d6;}
+.h1-chip.growth-neg{color:#c0392b;border-color:#f3d3ce;}
 .badge.new{background:#fdf1de;color:#a0680d;}
 .badge.slab-max{background:#e3f5ec;color:#1a7a4d;}
 .badge.slab-remaining{background:#fdf1de;color:#a0680d;}
@@ -427,7 +440,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div id="overviewView" style="display:none;">
 <div class="card">
 <div class="overview-note">
-هذه النظرة العامة تعتمد على نمو مبيعات الموزع من الربع الثالث إلى الربع الرابع 2025، وتُفلتر حسب المندوب/مدير المنطقة المختار أعلاه في تبويب البحث.
+هذه النظرة العامة تعتمد على نمو مبيعات الموزع من الربع الثالث إلى الربع الرابع 2025 (الرقم التعاقدي)، وتُفلتر حسب المندوب/مدير المنطقة المختار أعلاه في تبويب البحث. الوسم 📈/📉 "H1 2026 vs 2025" بجانب كل صيدلية هو مؤشر إعلامي إضافي عن الاتجاه الحالي (النصف الأول من هذا العام مقابل النصف الأول من العام الماضي) — لا يغيّر التصنيف أو الكاش باك.
 </div>
 </div>
 <div id="overviewSection"></div>
@@ -466,7 +479,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div id="analysisView" style="display:none;">
 <div class="card">
 <h2>📈 Performance Analysis</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">Aggregate analysis across all <span id="analysisTotalCount"></span> pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.</div>
+<div class="note" style="margin-top:0;margin-bottom:12px;">Aggregate analysis across all <span id="analysisTotalCount"></span> pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). "Growth % (Q3→Q4)" is the contractual figure that determines cashback slabs. "H1 '26 vs '25 %" is a separate, informational read on current-year momentum (Jan-Jun 2026 vs Jan-Jun 2025) -- it does not affect cashback. Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.</div>
 <div class="tabs" id="analysisSubTabs">
 <div class="tab-btn active" data-group="rg">By Region</div>
 <div class="tab-btn" data-group="tr">By Territory</div>
@@ -547,6 +560,67 @@ return Math.round(n).toLocaleString('en-US');
 }
 function pct(n){
 return (n*100).toFixed(1) + '%';
+}
+
+// ---------- H1 2026 vs H1 2025 (current-year momentum, separate from the
+// contractual Q3/Q4 2025 slab calculation) ----------
+// The Q3/Q4 2025 growth above is a fixed, one-time number: it's literally what
+// determines the cashback owed under the already-agreed contract, so it never
+// changes and always stays as the "official" figure. But by the time anyone is
+// using this tool (mid/late 2026), that number is old news -- it doesn't tell you
+// whether a pharmacy is actually doing better or worse *right now*. Every
+// pharmacy's "mo" monthly series already covers Jan 2024 through Jun 2026, so
+// H1 2025 (Jan-Jun) vs H1 2026 (Jan-Jun) is a full, same-length, same-season
+// comparison we can compute for free -- a live pulse to sit alongside the
+// contractual number, not replace it.
+const H1_2025_MONTHS = ['202501','202502','202503','202504','202505','202506'];
+const H1_2026_MONTHS = ['202601','202602','202603','202604','202605','202606'];
+function sumMonths(mo, months){
+if(!mo) return 0;
+return months.reduce((s,m) => s + (mo[m] || 0), 0);
+}
+function getH1Growth(p){
+const h1_25 = sumMonths(p.mo, H1_2025_MONTHS);
+const h1_26 = sumMonths(p.mo, H1_2026_MONTHS);
+const growth = h1_25 > 0 ? (h1_26 - h1_25) / h1_25 : null;
+return { h1_25, h1_26, growth };
+}
+function h1GrowthBadgeHtml(p){
+const h = getH1Growth(p);
+if(h.growth === null) return '';
+const cls = h.growth >= 0 ? 'growth-pos' : 'growth-neg';
+const arrow = h.growth >= 0 ? '📈' : '📉';
+return `<span class="h1-chip ${cls}">${arrow} H1 2026 vs 2025: ${h.growth>=0?'+':''}${pct(h.growth)}</span>`;
+}
+
+// Separate card on the pharmacy detail view so the current-year (H1) trend is
+// never confused with the Q3/Q4 2025 numbers above it -- that card is the
+// contractual figure that decides cashback; this one is just "how is this
+// pharmacy doing right now."
+function renderH1Card(p){
+const h = getH1Growth(p);
+if(h.h1_25 === 0 && h.h1_26 === 0) return '';
+const growthClass = h.growth === null ? '' : (h.growth >= 0 ? 'growth-pos' : 'growth-neg');
+const growthText = h.growth === null ? 'لا توجد بيانات كافية' : (h.growth>=0?'+':'') + pct(h.growth);
+return `
+<div class="card">
+<h2>📅 اتجاه العام الحالي (النصف الأول 2026 مقابل النصف الأول 2025)</h2>
+<div class="note" style="margin-top:0;">هذا الرقم إعلامي فقط لمعرفة الاتجاه الحالي للصيدلية -- لا يدخل في حساب الشريحة أو الكاش باك الخاص بالعقد، والذي يظل مبنياً على مقارنة الربع الثالث والرابع 2025 أعلاه.</div>
+<div class="sales-grid">
+<div class="sales-box">
+<div class="t">النصف الأول 2025 (يناير-يونيو)</div>
+<div class="v">${fmt(h.h1_25)} ج.م</div>
+</div>
+<div class="sales-box">
+<div class="t">النصف الأول 2026 (يناير-يونيو)</div>
+<div class="v">${fmt(h.h1_26)} ج.م</div>
+</div>
+<div class="sales-box">
+<div class="t">نسبة النمو (2026 مقابل 2025)</div>
+<div class="v ${growthClass}">${growthText}</div>
+</div>
+</div>
+</div>`;
 }
 
 // ---------- MR / DM filters ----------
@@ -869,13 +943,13 @@ const listItem = (p, s, cls, metaHtml, salesHtml) => `
 </div>`;
 
 const maxItemsHtml = maxed.map(({p,s}) => listItem(p, s, 'pli-slab-max',
-`نمو +${pct(s.currentGrowth)}`, `🏆 ${fmt(s.cashback)} ج.م`)).join('');
+`نمو +${pct(s.currentGrowth)} ${h1GrowthBadgeHtml(p)}`, `🏆 ${fmt(s.cashback)} ج.م`)).join('');
 
 const bestChanceHtml = bestChance.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-best-chance',
-`نمو +${pct(s.currentGrowth)} · حتى ${s.nextLabel}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
+`نمو +${pct(s.currentGrowth)} · حتى ${s.nextLabel} ${h1GrowthBadgeHtml(p)}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
 
 const needsAttentionHtml = needsAttention.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
-`نمو ${pct(s.currentGrowth)} · حتى ${s.nextLabel}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
+`نمو ${pct(s.currentGrowth)} · حتى ${s.nextLabel} ${h1GrowthBadgeHtml(p)}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
 
 overviewSection.innerHTML = `
 <div class="card">
@@ -953,12 +1027,28 @@ const companyQ3 = PHARMACIES.reduce((s,p) => s + p.q3d, 0);
 const companyQ4 = PHARMACIES.reduce((s,p) => s + p.q4d, 0);
 const companyGrowth = companyQ3 > 0 ? (companyQ4 - companyQ3) / companyQ3 : null;
 
+// Same idea as the Q3/Q4 numbers above, but for the current year (H1 2026 vs
+// H1 2025) -- a live read on the rep's book, separate from the contractual
+// Q3/Q4 figure, since that one is locked in and can't tell them how this year
+// is actually going so far.
+const sumH1_25 = subset.reduce((s,p) => s + getH1Growth(p).h1_25, 0);
+const sumH1_26 = subset.reduce((s,p) => s + getH1Growth(p).h1_26, 0);
+const h1Growth = sumH1_25 > 0 ? (sumH1_26 - sumH1_25) / sumH1_25 : null;
+const h1GrowthClass = h1Growth === null ? '' : (h1Growth >= 0 ? 'growth-pos' : 'growth-neg');
+const h1GrowthText = h1Growth === null ? '—' : (h1Growth>=0?'+':'') + pct(h1Growth);
+
+const companyH1_25 = PHARMACIES.reduce((s,p) => s + getH1Growth(p).h1_25, 0);
+const companyH1_26 = PHARMACIES.reduce((s,p) => s + getH1Growth(p).h1_26, 0);
+const companyH1Growth = companyH1_25 > 0 ? (companyH1_26 - companyH1_25) / companyH1_25 : null;
+
 const mrGroups = computeAnalysisGroups('mr');
 const totalMRs = mrGroups.length;
 const byQ4Rank = [...mrGroups].sort((a,b) => b.q4 - a.q4);
 const q4Rank = byQ4Rank.findIndex(g => g.name === myperfActiveMR) + 1;
 const byGrowthRank = mrGroups.filter(g => g.growth !== null).sort((a,b) => b.growth - a.growth);
 const growthRank = growth !== null ? byGrowthRank.findIndex(g => g.name === myperfActiveMR) + 1 : null;
+const byH1GrowthRank = mrGroups.filter(g => g.h1Growth !== null).sort((a,b) => b.h1Growth - a.h1Growth);
+const h1GrowthRank = h1Growth !== null ? byH1GrowthRank.findIndex(g => g.name === myperfActiveMR) + 1 : null;
 
 const withStatus = subset.map(p => ({ p, s: getSlabStatus(p) }));
 const maxed = withStatus.filter(x => x.s.state === 'max');
@@ -980,9 +1070,9 @@ const listItem = (p, s, cls, metaHtml, salesHtml) => `
 </div>`;
 
 const bestChanceHtml = bestChance.slice(0, 5).map(({p,s}) => listItem(p, s, 'pli-best-chance',
-`${p.tr} · growth +${pct(s.currentGrowth)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
+`${p.tr} · growth +${pct(s.currentGrowth)} ${h1GrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
 const needsAttentionHtml = needsAttention.slice(0, 5).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
-`${p.tr} · growth ${pct(s.currentGrowth)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
+`${p.tr} · growth ${pct(s.currentGrowth)} ${h1GrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
 
 section.innerHTML = `
 <div class="card">
@@ -990,15 +1080,26 @@ section.innerHTML = `
 <div class="totals-grid">
 <div class="sales-box"><div class="t">Q3 Total</div><div class="v">${fmt(sumQ3)} EGP</div></div>
 <div class="sales-box"><div class="t">Q4 Total</div><div class="v">${fmt(sumQ4)} EGP</div></div>
-<div class="sales-box"><div class="t">Your Growth</div><div class="v ${growthClass}">${growthText}</div></div>
+<div class="sales-box"><div class="t">Your Growth (Q3→Q4, contractual)</div><div class="v ${growthClass}">${growthText}</div></div>
 </div>
 <div class="note">Company-wide growth this period: ${companyGrowth===null?'—':(companyGrowth>=0?'+':'')+pct(companyGrowth)}. ${growth!==null && companyGrowth!==null ? (growth > companyGrowth ? 'You are outperforming the company average.' : 'You are behind the company average.') : ''}</div>
+</div>
+<div class="card">
+<h2>📅 Your Current-Year Trend (H1 2026 vs H1 2025)</h2>
+<div class="note" style="margin-top:0;">Informational only -- doesn't affect cashback, but tells you how your book is doing right now instead of waiting for the next contract cycle.</div>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">H1 2025 Total</div><div class="v">${fmt(sumH1_25)} EGP</div></div>
+<div class="sales-box"><div class="t">H1 2026 Total</div><div class="v">${fmt(sumH1_26)} EGP</div></div>
+<div class="sales-box"><div class="t">Your H1 Growth</div><div class="v ${h1GrowthClass}">${h1GrowthText}</div></div>
+</div>
+<div class="note">Company-wide H1 growth: ${companyH1Growth===null?'—':(companyH1Growth>=0?'+':'')+pct(companyH1Growth)}. ${h1Growth!==null && companyH1Growth!==null ? (h1Growth > companyH1Growth ? 'You are outperforming the company average so far this year.' : 'You are behind the company average so far this year.') : ''}</div>
 </div>
 <div class="card">
 <h2>📊 Your Ranking (of ${totalMRs} reps)</h2>
 <div class="totals-grid">
 <div class="sales-box"><div class="t">By Revenue (Q4)</div><div class="v">#${q4Rank}</div></div>
-<div class="sales-box"><div class="t">By Growth %</div><div class="v">${growthRank ? '#'+growthRank+' of '+byGrowthRank.length : 'n/a'}</div></div>
+<div class="sales-box"><div class="t">By Growth % (Q3→Q4)</div><div class="v">${growthRank ? '#'+growthRank+' of '+byGrowthRank.length : 'n/a'}</div></div>
+<div class="sales-box"><div class="t">By H1 Growth %</div><div class="v">${h1GrowthRank ? '#'+h1GrowthRank+' of '+byH1GrowthRank.length : 'n/a'}</div></div>
 </div>
 </div>
 <div class="card">
@@ -1047,12 +1148,15 @@ PHARMACIES.forEach(p => {
 const key = p[field];
 if(!key) return;
 if(!groups[key]){
-groups[key] = { name:key, count:0, q3:0, q4:0, maxed:0, bestChance:0, needsAttention:0, unknown:0 };
+groups[key] = { name:key, count:0, q3:0, q4:0, h1_25:0, h1_26:0, maxed:0, bestChance:0, needsAttention:0, unknown:0 };
 }
 const g = groups[key];
 g.count++;
 g.q3 += p.q3d || 0;
 g.q4 += p.q4d || 0;
+const h = getH1Growth(p);
+g.h1_25 += h.h1_25;
+g.h1_26 += h.h1_26;
 const s = getSlabStatus(p);
 if(s.state === 'max') g.maxed++;
 else if(s.state === 'remaining' && s.currentGrowth > 0) g.bestChance++;
@@ -1062,6 +1166,7 @@ else g.unknown++;
 return Object.values(groups).map(g => ({
 ...g,
 growth: g.q3 > 0 ? (g.q4 - g.q3) / g.q3 : null,
+h1Growth: g.h1_25 > 0 ? (g.h1_26 - g.h1_25) / g.h1_25 : null,
 }));
 }
 
@@ -1082,7 +1187,8 @@ const ANALYSIS_COLS = [
 { key:'count', lbl:'Pharmacy Count' },
 { key:'q3', lbl:'Q3 Total' },
 { key:'q4', lbl:'Q4 Total' },
-{ key:'growth', lbl:'Growth %' },
+{ key:'growth', lbl:'Growth % (Q3→Q4)' },
+{ key:'h1Growth', lbl:'H1 \'26 vs \'25 %' },
 { key:'maxed', lbl:'🏆 Maxed Out' },
 { key:'bestChance', lbl:'📈 Best Chance' },
 { key:'needsAttention', lbl:'⚠️ Needs Attention' },
@@ -1105,6 +1211,8 @@ return `<th data-sort="${c.key}" style="cursor:pointer;white-space:nowrap;">${lb
 const rowsHtml = sorted.map(g => {
 const gClass = g.growth === null ? '' : (g.growth >= 0 ? 'growth-pos' : 'growth-neg');
 const gText = g.growth === null ? '—' : (g.growth >= 0 ? '+' : '') + pct(g.growth);
+const h1Class = g.h1Growth === null ? '' : (g.h1Growth >= 0 ? 'growth-pos' : 'growth-neg');
+const h1Text = g.h1Growth === null ? '—' : (g.h1Growth >= 0 ? '+' : '') + pct(g.h1Growth);
 return `
 <tr class="${clickable ? 'pharm-list-item' : ''}" ${clickable ? `data-name="${g.name}"` : ''} style="${clickable ? 'cursor:pointer;' : ''}">
 <td class="name-cell">${g.name}</td>
@@ -1112,6 +1220,7 @@ return `
 <td>${fmt(g.q3)} EGP</td>
 <td>${fmt(g.q4)} EGP</td>
 <td class="${gClass}">${gText}</td>
+<td class="${h1Class}">${h1Text}</td>
 <td>${g.maxed.toLocaleString('en-US')}</td>
 <td>${g.bestChance.toLocaleString('en-US')}</td>
 <td>${g.needsAttention.toLocaleString('en-US')}</td>
@@ -1711,6 +1820,8 @@ ${SUPPLEMENT_LABEL ? `
 </div>` : ''}
 </div>
 </div>
+
+${renderH1Card(p)}
 
 <div class="card">
 <h2>📊 سجل المبيعات — للاستدلال على الإمكانية الفعلية للصيدلية</h2>
