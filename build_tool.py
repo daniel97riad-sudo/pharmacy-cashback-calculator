@@ -315,27 +315,35 @@ def extract_chc_data(xlsx_path, ph_flag_only=True):
     wb.close()
     return rows
 
-def strip_medical_leaked_mr_names(xlsx_path, rows):
+def strip_nonpharmacy_leaked_mr_names(xlsx_path, rows):
     """Some names appearing as mr_name on a handful of pharmacy rows are, in reality,
-    medical-channel reps (hospitals/universities/etc.) whose name leaked onto those
-    rows by a data error in final_chc.xlsx -- their real account book is overwhelmingly
-    medical (ph_flag=FALSE, medical_flag=TRUE) accounts, not pharmacies. Confirmed by
-    inspection: e.g. "Abdelrahman Hussein Mohamed Abdelsamad" sits on just 1 pharmacy
-    row but 20 medical-only rows; "Aya Khaled el sayed refaat el saeid" on 1 pharmacy
-    row but 10 medical-only rows. Meanwhile a legitimate pharmacy MR who also happens
-    to touch a couple of medical accounts (e.g. "Amr Hussein Kamel Ali Nasser": 191
-    pharmacy rows vs. 3 medical-only rows) is left untouched.
+    reps from another channel entirely (medical/hospital, university, army, distributor
+    stores, etc.) whose name leaked onto those rows by a data error in final_chc.xlsx --
+    their real account book is overwhelmingly non-pharmacy (ph_flag=FALSE) accounts.
+    Originally this only checked medical_flag=TRUE rows, but inspection showed several
+    names are contaminated almost entirely from OTHER non-pharmacy channels with zero
+    medical rows at all (e.g. "Ayman Henin": 4 pharmacy rows vs. 14 other-channel rows,
+    0 medical) -- so the check now counts every non-pharmacy row, not just medical ones.
+    Confirmed extreme case: "Yasmin Ehab Ibrahem Abed" sits on just 1 pharmacy row but
+    207 non-pharmacy rows (8 medical + 199 other-channel). Meanwhile a legitimate
+    pharmacy MR who also happens to touch a few non-pharmacy accounts (e.g. "Amr
+    Hussein Kamel Ali Nasser": 191 pharmacy rows vs. a handful of others) is left
+    untouched.
 
     Rule: for each mr_name, compare how many pharmacy rows (ph_flag=TRUE, already in
-    `rows`) carry that name vs. how many medical-only rows (ph_flag=FALSE,
-    medical_flag=TRUE) do. If the medical-only count exceeds the pharmacy count, that
-    name is not really a pharmacy MR -- blank out mr_name on those specific pharmacy
-    rows (the pharmacy itself, its sales data, dm_name, etc. are left untouched; only
-    the wrong mr_name field is cleared, so the tool shows "unassigned" instead of a
-    medical rep's name).
+    `rows`) carry that name vs. how many non-pharmacy rows (ph_flag=FALSE, any channel)
+    do. If the non-pharmacy count exceeds the pharmacy count, that name is not really a
+    pharmacy MR -- blank out mr_name on those specific pharmacy rows (the pharmacy
+    itself, its sales data, dm_name, etc. are left untouched; only the wrong mr_name
+    field is cleared, so the tool shows "unassigned" instead of another channel's rep).
+    In practice this correlates almost perfectly with the pharmacy row's dm_name also
+    being blank (135 of 136 rows), but blank-dm_name is deliberately NOT used as an
+    independent trigger -- it's also common on genuinely legitimate, high-volume
+    pharmacy MRs (a data-entry gap, not evidence of a wrong name), so using it alone
+    would incorrectly wipe real MRs off hundreds of rows.
 
-    Returns a list of (name, pharmacy_row_count, medical_only_row_count) for every
-    name that got stripped, for the caller to report.
+    Returns a list of (name, pharmacy_row_count, nonpharmacy_row_count) for every name
+    that got stripped, for the caller to report.
     """
     wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
     ws = wb[wb.sheetnames[0]]
@@ -347,19 +355,15 @@ def strip_medical_leaked_mr_names(xlsx_path, rows):
         i = idx.get(key)
         return row[i] if i is not None and i < len(row) else None
 
-    medical_only_counts = {}
+    nonpharmacy_counts = {}
     for row in rows_iter:
         ph = val(row, "ph_flag")
         is_ph = (ph is True) or (str(ph).strip().upper() == "TRUE")
         if is_ph:
             continue
-        med = val(row, "medical_flag")
-        is_med = (med is True) or (str(med).strip().upper() == "TRUE")
-        if not is_med:
-            continue
         mr = str(val(row, "mr_name") or "").strip()
         if mr:
-            medical_only_counts[mr] = medical_only_counts.get(mr, 0) + 1
+            nonpharmacy_counts[mr] = nonpharmacy_counts.get(mr, 0) + 1
     wb.close()
 
     pharmacy_counts = {}
@@ -369,10 +373,10 @@ def strip_medical_leaked_mr_names(xlsx_path, rows):
             pharmacy_counts[mr] = pharmacy_counts.get(mr, 0) + 1
 
     stripped = []
-    for name, med_count in medical_only_counts.items():
+    for name, nonph_count in nonpharmacy_counts.items():
         ph_count = pharmacy_counts.get(name, 0)
-        if ph_count and med_count > ph_count:
-            stripped.append((name, ph_count, med_count))
+        if ph_count and nonph_count > ph_count:
+            stripped.append((name, ph_count, nonph_count))
 
     stripped_names = {name for name, _, _ in stripped}
     if stripped_names:
@@ -761,11 +765,11 @@ def main():
     # same file) -- strip mr_name from pharmacy rows where the name is really a
     # medical-channel rep who leaked onto a handful of pharmacy rows by data error.
     if args.chc_file:
-        stripped = strip_medical_leaked_mr_names(args.chc_file, rows)
-        for name, ph_count, med_count in stripped:
+        stripped = strip_nonpharmacy_leaked_mr_names(args.chc_file, rows)
+        for name, ph_count, nonph_count in stripped:
             print(
-                f"Stripped medical-leaked mr_name \"{name}\" from {ph_count} pharmacy "
-                f"row(s) -- has {med_count} medical-only row(s), so not a real pharmacy MR."
+                f"Stripped non-pharmacy-leaked mr_name \"{name}\" from {ph_count} pharmacy "
+                f"row(s) -- has {nonph_count} non-pharmacy row(s), so not a real pharmacy MR."
             )
 
     supplement_label = None
