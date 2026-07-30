@@ -474,6 +474,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="view-tab-btn" data-view="chain">🔗 دمج صيدليات (سلسلة)</div>
 <div class="view-tab-btn" data-view="leaderboard">🏆 لوحة المتصدرين</div>
 <div class="view-tab-btn" data-view="myperf">👤 My Performance</div>
+<div class="view-tab-btn" data-view="myteam">👥 My Team (DM)</div>
 <div class="view-tab-btn" data-view="analysis">📈 Analysis</div>
 </div>
 
@@ -543,6 +544,15 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <select id="myperfMrSelect"><option value="">-- Select your name --</option></select>
 </div>
 <div id="myperfSection"></div>
+</div>
+
+<div id="myteamView" style="display:none;">
+<div class="card">
+<h2>👥 My Team — District Manager</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">Select your name to see every rep in your district against their own 15% target, where the coaching leverage sits inside your team, and any help your reps have asked for.</div>
+<select id="myteamDmSelect"><option value="">-- Select your name --</option></select>
+</div>
+<div id="myteamSection"></div>
 </div>
 
 <div id="analysisView" style="display:none;">
@@ -937,6 +947,7 @@ dmFilter.appendChild(opt);
 updateMRFilterOptions();
 renderStatusBreakdown();
 populateMyPerfSelect();
+populateMyteamSelect();
 }
 
 // Shows how many pharmacies were already on the merchandising program (PH & Merch,
@@ -1629,6 +1640,182 @@ if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', bl
 wirePriorityList(section, myperfActiveMR);
 }
 
+// ---------- District Manager team view ----------
+// A DM's job is different from a rep's: they cannot work 1,400 pharmacies, but
+// they can move 6-8 people. The most useful thing this data says to a DM is
+// that the spread between their best and worst rep is 48-83 percentage points
+// -- inside the same district, same market, same products. That gap is not
+// market conditions, it's practice, which means it's coachable. So this view
+// leads with the spread rather than with a territory total.
+let myteamActiveDM = '';
+
+function populateMyteamSelect(){
+const sel = document.getElementById('myteamDmSelect');
+if(!sel) return;
+[...new Set(PHARMACIES.map(p => p.dm).filter(Boolean))].sort()
+.forEach(dm => {
+const o = document.createElement('option');
+o.value = dm; o.textContent = dm;
+sel.appendChild(o);
+});
+sel.addEventListener('change', () => { myteamActiveDM = sel.value; renderMyTeam(); });
+}
+
+function computeTeamRows(dmName){
+const reps = [...new Set(PHARMACIES.filter(p => p.dm === dmName && p.mr).map(p => p.mr))];
+return reps.map(mr => {
+const pool = PHARMACIES.filter(p => p.mr === mr);
+const g = computeGapToTarget(pool);
+const prio = buildPriorityList(pool);
+const recoverable = prio.reduce((s,x) => s + x.problem.recoverEGP, 0);
+const dormant = pool.filter(p => getDormancyInfo(p).isDormant);
+return {
+mr, count: pool.length, g, prio, recoverable,
+dormantCount: dormant.length,
+dormantEGP: dormant.reduce((s,p) => s + getDormancyInfo(p).atRiskEGP, 0),
+coverage: g && g.extraVsTrend > 0 ? recoverable / g.extraVsTrend : Infinity
+};
+}).filter(r => r.g && r.g.priorFullYear > 0)
+.sort((a,b) => (a.g.growthSoFar === null ? 1 : a.g.growthSoFar) - (b.g.growthSoFar === null ? 1 : b.g.growthSoFar));
+}
+
+async function renderMyTeam(){
+const section = document.getElementById('myteamSection');
+if(!section) return;
+if(!myteamActiveDM){ section.innerHTML = ''; return; }
+
+const pool = PHARMACIES.filter(p => p.dm === myteamActiveDM);
+const teamGap = computeGapToTarget(pool);
+const rows = computeTeamRows(myteamActiveDM);
+const { curRange, priorRange } = yoyRangeLabels();
+
+const withGrowth = rows.filter(r => r.g.growthSoFar !== null);
+const best = withGrowth.length ? withGrowth[withGrowth.length - 1] : null;
+const worst = withGrowth.length ? withGrowth[0] : null;
+const spread = (best && worst) ? (best.g.growthSoFar - worst.g.growthSoFar) : null;
+const behind = rows.filter(r => !r.g.onTrack);
+
+const rowsHtml = rows.map(r => {
+const sf = r.g.growthSoFar;
+const sfText = sf === null ? '—' : (sf >= 0 ? '+' : '') + pct(sf);
+const sfClass = sf === null ? '' : (sf >= GROWTH_TARGET ? 'growth-pos' : 'growth-neg');
+const rr = r.g.requiredRemainingGrowth;
+const needsSupport = rr !== null && rr > 0.40;
+return `<tr class="${r.g.onTrack ? '' : 'rep-behind'} pharm-list-item" data-name="${r.mr}" style="cursor:pointer;">
+<td class="name-cell">${needsSupport ? '🆘 ' : ''}${r.mr}</td>
+<td>${r.count}</td>
+<td class="${sfClass}">${sfText}</td>
+<td class="${r.g.extraVsTrend > 0 ? 'growth-neg' : 'growth-pos'}">${fmt(Math.max(r.g.extraVsTrend, 0))} EGP</td>
+<td>${r.g.extraPerMonth === null ? '—' : fmt(Math.max(r.g.extraPerMonth, 0))} EGP</td>
+<td class="${r.dormantCount > 0 ? 'growth-neg' : ''}">${r.dormantCount}</td>
+<td>${fmt(r.recoverable)} EGP</td>
+<td>${r.prio.length}</td>
+</tr>`;
+}).join('');
+
+section.innerHTML = `
+${gapCardHtml(teamGap, { who: myteamActiveDM + "'s district" })}
+${spread !== null ? `
+<div class="card">
+<h2>🎯 Where Your Coaching Leverage Is</h2>
+<div class="note" style="margin-top:0;">
+Your best and worst rep are <b>${pct(spread)} apart</b> on current-year growth — same district, same products, same market.
+That gap is practice, not territory, which makes it the cheapest growth available to you: no budget, no new customers, just moving what
+<b>${best.mr}</b> is already doing across to the rest of the team.
+</div>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">Best in District</div><div class="v growth-pos">${(best.g.growthSoFar>=0?'+':'')+pct(best.g.growthSoFar)}</div><div class="sub">${best.mr}</div></div>
+<div class="sales-box"><div class="t">Needs Most Support</div><div class="v growth-neg">${(worst.g.growthSoFar>=0?'+':'')+pct(worst.g.growthSoFar)}</div><div class="sub">${worst.mr}</div></div>
+<div class="sales-box"><div class="t">Spread</div><div class="v">${pct(spread)}</div><div class="sub">points of coachable difference</div></div>
+<div class="sales-box"><div class="t">Reps Behind 15%</div><div class="v ${behind.length ? 'growth-neg' : 'growth-pos'}">${behind.length} of ${rows.length}</div></div>
+</div>
+<div class="note">
+Worth asking ${best.mr} in your next team meeting: which pharmacies did they win back this year, and what did they actually say or do?
+That answer is more useful to ${worst.mr} than any target.
+</div>
+</div>` : ''}
+<div class="card">
+<h2>📋 Your Reps (${rows.length})</h2>
+<div class="note" style="margin-top:0;">
+Each rep against their <i>own</i> 15% target, computed from their own ${PRIOR_YEAR} book. "Real Gap" is what they need on top of current pace.
+🆘 marks reps needing more than +40% from here — structural, not effort. Sorted worst-first. Click a rep to open their book.
+</div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr>
+<th>Medical Representative</th><th>Pharmacies</th><th>Growth (${curRange} vs ${priorRange})</th>
+<th>Real Gap</th><th>Extra / Month</th><th>🚨 Dormant</th><th>Recoverable</th><th>Priority Accounts</th>
+</tr></thead>
+<tbody>${rowsHtml}</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<h2>🚨 Help Requests From Your Team</h2>
+<div id="myteamHelpBox"><div class="placeholder">جارٍ التحميل...</div></div>
+</div>
+<div class="card">
+<h2>🎯 Top Priority Accounts Across Your District</h2>
+<div class="note" style="margin-top:0;">The single biggest recoverable account for each of your reps — a ready-made agenda for your next one-to-ones.</div>
+<div class="pharm-list" id="myteamTopList">${
+rows.map(r => r.prio.length ? { r, top: r.prio[0] } : null).filter(Boolean)
+.sort((a,b) => b.top.problem.recoverEGP - a.top.problem.recoverEGP)
+.map(({r, top}) => `
+<div class="prio-item">
+<div class="prio-main" data-idx="${PHARMACIES.indexOf(top.p)}">
+<div class="prio-name">${top.p.n}</div>
+<div class="prio-meta">${r.mr} · ${top.p.tr || '—'}</div>
+<div><span class="problem-tag ${top.problem.cls === '' ? 'neutral' : ''}">${top.problem.icon} ${top.problem.label}</span></div>
+</div>
+<div class="prio-side">
+<div class="prio-egp">${fmt(top.problem.recoverEGP)} EGP</div>
+<div class="prio-meta">recoverable</div>
+</div>
+</div>`).join('') || '<div class="empty-msg">Nothing urgent across the district right now</div>'
+}</div>
+</div>`;
+
+section.querySelectorAll('tr[data-name]').forEach(tr => {
+tr.addEventListener('click', () => {
+activeMR = tr.dataset.name; mrFilter.value = tr.dataset.name;
+activeDM = ''; dmFilter.value = '';
+updateMRFilterOptions();
+renderTotals();
+updateOverviewBadge();
+switchView('search');
+});
+});
+wirePriorityList(section, null);
+
+// Help requests come from the same backend the reps post to. Filtered to this
+// DM's own team so a manager sees their queue, not everyone's.
+const box = document.getElementById('myteamHelpBox');
+try {
+const res = await fetch(`${DEALS_API_URL}?token=${encodeURIComponent(DEALS_API_TOKEN)}&kind=help_requests`);
+const data = await res.json();
+const myReps = new Set(rows.map(r => r.mr));
+const reqs = (data.help_requests || []).filter(h => myReps.has(h.mr_name) || h.dm_name === myteamActiveDM);
+if(!data.help_requests){
+box.innerHTML = `<div class="note" style="margin-top:0;">No help-request feed available from the backend yet. Requests your reps send are still being saved — they appear in the <b>Help Requests</b> tab of the deals sheet.</div>`;
+} else if(!reqs.length){
+box.innerHTML = `<div class="empty-msg">No open help requests from your team.</div>`;
+} else {
+box.innerHTML = `<div class="pharm-list">${reqs.map(h => `
+<div class="prio-item">
+<div class="prio-main">
+<div class="prio-name">${h.pharmacy_name || '—'}</div>
+<div class="prio-meta">${h.mr_name || '—'} · ${h.territory || '—'} · ${h.status || 'New'}</div>
+<div><span class="problem-tag">${h.reason_label || h.reason_code || '—'}</span></div>
+${h.notes ? `<div class="prio-ask">${h.notes}</div>` : ''}
+</div>
+<div class="prio-side"><div class="prio-egp">${fmt(h.egp_at_risk || 0)} EGP</div><div class="prio-meta">at risk</div></div>
+</div>`).join('')}</div>`;
+}
+} catch(err){
+box.innerHTML = `<div class="note" style="margin-top:0;">Couldn't load help requests right now. They are still being saved to the <b>Help Requests</b> tab of the deals sheet.</div>`;
+}
+}
+
 // ---------- Where to Invest (merchandising) ----------
 // Two questions the merchandising team actually needs answered: (1) is our
 // money going where it should -- are chain vs. independent, and
@@ -2170,6 +2357,7 @@ document.getElementById('overviewView').style.display = view === 'overview' ? ''
 document.getElementById('chainView').style.display = view === 'chain' ? '' : 'none';
 document.getElementById('leaderboardView').style.display = view === 'leaderboard' ? '' : 'none';
 document.getElementById('myperfView').style.display = view === 'myperf' ? '' : 'none';
+document.getElementById('myteamView').style.display = view === 'myteam' ? '' : 'none';
 document.getElementById('analysisView').style.display = view === 'analysis' ? '' : 'none';
 document.querySelectorAll('.view-tab-btn').forEach(btn => {
 btn.classList.toggle('active', btn.dataset.view === view);
@@ -2178,6 +2366,7 @@ if(view === 'overview') renderOverview();
 if(view === 'chain') renderChainSection();
 if(view === 'leaderboard') renderLeaderboard();
 if(view === 'myperf') renderMyPerf();
+if(view === 'myteam') renderMyTeam();
 if(view === 'analysis') renderAnalysis();
 }
 document.getElementById('viewTabs').addEventListener('click', (e) => {
