@@ -357,6 +357,13 @@ cursor:pointer;font-family:inherit;border:1px solid var(--border);background:#ff
 .gap-bar{height:100%;background:var(--primary);border-radius:999px;}
 .gap-bar.ok{background:#1a7a4d;}
 
+.signed-in-as{
+display:inline-flex;align-items:center;gap:7px;margin-top:10px;
+font-size:11.5px;font-weight:600;color:var(--muted);
+background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:5px 12px;
+}
+.signed-in-as .sia-dot{width:7px;height:7px;border-radius:50%;background:#1a7a4d;flex:0 0 7px;}
+
 .compare-box{position:relative;margin-top:6px;}
 .compare-active-row{
 display:flex;
@@ -463,6 +470,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="brand-divider"></div>
 <span class="brand-tag">Consumer Healthcare</span>
 </div>
+<div class="signed-in-as" id="signedInAs" style="display:none;"></div>
 <h1>🧮 حاسبة كاش باك ومكافآت الصيدليات</h1>
 <p>اكتب اسم الصيدلية أو الكود، وشاهد مبيعات الربع الثالث والرابع، ونسبة النمو، وقيمة الكاش باك المستهدف للعقد الجديد.</p>
 </header>
@@ -930,6 +938,100 @@ monthsLeft,
 requiredRemainingGrowth: priorRemaining > 0 ? (needRemaining - priorRemaining) / priorRemaining : null,
 onTrack: priorSoFar > 0 ? ((actualSoFar - priorSoFar) / priorSoFar) >= GROWTH_TARGET : false
 };
+}
+
+// ---------- Who is signed in, and what they should see ----------
+// When the site sits behind Cloudflare Access, the signed-in user's identity is
+// available from a Cloudflare endpoint on the same origin. We look them up in
+// ROLE_MAP to decide which tabs to show and which name to preselect.
+//
+// Two deliberate design choices worth knowing:
+//
+// 1. FAIL OPEN. If identity can't be read -- opened locally, Access not
+//    configured yet, endpoint unreachable, email not in the map -- the tool
+//    shows everything, exactly as it did before login existed. A broken or
+//    half-finished role map must never lock the team out of their own numbers.
+//
+// 2. THIS IS CONVENIENCE, NOT SECURITY. The whole dataset is embedded in this
+//    file, so anyone signed in can read all of it from the page source no matter
+//    what the interface displays. Hiding tabs stops idle comparing between
+//    colleagues; it does not isolate data. Cloudflare Access is the thing
+//    actually keeping outsiders out. Real per-user isolation would need a
+//    server that only sends each person their own rows.
+const ROLE_MAP = {"people":{}};
+let currentUser = { role: 'unknown', name: null, email: null };
+
+async function resolveIdentity(){
+try {
+// Cloudflare Access exposes the authenticated user here. Short timeout so a
+// non-Cloudflare host doesn't leave the page waiting.
+const ctrl = new AbortController();
+const t = setTimeout(() => ctrl.abort(), 3000);
+const res = await fetch('/cdn-cgi/access/get-identity', { signal: ctrl.signal });
+clearTimeout(t);
+if(!res.ok) return;
+const id = await res.json();
+const email = (id && id.email ? String(id.email) : '').trim().toLowerCase();
+if(!email) return;
+const entry = (ROLE_MAP.people || {})[email];
+currentUser = entry
+? { role: entry.role || 'unknown', name: entry.name || null, email }
+: { role: 'unknown', name: null, email };
+} catch(err) {
+// Deliberately silent: unidentified is a normal, supported state.
+}
+}
+
+// Tabs each role is allowed to open. 'unknown' gets everything (fail open).
+const ROLE_TABS = {
+mr: ['search', 'overview', 'chain', 'leaderboard', 'myperf'],
+dm: ['search', 'overview', 'chain', 'leaderboard', 'myperf', 'myteam', 'analysis'],
+management: null, // null = all tabs
+unknown: null
+};
+
+function applyRoleView(){
+const allowed = ROLE_TABS[currentUser.role];
+if(allowed){
+document.querySelectorAll('.view-tab-btn').forEach(btn => {
+btn.style.display = allowed.includes(btn.dataset.view) ? '' : 'none';
+});
+}
+
+// Preselect the signed-in person so they land on their own numbers rather than
+// hunting for their name in a 35-entry dropdown.
+if(currentUser.role === 'mr' && currentUser.name){
+const sel = document.getElementById('myperfMrSelect');
+if(sel){ sel.value = currentUser.name; myperfActiveMR = currentUser.name; }
+// Their own book is also the most useful default for the search tab.
+if(mrFilter){
+mrFilter.value = currentUser.name;
+activeMR = currentUser.name;
+updateMRFilterOptions();
+renderTotals();
+updateOverviewBadge();
+}
+switchView('myperf');
+} else if(currentUser.role === 'dm' && currentUser.name){
+const sel = document.getElementById('myteamDmSelect');
+if(sel){ sel.value = currentUser.name; myteamActiveDM = currentUser.name; }
+switchView('myteam');
+}
+
+renderSignedInAs();
+}
+
+function renderSignedInAs(){
+const box = document.getElementById('signedInAs');
+if(!box) return;
+if(currentUser.role === 'unknown' || !currentUser.name){
+box.style.display = 'none';
+return;
+}
+const roleLabel = currentUser.role === 'mr' ? 'Medical Representative'
+: currentUser.role === 'dm' ? 'District Manager' : 'Management';
+box.style.display = '';
+box.innerHTML = `<span class="sia-dot"></span>${currentUser.name} · ${roleLabel}`;
 }
 
 // ---------- MR / DM filters ----------
@@ -3190,6 +3292,11 @@ target, cashback, shelfBonus, posmBonus, rebateBonus, total
 
 populateFilters();
 updateOverviewBadge();
+
+// Identity is resolved after the tool is already usable, so a slow or missing
+// Access endpoint never delays first paint. If a role is found, the view narrows
+// and preselects; if not, everything simply stays as-is.
+resolveIdentity().then(applyRoleView);
 </script>
 </body>
 </html>
