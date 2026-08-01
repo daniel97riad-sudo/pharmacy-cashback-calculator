@@ -3329,5 +3329,25 @@ updateOverviewBadge();
 // and preselects; if not, everything simply stays as-is.
 resolveIdentity().then(applyRoleView);
 </script>
+
+<script>
+(function(){
+  // Public build: management/DM-only tabs (My Team, Analysis) are not included here.
+  // They live on a separate, unlisted link for management + district managers.
+  function hideManagementTabs(){
+    document.querySelectorAll('.view-tab-btn[data-view="myteam"], .view-tab-btn[data-view="analysis"]')
+      .forEach(function(el){ el.style.display = 'none'; });
+    var myteamView = document.getElementById('myteamView');
+    var analysisView = document.getElementById('analysisView');
+    if (myteamView) myteamView.style.display = 'none';
+    if (analysisView) analysisView.style.display = 'none';
+  }
+  document.addEventListener('DOMContentLoaded', hideManagementTabs);
+  // Also re-apply shortly after load in case the app's own render logic runs later
+  // and re-shows these views (e.g. on the "signed in as" role-based flow).
+  window.addEventListener('load', function(){ setTimeout(hideManagementTabs, 300); });
+})();
+</script>
+
 </body>
 </html>
