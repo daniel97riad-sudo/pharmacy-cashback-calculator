@@ -134,6 +134,8 @@ border-bottom:1px solid var(--border);
 }
 .pharm-list-item:last-child{border-bottom:none;}
 .pharm-list-item:hover{background:#f8f2ea;}
+tr.clickable-row{cursor:pointer;}
+tr.clickable-row:hover{background:#f8f2ea;}
 .pli-name{font-weight:600;font-size:13px;}
 .pli-meta{font-size:11px;color:var(--muted);margin-top:2px;}
 .pli-stats{text-align:left;white-space:nowrap;}
@@ -1863,7 +1865,7 @@ const rowsHtml = rows.map(r => {
 const sf = r.g.growthSoFar;
 const sfText = sf === null ? '—' : signedPct(sf);
 const sfClass = sf === null ? '' : (sf >= 0 ? 'growth-pos' : 'growth-neg');
-return `<tr class="pharm-list-item" data-name="${r.mr}" style="cursor:pointer;">
+return `<tr class="clickable-row" data-name="${r.mr}">
 <td class="name-cell">${r.mr}</td>
 <td>${r.count}</td>
 <td class="${sfClass}">${sfText}</td>
@@ -2148,7 +2150,7 @@ const sfText = sf === null ? '—' : signedPct(sf);
 const sfClass = sf === null ? '' : (sf >= 0 ? 'growth-pos' : 'growth-neg');
 const rr = r.g.requiredRemainingGrowth;
 const rrText = rr === null ? '—' : signedPct(rr);
-return `<tr class="pharm-list-item" data-name="${r.mr}" style="cursor:pointer;">
+return `<tr class="clickable-row" data-name="${r.mr}">
 <td class="name-cell">${r.mr}</td>
 <td>${r.count.toLocaleString('en-US')}</td>
 <td>${fmt(r.g.priorFullYear)} EGP</td>
@@ -2453,7 +2455,7 @@ const gText = g.growth === null ? '—' : signedPct(g.growth);
 const yClass = g.yoyGrowth === null ? '' : (g.yoyGrowth >= 0 ? 'growth-pos' : 'growth-neg');
 const yText = g.yoyGrowth === null ? '—' : signedPct(g.yoyGrowth);
 return `
-<tr class="${clickable ? 'pharm-list-item' : ''}" ${clickable ? `data-name="${g.name}"` : ''} style="${clickable ? 'cursor:pointer;' : ''}">
+<tr class="${clickable ? 'clickable-row' : ''}" ${clickable ? `data-name="${g.name}"` : ''}>
 <td class="name-cell">${g.name}</td>
 <td>${g.count.toLocaleString('en-US')}</td>
 <td>${fmt(g.q3)} EGP</td>
