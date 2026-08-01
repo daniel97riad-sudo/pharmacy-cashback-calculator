@@ -652,6 +652,14 @@ return Math.round(n).toLocaleString('en-US');
 function pct(n){
 return (n*100).toFixed(1) + '%';
 }
+function signedPct(n){
+if(n === null || n === undefined) return '—';
+const sign = n >= 0 ? '+' : '';
+return `<bdi dir="ltr">${sign}${pct(n)}</bdi>`;
+}
+function ltrWrap(s){
+return `<bdi dir="ltr">${s}</bdi>`;
+}
 
 // ---------- Year-over-year momentum (self-correcting window, separate from
 // the contractual Q3/Q4 2025 slab calculation) ----------
@@ -751,7 +759,7 @@ const y = getYoYGrowth(p);
 if(y.priorSum === 0 && y.curSum === 0) return '';
 const { curRange, priorRange } = yoyRangeLabels();
 const growthClass = y.growth === null ? '' : (y.growth >= 0 ? 'growth-pos' : 'growth-neg');
-const growthText = y.growth === null ? 'لا توجد بيانات كافية' : (y.growth>=0?'+':'') + pct(y.growth);
+const growthText = y.growth === null ? 'لا توجد بيانات كافية' : signedPct(y.growth);
 return `
 <div class="card">
 <h2>📅 اتجاه العام الحالي (${curRange} مقابل ${priorRange})</h2>
@@ -1139,7 +1147,7 @@ const sumQ3 = subset.reduce((s,p) => s + p.q3d, 0);
 const sumQ4 = subset.reduce((s,p) => s + p.q4d, 0);
 const growth = sumQ3 > 0 ? (sumQ4 - sumQ3) / sumQ3 : null;
 const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
-const growthText = growth === null ? '—' : (growth>=0?'+':'') + pct(growth);
+const growthText = growth === null ? '—' : signedPct(growth);
 const slabRows = calcSlabs(sumQ4, {shelf:'none', posm:false, full:false});
 
 const withWk = subset.filter(p => p.wk !== null && p.wk !== undefined);
@@ -1152,7 +1160,7 @@ const sortedList = [...subset].sort((a,b) => a.n.localeCompare(b.n, 'ar'));
 const listHtml = sortedList.map(p => {
 const g = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
 const gClass = g === null ? '' : (g >= 0 ? 'growth-pos' : 'growth-neg');
-const gText = g === null ? '—' : (g>=0?'+':'') + pct(g);
+const gText = g === null ? '—' : signedPct(g);
 const mrLine = !activeMR ? ` · ${p.mr}` : '';
 return `
 <div class="pharm-list-item" data-idx="${PHARMACIES.indexOf(p)}">
@@ -1184,7 +1192,7 @@ ${SUPPLEMENT_LABEL ? `<div class="sales-box"><div class="t">${SUPPLEMENT_LABEL}<
 ${slabRows.map(r => `
 <tr class="${r.color}">
 <td class="name-cell">${r.label}</td>
-<td>+${pct(r.growth)}</td>
+<td>${ltrWrap('+' + pct(r.growth))}</td>
 <td>${fmt(r.target)} ج.م</td>
 <td class="total-cell">${fmt(r.cashback)} ج.م</td>
 </tr>`).join('')}
@@ -1249,10 +1257,10 @@ remaining
 
 function slabStatusBadgeHtml(s){
 if(s.state === 'max'){
-return `<span class="badge slab-max">🏆 حقّق الحد الأقصى للنمو (+${pct(s.currentGrowth)}) — فوز مضمون بكاش باك ${fmt(s.cashback)} ج.م</span>`;
+return `<span class="badge slab-max">🏆 حقّق الحد الأقصى للنمو (${ltrWrap('+' + pct(s.currentGrowth))}) — فوز مضمون بكاش باك ${fmt(s.cashback)} ج.م</span>`;
 }
 if(s.state === 'remaining'){
-return `<span class="badge slab-remaining">📈 يحتاج ${fmt(s.remaining)} ج.م إضافية للوصول إلى ${s.nextLabel} (+${pct(s.nextGrowth)})</span>`;
+return `<span class="badge slab-remaining">📈 يحتاج ${fmt(s.remaining)} ج.م إضافية للوصول إلى ${s.nextLabel} (${ltrWrap('+' + pct(s.nextGrowth))})</span>`;
 }
 return `<span class="badge slab-unknown">لا تتوفر بيانات كافية لحساب الشريحة (لا يوجد مبيعات ربع ثالث)</span>`;
 }
@@ -1400,10 +1408,10 @@ const listItem = (p, s, cls, metaHtml, salesHtml) => `
 </div>`;
 
 const maxItemsHtml = maxed.map(({p,s}) => listItem(p, s, 'pli-slab-max',
-`نمو +${pct(s.currentGrowth)} ${yoyGrowthBadgeHtml(p)}`, `🏆 ${fmt(s.cashback)} ج.م`)).join('');
+`نمو ${ltrWrap('+' + pct(s.currentGrowth))} ${yoyGrowthBadgeHtml(p)}`, `🏆 ${fmt(s.cashback)} ج.م`)).join('');
 
 const bestChanceHtml = bestChance.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-best-chance',
-`نمو +${pct(s.currentGrowth)} · حتى ${s.nextLabel} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
+`نمو ${ltrWrap('+' + pct(s.currentGrowth))} · حتى ${s.nextLabel} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
 
 const needsAttentionHtml = needsAttention.slice(0, 150).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
 `نمو ${pct(s.currentGrowth)} · حتى ${s.nextLabel} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} ج.م متبقية`)).join('');
@@ -1415,7 +1423,7 @@ const declineItem = ({p,y}) => `
 <div class="pharm-list-item pli-needs-attention" data-idx="${PHARMACIES.indexOf(p)}">
 <div>
 <div class="pli-name">${p.n}</div>
-<div class="pli-meta">${p.mr||'—'} · ${p.tr||'—'} · ${y.growth!==null?(y.growth>=0?'+':'')+pct(y.growth):'—'}</div>
+<div class="pli-meta">${p.mr||'—'} · ${p.tr||'—'} · ${y.growth!==null?signedPct(y.growth):'—'}</div>
 </div>
 <div class="pli-stats">
 <div class="pli-sales">📉 ${fmt(y.deltaEGP)} ج.م</div>
@@ -1565,10 +1573,10 @@ if(!gap || !gap.priorFullYear) return '';
 const who = o.who || 'Your book';
 const pctToTarget = gap.target > 0 ? Math.min(gap.actualSoFar / gap.target, 1) : 0;
 const reqText = gap.requiredRemainingGrowth === null ? '—'
-: (gap.requiredRemainingGrowth >= 0 ? '+' : '') + pct(gap.requiredRemainingGrowth);
-const soFarText = gap.growthSoFar === null ? '—' : (gap.growthSoFar >= 0 ? '+' : '') + pct(gap.growthSoFar);
+: signedPct(gap.requiredRemainingGrowth);
+const soFarText = gap.growthSoFar === null ? '—' : signedPct(gap.growthSoFar);
 const soFarClass = gap.growthSoFar === null ? '' : (gap.growthSoFar >= GROWTH_TARGET ? 'growth-pos' : 'growth-neg');
-const projText = gap.projectedGrowth === null ? '—' : (gap.projectedGrowth >= 0 ? '+' : '') + pct(gap.projectedGrowth);
+const projText = gap.projectedGrowth === null ? '—' : signedPct(gap.projectedGrowth);
 const monthSpan = REMAINING_CUR_MONTHS.length
 ? `${monthAbbr(REMAINING_CUR_MONTHS[0])}–${monthAbbr(REMAINING_CUR_MONTHS[REMAINING_CUR_MONTHS.length-1])}`
 : '—';
@@ -1634,7 +1642,7 @@ const sumQ3 = subset.reduce((s,p) => s + p.q3d, 0);
 const sumQ4 = subset.reduce((s,p) => s + p.q4d, 0);
 const growth = sumQ3 > 0 ? (sumQ4 - sumQ3) / sumQ3 : null;
 const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
-const growthText = growth === null ? '—' : (growth>=0?'+':'') + pct(growth);
+const growthText = growth === null ? '—' : signedPct(growth);
 
 const companyQ3 = PHARMACIES.reduce((s,p) => s + p.q3d, 0);
 const companyQ4 = PHARMACIES.reduce((s,p) => s + p.q4d, 0);
@@ -1650,7 +1658,7 @@ const sumYoYPrior = subset.reduce((s,p) => s + getYoYGrowth(p).priorSum, 0);
 const sumYoYCur = subset.reduce((s,p) => s + getYoYGrowth(p).curSum, 0);
 const yoyGrowth = sumYoYPrior > 0 ? (sumYoYCur - sumYoYPrior) / sumYoYPrior : null;
 const yoyGrowthClass = yoyGrowth === null ? '' : (yoyGrowth >= 0 ? 'growth-pos' : 'growth-neg');
-const yoyGrowthText = yoyGrowth === null ? '—' : (yoyGrowth>=0?'+':'') + pct(yoyGrowth);
+const yoyGrowthText = yoyGrowth === null ? '—' : signedPct(yoyGrowth);
 
 const companyYoYPrior = PHARMACIES.reduce((s,p) => s + getYoYGrowth(p).priorSum, 0);
 const companyYoYCur = PHARMACIES.reduce((s,p) => s + getYoYGrowth(p).curSum, 0);
@@ -1699,13 +1707,13 @@ const listItem = (p, s, cls, metaHtml, salesHtml) => `
 </div>`;
 
 const bestChanceHtml = bestChance.slice(0, 5).map(({p,s}) => listItem(p, s, 'pli-best-chance',
-`${p.tr} · growth +${pct(s.currentGrowth)} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
+`${p.tr} · growth ${ltrWrap('+' + pct(s.currentGrowth))} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
 const needsAttentionHtml = needsAttention.slice(0, 5).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
 `${p.tr} · growth ${pct(s.currentGrowth)} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
 const dormantMineHtml = dormantMine.slice(0, 5).map(({p,d}) => listItem(p, d, 'pli-dormant',
 `${p.tr||'—'} · quiet for ${d.lastTwo.length} months`, `🚨 ${fmt(d.atRiskEGP)} EGP at risk`)).join('');
 const yoyDeclinesMineHtml = yoyDeclinesMine.slice(0, 5).map(({p,y}) => listItem(p, y, 'pli-needs-attention',
-`${p.tr||'—'} · ${y.growth!==null?(y.growth>=0?'+':'')+pct(y.growth):'—'}`, `📉 ${fmt(y.deltaEGP)} EGP`)).join('');
+`${p.tr||'—'} · ${y.growth!==null?signedPct(y.growth):'—'}`, `📉 ${fmt(y.deltaEGP)} EGP`)).join('');
 
 section.innerHTML = `
 <div class="card">
@@ -1715,7 +1723,7 @@ section.innerHTML = `
 <div class="sales-box"><div class="t">Q4 Total</div><div class="v">${fmt(sumQ4)} EGP</div></div>
 <div class="sales-box"><div class="t">Your Growth (Q3→Q4, contractual)</div><div class="v ${growthClass}">${growthText}</div></div>
 </div>
-<div class="note">Company-wide growth this period: ${companyGrowth===null?'—':(companyGrowth>=0?'+':'')+pct(companyGrowth)}. ${growth!==null && companyGrowth!==null ? (growth > companyGrowth ? 'You are outperforming the company average.' : 'You are behind the company average.') : ''}</div>
+<div class="note">Company-wide growth this period: ${companyGrowth===null?'—':signedPct(companyGrowth)}. ${growth!==null && companyGrowth!==null ? (growth > companyGrowth ? 'You are outperforming the company average.' : 'You are behind the company average.') : ''}</div>
 </div>
 <div class="card">
 <h2>📅 Your Current-Year Trend (${curRange} vs ${priorRange})</h2>
@@ -1725,7 +1733,7 @@ section.innerHTML = `
 <div class="sales-box"><div class="t">${curRange} Total</div><div class="v">${fmt(sumYoYCur)} EGP</div></div>
 <div class="sales-box"><div class="t">Your Growth</div><div class="v ${yoyGrowthClass}">${yoyGrowthText}</div></div>
 </div>
-<div class="note">Company-wide growth over the same period: ${companyYoYGrowth===null?'—':(companyYoYGrowth>=0?'+':'')+pct(companyYoYGrowth)}. ${yoyGrowth!==null && companyYoYGrowth!==null ? (yoyGrowth > companyYoYGrowth ? 'You are outperforming the company average so far this year.' : 'You are behind the company average so far this year.') : ''}</div>
+<div class="note">Company-wide growth over the same period: ${companyYoYGrowth===null?'—':signedPct(companyYoYGrowth)}. ${yoyGrowth!==null && companyYoYGrowth!==null ? (yoyGrowth > companyYoYGrowth ? 'You are outperforming the company average so far this year.' : 'You are behind the company average so far this year.') : ''}</div>
 </div>
 ${gapCardHtml(gap, { who: 'Your book' })}
 <div class="card">
@@ -1853,7 +1861,7 @@ const spread = (highest && lowest) ? (highest.g.growthSoFar - lowest.g.growthSoF
 // figures are shown plainly and the manager draws their own conclusions.
 const rowsHtml = rows.map(r => {
 const sf = r.g.growthSoFar;
-const sfText = sf === null ? '—' : (sf >= 0 ? '+' : '') + pct(sf);
+const sfText = sf === null ? '—' : signedPct(sf);
 const sfClass = sf === null ? '' : (sf >= 0 ? 'growth-pos' : 'growth-neg');
 return `<tr class="pharm-list-item" data-name="${r.mr}" style="cursor:pointer;">
 <td class="name-cell">${r.mr}</td>
@@ -1879,12 +1887,12 @@ available to you: no budget and no new customers needed.
 </div>
 <div class="totals-grid">
 <div class="sales-box"><div class="t">Range Across Team</div><div class="v">${pct(spread)}</div><div class="sub">between the highest and lowest growth</div></div>
-<div class="sales-box"><div class="t">District Growth</div><div class="v ${teamGap && teamGap.growthSoFar !== null && teamGap.growthSoFar >= GROWTH_TARGET ? 'growth-pos' : ''}">${teamGap && teamGap.growthSoFar !== null ? (teamGap.growthSoFar>=0?'+':'')+pct(teamGap.growthSoFar) : '—'}</div><div class="sub">target is +15%</div></div>
+<div class="sales-box"><div class="t">District Growth</div><div class="v ${teamGap && teamGap.growthSoFar !== null && teamGap.growthSoFar >= GROWTH_TARGET ? 'growth-pos' : ''}">${teamGap && teamGap.growthSoFar !== null ? signedPct(teamGap.growthSoFar) : '—'}</div><div class="sub">target is +15%</div></div>
 <div class="sales-box"><div class="t">Pharmacies in District</div><div class="v">${pool.length.toLocaleString('en-US')}</div></div>
 <div class="sales-box"><div class="t">Dormant Across Team</div><div class="v ${rows.reduce((s,r)=>s+r.dormantCount,0) > 0 ? 'growth-neg' : ''}">${rows.reduce((s,r)=>s+r.dormantCount,0)}</div><div class="sub">stopped buying entirely</div></div>
 </div>
 <div class="note">
-<b>Worth sharing:</b> ${highest.mr} is running at ${(highest.g.growthSoFar>=0?"+":"")+pct(highest.g.growthSoFar)} this year.
+<b>Worth sharing:</b> ${highest.mr} is running at ${signedPct(highest.g.growthSoFar)} this year.
 A useful team-meeting question is which pharmacies they won back and what they actually said or did — specific accounts and specific words
 travel much better than a target does.
 </div>
@@ -2007,7 +2015,7 @@ function simpleGroupTableHtml(rows, labelMap){
 const { curRange, priorRange } = yoyRangeLabels();
 const rowsHtml = rows.map(g => {
 const yClass = g.yoyGrowth === null ? '' : (g.yoyGrowth >= 0 ? 'growth-pos' : 'growth-neg');
-const yText = g.yoyGrowth === null ? '—' : (g.yoyGrowth >= 0 ? '+' : '') + pct(g.yoyGrowth);
+const yText = g.yoyGrowth === null ? '—' : signedPct(g.yoyGrowth);
 return `<tr>
 <td class="name-cell">${(labelMap && labelMap[g.name]) || g.name}</td>
 <td>${g.count.toLocaleString('en-US')}</td>
@@ -2055,9 +2063,9 @@ const listItem = (p, metaHtml, salesHtml) => `
 </div>`;
 
 const expansionHtml = expansion.slice(0, 50).map(({p,y}) => listItem(p,
-`${p.mr||'—'} · ${p.tr||'—'} · never merchandised`, `📈 +${pct(y.growth)} (${fmt(y.curSum)} EGP)`)).join('');
+`${p.mr||'—'} · ${p.tr||'—'} · never merchandised`, `📈 ${ltrWrap('+' + pct(y.growth))} (${fmt(y.curSum)} EGP)`)).join('');
 const reviewHtml = review.slice(0, 50).map(({p,y}) => listItem(p,
-`${p.mr||'—'} · ${p.tr||'—'} · already merchandised`, `📉 ${(y.growth>=0?'+':'')+pct(y.growth)} (${fmt(p.q4d)} EGP)`)).join('');
+`${p.mr||'—'} · ${p.tr||'—'} · already merchandised`, `📉 ${signedPct(y.growth)} (${fmt(p.q4d)} EGP)`)).join('');
 
 section.innerHTML = `
 <div class="card">
@@ -2136,10 +2144,10 @@ const companyCoverage = companyGap && companyGap.extraVsTrend > 0
 // a named person, since every rep can open this page too.
 const rowsHtml = rows.map(r => {
 const sf = r.g.growthSoFar;
-const sfText = sf === null ? '—' : (sf >= 0 ? '+' : '') + pct(sf);
+const sfText = sf === null ? '—' : signedPct(sf);
 const sfClass = sf === null ? '' : (sf >= 0 ? 'growth-pos' : 'growth-neg');
 const rr = r.g.requiredRemainingGrowth;
-const rrText = rr === null ? '—' : (rr >= 0 ? '+' : '') + pct(rr);
+const rrText = rr === null ? '—' : signedPct(rr);
 return `<tr class="pharm-list-item" data-name="${r.mr}" style="cursor:pointer;">
 <td class="name-cell">${r.mr}</td>
 <td>${r.count.toLocaleString('en-US')}</td>
@@ -2363,8 +2371,8 @@ if(!section) return;
 const trendPoints = computeCompanyTrendPoints();
 const proj = computeFullYearProjection();
 const projClass = proj.projectedGrowth === null ? '' : (proj.projectedGrowth >= 0 ? 'growth-pos' : 'growth-neg');
-const projText = proj.projectedGrowth === null ? '—' : (proj.projectedGrowth >= 0 ? '+' : '') + pct(proj.projectedGrowth);
-const trendGrowthText = (proj.trendGrowth >= 0 ? '+' : '') + pct(proj.trendGrowth);
+const projText = proj.projectedGrowth === null ? '—' : signedPct(proj.projectedGrowth);
+const trendGrowthText = signedPct(proj.trendGrowth);
 const inactivityPoints = computeInactivityTrendPoints();
 
 section.innerHTML = `
@@ -2441,9 +2449,9 @@ return `<th data-sort="${c.key}" style="cursor:pointer;white-space:nowrap;">${lb
 
 const rowsHtml = sorted.map(g => {
 const gClass = g.growth === null ? '' : (g.growth >= 0 ? 'growth-pos' : 'growth-neg');
-const gText = g.growth === null ? '—' : (g.growth >= 0 ? '+' : '') + pct(g.growth);
+const gText = g.growth === null ? '—' : signedPct(g.growth);
 const yClass = g.yoyGrowth === null ? '' : (g.yoyGrowth >= 0 ? 'growth-pos' : 'growth-neg');
-const yText = g.yoyGrowth === null ? '—' : (g.yoyGrowth >= 0 ? '+' : '') + pct(g.yoyGrowth);
+const yText = g.yoyGrowth === null ? '—' : signedPct(g.yoyGrowth);
 return `
 <tr class="${clickable ? 'pharm-list-item' : ''}" ${clickable ? `data-name="${g.name}"` : ''} style="${clickable ? 'cursor:pointer;' : ''}">
 <td class="name-cell">${g.name}</td>
@@ -2719,7 +2727,7 @@ const sumQ3 = chainMembers.reduce((s,p) => s + p.q3d, 0);
 const sumQ4 = chainMembers.reduce((s,p) => s + p.q4d, 0);
 const growth = sumQ3 > 0 ? (sumQ4 - sumQ3) / sumQ3 : null;
 const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
-const growthText = growth === null ? '—' : (growth>=0?'+':'') + pct(growth);
+const growthText = growth === null ? '—' : signedPct(growth);
 const rows = calcSlabs(sumQ4, {shelf:'none', posm:false, full:false});
 
 chainSection.innerHTML = `
@@ -2742,7 +2750,7 @@ chainSection.innerHTML = `
 ${rows.map(r => `
 <tr class="${r.color}">
 <td class="name-cell">${r.label}</td>
-<td>+${pct(r.growth)}</td>
+<td>${ltrWrap('+' + pct(r.growth))}</td>
 <td>${fmt(r.target)} ج.م</td>
 <td class="total-cell">${fmt(r.cashback)} ج.م</td>
 </tr>`).join('')}
@@ -2984,7 +2992,7 @@ ${compareRowHtml('المندوب الطبي', p.mr||'—', c.mr||'—')}
 ${compareRowHtml('مدير المنطقة', p.dm||'—', c.dm||'—')}
 ${compareRowHtml('مبيعات الربع الثالث', fmt(p.q3d)+' ج.م', fmt(c.q3d)+' ج.م')}
 ${compareRowHtml('مبيعات الربع الرابع', fmt(p.q4d)+' ج.م', fmt(c.q4d)+' ج.م')}
-${compareRowHtml('نسبة النمو', gA===null?'—':(gA>=0?'+':'')+pct(gA), gB===null?'—':(gB>=0?'+':'')+pct(gB))}
+${compareRowHtml('نسبة النمو', gA===null?'—':signedPct(gA), gB===null?'—':signedPct(gB))}
 ${compareRowHtml('حالة الشريحة', sA.state==='max' ? '🏆 فوز مضمون' : sA.state==='remaining' ? `${fmt(sA.remaining)} ج.م لـ${sA.nextLabel}` : '—', sB.state==='max' ? '🏆 فوز مضمون' : sB.state==='remaining' ? `${fmt(sB.remaining)} ج.م لـ${sB.nextLabel}` : '—')}
 ${compareRowHtml('كاش باك الشريحة القصوى (أساس الربع الثالث)', fmt(topA.cashback)+' ج.م', fmt(topB.cashback)+' ج.م')}
 </tbody>
@@ -3091,7 +3099,7 @@ if(!p) return;
 
 const growth = p.q3d > 0 ? (p.q4d - p.q3d) / p.q3d : null;
 const growthClass = growth === null ? '' : (growth >= 0 ? 'growth-pos' : 'growth-neg');
-const growthText = growth === null ? 'لا توجد بيانات كافية' : (growth>=0?'+':'') + pct(growth);
+const growthText = growth === null ? 'لا توجد بيانات كافية' : signedPct(growth);
 
 // For a CHC-based build, "st" reflects merch_flag: "Exist" = this pharmacy was
 // already part of the merchandising program (on both the PH and Merch lists),
@@ -3222,7 +3230,7 @@ ${usingCustom ? '<button class="reset-btn" id="resetCustomBtn" type="button">إ�
 ${rows.map((r, ri) => `
 <tr class="${r.color}">
 <td class="name-cell">${r.label}</td>
-<td>+${pct(r.growth)}</td>
+<td>${ltrWrap('+' + pct(r.growth))}</td>
 <td>${fmt(r.target)} ج.م</td>
 <td>${fmt(r.cashback)} ج.م</td>
 <td>${r.shelfBonus>0?fmt(r.shelfBonus)+' ج.م':'—'}</td>
