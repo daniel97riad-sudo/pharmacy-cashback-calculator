@@ -596,7 +596,7 @@ const PHARMACIES = [{"c":"63949","n":"الوليد فارم - صيدليات ا�
 // merged in by scripts/build_tool.py's --supplement-file. null if none was supplied.
 // This figure is purely informational -- it does NOT feed into growth %, slab, or
 // cashback calculations, which remain based on Q3/Q4 distributor sales only.
-const SUPPLEMENT_LABEL = "July 2026";
+const SUPPLEMENT_LABEL = "يوليو 2026 (أول 3 أسابيع فقط)";
 // Optional label for the week-1-of-month pacing figure, merged in by
 // scripts/build_tool.py's --week1-file. null until a week-1 extract has been supplied.
 const WEEK1_LABEL = null;
@@ -2744,7 +2744,7 @@ const ANALYSIS_COLS = [
 // Notes are per-view because the three views answer different questions and a
 // single combined paragraph ended up explaining none of them well.
 const ANALYSIS_NOTES = {
-group: () => `Aggregate analysis across all ${PHARMACIES.length.toLocaleString('en-US')} pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). "Growth % (Q3→Q4)" is the contractual figure that determines cashback slabs. The "YoY %" column is a separate, informational read on current-year momentum, computed from whichever recent months are fully reported (auto-excludes any month with incomplete distributor data) -- it does not affect cashback. Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.`,
+group: () => `Aggregate analysis across all ${PHARMACIES.length.toLocaleString('en-US')} pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). "Growth % (Q3→Q4)" is the contractual figure that determines cashback slabs. The "YoY %" column is a separate, informational read on current-year momentum, computed from whichever recent months are fully reported (auto-excludes any month with incomplete distributor data) -- it does not affect cashback. Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.<br><br><b>Column legend:</b> 🏆 <b>Maxed Out</b> = already growing 25%+ (Q3→Q4 2025), the top cashback slab -- nothing more needed from these. 📈 <b>Best Chance</b> = below the top slab but currently growing -- closest to reach it with a normal push. ⚠️ <b>Needs Attention</b> = below the top slab and flat or declining -- the reason needs diagnosing before a push will help. 🚨 <b>Dormant</b> = had real sales before but zero in the last two reliably-reported months -- at risk of being lost entirely.`,
 gap: () => `The company's 15% growth goal, broken down into each rep's own number based on their actual ${PRIOR_YEAR} book -- so a rep with 100 pharmacies isn't handed the same target as a rep with 210. Actual EGP booked so far this year is shown right next to the target and the gap, so you can read real numbers, not just percentages. "Required From Here" is the growth rate the remaining months have to run at versus the same months last year; it's the figure that tells you whether a target is reachable or whether the rep needs structural help.`,
 invest: () => `Where to put merchandising investment next, based on who's already growing on their own versus who already received materials and is still declining. "YoY %" uses the same self-correcting current-year window as the rest of the tool (auto-excludes any not-yet-fully-reported month) -- separate from the contractual Q3→Q4 2025 figure.`,
 quarters: () => `Plain Q1-Q4 calendar-quarter growth, ${QUARTER_YEARS[QUARTER_YEARS.length-1] || 'this year'} vs ${QUARTER_YEARS.length > 1 ? QUARTER_YEARS[QUARTER_YEARS.length-2] : 'last year'} -- separate from the rolling self-correcting window used elsewhere, so you can see actual growth quarter by quarter. A quarter still being reported is marked partial and compared only against the same calendar months last year.`,
@@ -3494,7 +3494,7 @@ ${SUPPLEMENT_LABEL ? `
 <div class="sales-box">
 <div class="t">${SUPPLEMENT_LABEL}</div>
 <div class="v">${(p.wk === null || p.wk === undefined) ? '—' : fmt(p.wk) + ' ج.م'}</div>
-<div class="sub">${(p.wk === null || p.wk === undefined) ? 'لا توجد بيانات مطابقة لهذه الصيدلية في هذا الملف' : 'بيانات إضافية — لا تؤثر على حساب النمو أو الشرائح'}</div>
+<div class="sub">${(p.wk === null || p.wk === undefined) ? 'لا توجد بيانات مطابقة لهذه الصيدلية في هذا الملف' : 'بيانات جزئية (أول 3 أسابيع فقط من الشهر) — لا تؤثر على حساب النمو أو الشرائح'}</div>
 </div>` : ''}
 </div>
 </div>
