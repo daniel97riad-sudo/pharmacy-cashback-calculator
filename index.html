@@ -136,6 +136,8 @@ border-bottom:1px solid var(--border);
 .pharm-list-item:hover{background:#f8f2ea;}
 tr.clickable-row{cursor:pointer;}
 tr.clickable-row:hover{background:#f8f2ea;}
+.qcell-prior, .qcell-cur{font-size:11px;color:var(--muted);white-space:nowrap;}
+.qcell-growth{font-weight:700;margin-top:2px;}
 .pli-name{font-weight:600;font-size:13px;}
 .pli-meta{font-size:11px;color:var(--muted);margin-top:2px;}
 .pli-stats{text-align:left;white-space:nowrap;}
@@ -1658,9 +1660,10 @@ A 15% year means <b>${fmt(gap.target)} EGP</b> across ${LATEST_YEAR}.
 </div>
 <div class="gap-hero">
 <div class="sales-box"><div class="t">${PRIOR_YEAR} Full Year</div><div class="v">${fmt(gap.priorFullYear)} EGP</div></div>
+<div class="sales-box"><div class="t">${LATEST_YEAR} Actual So Far</div><div class="v">${fmt(gap.actualSoFar)} EGP</div><div class="sub">booked so far this year</div></div>
 <div class="sales-box"><div class="t">15% Target for ${LATEST_YEAR}</div><div class="v">${fmt(gap.target)} EGP</div></div>
-<div class="sales-box"><div class="t">On Current Pace</div><div class="v">${fmt(gap.projectedFullYear)} EGP</div><div class="sub">${projText} if nothing changes</div></div>
 <div class="sales-box"><div class="t">The Real Gap</div><div class="v ${gap.extraVsTrend > 0 ? 'growth-neg' : 'growth-pos'}">${fmt(Math.max(gap.extraVsTrend, 0))} EGP</div><div class="sub">extra, on top of current pace</div></div>
+<div class="sales-box"><div class="t">On Current Pace</div><div class="v">${fmt(gap.projectedFullYear)} EGP</div><div class="sub">${projText} if nothing changes</div></div>
 </div>
 <div class="gap-bar-wrap"><div class="gap-bar ${pctToTarget >= 1 ? 'ok' : ''}" style="width:${(pctToTarget*100).toFixed(1)}%"></div></div>
 <div class="totals-grid" style="margin-top:14px;">
@@ -2229,9 +2232,17 @@ return { name, q, sortVal: latestWithData ? latestWithData.growth : -Infinity };
 
 const bodyHtml = rows.map(r => {
 const cells = r.q.map(row => {
+if(row.curTotal === null && row.growth === null){
+const priorOnly = row.priorTotal !== null ? `<div class="qcell-prior">${row.priorYear}: ${fmt(row.priorTotal)} EGP</div>` : '';
+return `<td>${priorOnly || '—'}</td>`;
+}
 const cls = row.growth === null ? '' : (row.growth >= 0 ? 'growth-pos' : 'growth-neg');
-const text = row.growth === null ? '—' : signedPct(row.growth) + (row.complete ? '' : ' *');
-return `<td class="${cls}">${text}</td>`;
+const growthText = row.growth === null ? '—' : signedPct(row.growth) + (row.complete ? '' : ' *');
+return `<td class="${cls}">
+<div class="qcell-prior">${row.priorYear}: ${fmt(row.priorTotal)} EGP</div>
+<div class="qcell-cur">${row.curYear}: ${row.curTotal === null ? '—' : fmt(row.curTotal) + ' EGP'}</div>
+<div class="qcell-growth">${growthText}</div>
+</td>`;
 }).join('');
 return `<tr class="${clickable ? 'clickable-row' : ''}" ${clickable ? `data-name="${r.name}"` : ''}>
 <td class="name-cell">${r.name}</td>
@@ -2242,7 +2253,7 @@ ${cells}
 breakdownHtml = `
 <div class="card">
 <h2>📅 Quarterly Growth — ${groupLabel}</h2>
-<div class="note" style="margin-top:0;">Growth % for each quarter vs the same calendar months one year earlier. <b>*</b> marks a quarter still partially reported. Sorted by the most recent available quarter, worst first.${clickable ? ' Click a row to open their book in the Search tab.' : ''}</div>
+<div class="note" style="margin-top:0;">Actual EGP for each quarter, ${priorYear || 'last year'} vs ${latestYear || 'this year'}, plus the growth % between them. <b>*</b> marks a quarter still partially reported. Sorted by the most recent available quarter, worst first.${clickable ? ' Click a row to open their book in the Search tab.' : ''}</div>
 <div style="overflow-x:auto;">
 <table>
 <thead><tr><th>${groupLabel}</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead>
@@ -2334,6 +2345,7 @@ return `<tr class="clickable-row" data-name="${r.mr}">
 <td class="name-cell">${r.mr}</td>
 <td>${r.count.toLocaleString('en-US')}</td>
 <td>${fmt(r.g.priorFullYear)} EGP</td>
+<td>${fmt(r.g.actualSoFar)} EGP</td>
 <td>${fmt(r.g.target)} EGP</td>
 <td class="${sfClass}">${sfText}</td>
 <td>${fmt(Math.max(r.g.extraVsTrend, 0))} EGP</td>
@@ -2372,7 +2384,7 @@ Ordered by growth so far. Click a rep to open their book in the Search tab.
 <div style="overflow-x:auto;">
 <table>
 <thead><tr>
-<th>Medical Representative</th><th>Pharmacies</th><th>${PRIOR_YEAR} Actual</th><th>15% Target</th>
+<th>Medical Representative</th><th>Pharmacies</th><th>${PRIOR_YEAR} Actual</th><th>${LATEST_YEAR} Actual So Far</th><th>15% Target</th>
 <th>Growth So Far</th><th>Real Gap</th><th>Extra / Month</th><th>Required From Here</th>
 <th>Recoverable on List</th><th>Gap Covered</th>
 </tr></thead>
@@ -2380,6 +2392,7 @@ Ordered by growth so far. Click a rep to open their book in the Search tab.
 </table>
 </div>
 <div class="note">
+<b>${LATEST_YEAR} Actual So Far</b> is the raw EGP the rep has actually booked this year to date — compare it directly against <b>15% Target</b> to see where they stand, in real numbers, not just a percentage.
 <b>Real Gap</b> is what the rep needs on top of their current pace — not the total left to book, which is mostly already covered by normal business.
 <b>Recoverable on List</b> is the EGP sitting in their priority pharmacies: revenue their book was booking last year and isn't now.
 <b>Gap Covered</b> is the ratio of the two — at 100% or above, that rep can hit 15% by winning back existing accounts alone, with no new business at all. Below that, they need recovery <i>and</i> new volume, which is where support has to come in.
@@ -2596,7 +2609,7 @@ const ANALYSIS_COLS = [
 // single combined paragraph ended up explaining none of them well.
 const ANALYSIS_NOTES = {
 group: () => `Aggregate analysis across all ${PHARMACIES.length.toLocaleString('en-US')} pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). "Growth % (Q3→Q4)" is the contractual figure that determines cashback slabs. The "YoY %" column is a separate, informational read on current-year momentum, computed from whichever recent months are fully reported (auto-excludes any month with incomplete distributor data) -- it does not affect cashback. Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.`,
-gap: () => `The company's 15% growth goal, broken down into each rep's own number based on their actual ${PRIOR_YEAR} book -- so a rep with 100 pharmacies isn't handed the same target as a rep with 210. "Required From Here" is the growth rate the remaining months have to run at versus the same months last year; it's the figure that tells you whether a target is reachable or whether the rep needs structural help.`,
+gap: () => `The company's 15% growth goal, broken down into each rep's own number based on their actual ${PRIOR_YEAR} book -- so a rep with 100 pharmacies isn't handed the same target as a rep with 210. Actual EGP booked so far this year is shown right next to the target and the gap, so you can read real numbers, not just percentages. "Required From Here" is the growth rate the remaining months have to run at versus the same months last year; it's the figure that tells you whether a target is reachable or whether the rep needs structural help.`,
 invest: () => `Where to put merchandising investment next, based on who's already growing on their own versus who already received materials and is still declining. "YoY %" uses the same self-correcting current-year window as the rest of the tool (auto-excludes any not-yet-fully-reported month) -- separate from the contractual Q3→Q4 2025 figure.`,
 quarters: () => `Plain Q1-Q4 calendar-quarter growth, ${QUARTER_YEARS[QUARTER_YEARS.length-1] || 'this year'} vs ${QUARTER_YEARS.length > 1 ? QUARTER_YEARS[QUARTER_YEARS.length-2] : 'last year'} -- separate from the rolling self-correcting window used elsewhere, so you can see actual growth quarter by quarter. A quarter still being reported is marked partial and compared only against the same calendar months last year.`
 };
