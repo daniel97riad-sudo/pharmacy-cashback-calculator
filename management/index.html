@@ -577,6 +577,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="tab-btn" data-group="dm">By District Manager</div>
 <div class="tab-btn" data-group="gap">🎯 Gap to 15%</div>
 <div class="tab-btn" data-group="invest">🛒 Where to Invest</div>
+<div class="tab-btn" data-group="quarters">📅 Quarterly (2025 vs 2026)</div>
 </div>
 </div>
 <div id="companyTrendSection"></div>
@@ -916,6 +917,55 @@ const MONTHS_OF_YEAR = (y) => Array.from({length:12}, (_,i) => `${y}${String(i+1
 // the team still has to close the gap in.
 const REMAINING_CUR_MONTHS = LATEST_YEAR ? MONTHS_OF_YEAR(LATEST_YEAR).filter(m => !YOY_CUR_MONTHS.includes(m)) : [];
 const REMAINING_PRIOR_MONTHS = REMAINING_CUR_MONTHS.map(m => PRIOR_YEAR + m.slice(4));
+
+// ---------- Quarterly (Q1-Q4) year-over-year comparison ----------
+// A plainer, calendar-quarter read alongside the rolling self-correcting YoY
+// window above: "how did each quarter actually do this year vs the same
+// quarter last year" -- e.g. Q1 2026 vs Q1 2025. Built from RELIABLE_MONTHS
+// only, so a quarter still being reported (the current one, usually) is
+// marked partial and compared using only the calendar months it actually has
+// -- never padded with zeros, which would understate it as a collapse.
+const QUARTER_OF_MONTH = {'01':1,'02':1,'03':1,'04':2,'05':2,'06':2,'07':3,'08':3,'09':3,'10':4,'11':4,'12':4};
+function quarterKey(yyyymm){ return yyyymm.slice(0,4) + '-Q' + QUARTER_OF_MONTH[yyyymm.slice(4,6)]; }
+function computeQuarters(){
+const map = {};
+RELIABLE_MONTHS.forEach(m => {
+const key = quarterKey(m);
+if(!map[key]) map[key] = { key, year: m.slice(0,4), q: QUARTER_OF_MONTH[m.slice(4,6)], months: [] };
+map[key].months.push(m);
+});
+return Object.values(map)
+.map(v => ({ ...v, months: v.months.sort(), complete: v.months.length === 3 }))
+.sort((a,b) => a.key.localeCompare(b.key));
+}
+const QUARTERS = computeQuarters();
+const QUARTER_YEARS = [...new Set(QUARTERS.map(q => q.year))].sort();
+
+// For each of the 4 calendar quarters, pairs the most recent year's quarter
+// (if any reliable data exists for it) with the same quarter one year
+// earlier, using only the exact calendar months the recent quarter actually
+// has -- so a partial Q2 2026 (say, just Apr+May) is compared against Apr+May
+// 2025 only, never a full Q2 2025, which would unfairly inflate the shortfall.
+function computeQuarterlyComparison(pool){
+const latestYear = QUARTER_YEARS[QUARTER_YEARS.length - 1];
+return [1,2,3,4].map(qn => {
+const curQ = QUARTERS.find(q => q.year === latestYear && q.q === qn);
+const priorYear = latestYear ? String(parseInt(latestYear,10) - 1) : null;
+const priorQMonths = MONTHS_OF_YEAR(priorYear || '0').filter(m => QUARTER_OF_MONTH[m.slice(4,6)] === qn);
+const priorFullSum = priorYear ? pool.reduce((s,p) => s + sumMonths(p.mo, priorQMonths), 0) : 0;
+if(!curQ){
+return { q: qn, curYear: latestYear, priorYear, curTotal: null, priorTotal: priorYear ? priorFullSum : null, priorFullTotal: priorFullSum, growth: null, complete: false, months: [] };
+}
+const matchedPriorMonths = curQ.months.map(m => priorYear + m.slice(4));
+const curTotal = pool.reduce((s,p) => s + sumMonths(p.mo, curQ.months), 0);
+const matchedPriorTotal = pool.reduce((s,p) => s + sumMonths(p.mo, matchedPriorMonths), 0);
+const growth = matchedPriorTotal > 0 ? (curTotal - matchedPriorTotal) / matchedPriorTotal : null;
+return {
+q: qn, curYear: curQ.year, priorYear, curTotal, priorTotal: matchedPriorTotal,
+priorFullTotal: priorFullSum, growth, complete: curQ.complete, months: curQ.months
+};
+});
+}
 
 function computeGapToTarget(pool){
 if(!LATEST_YEAR || !PRIOR_YEAR) return null;
@@ -2101,6 +2151,136 @@ if(detail && detail.scrollIntoView) detail.scrollIntoView({behavior:'smooth', bl
 });
 }
 
+// ---------- Quarterly (Q1-Q4) comparison view ----------
+// Company-wide Q1-Q4 2025 vs 2026 by default, with an optional breakdown by
+// Region/Territory/Medical Representative/District Manager -- kept as its own
+// small toggle inside this view (separate from the outer Region/Territory/MR/DM
+// tabs, which drive a different table shape) so this stays self-contained like
+// the Gap and Where-to-Invest views.
+let quartersBreakdown = 'company';
+const QUARTER_BREAKDOWN_LABELS = { company: 'Company-Wide', rg: 'By Region', tr: 'By Territory', mr: 'By Medical Representative', dm: 'By District Manager' };
+
+function groupPharmaciesByField(field){
+const groups = {};
+PHARMACIES.forEach(p => {
+const key = p[field];
+if(!key) return;
+if(!groups[key]) groups[key] = [];
+groups[key].push(p);
+});
+return groups;
+}
+
+function renderQuarters(){
+const section = document.getElementById('analysisSection');
+const companyQ = computeQuarterlyComparison(PHARMACIES);
+const latestYear = QUARTER_YEARS[QUARTER_YEARS.length - 1];
+const priorYear = latestYear ? String(parseInt(latestYear,10) - 1) : null;
+
+const qLabel = (row) => {
+if(!row.curTotal && row.curTotal !== 0) return `Q${row.q} ${latestYear || ''}`;
+return row.complete ? `Q${row.q} ${row.curYear}` : `Q${row.q} ${row.curYear} (partial: ${row.months.map(monthAbbr).join('/')})`;
+};
+
+const companyRowsHtml = companyQ.map(row => {
+const curText = row.curTotal === null ? '—' : `${fmt(row.curTotal)} EGP`;
+const priorText = row.priorTotal === null ? '—' : `${fmt(row.priorTotal)} EGP`;
+const growthText = row.growth === null ? '—' : signedPct(row.growth);
+const growthClass = row.growth === null ? '' : (row.growth >= 0 ? 'growth-pos' : 'growth-neg');
+const statusText = !row.curTotal && row.curTotal !== 0 ? `Not started` : (row.complete ? 'Complete' : 'Partial (in progress)');
+return `<tr>
+<td class="name-cell">${qLabel(row)}</td>
+<td>${priorText}</td>
+<td>${curText}</td>
+<td class="${growthClass}">${growthText}</td>
+<td>${statusText}</td>
+</tr>`;
+}).join('');
+
+const companyTableHtml = `
+<div class="card">
+<h2>📅 Quarterly Comparison — Company-Wide</h2>
+<div class="note" style="margin-top:0;">
+Each ${latestYear || 'latest year'} quarter compared against the <b>same calendar months</b> one year earlier (Q${companyQ[0]?.q || 1} ${priorYear || ''} etc.) -- not a full prior quarter padded out, so a quarter still being reported isn't unfairly compared against a complete one. "Complete" means all 3 months of that quarter are reliably reported; "Partial" shows exactly which months are included so far.
+</div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>Quarter</th><th>${priorYear || 'Prior Year'} (matched months)</th><th>${latestYear || 'Latest Year'}</th><th>Growth %</th><th>Status</th></tr></thead>
+<tbody>${companyRowsHtml}</tbody>
+</table>
+</div>
+</div>`;
+
+const toggleHtml = `
+<div class="tabs" id="quartersBreakdownTabs" style="margin-bottom:14px;">
+${Object.entries(QUARTER_BREAKDOWN_LABELS).map(([key,lbl]) => `<div class="tab-btn ${quartersBreakdown===key?'active':''}" data-qb="${key}">${lbl}</div>`).join('')}
+</div>`;
+
+let breakdownHtml = '';
+if(quartersBreakdown !== 'company'){
+const groups = groupPharmaciesByField(quartersBreakdown);
+const clickable = quartersBreakdown === 'mr' || quartersBreakdown === 'dm';
+const groupLabel = ANALYSIS_GROUP_LABELS[quartersBreakdown];
+const rows = Object.entries(groups).map(([name, pool]) => {
+const q = computeQuarterlyComparison(pool);
+const latestWithData = [...q].reverse().find(r => r.growth !== null);
+return { name, q, sortVal: latestWithData ? latestWithData.growth : -Infinity };
+}).sort((a,b) => a.sortVal - b.sortVal);
+
+const bodyHtml = rows.map(r => {
+const cells = r.q.map(row => {
+const cls = row.growth === null ? '' : (row.growth >= 0 ? 'growth-pos' : 'growth-neg');
+const text = row.growth === null ? '—' : signedPct(row.growth) + (row.complete ? '' : ' *');
+return `<td class="${cls}">${text}</td>`;
+}).join('');
+return `<tr class="${clickable ? 'clickable-row' : ''}" ${clickable ? `data-name="${r.name}"` : ''}>
+<td class="name-cell">${r.name}</td>
+${cells}
+</tr>`;
+}).join('');
+
+breakdownHtml = `
+<div class="card">
+<h2>📅 Quarterly Growth — ${groupLabel}</h2>
+<div class="note" style="margin-top:0;">Growth % for each quarter vs the same calendar months one year earlier. <b>*</b> marks a quarter still partially reported. Sorted by the most recent available quarter, worst first.${clickable ? ' Click a row to open their book in the Search tab.' : ''}</div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>${groupLabel}</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead>
+<tbody>${bodyHtml}</tbody>
+</table>
+</div>
+</div>`;
+}
+
+section.innerHTML = companyTableHtml + toggleHtml + breakdownHtml;
+
+document.getElementById('quartersBreakdownTabs')?.addEventListener('click', (e) => {
+const btn = e.target.closest('.tab-btn');
+if(!btn) return;
+quartersBreakdown = btn.dataset.qb;
+renderQuarters();
+});
+
+if(quartersBreakdown !== 'company'){
+section.querySelectorAll('tr[data-name]').forEach(tr => {
+tr.addEventListener('click', () => {
+const name = tr.dataset.name;
+if(quartersBreakdown === 'mr'){
+activeMR = name; mrFilter.value = name;
+activeDM = ''; dmFilter.value = '';
+updateMRFilterOptions();
+} else {
+activeDM = name; dmFilter.value = name;
+activeMR = ''; updateMRFilterOptions();
+}
+renderTotals();
+updateOverviewBadge();
+switchView('search');
+});
+});
+}
+}
+
 // ---------- Gap to 15%: the management support board ----------
 // Answers the question a manager actually has: who is behind, by how much, and
 // is their target realistic from where they stand. A rep needing +20% over the
@@ -2417,23 +2597,26 @@ const ANALYSIS_COLS = [
 const ANALYSIS_NOTES = {
 group: () => `Aggregate analysis across all ${PHARMACIES.length.toLocaleString('en-US')} pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). "Growth % (Q3→Q4)" is the contractual figure that determines cashback slabs. The "YoY %" column is a separate, informational read on current-year momentum, computed from whichever recent months are fully reported (auto-excludes any month with incomplete distributor data) -- it does not affect cashback. Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.`,
 gap: () => `The company's 15% growth goal, broken down into each rep's own number based on their actual ${PRIOR_YEAR} book -- so a rep with 100 pharmacies isn't handed the same target as a rep with 210. "Required From Here" is the growth rate the remaining months have to run at versus the same months last year; it's the figure that tells you whether a target is reachable or whether the rep needs structural help.`,
-invest: () => `Where to put merchandising investment next, based on who's already growing on their own versus who already received materials and is still declining. "YoY %" uses the same self-correcting current-year window as the rest of the tool (auto-excludes any not-yet-fully-reported month) -- separate from the contractual Q3→Q4 2025 figure.`
+invest: () => `Where to put merchandising investment next, based on who's already growing on their own versus who already received materials and is still declining. "YoY %" uses the same self-correcting current-year window as the rest of the tool (auto-excludes any not-yet-fully-reported month) -- separate from the contractual Q3→Q4 2025 figure.`,
+quarters: () => `Plain Q1-Q4 calendar-quarter growth, ${QUARTER_YEARS[QUARTER_YEARS.length-1] || 'this year'} vs ${QUARTER_YEARS.length > 1 ? QUARTER_YEARS[QUARTER_YEARS.length-2] : 'last year'} -- separate from the rolling self-correcting window used elsewhere, so you can see actual growth quarter by quarter. A quarter still being reported is marked partial and compared only against the same calendar months last year.`
 };
 
 function renderAnalysis(){
 const noteEl = document.getElementById('analysisIntroNote');
 if(noteEl){
-const kind = analysisGroup === 'gap' ? 'gap' : (analysisGroup === 'invest' ? 'invest' : 'group');
+const kind = analysisGroup === 'gap' ? 'gap' : (analysisGroup === 'invest' ? 'invest' : (analysisGroup === 'quarters' ? 'quarters' : 'group'));
 noteEl.innerHTML = ANALYSIS_NOTES[kind]();
 }
 
 // The company trend/projection charts belong to the aggregate group views; the
-// Gap and Where-to-Invest views carry their own framing and would be noisier
-// with them repeated on top.
+// Gap, Where-to-Invest, and Quarterly views carry their own framing and would
+// be noisier with them repeated on top.
 const trendSection = document.getElementById('companyTrendSection');
-if(analysisGroup === 'gap' || analysisGroup === 'invest'){
+if(analysisGroup === 'gap' || analysisGroup === 'invest' || analysisGroup === 'quarters'){
 if(trendSection) trendSection.innerHTML = '';
-if(analysisGroup === 'gap') renderGapBoard(); else renderMerch();
+if(analysisGroup === 'gap') renderGapBoard();
+else if(analysisGroup === 'invest') renderMerch();
+else renderQuarters();
 return;
 }
 renderCompanyTrend();
