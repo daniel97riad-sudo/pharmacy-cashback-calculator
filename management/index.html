@@ -580,6 +580,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="tab-btn" data-group="gap">🎯 Gap to 15%</div>
 <div class="tab-btn" data-group="invest">🛒 Where to Invest</div>
 <div class="tab-btn" data-group="quarters">📅 Quarterly (2025 vs 2026)</div>
+<div class="tab-btn" data-group="monthly">📆 Monthly (2025 vs 2026)</div>
 </div>
 </div>
 <div id="companyTrendSection"></div>
@@ -966,6 +967,23 @@ return {
 q: qn, curYear: curQ.year, priorYear, curTotal, priorTotal: matchedPriorTotal,
 priorFullTotal: priorFullSum, growth, complete: curQ.complete, months: curQ.months
 };
+});
+}
+
+function computeMonthlyComparison(pool){
+const latestYear = QUARTER_YEARS[QUARTER_YEARS.length - 1];
+const priorYear = latestYear ? String(parseInt(latestYear,10) - 1) : null;
+return Array.from({length:12}, (_,i) => String(i+1).padStart(2,'0')).map(mm => {
+const curKey = latestYear + mm;
+const priorKey = priorYear ? priorYear + mm : null;
+const curReliable = RELIABLE_MONTHS.includes(curKey);
+const priorTotal = priorKey ? pool.reduce((s,p) => s + sumMonths(p.mo, [priorKey]), 0) : null;
+if(!curReliable){
+return { mm, curYear: latestYear, priorYear, curTotal: null, priorTotal, growth: null, reliable: false };
+}
+const curTotal = pool.reduce((s,p) => s + sumMonths(p.mo, [curKey]), 0);
+const growth = priorTotal > 0 ? (curTotal - priorTotal) / priorTotal : null;
+return { mm, curYear: latestYear, priorYear, curTotal, priorTotal, growth, reliable: true };
 });
 }
 
@@ -2292,6 +2310,124 @@ switchView('search');
 }
 }
 
+let monthlyBreakdown = 'company';
+
+function renderMonthly(){
+const section = document.getElementById('analysisSection');
+const companyM = computeMonthlyComparison(PHARMACIES);
+const latestYear = QUARTER_YEARS[QUARTER_YEARS.length - 1];
+const priorYear = latestYear ? String(parseInt(latestYear,10) - 1) : null;
+
+const companyRowsHtml = companyM.map(row => {
+const curText = row.curTotal === null ? '—' : `${fmt(row.curTotal)} EGP`;
+const priorText = row.priorTotal === null ? '—' : `${fmt(row.priorTotal)} EGP`;
+const growthText = row.growth === null ? '—' : signedPct(row.growth);
+const growthClass = row.growth === null ? '' : (row.growth >= 0 ? 'growth-pos' : 'growth-neg');
+const statusText = row.reliable ? 'Complete' : 'Not started / not yet reliable';
+const monthLabel = `${ENGLISH_MONTHS[parseInt(row.mm,10)-1]} ${row.curYear}`;
+return `<tr>
+<td class="name-cell">${monthLabel}</td>
+<td>${priorText}</td>
+<td>${curText}</td>
+<td class="${growthClass}">${growthText}</td>
+<td>${statusText}</td>
+</tr>`;
+}).join('');
+
+const companyTableHtml = `
+<div class="card">
+<h2>📆 Monthly Comparison — Company-Wide</h2>
+<div class="note" style="margin-top:0;">
+Every calendar month of ${latestYear || 'this year'} against the same month in ${priorYear || 'last year'}. A month with no reliable data yet (the current month, usually, while the distributor feed is still posting) shows as "Not started / not yet reliable" rather than a misleading drop.
+</div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>Month</th><th>${priorYear || 'Prior Year'}</th><th>${latestYear || 'Latest Year'}</th><th>Growth %</th><th>Status</th></tr></thead>
+<tbody>${companyRowsHtml}</tbody>
+</table>
+</div>
+</div>`;
+
+const toggleHtml = `
+<div class="tabs" id="monthlyBreakdownTabs" style="margin-bottom:14px;">
+${Object.entries(QUARTER_BREAKDOWN_LABELS).map(([key,lbl]) => `<div class="tab-btn ${monthlyBreakdown===key?'active':''}" data-mb="${key}">${lbl}</div>`).join('')}
+</div>`;
+
+let breakdownHtml = '';
+if(monthlyBreakdown !== 'company'){
+const groups = groupPharmaciesByField(monthlyBreakdown);
+const clickable = monthlyBreakdown === 'mr' || monthlyBreakdown === 'dm';
+const groupLabel = ANALYSIS_GROUP_LABELS[monthlyBreakdown];
+const rows = Object.entries(groups).map(([name, pool]) => {
+const m = computeMonthlyComparison(pool);
+const latestWithData = [...m].reverse().find(r => r.growth !== null);
+return { name, m, sortVal: latestWithData ? latestWithData.growth : -Infinity };
+}).sort((a,b) => a.sortVal - b.sortVal);
+
+const monthHeaders = companyM.map(row => `<th>${ENGLISH_MONTHS[parseInt(row.mm,10)-1]}</th>`).join('');
+
+const bodyHtml = rows.map(r => {
+const cells = r.m.map(row => {
+if(!row.reliable){
+const priorOnly = row.priorTotal !== null ? `<div class="qcell-prior">${row.priorYear}: ${fmt(row.priorTotal)} EGP</div>` : '';
+return `<td>${priorOnly || '—'}</td>`;
+}
+const cls = row.growth === null ? '' : (row.growth >= 0 ? 'growth-pos' : 'growth-neg');
+const growthText = row.growth === null ? '—' : signedPct(row.growth);
+return `<td class="${cls}">
+<div class="qcell-prior">${row.priorYear}: ${fmt(row.priorTotal)} EGP</div>
+<div class="qcell-cur">${row.curYear}: ${fmt(row.curTotal)} EGP</div>
+<div class="qcell-growth">${growthText}</div>
+</td>`;
+}).join('');
+return `<tr class="${clickable ? 'clickable-row' : ''}" ${clickable ? `data-name="${r.name}"` : ''}>
+<td class="name-cell">${r.name}</td>
+${cells}
+</tr>`;
+}).join('');
+
+breakdownHtml = `
+<div class="card">
+<h2>📆 Monthly Growth — ${groupLabel}</h2>
+<div class="note" style="margin-top:0;">Actual EGP for each month, ${priorYear || 'last year'} vs ${latestYear || 'this year'}, plus the growth % between them.${clickable ? ' Click a row to open their book in the Search tab.' : ''}</div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>${groupLabel}</th>${monthHeaders}</tr></thead>
+<tbody>${bodyHtml}</tbody>
+</table>
+</div>
+</div>`;
+}
+
+section.innerHTML = companyTableHtml + toggleHtml + breakdownHtml;
+
+document.getElementById('monthlyBreakdownTabs')?.addEventListener('click', (e) => {
+const btn = e.target.closest('.tab-btn');
+if(!btn) return;
+monthlyBreakdown = btn.dataset.mb;
+renderMonthly();
+});
+
+if(monthlyBreakdown !== 'company'){
+section.querySelectorAll('tr[data-name]').forEach(tr => {
+tr.addEventListener('click', () => {
+const name = tr.dataset.name;
+if(monthlyBreakdown === 'mr'){
+activeMR = name; mrFilter.value = name;
+activeDM = ''; dmFilter.value = '';
+updateMRFilterOptions();
+} else {
+activeDM = name; dmFilter.value = name;
+activeMR = ''; updateMRFilterOptions();
+}
+renderTotals();
+updateOverviewBadge();
+switchView('search');
+});
+});
+}
+}
+
 // ---------- Gap to 15%: the management support board ----------
 // Answers the question a manager actually has: who is behind, by how much, and
 // is their target realistic from where they stand. A rep needing +20% over the
@@ -2611,25 +2747,27 @@ const ANALYSIS_NOTES = {
 group: () => `Aggregate analysis across all ${PHARMACIES.length.toLocaleString('en-US')} pharmacies in the database (not affected by the Medical Rep/District Manager filter in the Search tab). "Growth % (Q3→Q4)" is the contractual figure that determines cashback slabs. The "YoY %" column is a separate, informational read on current-year momentum, computed from whichever recent months are fully reported (auto-excludes any month with incomplete distributor data) -- it does not affect cashback. Click any column header to sort. Clicking a row under "By Medical Representative" or "By District Manager" filters the Search tab directly to that person.`,
 gap: () => `The company's 15% growth goal, broken down into each rep's own number based on their actual ${PRIOR_YEAR} book -- so a rep with 100 pharmacies isn't handed the same target as a rep with 210. Actual EGP booked so far this year is shown right next to the target and the gap, so you can read real numbers, not just percentages. "Required From Here" is the growth rate the remaining months have to run at versus the same months last year; it's the figure that tells you whether a target is reachable or whether the rep needs structural help.`,
 invest: () => `Where to put merchandising investment next, based on who's already growing on their own versus who already received materials and is still declining. "YoY %" uses the same self-correcting current-year window as the rest of the tool (auto-excludes any not-yet-fully-reported month) -- separate from the contractual Q3→Q4 2025 figure.`,
-quarters: () => `Plain Q1-Q4 calendar-quarter growth, ${QUARTER_YEARS[QUARTER_YEARS.length-1] || 'this year'} vs ${QUARTER_YEARS.length > 1 ? QUARTER_YEARS[QUARTER_YEARS.length-2] : 'last year'} -- separate from the rolling self-correcting window used elsewhere, so you can see actual growth quarter by quarter. A quarter still being reported is marked partial and compared only against the same calendar months last year.`
+quarters: () => `Plain Q1-Q4 calendar-quarter growth, ${QUARTER_YEARS[QUARTER_YEARS.length-1] || 'this year'} vs ${QUARTER_YEARS.length > 1 ? QUARTER_YEARS[QUARTER_YEARS.length-2] : 'last year'} -- separate from the rolling self-correcting window used elsewhere, so you can see actual growth quarter by quarter. A quarter still being reported is marked partial and compared only against the same calendar months last year.`,
+monthly: () => `Month-by-month growth, ${QUARTER_YEARS[QUARTER_YEARS.length-1] || 'this year'} vs ${QUARTER_YEARS.length > 1 ? QUARTER_YEARS[QUARTER_YEARS.length-2] : 'last year'} -- the finest-grain read the data supports, with actual EGP for both years shown side by side, not just a percentage.`
 };
 
 function renderAnalysis(){
 const noteEl = document.getElementById('analysisIntroNote');
 if(noteEl){
-const kind = analysisGroup === 'gap' ? 'gap' : (analysisGroup === 'invest' ? 'invest' : (analysisGroup === 'quarters' ? 'quarters' : 'group'));
+const kind = analysisGroup === 'gap' ? 'gap' : (analysisGroup === 'invest' ? 'invest' : (analysisGroup === 'quarters' ? 'quarters' : (analysisGroup === 'monthly' ? 'monthly' : 'group')));
 noteEl.innerHTML = ANALYSIS_NOTES[kind]();
 }
 
 // The company trend/projection charts belong to the aggregate group views; the
-// Gap, Where-to-Invest, and Quarterly views carry their own framing and would
-// be noisier with them repeated on top.
+// Gap, Where-to-Invest, Quarterly, and Monthly views carry their own framing
+// and would be noisier with them repeated on top.
 const trendSection = document.getElementById('companyTrendSection');
-if(analysisGroup === 'gap' || analysisGroup === 'invest' || analysisGroup === 'quarters'){
+if(analysisGroup === 'gap' || analysisGroup === 'invest' || analysisGroup === 'quarters' || analysisGroup === 'monthly'){
 if(trendSection) trendSection.innerHTML = '';
 if(analysisGroup === 'gap') renderGapBoard();
 else if(analysisGroup === 'invest') renderMerch();
-else renderQuarters();
+else if(analysisGroup === 'quarters') renderQuarters();
+else renderMonthly();
 return;
 }
 renderCompanyTrend();
