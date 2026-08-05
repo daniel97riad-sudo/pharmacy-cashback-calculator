@@ -1743,6 +1743,19 @@ section.innerHTML = '';
 return;
 }
 
+section.innerHTML = '<div class="card"><div class="placeholder">جارٍ التحميل...</div></div>';
+setTimeout(renderMyPerfInner, 10);
+}
+
+function renderMyPerfInner(){
+const section = document.getElementById('myperfSection');
+if(!section) return;
+
+if(!myperfActiveMR){
+section.innerHTML = '';
+return;
+}
+
 const subset = PHARMACIES.filter(p => p.mr === myperfActiveMR);
 const count = subset.length;
 const sumQ3 = subset.reduce((s,p) => s + p.q3d, 0);
@@ -1945,7 +1958,16 @@ coverage: g && g.extraVsTrend > 0 ? recoverable / g.extraVsTrend : Infinity
 .sort((a,b) => (a.g.growthSoFar === null ? 1 : a.g.growthSoFar) - (b.g.growthSoFar === null ? 1 : b.g.growthSoFar));
 }
 
-async function renderMyTeam(){
+function renderMyTeam(){
+const section = document.getElementById('myteamSection');
+if(!section) return;
+if(!myteamActiveDM){ section.innerHTML = ''; return; }
+
+section.innerHTML = '<div class="card"><div class="placeholder">جارٍ التحميل...</div></div>';
+setTimeout(renderMyTeamInner, 10);
+}
+
+async function renderMyTeamInner(){
 const section = document.getElementById('myteamSection');
 if(!section) return;
 if(!myteamActiveDM){ section.innerHTML = ''; return; }
@@ -2790,6 +2812,12 @@ monthly: () => `Month-by-month growth, ${QUARTER_YEARS[QUARTER_YEARS.length-1] |
 };
 
 function renderAnalysis(){
+const section = document.getElementById('analysisSection');
+if(section) section.innerHTML = '<div class="card"><div class="placeholder">جارٍ التحميل...</div></div>';
+setTimeout(renderAnalysisInner, 10);
+}
+
+function renderAnalysisInner(){
 const noteEl = document.getElementById('analysisIntroNote');
 if(noteEl){
 const kind = analysisGroup === 'gap' ? 'gap' : (analysisGroup === 'invest' ? 'invest' : (analysisGroup === 'quarters' ? 'quarters' : (analysisGroup === 'monthly' ? 'monthly' : 'group')));
