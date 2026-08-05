@@ -1131,6 +1131,27 @@ management: null, // null = all tabs
 unknown: null
 };
 
+// Deployment-level tab hiding -- independent of signed-in role. This build has
+// no login of its own (the public rep-facing GitHub Pages copy), so ROLE_TABS
+// alone can't restrict it: everyone resolves to 'unknown' -> null -> all tabs.
+// DEPLOYMENT_HIDE_TABS hides tabs unconditionally, for this specific build,
+// regardless of role. Left empty (visible) on the management build.
+const DEPLOYMENT_HIDE_TABS = ['myteam', 'analysis'];
+
+function applyDeploymentTabHiding(){
+if(!DEPLOYMENT_HIDE_TABS.length) return;
+document.querySelectorAll('.view-tab-btn').forEach(btn => {
+if(DEPLOYMENT_HIDE_TABS.includes(btn.dataset.view)){
+btn.style.display = 'none';
+}
+});
+// Defensive: never leave the tool on a hidden view (e.g. if a future signed-in
+// DM role lands here and applyRoleView tries to switch to My Team).
+if(DEPLOYMENT_HIDE_TABS.includes(document.querySelector('.view-tab-btn.active')?.dataset.view)){
+switchView('search');
+}
+}
+
 function applyRoleView(){
 const allowed = ROLE_TABS[currentUser.role];
 if(allowed){
@@ -3788,7 +3809,8 @@ updateOverviewBadge();
 // Identity is resolved after the tool is already usable, so a slow or missing
 // Access endpoint never delays first paint. If a role is found, the view narrows
 // and preselects; if not, everything simply stays as-is.
-resolveIdentity().then(applyRoleView);
+applyDeploymentTabHiding();
+resolveIdentity().then(() => { applyRoleView(); applyDeploymentTabHiding(); });
 </script>
 </body>
 </html>
