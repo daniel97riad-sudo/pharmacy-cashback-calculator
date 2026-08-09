@@ -3240,6 +3240,23 @@ section.innerHTML = `
 </div>`;
 }
 
+let dealsActiveDM = '';
+
+// One tab per DM that actually has an agreed deal, ordered by total payout
+// (highest first) so the busiest district lands first -- plus an "All"
+// tab and, only if the data actually has any, an "Unassigned" tab for deals
+// with no dm_name (never silently drop them from the tab list).
+function computeDealsDmSummary(){
+const byDM = {};
+AGREED_DEALS.forEach(d => {
+const key = d.dm || '';
+if(!byDM[key]) byDM[key] = { dm: key, n: 0, sum: 0 };
+byDM[key].n++;
+byDM[key].sum += d.total_payout;
+});
+return Object.values(byDM).sort((a,b) => b.sum - a.sum);
+}
+
 function renderDeals(){
 const section = document.getElementById('dealsSection');
 if(!section) return;
@@ -3249,9 +3266,18 @@ section.innerHTML = `<div class="card"><div class="placeholder"><div class="big"
 return;
 }
 
-const totalPayout = AGREED_DEALS.reduce((s,d) => s + d.total_payout, 0);
+const dmSummary = computeDealsDmSummary();
+const dmTabsHtml = `
+<div class="tabs" id="dealsDmTabs" style="margin-bottom:14px;flex-wrap:wrap;">
+<div class="tab-btn ${dealsActiveDM===''?'active':''}" data-dm="">الكل (${AGREED_DEALS.length})</div>
+${dmSummary.map(b => `<div class="tab-btn ${dealsActiveDM===b.dm?'active':''}" data-dm="${b.dm}">${b.dm || 'غير محدد'} (${b.n})</div>`).join('')}
+</div>`;
+
+const filteredDeals = dealsActiveDM === '' ? AGREED_DEALS : AGREED_DEALS.filter(d => (d.dm || '') === dealsActiveDM);
+
+const totalPayout = filteredDeals.reduce((s,d) => s + d.total_payout, 0);
 const bySlab = {};
-AGREED_DEALS.forEach(d => {
+filteredDeals.forEach(d => {
 if(!bySlab[d.slab_key]) bySlab[d.slab_key] = { label: d.slab_label, n: 0, sum: 0 };
 bySlab[d.slab_key].n++;
 bySlab[d.slab_key].sum += d.total_payout;
@@ -3265,7 +3291,7 @@ return `<div class="pli-stats" style="text-align:center;">
 </div>`;
 }).join('');
 
-const rowsHtml = AGREED_DEALS.map(d => `<tr>
+const rowsHtml = filteredDeals.map(d => `<tr>
 <td class="name-cell">${d.name}</td>
 <td>${d.code}</td>
 <td>${d.region}</td>
@@ -3280,13 +3306,21 @@ const rowsHtml = AGREED_DEALS.map(d => `<tr>
 section.innerHTML = `
 <div class="card">
 <h2>ملخص الاتفاقات</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">Snapshot as of ${DEALS_SNAPSHOT_DATE} — ${AGREED_DEALS.length} pharmacy with an agreed deal, total payout <b>${fmt(totalPayout)} ج.م</b>.</div>
+<div class="note" style="margin-top:0;margin-bottom:12px;">Snapshot as of ${DEALS_SNAPSHOT_DATE} — ${AGREED_DEALS.length} pharmacy with an agreed deal overall, total payout <b>${fmt(AGREED_DEALS.reduce((s,d)=>s+d.total_payout,0))} ج.م</b>${dealsActiveDM ? ` — showing <b>${dealsActiveDM}</b> only: ${filteredDeals.length} pharmacy, ${fmt(totalPayout)} ج.م` : ''}.</div>
+${dmTabsHtml}
 <div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;">${slabCardsHtml}</div>
 </div>
 <div class="card">
-<h2>تفاصيل الصيدليات (${AGREED_DEALS.length})</h2>
+<h2>تفاصيل الصيدليات (${filteredDeals.length})</h2>
 <div style="overflow-x:auto;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>Region</th><th>Territory</th><th>MR</th><th>DM</th><th>Slab</th><th>Cashback</th><th>Total Payout</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
 </div>`;
+
+document.getElementById('dealsDmTabs')?.addEventListener('click', (e) => {
+const btn = e.target.closest('.tab-btn');
+if(!btn) return;
+dealsActiveDM = btn.dataset.dm;
+renderDeals();
+});
 }
 
 // Logs an agreed deal for one slab of one pharmacy to the live backend. Called from
