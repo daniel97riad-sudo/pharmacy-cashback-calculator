@@ -640,6 +640,30 @@ const DEALS_API_TOKEN = '6UIyKQI1LwIl4iBAUOP3heMpSAo-3OGn';
 // a disabled "done" state immediately without waiting on a round-trip re-fetch.
 const agreedThisSession = new Set();
 
+// Codes with an already-agreed deal baked into this snapshot, so the main search
+// results can mark them (added 2026-08-11). Empty on the public build, since
+// AGREED_DEALS is always stripped there -- the marker just quietly never shows,
+// which is the correct, privacy-safe behavior rather than something to special-case.
+const AGREED_DEAL_CODES = new Set(AGREED_DEALS.map(d => String(d.code)));
+
+// DM for a given MR, looked up from the full pharmacy roster (not just deals) so it
+// covers every MR regardless of whether they have an agreed deal yet.
+function dmForMr(mrName){
+const hit = PHARMACIES.find(p => p.mr === mrName && p.dm);
+return hit ? hit.dm : '';
+}
+
+// Distinct MR names under a DM, from the full pharmacy roster -- same pattern
+// already used for the "My Team" view, reused here so deal-tab team sizes/names
+// reflect the whole team, not just the subset who happen to have a deal logged.
+function teamMembersForDm(dmName){
+if(!dmName) return [];
+return [...new Set(PHARMACIES.filter(p => p.dm === dmName && p.mr).map(p => p.mr))].sort((a,b) => a.localeCompare(b));
+}
+function teamSizeForDm(dmName){
+return teamMembersForDm(dmName).length;
+}
+
 const SLABS = [
 {key:'s1', label:'الشريحة 1', growth:0.15, cashRate:0.0125, targetFloor:5000, cashFloor:500, rebateRate:0.0025, color:'slab1'},
 {key:'s2', label:'الشريحة 2', growth:0.25, cashRate:0.0175, targetFloor:6000, cashFloor:700, rebateRate:0.005, color:'slab2'},
@@ -3053,11 +3077,14 @@ if(matches.length === 0){
 resultsBox.innerHTML = '<div class="empty-msg">لا توجد نتائج مطابقة ' + (activeMR || activeDM ? '(ضمن الفلتر الحالي)' : '') + '</div>';
 } else {
 resultsBox.innerHTML = (fuzzy ? '<div class="empty-msg" style="text-align:right;">أقرب نتائج مطابقة:</div>' : '') +
-matches.map((p) => `
+matches.map((p) => {
+const hasDeal = AGREED_DEAL_CODES.has(String(p.c));
+return `
 <div class="result-item" data-idx="${PHARMACIES.indexOf(p)}">
-<div class="rname">${p.n}</div>
+<div class="rname">${p.n}${hasDeal ? ' <span style="color:#2e8b57;font-weight:600;font-size:12px;">✅ اتفاق مسجَّل</span>' : ''}</div>
 <div class="rmeta">كود: ${p.c} · ${p.rg} / ${p.tr} · المندوب: ${p.mr}</div>
-</div>`).join('');
+</div>`;
+}).join('');
 }
 resultsBox.classList.add('show');
 }
@@ -3228,15 +3255,19 @@ return;
 }
 
 const medals = ['🥇','🥈','🥉'];
-const rowsHtml = ranking.map((r, i) => `
+const rowsHtml = ranking.map((r, i) => {
+const dm = dmForMr(r.mr);
+return `
 <div class="pharm-list-item">
 <div>
 <div class="pli-name">${medals[i] || ('#' + (i+1))} ${r.mr}</div>
+<div class="pli-meta">${dm ? 'مدير المنطقة: ' + dm : ''}</div>
 </div>
 <div class="pli-stats">
 <div class="pli-sales">${r.count.toLocaleString('en-US')} صيدلية</div>
 </div>
-</div>`).join('');
+</div>`;
+}).join('');
 
 section.innerHTML = `
 <div class="card">
@@ -3246,6 +3277,9 @@ section.innerHTML = `
 }
 
 let dealsActiveDM = '';
+// Which MR is drilled into, within the currently selected DM. Reset whenever the
+// DM selection changes, since an MR tab only makes sense inside its DM's context.
+let dealsActiveMR = '';
 
 // One tab per DM that actually has an agreed deal, ordered by total payout
 // (highest first) so the busiest district lands first -- plus an "All"
@@ -3262,6 +3296,19 @@ byDM[key].sum += d.total_payout;
 return Object.values(byDM).sort((a,b) => b.sum - a.sum);
 }
 
+// One row per MR who has at least one deal within `deals` (already DM-filtered),
+// ordered by deal count (highest first) so the top closer lands first.
+function computeDealsMrSummary(deals){
+const byMR = {};
+deals.forEach(d => {
+const key = d.mr || '';
+if(!byMR[key]) byMR[key] = { mr: key, n: 0, sum: 0 };
+byMR[key].n++;
+byMR[key].sum += d.total_payout;
+});
+return Object.values(byMR).sort((a,b) => b.n - a.n);
+}
+
 function renderDeals(){
 const section = document.getElementById('dealsSection');
 if(!section) return;
@@ -3275,10 +3322,24 @@ const dmSummary = computeDealsDmSummary();
 const dmTabsHtml = `
 <div class="tabs" id="dealsDmTabs" style="margin-bottom:14px;flex-wrap:wrap;">
 <div class="tab-btn ${dealsActiveDM===''?'active':''}" data-dm="">الكل (${AGREED_DEALS.length})</div>
-${dmSummary.map(b => `<div class="tab-btn ${dealsActiveDM===b.dm?'active':''}" data-dm="${b.dm}">${b.dm || 'غير محدد'} (${b.n})</div>`).join('')}
+${dmSummary.map(b => {
+const team = teamSizeForDm(b.dm);
+return `<div class="tab-btn ${dealsActiveDM===b.dm?'active':''}" data-dm="${b.dm}">${b.dm || 'غير محدد'} (${b.n} صفقة${team ? ' · فريق ' + team + (team===1?' مندوب':' مندوبين') : ''})</div>`;
+}).join('')}
 </div>`;
 
-const filteredDeals = dealsActiveDM === '' ? AGREED_DEALS : AGREED_DEALS.filter(d => (d.dm || '') === dealsActiveDM);
+const dmFilteredDeals = dealsActiveDM === '' ? AGREED_DEALS : AGREED_DEALS.filter(d => (d.dm || '') === dealsActiveDM);
+
+// MR drill-down only makes sense once a specific DM is picked -- at "الكل" there
+// could be dozens of reps across every district, so we wait for that first click.
+const mrSummary = dealsActiveDM !== '' ? computeDealsMrSummary(dmFilteredDeals) : [];
+const mrTabsHtml = dealsActiveDM === '' ? '' : `
+<div class="tabs" id="dealsMrTabs" style="margin-bottom:14px;flex-wrap:wrap;">
+<div class="tab-btn ${dealsActiveMR===''?'active':''}" data-mr="">كل مندوبي ${dealsActiveDM || 'غير محدد'} (${dmFilteredDeals.length})</div>
+${mrSummary.map(b => `<div class="tab-btn ${dealsActiveMR===b.mr?'active':''}" data-mr="${b.mr}">${b.mr || 'غير محدد'} (${b.n} صيدلية)</div>`).join('')}
+</div>`;
+
+const filteredDeals = dealsActiveMR === '' ? dmFilteredDeals : dmFilteredDeals.filter(d => (d.mr || '') === dealsActiveMR);
 
 const totalPayout = filteredDeals.reduce((s,d) => s + d.total_payout, 0);
 const bySlab = {};
@@ -3308,12 +3369,32 @@ const rowsHtml = filteredDeals.map(d => `<tr>
 <td>${fmt(d.total_payout)} ج.م</td>
 </tr>`).join('');
 
+const dmBreakdownRowsHtml = dmSummary.map(b => {
+const members = teamMembersForDm(b.dm);
+return `<tr>
+<td class="name-cell">${b.dm || 'غير محدد'}</td>
+<td>${members.length ? `<div style="font-size:12px;color:var(--muted);">${members.length} مندوب: ${members.join('، ')}</div>` : '—'}</td>
+<td>${b.n}</td>
+<td>${fmt(b.sum)} ج.م</td>
+</tr>`;
+}).join('');
+
+const filterNote = [
+dealsActiveDM ? `مدير المنطقة: <b>${dealsActiveDM}</b>` : '',
+dealsActiveMR ? `المندوب: <b>${dealsActiveMR}</b>` : ''
+].filter(Boolean).join(' — ');
+
 section.innerHTML = `
 <div class="card">
 <h2>ملخص الاتفاقات</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">Snapshot as of ${DEALS_SNAPSHOT_DATE} — ${AGREED_DEALS.length} pharmacy with an agreed deal overall, total payout <b>${fmt(AGREED_DEALS.reduce((s,d)=>s+d.total_payout,0))} ج.م</b>${dealsActiveDM ? ` — showing <b>${dealsActiveDM}</b> only: ${filteredDeals.length} pharmacy, ${fmt(totalPayout)} ج.م` : ''}.</div>
+<div class="note" style="margin-top:0;margin-bottom:12px;">Snapshot as of ${DEALS_SNAPSHOT_DATE} — ${AGREED_DEALS.length} pharmacy with an agreed deal overall, total payout <b>${fmt(AGREED_DEALS.reduce((s,d)=>s+d.total_payout,0))} ج.م</b>${filterNote ? ` — showing ${filterNote}: ${filteredDeals.length} pharmacy, ${fmt(totalPayout)} ج.م` : ''}.</div>
 ${dmTabsHtml}
+${mrTabsHtml}
 <div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;">${slabCardsHtml}</div>
+</div>
+<div class="card">
+<h2>حسب مدير المنطقة</h2>
+<div style="overflow-x:auto;"><table><thead><tr><th>مدير المنطقة</th><th>حجم الفريق</th><th>عدد الصفقات</th><th>إجمالي المبلغ</th></tr></thead><tbody>${dmBreakdownRowsHtml}</tbody></table></div>
 </div>
 <div class="card">
 <h2>تفاصيل الصيدليات (${filteredDeals.length})</h2>
@@ -3324,18 +3405,53 @@ document.getElementById('dealsDmTabs')?.addEventListener('click', (e) => {
 const btn = e.target.closest('.tab-btn');
 if(!btn) return;
 dealsActiveDM = btn.dataset.dm;
+dealsActiveMR = ''; // a DM change invalidates whichever MR was drilled into
+renderDeals();
+});
+
+document.getElementById('dealsMrTabs')?.addEventListener('click', (e) => {
+const btn = e.target.closest('.tab-btn');
+if(!btn) return;
+dealsActiveMR = btn.dataset.mr;
 renderDeals();
 });
 }
 
 // Logs an agreed deal for one slab of one pharmacy to the live backend. Called from
 // the "✅ اتفاق مع الصيدلية" button next to each slab row in the contract calculator.
+//
+// RELIABILITY NOTE (added 2026-08-10): reps submit this from inside pharmacies on
+// mobile connections that can drop mid-request. When that happens, fetch() rejects
+// client-side with no way to know whether the write actually reached the backend
+// before the drop — so a genuine failure and a "succeeded but we never heard back"
+// case look identical. Clicking retry after the second case creates a duplicate row
+// in the deals log (confirmed happening ~150+ times since Aug 2 by inspecting the
+// log for near-duplicate rows). Two mitigations here:
+//   1. A stable request_id per (pharmacy, slab) is generated once and reused across
+//      every retry of that same click, so a backend-side dedup check can be added
+//      later (skip inserting if a row with this request_id already exists) without
+//      any client changes. This alone does not stop duplicates yet — that half of
+//      the fix has to live in the Apps Script backend.
+//   2. keepalive:true so the request survives the tab/page being backgrounded or
+//      torn down right after the tap (a real, separate failure mode on mobile).
+//   3. A short forced cooldown before the retry button is clickable again, since the
+//      log shows many duplicates were re-taps within 1-5 seconds of the first
+//      "failed" message — panic re-clicking, not a deliberate retry.
+const dealRequestIds = new Map();
+function getDealRequestId(p, row){
+const key = p.c + ':' + row.key;
+if(!dealRequestIds.has(key)){
+dealRequestIds.set(key, key + ':' + Math.random().toString(36).slice(2) + Date.now().toString(36));
+}
+return dealRequestIds.get(key);
+}
 async function agreeDeal(p, row, baselineSales, btn){
 if(agreedThisSession.has(p.c + ':' + row.key)) return;
 btn.disabled = true;
 btn.textContent = 'جارٍ الإرسال...';
 const payload = {
 token: DEALS_API_TOKEN,
+request_id: getDealRequestId(p, row),
 pharmacy_code: p.c, pharmacy_name: p.n, region: p.rg, territory: p.tr,
 mr_name: p.mr, dm_name: p.dm,
 baseline_used: state.baseline, baseline_sales: baselineSales,
@@ -3347,6 +3463,7 @@ total_payout: Math.round(row.total), notes: ''
 try {
 const res = await fetch(DEALS_API_URL, {
 method: 'POST',
+keepalive: true,
 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
 body: JSON.stringify(payload)
 });
@@ -3355,8 +3472,21 @@ if(!data.ok) throw new Error(data.error || 'unknown error');
 agreedThisSession.add(p.c + ':' + row.key);
 btn.textContent = '✅ تم تسجيل الاتفاق';
 } catch(err) {
+btn.disabled = true;
+btn.textContent = '⚠️ الإرسال غير مؤكد — قد يكون تم تسجيله. انتظر قليلاً قبل إعادة المحاولة';
+let secondsLeft = 5;
+const countdownLabel = () => `⚠️ أعد المحاولة بعد ${secondsLeft} ثانية`;
+btn.textContent = countdownLabel();
+const countdown = setInterval(() => {
+secondsLeft -= 1;
+if(secondsLeft <= 0){
+clearInterval(countdown);
 btn.disabled = false;
 btn.textContent = '⚠️ فشل الإرسال — أعد المحاولة';
+} else {
+btn.textContent = countdownLabel();
+}
+}, 1000);
 }
 }
 
