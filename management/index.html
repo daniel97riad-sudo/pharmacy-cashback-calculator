@@ -670,20 +670,18 @@ const SLABS = [
 {key:'s3', label:'الشريحة 3', growth:0.35, cashRate:0.025, targetFloor:7000, cashFloor:1000, rebateRate:0.0075, color:'slab3'}
 ];
 
-// Bands used ONLY to break down the Agreed Deals summary by the pharmacy's
-// target_sales value (requested 2026-08-12) -- separate from the SLABS growth-tier
-// config above. Phase 1 is every deal with target_sales STRICTLY OVER 9,500 EGP,
-// shown as a single group with no further split. Phase 2 is everything at or below
-// that, split into 3 bands at the 6,500 / 7,500 cut points: (-inf,6500) is the
-// first band, [6500,7500] the second, (7500,9500] the third. NOTE: 272 of the 975
-// deals (28%) sit at exactly target_sales=9500 -- a common ceiling value in this
-// data -- and per the "over 9,500" wording they land in the third Phase-2 band
-// (7,500-9,500], not Phase 1. Checked in order; first matching band wins.
+// Groups used ONLY to break down the Agreed Deals summary by the pharmacy's
+// target_sales value (requested 2026-08-12, corrected 2026-08-12) -- separate from
+// the SLABS growth-tier config above. These are 3 EXACT/FIXED target_sales values
+// that recur very often in the log (6,500 / 7,500 / 9,500 EGP -- a flat round-number
+// target used on many deals instead of a computed one), plus a 4th catch-all group
+// for every deal whose target_sales is anything else ("organic"/computed value).
+// Checked in order; first matching group wins, so the catch-all MUST stay last.
 const DEALS_VALUE_BANDS = [
-{key:'phase2_lt6500', label:'أقل من 6,500 ج.م', test:t => t < 6500},
-{key:'phase2_6500_7500', label:'6,500 – 7,500 ج.م', test:t => t >= 6500 && t <= 7500},
-{key:'phase2_7500_9500', label:'7,500 – 9,500 ج.م', test:t => t > 7500 && t <= 9500},
-{key:'phase1_over9500', label:'أكثر من 9,500 ج.م', test:t => t > 9500}
+{key:'fixed_6500', label:'قيمة ثابتة 6,500 ج.م', test:t => t === 6500},
+{key:'fixed_7500', label:'قيمة ثابتة 7,500 ج.م', test:t => t === 7500},
+{key:'fixed_9500', label:'قيمة ثابتة 9,500 ج.م', test:t => t === 9500},
+{key:'other_value', label:'باقي الصفقات (قيمة غير ثابتة)', test:t => true}
 ];
 function dealsValueBandFor(targetSales){
 return DEALS_VALUE_BANDS.find(b => b.test(targetSales)) || DEALS_VALUE_BANDS[DEALS_VALUE_BANDS.length - 1];
@@ -3450,9 +3448,9 @@ ${mrTabsHtml}
 <div style="overflow-x:auto;"><table><thead><tr><th>الشريحة</th><th>عدد الصيدليات</th><th>إجمالي القيمة (المستهدف)</th><th>إجمالي الكاش باك</th></tr></thead><tbody>${slabValueSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.cashback)} ج.م</td></tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
-<h2>تقسيم الصيدليات حسب قيمة المستهدف (مرحلتين)</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">المرحلة 1: صيدليات بمستهدف أكثر من 9,500 ج.م (بدون تقسيم فرعي). المرحلة 2: باقي الصيدليات، مقسّمة إلى 3 فئات عند حدود 6,500 و 7,500 ج.م${filterNote ? ` — ${filterNote}` : ''}.</div>
-<div style="overflow-x:auto;"><table><thead><tr><th>المرحلة / الفئة</th><th>عدد الصيدليات</th><th>إجمالي القيمة (المستهدف)</th><th>إجمالي الكاش باك</th></tr></thead><tbody>${phaseSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.cashback)} ج.م</td></tr>`).join('')}</tbody></table></div>
+<h2>الصفقات ذات القيمة الثابتة (6,500 / 7,500 / 9,500)</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">عدد الصيدليات وإجمالي القيمة والكاش باك لكل قيمة مستهدف ثابتة تتكرر في السجل، ثم باقي الصفقات ذات القيمة غير الثابتة (المحسوبة فرديًا)${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div style="overflow-x:auto;"><table><thead><tr><th>الفئة</th><th>عدد الصيدليات</th><th>إجمالي القيمة (المستهدف)</th><th>إجمالي الكاش باك</th></tr></thead><tbody>${phaseSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.cashback)} ج.م</td></tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
 <h2>حسب مدير المنطقة</h2>
