@@ -3389,6 +3389,23 @@ b.remaining += d.q3_remaining || 0;
 return Object.values(byDM).sort((a,b) => b.remaining - a.remaining);
 }
 
+// Visibility (POSM) breakdown -- how many agreed-deal pharmacies have Point-of-Sale
+// Materials placed (the existing `posm` boolean already logged per deal) vs not.
+// Added 2026-08-13 per Daniel's request for a "visibility flag" count.
+function computeDealsPosmSummary(deals){
+const groups = {
+posm_yes: { key: 'posm_yes', label: 'بها رؤية (POSM) ✅', n: 0, cashback: 0, payout: 0 },
+posm_no: { key: 'posm_no', label: 'بدون رؤية (POSM) ❌', n: 0, cashback: 0, payout: 0 }
+};
+deals.forEach(d => {
+const g = d.posm ? groups.posm_yes : groups.posm_no;
+g.n++;
+g.cashback += d.cashback || 0;
+g.payout += d.total_payout || 0;
+});
+return [groups.posm_yes, groups.posm_no];
+}
+
 function renderDeals(){
 const section = document.getElementById('dealsSection');
 if(!section) return;
@@ -3448,6 +3465,7 @@ acc.m9 += d.month9_sales || 0;
 acc.remaining += d.q3_remaining || 0;
 return acc;
 }, {target:0, m7:0, m8:0, m9:0, remaining:0});
+const posmSummary = computeDealsPosmSummary(filteredDeals);
 
 const rowsHtml = filteredDeals.map(d => `<tr>
 <td class="name-cell">${d.name}</td>
@@ -3463,6 +3481,7 @@ const rowsHtml = filteredDeals.map(d => `<tr>
 <td>${fmt(d.month8_sales || 0)} ج.م</td>
 <td>${d.month9_sales ? fmt(d.month9_sales) + ' ج.م' : '—'}</td>
 <td>${fmt(d.q3_remaining || 0)} ج.م</td>
+<td style="text-align:center;">${d.posm ? '✅' : '—'}</td>
 </tr>`).join('');
 
 const dmBreakdownRowsHtml = dmSummary.map(b => {
@@ -3511,8 +3530,13 @@ ${mrTabsHtml}
 <div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>مدير المنطقة</th><th>عدد الصفقات</th><th>المستهدف</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي</th></tr></thead><tbody>${q3Summary.map(b => `<tr><td class="name-cell">${b.dm || 'غير محدد'}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.m7)} ج.م</td><td>${fmt(b.m8)} ج.م</td><td>${b.m9 ? fmt(b.m9) + ' ج.م' : '—'}</td><td>${fmt(b.remaining)} ج.م</td></tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
+<h2>الرؤية على الرف (POSM)</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">عدد الصفقات التي تم فيها وضع مواد نقطة البيع (POSM) على الرف، مقابل الصفقات بدون ذلك${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div style="overflow-x:auto;"><table><thead><tr><th>الحالة</th><th>عدد الصيدليات</th><th>إجمالي الكاش باك</th><th>إجمالي المدفوع</th></tr></thead><tbody>${posmSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.cashback)} ج.م</td><td>${fmt(b.payout)} ج.م</td></tr>`).join('')}</tbody></table></div>
+</div>
+<div class="card">
 <h2>تفاصيل الصيدليات (${filteredDeals.length})</h2>
-<div style="overflow-x:auto;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>Region</th><th>Territory</th><th>MR</th><th>DM</th><th>Slab</th><th>Cashback</th><th>Total Payout</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي للمستهدف</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
+<div style="overflow-x:auto;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>Region</th><th>Territory</th><th>MR</th><th>DM</th><th>Slab</th><th>Cashback</th><th>Total Payout</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي للمستهدف</th><th>الرؤية (POSM)</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
 </div>`;
 
 document.getElementById('dealsDmTabs')?.addEventListener('click', (e) => {
