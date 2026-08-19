@@ -3018,6 +3018,8 @@ if(searchInput.value.trim().length) runSearch();
 });
 
 // ---------- Search ----------
+const searchCountEl = document.getElementById('searchCount');
+if(searchCountEl) searchCountEl.textContent = `إجمالي الصيدليات في القاعدة: ${PHARMACIES.length}`;
 const searchInput = document.getElementById('searchInput');
 const resultsBox = document.getElementById('resultsBox');
 const clearSearchBtn = document.getElementById('clearSearchBtn');
