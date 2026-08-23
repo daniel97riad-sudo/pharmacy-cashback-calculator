@@ -490,6 +490,12 @@ color:var(--muted);
 }
 .placeholder .big{font-size:40px;margin-bottom:10px;}
 footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
+.dealtype-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--border);min-width:70px;}
+.dealtype-bar-fixed{background:var(--primary);}
+.dealtype-bar-var{background:#4a90d9;}
+.dm-group-header{cursor:pointer;}
+.dm-group-header:hover td{background:var(--accent);}
+.dm-toggle-arrow{display:inline-block;width:16px;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -3329,6 +3335,14 @@ let dealsActiveDM = '';
 // DM selection changes, since an MR tab only makes sense inside its DM's context.
 let dealsActiveMR = '';
 
+// Which DM groups are expanded (showing their per-rep sub-rows) in the two
+// grouped-by-DM tables below (deal-type breakdown, Q3 tracker). Both start
+// fully collapsed -- a 35-rep flat list was hard to scan, so now you see DM
+// totals first and click a DM to drill into its reps. Added 2026-08-23 per
+// Daniel's request to make this data "more visual and easier to access".
+let dealsTypeExpandedDMs = new Set();
+let dealsQ3ExpandedDMs = new Set();
+
 // One tab per DM that actually has an agreed deal, ordered by total payout
 // (highest first) so the busiest district lands first -- plus an "All"
 // tab and, only if the data actually has any, an "Unassigned" tab for deals
@@ -3408,6 +3422,42 @@ else if(d.slab_key === 's3') b.s3++;
 b.n++;
 });
 return Object.values(byMR).sort((a,b) => b.n - a.n);
+}
+
+// Same per-MR breakdown, grouped one level up by DM -- each DM bucket carries
+// its own team totals plus a `reps` array (each rep's own row from
+// computeDealsMrTypeSummary above) for the collapsible table render below.
+function computeDealsMrTypeSummaryByDm(deals){
+const reps = computeDealsMrTypeSummary(deals);
+const byDM = {};
+reps.forEach(r => {
+const key = r.dm || '';
+if(!byDM[key]) byDM[key] = { dm: key, fixed_6500:0, fixed_7500:0, fixed_9500:0, s1:0, s2:0, s3:0, n:0, reps: [] };
+const b = byDM[key];
+b.fixed_6500 += r.fixed_6500;
+b.fixed_7500 += r.fixed_7500;
+b.fixed_9500 += r.fixed_9500;
+b.s1 += r.s1;
+b.s2 += r.s2;
+b.s3 += r.s3;
+b.n += r.n;
+b.reps.push(r);
+});
+return Object.values(byDM).sort((a,b) => b.n - a.n);
+}
+
+// Small 2-segment horizontal bar showing the fixed-vs-variable mix at a glance
+// (orange = fixed-value deals, blue = variable/slab deals) so the split reads
+// visually instead of as two more numbers buried in a wide table.
+function renderDealTypeBar(fixedTotal, varTotal){
+const total = fixedTotal + varTotal;
+if(!total) return `<div class="dealtype-bar" title="لا توجد صفقات"></div>`;
+const fixedPct = (fixedTotal / total) * 100;
+const varPct = 100 - fixedPct;
+return `<div class="dealtype-bar" title="ثابتة ${fixedTotal} (${fixedPct.toFixed(0)}%) — متغيرة ${varTotal} (${varPct.toFixed(0)}%)">
+<div class="dealtype-bar-fixed" style="width:${fixedPct}%;"></div>
+<div class="dealtype-bar-var" style="width:${varPct}%;"></div>
+</div>`;
 }
 
 // "Time gun" pacing helpers (added 2026-08-23 per Daniel's request): compare
@@ -3562,7 +3612,7 @@ return `<div class="pli-stats" style="text-align:center;">
 
 const slabValueSummary = computeDealsSlabValueSummary(filteredDeals);
 const phaseSummary = computeDealsPhaseSummary(filteredDeals);
-const mrTypeSummary = computeDealsMrTypeSummary(filteredDeals);
+const mrTypeSummary = computeDealsMrTypeSummaryByDm(filteredDeals);
 const q3Summary = computeDealsQ3SummaryWithReps(filteredDeals);
 const q3Totals = filteredDeals.reduce((acc, d) => {
 acc.target += d.target_sales || 0;
@@ -3628,23 +3678,45 @@ ${mrTabsHtml}
 </div>
 <div class="card">
 <h2>عدد الصفقات حسب النوع لكل مندوب</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">نوعان من الصفقات: صفقات بقيمة مستهدف ثابتة (6,500 / 7,500 / 9,500 ج.م)، وصفقات بقيمة متغيرة محسوبة حسب شريحة النمو (1 / 2 / 3) -- عدد كل نوع لكل مندوب${filterNote ? ` — ${filterNote}` : ''}.</div>
-<div style="overflow-x:auto;"><table><thead><tr><th>المندوب</th><th>مدير المنطقة</th><th>ثابتة 6,500</th><th>ثابتة 7,500</th><th>ثابتة 9,500</th><th>إجمالي الثابتة</th><th>الشريحة 1</th><th>الشريحة 2</th><th>الشريحة 3</th><th>إجمالي المتغيرة</th><th>الإجمالي</th></tr></thead><tbody>${mrTypeSummary.map(b => {
+<div class="note" style="margin-top:0;margin-bottom:12px;">نوعان من الصفقات: صفقات بقيمة مستهدف ثابتة (6,500 / 7,500 / 9,500 ج.م)، وصفقات بقيمة متغيرة محسوبة حسب شريحة النمو (1 / 2 / 3) -- مُجمّعة حسب مدير المنطقة، اضغط على اسم المدير لعرض مندوبيه${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div style="overflow-x:auto;"><table><thead><tr><th>المندوب / المدير</th><th>مدير المنطقة</th><th>ثابتة 6,500</th><th>ثابتة 7,500</th><th>ثابتة 9,500</th><th>إجمالي الثابتة</th><th>الشريحة 1</th><th>الشريحة 2</th><th>الشريحة 3</th><th>إجمالي المتغيرة</th><th>الإجمالي</th><th>التركيبة</th></tr></thead><tbody>${mrTypeSummary.map(g => {
+const gFixedTotal = g.fixed_6500 + g.fixed_7500 + g.fixed_9500;
+const gVarTotal = g.s1 + g.s2 + g.s3;
+const expanded = dealsTypeExpandedDMs.has(g.dm);
+const arrow = expanded ? '▾' : '▸';
+const headerRow = `<tr class="dm-group-header" data-dmtype-toggle="${g.dm}">
+<td class="name-cell"><span class="dm-toggle-arrow">${arrow}</span><b>${g.dm || 'غير محدد'}</b> <span style="color:var(--muted);font-size:12px;">(${g.reps.length} مندوب)</span></td>
+<td>—</td>
+<td><b>${g.fixed_6500}</b></td>
+<td><b>${g.fixed_7500}</b></td>
+<td><b>${g.fixed_9500}</b></td>
+<td><b>${gFixedTotal}</b></td>
+<td><b>${g.s1}</b></td>
+<td><b>${g.s2}</b></td>
+<td><b>${g.s3}</b></td>
+<td><b>${gVarTotal}</b></td>
+<td><b>${g.n}</b></td>
+<td>${renderDealTypeBar(gFixedTotal, gVarTotal)}</td>
+</tr>`;
+const repRows = expanded ? g.reps.map(b => {
 const fixedTotal = b.fixed_6500 + b.fixed_7500 + b.fixed_9500;
 const varTotal = b.s1 + b.s2 + b.s3;
 return `<tr>
-<td class="name-cell">${b.mr || 'غير محدد'}</td>
-<td>${b.dm || '—'}</td>
-<td>${b.fixed_6500 || '—'}</td>
-<td>${b.fixed_7500 || '—'}</td>
-<td>${b.fixed_9500 || '—'}</td>
+<td class="name-cell" style="padding-right:26px;color:var(--muted);font-size:13px;">↳ ${b.mr || 'غير محدد'}</td>
+<td>—</td>
+<td>${b.fixed_6500}</td>
+<td>${b.fixed_7500}</td>
+<td>${b.fixed_9500}</td>
 <td><b>${fixedTotal}</b></td>
-<td>${b.s1 || '—'}</td>
-<td>${b.s2 || '—'}</td>
-<td>${b.s3 || '—'}</td>
+<td>${b.s1}</td>
+<td>${b.s2}</td>
+<td>${b.s3}</td>
 <td><b>${varTotal}</b></td>
 <td><b>${b.n}</b></td>
+<td>${renderDealTypeBar(fixedTotal, varTotal)}</td>
 </tr>`;
+}).join('') : '';
+return headerRow + repRows;
 }).join('')}</tbody></table></div>
 </div>
 <div class="card">
@@ -3653,11 +3725,17 @@ return `<tr>
 </div>
 <div class="card">
 <h2>متابعة الربع الثالث 2026 (يوليو - سبتمبر)</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">المستهدف = target_sales المتفق عليه في الصفقة. المحقق حتى الآن = يوليو (شهر كامل) + أغسطس (${DEALS_Q3_DATA_AS_OF}) + سبتمبر (لم يبدأ بعد). المتبقي = المستهدف − المحقق حتى الآن (بحد أدنى صفر). التقدم = نسبة المحقق من المستهدف مقارنة بنسبة الوقت المنقضي من الربع الثالث (${(q3TimeFrac*100).toFixed(0)}% حتى اليوم)${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div class="note" style="margin-top:0;margin-bottom:12px;">المستهدف = target_sales المتفق عليه في الصفقة. المحقق حتى الآن = يوليو (شهر كامل) + أغسطس (${DEALS_Q3_DATA_AS_OF}) + سبتمبر (لم يبدأ بعد). المتبقي = المستهدف − المحقق حتى الآن (بحد أدنى صفر). التقدم = نسبة المحقق من المستهدف مقارنة بنسبة الوقت المنقضي من الربع الثالث (${(q3TimeFrac*100).toFixed(0)}% حتى اليوم). اضغط على اسم المدير لعرض التقدم لكل مندوب تحته${filterNote ? ` — ${filterNote}` : ''}.</div>
 <div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;">
 <div class="pli-stats" style="text-align:center;"><div class="pli-name">الإجمالي</div><div class="pli-sales">مستهدف ${fmt(q3Totals.target)} ج.م — محقق ${fmt(q3Totals.m7+q3Totals.m8+q3Totals.m9)} ج.م — متبقي ${fmt(q3Totals.remaining)} ج.م</div><div style="margin-top:8px;">${renderPacingWidget(achievedFrac(q3Totals.m7+q3Totals.m8+q3Totals.m9, q3Totals.target), q3TimeFrac)}</div></div>
 </div>
-<div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>مدير المنطقة</th><th>عدد الصفقات</th><th>المستهدف</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي</th><th>التقدم</th></tr></thead><tbody>${q3Summary.map(b => `<tr><td class="name-cell">${b.dm || 'غير محدد'}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.m7)} ج.م</td><td>${fmt(b.m8)} ج.م</td><td>${b.m9 ? fmt(b.m9) + ' ج.م' : '—'}</td><td>${fmt(b.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(b.m7+b.m8+b.m9, b.target), q3TimeFrac)}</td></tr>${b.reps.map(r => `<tr style="background:var(--bg);"><td class="name-cell" style="padding-right:26px;color:var(--muted);font-size:13px;">↳ ${r.mr || 'غير محدد'}</td><td>${r.n}</td><td>${fmt(r.target)} ج.م</td><td>${fmt(r.m7)} ج.م</td><td>${fmt(r.m8)} ج.م</td><td>${r.m9 ? fmt(r.m9) + ' ج.م' : '—'}</td><td>${fmt(r.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(r.m7+r.m8+r.m9, r.target), q3TimeFrac)}</td></tr>`).join('')}`).join('')}</tbody></table></div>
+<div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>مدير المنطقة</th><th>عدد الصفقات</th><th>المستهدف</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي</th><th>التقدم</th></tr></thead><tbody>${q3Summary.map(b => {
+const expanded = dealsQ3ExpandedDMs.has(b.dm);
+const arrow = expanded ? '▾' : '▸';
+const headerRow = `<tr class="dm-group-header" data-dmq3-toggle="${b.dm}"><td class="name-cell"><span class="dm-toggle-arrow">${arrow}</span>${b.dm || 'غير محدد'}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.m7)} ج.م</td><td>${fmt(b.m8)} ج.م</td><td>${b.m9 ? fmt(b.m9) + ' ج.م' : '—'}</td><td>${fmt(b.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(b.m7+b.m8+b.m9, b.target), q3TimeFrac)}</td></tr>`;
+const repRows = expanded ? b.reps.map(r => `<tr style="background:var(--bg);"><td class="name-cell" style="padding-right:26px;color:var(--muted);font-size:13px;">↳ ${r.mr || 'غير محدد'}</td><td>${r.n}</td><td>${fmt(r.target)} ج.م</td><td>${fmt(r.m7)} ج.م</td><td>${fmt(r.m8)} ج.م</td><td>${r.m9 ? fmt(r.m9) + ' ج.م' : '—'}</td><td>${fmt(r.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(r.m7+r.m8+r.m9, r.target), q3TimeFrac)}</td></tr>`).join('') : '';
+return headerRow + repRows;
+}).join('')}</tbody></table></div>
 </div>
 <div class="card">
 <h2>الرؤية على الرف (POSM)</h2>
@@ -3682,6 +3760,22 @@ const btn = e.target.closest('.tab-btn');
 if(!btn) return;
 dealsActiveMR = btn.dataset.mr;
 renderDeals();
+});
+
+section.querySelectorAll('[data-dmtype-toggle]').forEach(row => {
+row.addEventListener('click', () => {
+const dm = row.dataset.dmtypeToggle;
+if(dealsTypeExpandedDMs.has(dm)) dealsTypeExpandedDMs.delete(dm); else dealsTypeExpandedDMs.add(dm);
+renderDeals();
+});
+});
+
+section.querySelectorAll('[data-dmq3-toggle]').forEach(row => {
+row.addEventListener('click', () => {
+const dm = row.dataset.dmq3Toggle;
+if(dealsQ3ExpandedDMs.has(dm)) dealsQ3ExpandedDMs.delete(dm); else dealsQ3ExpandedDMs.add(dm);
+renderDeals();
+});
 });
 }
 
