@@ -3387,6 +3387,29 @@ byBand[band.key].cashback += d.cashback || 0;
 return DEALS_VALUE_BANDS.map(b => byBand[b.key]);
 }
 
+// Per-MR breakdown of deal "kind": fixed-value deals (target_sales pinned at
+// 6,500 / 7,500 / 9,500 -- see DEALS_VALUE_BANDS above) vs variable/organic
+// deals priced by growth slab (SLABS s1/s2/s3). Added 2026-08-23 per Daniel's
+// request to see, per rep, how many of each kind of deal they've closed.
+function computeDealsMrTypeSummary(deals){
+const byMR = {};
+deals.forEach(d => {
+const key = d.mr || '';
+if(!byMR[key]) byMR[key] = { mr: key, dm: d.dm || '', fixed_6500:0, fixed_7500:0, fixed_9500:0, s1:0, s2:0, s3:0, n:0 };
+const b = byMR[key];
+if(!b.dm && d.dm) b.dm = d.dm;
+const band = dealsValueBandFor(d.target_sales || 0);
+if(band.key === 'fixed_6500') b.fixed_6500++;
+else if(band.key === 'fixed_7500') b.fixed_7500++;
+else if(band.key === 'fixed_9500') b.fixed_9500++;
+else if(d.slab_key === 's1') b.s1++;
+else if(d.slab_key === 's2') b.s2++;
+else if(d.slab_key === 's3') b.s3++;
+b.n++;
+});
+return Object.values(byMR).sort((a,b) => b.n - a.n);
+}
+
 // "Time gun" pacing helpers (added 2026-08-23 per Daniel's request): compare
 // % of Q3 target achieved so far against % of the Q3 2026 calendar (Jul 1 -
 // Sep 30, 92 days) that has actually elapsed, so a DM/rep can see at a glance
@@ -3443,6 +3466,33 @@ b.m9 += d.month9_sales || 0;
 b.remaining += d.q3_remaining || 0;
 });
 return Object.values(byDM).sort((a,b) => b.remaining - a.remaining);
+}
+
+// Same Q3 rollup as computeDealsQ3Summary, but one level deeper: within each DM
+// bucket, also break out that DM's individual reps (mirroring the same target/
+// m7/m8/m9/remaining fields) so each rep's own pacing can be read directly
+// under their DM instead of only at the DM-aggregate level. Added 2026-08-23
+// per Daniel's request. Reps within a DM are ordered by remaining (desc), same
+// convention as the DM-level ordering above.
+function computeDealsQ3SummaryWithReps(deals){
+const dmBuckets = computeDealsQ3Summary(deals);
+return dmBuckets.map(dmB => {
+const repDeals = deals.filter(d => (d.dm || '') === dmB.dm);
+const byMR = {};
+repDeals.forEach(d => {
+const key = d.mr || '';
+if(!byMR[key]) byMR[key] = { mr: key, n: 0, target: 0, m7: 0, m8: 0, m9: 0, remaining: 0 };
+const b = byMR[key];
+b.n++;
+b.target += d.target_sales || 0;
+b.m7 += d.month7_sales || 0;
+b.m8 += d.month8_sales || 0;
+b.m9 += d.month9_sales || 0;
+b.remaining += d.q3_remaining || 0;
+});
+const reps = Object.values(byMR).sort((a,b) => b.remaining - a.remaining);
+return Object.assign({}, dmB, { reps });
+});
 }
 
 // Visibility (POSM) breakdown -- how many agreed-deal pharmacies have Point-of-Sale
@@ -3512,7 +3562,8 @@ return `<div class="pli-stats" style="text-align:center;">
 
 const slabValueSummary = computeDealsSlabValueSummary(filteredDeals);
 const phaseSummary = computeDealsPhaseSummary(filteredDeals);
-const q3Summary = computeDealsQ3Summary(filteredDeals);
+const mrTypeSummary = computeDealsMrTypeSummary(filteredDeals);
+const q3Summary = computeDealsQ3SummaryWithReps(filteredDeals);
 const q3Totals = filteredDeals.reduce((acc, d) => {
 acc.target += d.target_sales || 0;
 acc.m7 += d.month7_sales || 0;
@@ -3576,6 +3627,27 @@ ${mrTabsHtml}
 <div style="overflow-x:auto;"><table><thead><tr><th>الفئة</th><th>عدد الصيدليات</th><th>إجمالي القيمة (المستهدف)</th><th>إجمالي الكاش باك</th></tr></thead><tbody>${phaseSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.cashback)} ج.م</td></tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
+<h2>عدد الصفقات حسب النوع لكل مندوب</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">نوعان من الصفقات: صفقات بقيمة مستهدف ثابتة (6,500 / 7,500 / 9,500 ج.م)، وصفقات بقيمة متغيرة محسوبة حسب شريحة النمو (1 / 2 / 3) -- عدد كل نوع لكل مندوب${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div style="overflow-x:auto;"><table><thead><tr><th>المندوب</th><th>مدير المنطقة</th><th>ثابتة 6,500</th><th>ثابتة 7,500</th><th>ثابتة 9,500</th><th>إجمالي الثابتة</th><th>الشريحة 1</th><th>الشريحة 2</th><th>الشريحة 3</th><th>إجمالي المتغيرة</th><th>الإجمالي</th></tr></thead><tbody>${mrTypeSummary.map(b => {
+const fixedTotal = b.fixed_6500 + b.fixed_7500 + b.fixed_9500;
+const varTotal = b.s1 + b.s2 + b.s3;
+return `<tr>
+<td class="name-cell">${b.mr || 'غير محدد'}</td>
+<td>${b.dm || '—'}</td>
+<td>${b.fixed_6500 || '—'}</td>
+<td>${b.fixed_7500 || '—'}</td>
+<td>${b.fixed_9500 || '—'}</td>
+<td><b>${fixedTotal}</b></td>
+<td>${b.s1 || '—'}</td>
+<td>${b.s2 || '—'}</td>
+<td>${b.s3 || '—'}</td>
+<td><b>${varTotal}</b></td>
+<td><b>${b.n}</b></td>
+</tr>`;
+}).join('')}</tbody></table></div>
+</div>
+<div class="card">
 <h2>حسب مدير المنطقة</h2>
 <div style="overflow-x:auto;"><table><thead><tr><th>مدير المنطقة</th><th>حجم الفريق</th><th>عدد الصفقات</th><th>إجمالي المبلغ</th></tr></thead><tbody>${dmBreakdownRowsHtml}</tbody></table></div>
 </div>
@@ -3585,7 +3657,7 @@ ${mrTabsHtml}
 <div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;">
 <div class="pli-stats" style="text-align:center;"><div class="pli-name">الإجمالي</div><div class="pli-sales">مستهدف ${fmt(q3Totals.target)} ج.م — محقق ${fmt(q3Totals.m7+q3Totals.m8+q3Totals.m9)} ج.م — متبقي ${fmt(q3Totals.remaining)} ج.م</div><div style="margin-top:8px;">${renderPacingWidget(achievedFrac(q3Totals.m7+q3Totals.m8+q3Totals.m9, q3Totals.target), q3TimeFrac)}</div></div>
 </div>
-<div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>مدير المنطقة</th><th>عدد الصفقات</th><th>المستهدف</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي</th><th>التقدم</th></tr></thead><tbody>${q3Summary.map(b => `<tr><td class="name-cell">${b.dm || 'غير محدد'}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.m7)} ج.م</td><td>${fmt(b.m8)} ج.م</td><td>${b.m9 ? fmt(b.m9) + ' ج.م' : '—'}</td><td>${fmt(b.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(b.m7+b.m8+b.m9, b.target), q3TimeFrac)}</td></tr>`).join('')}</tbody></table></div>
+<div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>مدير المنطقة</th><th>عدد الصفقات</th><th>المستهدف</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي</th><th>التقدم</th></tr></thead><tbody>${q3Summary.map(b => `<tr><td class="name-cell">${b.dm || 'غير محدد'}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.m7)} ج.م</td><td>${fmt(b.m8)} ج.م</td><td>${b.m9 ? fmt(b.m9) + ' ج.م' : '—'}</td><td>${fmt(b.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(b.m7+b.m8+b.m9, b.target), q3TimeFrac)}</td></tr>${b.reps.map(r => `<tr style="background:var(--bg);"><td class="name-cell" style="padding-right:26px;color:var(--muted);font-size:13px;">↳ ${r.mr || 'غير محدد'}</td><td>${r.n}</td><td>${fmt(r.target)} ج.م</td><td>${fmt(r.m7)} ج.م</td><td>${fmt(r.m8)} ج.م</td><td>${r.m9 ? fmt(r.m9) + ' ج.م' : '—'}</td><td>${fmt(r.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(r.m7+r.m8+r.m9, r.target), q3TimeFrac)}</td></tr>`).join('')}`).join('')}</tbody></table></div>
 </div>
 <div class="card">
 <h2>الرؤية على الرف (POSM)</h2>
