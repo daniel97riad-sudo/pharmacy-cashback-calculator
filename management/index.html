@@ -263,6 +263,23 @@ white-space:nowrap;
 .badge.slab-unknown{background:var(--bg);color:var(--muted);}
 .badge-row{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;}
 
+/* "Time gun" pacing widget: achievement % vs. % of Q3 elapsed, two stacked bars
+   so a glance shows whether the fill (achieved) is ahead of or behind the
+   marker line (time elapsed). Used both per-pharmacy and in DM rollups. */
+.pacing-widget{min-width:150px;}
+.pacing-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.pacing-row:last-of-type{margin-bottom:5px;}
+.pacing-tag{font-size:10px;color:var(--muted);width:38px;flex:0 0 auto;text-align:start;}
+.pacing-track{flex:1;height:7px;border-radius:4px;background:var(--bg);border:1px solid var(--border);overflow:hidden;position:relative;}
+.pacing-fill{height:100%;border-radius:3px;}
+.pacing-fill.achieved{background:var(--primary);}
+.pacing-fill.time{background:#9aa0a6;}
+.pacing-pct{font-size:10px;color:var(--muted);width:36px;flex:0 0 auto;text-align:end;font-variant-numeric:tabular-nums;}
+.pacing-status{font-size:11px;font-weight:600;margin-top:2px;}
+.pacing-status.ahead{color:#1a7a4d;}
+.pacing-status.ontrack{color:#a0680d;}
+.pacing-status.behind{color:#d64545;}
+
 .view-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 .view-tab-btn{
 position:relative;
@@ -3370,6 +3387,43 @@ byBand[band.key].cashback += d.cashback || 0;
 return DEALS_VALUE_BANDS.map(b => byBand[b.key]);
 }
 
+// "Time gun" pacing helpers (added 2026-08-23 per Daniel's request): compare
+// % of Q3 target achieved so far against % of the Q3 2026 calendar (Jul 1 -
+// Sep 30, 92 days) that has actually elapsed, so a DM/rep can see at a glance
+// whether they're ahead of, on, or behind the pace they'd need to hit target
+// by quarter-end -- not just the raw remaining-EGP number shown elsewhere.
+// Time-elapsed is computed from the viewer's real clock (not the deals
+// snapshot date), so it keeps advancing correctly between data refreshes.
+const Q3_2026_START = new Date(2026, 6, 1);   // Jul 1, 2026
+const Q3_2026_END   = new Date(2026, 9, 1);   // Oct 1, 2026 (exclusive)
+function q3TimeElapsedFrac(){
+const total = Q3_2026_END - Q3_2026_START;
+const elapsed = Math.min(Math.max(new Date() - Q3_2026_START, 0), total);
+return elapsed / total;
+}
+function achievedFrac(achieved, target){
+if(!target) return 0;
+return achieved / target;
+}
+// Renders the two-bar comparison: top bar = % of target achieved, bottom bar
+// = % of Q3 elapsed. Both bars are visually capped at 100% width (an
+// over-achiever still reads as a full bar) but the printed percentage is the
+// real, uncapped number. The status line below compares the two directly.
+function renderPacingWidget(achFrac, timeFrac){
+const achPct = achFrac * 100;
+const timePct = timeFrac * 100;
+const gap = achPct - timePct;
+const status = gap >= 5 ? {cls:'ahead', label:'🟢 متقدم على الخطة'}
+: gap <= -10 ? {cls:'behind', label:'🔴 متأخر عن الخطة'}
+: {cls:'ontrack', label:'🟡 على المسار الصحيح'};
+const barW = p => Math.max(0, Math.min(100, p));
+return `<div class="pacing-widget">
+<div class="pacing-row"><span class="pacing-tag">تحقيق</span><div class="pacing-track"><div class="pacing-fill achieved" style="width:${barW(achPct)}%;"></div></div><span class="pacing-pct">${achPct.toFixed(0)}%</span></div>
+<div class="pacing-row"><span class="pacing-tag">وقت</span><div class="pacing-track"><div class="pacing-fill time" style="width:${barW(timePct)}%;"></div></div><span class="pacing-pct">${timePct.toFixed(0)}%</span></div>
+<div class="pacing-status ${status.cls}">${status.label}</div>
+</div>`;
+}
+
 // Per-DM rollup of Q3 progress: target vs actual-so-far (month7+month8+month9)
 // vs remaining, across the deals currently in view (already DM/MR filtered by
 // the caller). Ordered by remaining (highest first) -- the DM with the most
@@ -3467,6 +3521,7 @@ acc.m9 += d.month9_sales || 0;
 acc.remaining += d.q3_remaining || 0;
 return acc;
 }, {target:0, m7:0, m8:0, m9:0, remaining:0});
+const q3TimeFrac = q3TimeElapsedFrac();
 const posmSummary = computeDealsPosmSummary(filteredDeals);
 
 const rowsHtml = filteredDeals.map(d => `<tr>
@@ -3483,6 +3538,7 @@ const rowsHtml = filteredDeals.map(d => `<tr>
 <td>${fmt(d.month8_sales || 0)} ج.م</td>
 <td>${d.month9_sales ? fmt(d.month9_sales) + ' ج.م' : '—'}</td>
 <td>${fmt(d.q3_remaining || 0)} ج.م</td>
+<td>${renderPacingWidget(achievedFrac((d.month7_sales||0)+(d.month8_sales||0)+(d.month9_sales||0), d.target_sales||0), q3TimeFrac)}</td>
 <td style="text-align:center;">${d.posm ? '✅' : '—'}</td>
 </tr>`).join('');
 
@@ -3525,20 +3581,19 @@ ${mrTabsHtml}
 </div>
 <div class="card">
 <h2>متابعة الربع الثالث 2026 (يوليو - سبتمبر)</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">المستهدف = target_sales المتفق عليه في الصفقة. المحقق حتى الآن = يوليو (شهر كامل) + أغسطس (${DEALS_Q3_DATA_AS_OF}) + سبتمبر (لم يبدأ بعد). المتبقي = المستهدف − المحقق حتى الآن (بحد أدنى صفر)${filterNote ? ` — ${filterNote}` : ''}.</div>
-<div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;">
-<div class="pli-stats" style="text-align:center;"><div class="pli-name">الإجمالي</div><div class="pli-sales">مستهدف ${fmt(q3Totals.target)} ج.م — محقق ${fmt(q3Totals.m7+q3Totals.m8+q3Totals.m9)} ج.م — متبقي ${fmt(q3Totals.remaining)} ج.م</div></div>
+<div class="note" style="margin-top:0;margin-bottom:12px;">المستهدف = target_sales المتفق عليه في الصفقة. المحقق حتى الآن = يوليو (شهر كامل) + أغسطس (${DEALS_Q3_DATA_AS_OF}) + سبتمبر (لم يبدأ بعد). المتبقي = المستهدف − المحقق حتى الآن (بحد أدنى صفر). التقدم = نسبة المحقق من المستهدف مقارنة بنسبة الوقت المنقضي من الربع الثالث (${(q3TimeFrac*100).toFixed(0)}% حتى اليوم)${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;">
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">الإجمالي</div><div class="pli-sales">مستهدف ${fmt(q3Totals.target)} ج.م — محقق ${fmt(q3Totals.m7+q3Totals.m8+q3Totals.m9)} ج.م — متبقي ${fmt(q3Totals.remaining)} ج.م</div><div style="margin-top:8px;">${renderPacingWidget(achievedFrac(q3Totals.m7+q3Totals.m8+q3Totals.m9, q3Totals.target), q3TimeFrac)}</div></div>
 </div>
-<div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>مدير المنطقة</th><th>عدد الصفقات</th><th>المستهدف</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي</th></tr></thead><tbody>${q3Summary.map(b => `<tr><td class="name-cell">${b.dm || 'غير محدد'}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.m7)} ج.م</td><td>${fmt(b.m8)} ج.م</td><td>${b.m9 ? fmt(b.m9) + ' ج.م' : '—'}</td><td>${fmt(b.remaining)} ج.م</td></tr>`).join('')}</tbody></table></div>
-</div>
-<div class="card">
+<div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>مدير المنطقة</th><th>عدد الصفقات</th><th>المستهدف</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي</th><th>التقدم</th></tr></thead><tbody>${q3Summary.map(b => `<tr><td class="name-cell">${b.dm || 'غير محدد'}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.m7)} ج.م</td><td>${fmt(b.m8)} ج.م</td><td>${b.m9 ? fmt(b.m9) + ' ج.م' : '—'}</td><td>${fmt(b.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(b.m7+b.m8+b.m9, b.target), q3TimeFrac)}</td></tr>`).join('')}</tbody></table></div>
+</div><div class="card">
 <h2>الرؤية على الرف (POSM)</h2>
 <div class="note" style="margin-top:0;margin-bottom:12px;">عدد الصفقات التي تم فيها وضع مواد نقطة البيع (POSM) على الرف، مقابل الصفقات بدون ذلك${filterNote ? ` — ${filterNote}` : ''}.</div>
 <div style="overflow-x:auto;"><table><thead><tr><th>الحالة</th><th>عدد الصيدليات</th><th>إجمالي الكاش باك</th><th>إجمالي المدفوع</th></tr></thead><tbody>${posmSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.cashback)} ج.م</td><td>${fmt(b.payout)} ج.م</td></tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
 <h2>تفاصيل الصيدليات (${filteredDeals.length})</h2>
-<div style="overflow-x:auto;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>Region</th><th>Territory</th><th>MR</th><th>DM</th><th>Slab</th><th>Cashback</th><th>Total Payout</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي للمستهدف</th><th>الرؤية (POSM)</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
+<div style="overflow-x:auto;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>Region</th><th>Territory</th><th>MR</th><th>DM</th><th>Slab</th><th>Cashback</th><th>Total Payout</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي للمستهدف</th><th>التقدم</th><th>الرؤية (POSM)</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
 </div>`;
 
 document.getElementById('dealsDmTabs')?.addEventListener('click', (e) => {
