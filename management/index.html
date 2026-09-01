@@ -3401,6 +3401,112 @@ return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
 return `<div>${rowsHtml}</div>`;
 }
 
+// Combined "Target vs Achievement vs Growth" overview -- one row per chain,
+// sorted by achievement % (highest first). The bar encodes the delta between
+// YTD achievement and the chain's own target (a "delta-to-target" diverging
+// bar centered on 0 = exactly at target, same green/red pair used for growth
+// elsewhere on this tab -- both are the same "above/below a baseline" job).
+// Growth is NOT put on the same bar/axis as the delta-to-target value (that
+// would be a dual-axis chart, since EGP-target-delta and YoY-%-growth are
+// different scales) -- it's shown as its own chip alongside, same idiom as
+// the existing chain table's growth columns.
+function renderChainsComboChart(items){
+const sorted = items.slice().sort((a,b) => b.achPct - a.achPct);
+const maxAbsDelta = Math.max(...sorted.map(it => Math.abs(it.achPct - 100)), 10);
+const rowsHtml = sorted.map(it => {
+const delta = it.achPct - 100;
+const barPct = Math.min(100, (Math.abs(delta) / maxAbsDelta) * 50);
+const isPos = delta >= 0;
+const cls = isPos ? 'growth-pos-bg' : 'growth-neg-bg';
+const barStyle = isPos ? `left:50%;width:${barPct.toFixed(1)}%;` : `right:50%;width:${barPct.toFixed(1)}%;`;
+const txtCls = isPos ? 'growth-pos' : 'growth-neg';
+return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+<div style="width:150px;flex:0 0 auto;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${it.group}">${it.group}</div>
+<div style="flex:1;background:var(--bg);border-radius:4px;height:16px;position:relative;overflow:hidden;" title="${it.achPct.toFixed(0)}% of target">
+<div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border);"></div>
+<div class="${cls}" style="position:absolute;top:0;bottom:0;${barStyle}"></div>
+</div>
+<div class="${txtCls}" style="width:52px;flex:0 0 auto;font-size:11px;text-align:end;font-variant-numeric:tabular-nums;">${it.achPct.toFixed(0)}%</div>
+${chainsGrowthChip(it.growthPct)}
+</div>`;
+}).join('');
+return `<div>
+<div style="display:flex;gap:8px;font-size:10.5px;color:var(--muted);margin-bottom:8px;">
+<div style="width:150px;flex:0 0 auto;"></div>
+<div style="flex:1;">◀ below target &nbsp;|&nbsp; above target ▶ &nbsp;(bar = pts vs 100% of own target)</div>
+<div style="width:52px;flex:0 0 auto;text-align:end;">Ach.%</div>
+<div style="flex:0 0 auto;">YoY growth</div>
+</div>
+${rowsHtml}
+</div>`;
+}
+
+// Sums a monthly field across every chain for a given set of 'YYYYMM' month
+// keys -- used to build Q1/Q2/partial-Q3 totals, since CHAINS_DATA.monthly has
+// no native calendar-quarter breakdown (only a per-month, per-chain series).
+function sumChainsMonthlyField(groups, monthlyData, monthKeys, field){
+let s = 0;
+groups.forEach(g => {
+const md = monthlyData[g] || {};
+monthKeys.forEach(m => { const row = md[m]; if(row && row[field] != null) s += row[field]; });
+});
+return s;
+}
+
+// Builds the Q1/Q2/partial-Q3 rows (closed calendar quarters this data can
+// actually support) from the monthly series; Q4 2026 (projected, using the
+// same growth-rate projection already computed elsewhere on this tab) is
+// appended by the caller, since it comes from the ytd rollup, not monthly.
+function computeChainsQuarterlyTotals(groups, months, monthlyData){
+function buildQuarter(label, monthKeys, partial){
+const present = monthKeys.filter(m => months.includes(m));
+if(!present.length) return null;
+const inv = sumChainsMonthlyField(groups, monthlyData, present, 'invoice_value');
+const lyInv = sumChainsMonthlyField(groups, monthlyData, present, 'ly_invoice_value');
+const growth = lyInv ? ((inv - lyInv) / lyInv) * 100 : null;
+return { label, value: inv, growth, partial: !!partial, projected: false };
+}
+return [
+buildQuarter('Q1 2026 (Jan–Mar)', ['202601','202602','202603']),
+buildQuarter('Q2 2026 (Apr–Jun)', ['202604','202605','202606']),
+buildQuarter('Q3 2026 (Jul only — partial)', ['202607'], true),
+].filter(Boolean);
+}
+
+// Quarterly sales-by-period bar chart (one hue, magnitude over time -- a
+// "trend over time" job) with a YoY growth chip per quarter (vs the same
+// quarter last year). Partial/projected quarters use the same hue at reduced
+// opacity rather than a second color, since they're the same measure, just
+// less certain -- the label suffix already says so in words.
+function renderChainsQuarterlyChart(quarters){
+const maxVal = Math.max(...quarters.map(q => Math.abs(q.value)), 1);
+const rowsHtml = quarters.map(q => {
+const widthPct = Math.max(2, (Math.abs(q.value) / maxVal) * 100);
+const opacity = (q.partial || q.projected) ? '.5' : '1';
+return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+<div style="width:190px;flex:0 0 auto;font-size:12px;color:var(--text);white-space:nowrap;">${q.label}</div>
+<div style="flex:1;background:var(--bg);border-radius:4px;overflow:hidden;height:16px;position:relative;">
+<div style="width:${widthPct.toFixed(1)}%;height:100%;background:var(--primary);opacity:${opacity};border-radius:4px;"></div>
+</div>
+<div style="width:120px;flex:0 0 auto;font-size:11px;color:var(--muted);text-align:end;font-variant-numeric:tabular-nums;">${fmt(q.value)} ج.م</div>
+${chainsGrowthChip(q.growth)}
+</div>`;
+}).join('');
+const tableRowsHtml = quarters.map(q => `<tr>
+<td class="name-cell">${q.label}</td>
+<td>${fmt(q.value)} ج.م</td>
+<td>${chainsGrowthChip(q.growth)}</td>
+</tr>`).join('');
+return `<div>${rowsHtml}
+<div style="overflow-x:auto;margin-top:10px;">
+<table>
+<thead><tr><th>Quarter</th><th>Invoice Sales</th><th>YoY Growth</th></tr></thead>
+<tbody>${tableRowsHtml}</tbody>
+</table>
+</div>
+</div>`;
+}
+
 function renderChains(){
 const section = document.getElementById('chainsSection');
 if(!section) return;
@@ -3514,6 +3620,20 @@ const q4Items = rows.slice()
 .map(r => ({ label: r.group, value: r.q4_2026_projected_invoice_value }));
 const q4ChartHtml = renderHBarChart(q4Items, { valueFmt: v => fmt(v) + ' ج.م', color: '#8e5fd9' });
 
+// ---- Target vs Achievement vs Growth combo (all-chains overview) ----
+const comboItems = rows.map(r => ({
+group: r.group,
+achPct: r.target_value ? (r.total_actual_value / r.target_value) * 100 : 0,
+growthPct: r.actual_growth_pct,
+}));
+const comboChartHtml = renderChainsComboChart(comboItems);
+
+// ---- Sales by quarter + growth vs each quarter (all-chains overview) ----
+const quarterlyRows = computeChainsQuarterlyTotals(groups, months, CHAINS_DATA.monthly);
+const q4GrowthProjected = totalQ4_2025 ? ((totalQ4Proj - totalQ4_2025) / totalQ4_2025) * 100 : null;
+quarterlyRows.push({ label: 'Q4 2026 (Oct–Dec, projected)', value: totalQ4Proj, growth: q4GrowthProjected, partial: false, projected: true });
+const quarterlyChartHtml = renderChainsQuarterlyChart(quarterlyRows);
+
 // ---- Monthly + SKU drill-down for the selected chain ----
 let monthlyHtml = '';
 if(chainsActiveGroup && CHAINS_DATA.monthly[chainsActiveGroup]){
@@ -3616,6 +3736,16 @@ ${skuTableHtml}`;
 section.innerHTML = `
 <div class="card">
 ${summaryCardsHtml}
+</div>
+<div class="card">
+<h3 style="margin-top:0;">🎯 Target vs Achievement vs Growth — All Chains</h3>
+<div class="note" style="margin-top:0;">Each chain's YTD achievement against its own target — green = above target, red = below (bar centered at 100% of target) — alongside YoY growth. Sorted by achievement %, highest first.</div>
+${comboChartHtml}
+</div>
+<div class="card">
+<h3 style="margin-top:0;">📅 Sales by Quarter — All Chains (2026)</h3>
+<div class="note" style="margin-top:0;">Q1 and Q2 are closed; Q3 2026 shown is July only (partial — August/September aren't in this dataset yet); Q4 2026 is the same growth-rate projection used elsewhere on this tab. Growth % is YoY vs the same quarter last year.</div>
+${quarterlyChartHtml}
 </div>
 <div class="card">
 <h3 style="margin-top:0;">💰 Total Sales by Chain (YTD)</h3>
