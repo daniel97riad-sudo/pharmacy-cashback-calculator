@@ -722,6 +722,32 @@ function dealsValueBandFor(targetSales){
 return DEALS_VALUE_BANDS.find(b => b.test(targetSales)) || DEALS_VALUE_BANDS[DEALS_VALUE_BANDS.length - 1];
 }
 
+// Fixed target-value deals (target_sales pinned at one of the 3 flat values
+// above) are stored using the SAME slab_key namespace (s1/s2/s3) as real
+// growth-slab deals -- in the raw data, fixed_6500 always happens to carry
+// slab_key 's1', fixed_7500 's2', fixed_9500 's3' (a leftover of how they were
+// priced, not a meaningful growth tier). Every slab summary that grouped
+// straight off d.slab_key was therefore silently merging flat 6,500/7,500/9,500
+// deals in with organically-computed growth deals under one "الشريحة N" card.
+// Daniel asked (2026-09-02) for these split apart: "الشريحة الثابتة 1/2/3" for
+// the fixed 6,500/7,500/9,500 deals, then "الشريحة 1/2/3" for the real growth
+// ones. dealsDisplaySlab() is the one place that decides this for every
+// summary/table in the Agreed Deals tab -- use it instead of d.slab_key/
+// d.slab_label directly anywhere a deal's "slab" is shown or grouped.
+const FIXED_SLABS = [
+{key:'fixed1', label:'الشريحة الثابتة 1 (6,500 ج.م)', value:6500},
+{key:'fixed2', label:'الشريحة الثابتة 2 (7,500 ج.م)', value:7500},
+{key:'fixed3', label:'الشريحة الثابتة 3 (9,500 ج.م)', value:9500},
+];
+// Combined display order used everywhere: fixed slabs 1-3 first, then the
+// real growth slabs 1-3 -- matches how Daniel asked for them laid out.
+const DEALS_DISPLAY_SLAB_ORDER = [...FIXED_SLABS.map(s => s.key), ...SLABS.map(s => s.key)];
+function dealsDisplaySlab(d){
+const fixed = FIXED_SLABS.find(f => f.value === d.target_sales);
+if(fixed) return { key: fixed.key, label: fixed.label };
+return { key: d.slab_key, label: d.slab_label };
+}
+
 // Q3 2026 (Jul-Sep) progress tracking for Agreed Deals (added 2026-08-12). Each
 // AGREED_DEALS entry carries month7_sales (full July, from the CHC master),
 // month8_sales (August SO FAR -- currently just week 1 of a distributor extract,
@@ -3845,18 +3871,20 @@ return Object.values(byMR).sort((a,b) => b.n - a.n);
 
 // Per-slab totals of target_sales ("value") and cashback, for the requested slab
 // value/cashback summary. Kept separate from the existing slabCardsHtml (count +
-// total_payout) further down -- this is additive, not a replacement.
+// total_payout) further down -- this is additive, not a replacement. Groups by
+// dealsDisplaySlab() (fixed 1/2/3 vs real growth 1/2/3), not raw slab_key --
+// see the note above dealsDisplaySlab for why that distinction matters.
 function computeDealsSlabValueSummary(deals){
 const bySlab = {};
 deals.forEach(d => {
-const key = d.slab_key || '';
-if(!bySlab[key]) bySlab[key] = { key, label: d.slab_label || key, n: 0, target: 0, cashback: 0 };
+const disp = dealsDisplaySlab(d);
+const key = disp.key || '';
+if(!bySlab[key]) bySlab[key] = { key, label: disp.label || key, n: 0, target: 0, cashback: 0 };
 bySlab[key].n++;
 bySlab[key].target += d.target_sales || 0;
 bySlab[key].cashback += d.cashback || 0;
 });
-const order = SLABS.map(s => s.key);
-return order.filter(k => bySlab[k]).map(k => bySlab[k]);
+return DEALS_DISPLAY_SLAB_ORDER.filter(k => bySlab[k]).map(k => bySlab[k]);
 }
 
 // Splits deals into the 2-phase / 4-band breakdown by target_sales value (see
@@ -4069,11 +4097,12 @@ const filteredDeals = dealsActiveMR === '' ? dmFilteredDeals : dmFilteredDeals.f
 const totalPayout = filteredDeals.reduce((s,d) => s + d.total_payout, 0);
 const bySlab = {};
 filteredDeals.forEach(d => {
-if(!bySlab[d.slab_key]) bySlab[d.slab_key] = { label: d.slab_label, n: 0, sum: 0 };
-bySlab[d.slab_key].n++;
-bySlab[d.slab_key].sum += d.total_payout;
+const disp = dealsDisplaySlab(d);
+if(!bySlab[disp.key]) bySlab[disp.key] = { label: disp.label, n: 0, sum: 0 };
+bySlab[disp.key].n++;
+bySlab[disp.key].sum += d.total_payout;
 });
-const slabOrder = SLABS.map(s => s.key);
+const slabOrder = DEALS_DISPLAY_SLAB_ORDER;
 const slabCardsHtml = slabOrder.filter(k => bySlab[k]).map(k => {
 const b = bySlab[k];
 return `<div class="pli-stats" style="text-align:center;">
@@ -4104,7 +4133,7 @@ const rowsHtml = filteredDeals.map(d => `<tr>
 <td>${d.territory}</td>
 <td>${d.mr || '—'}</td>
 <td>${d.dm || '—'}</td>
-<td>${d.slab_label}</td>
+<td>${dealsDisplaySlab(d).label}</td>
 <td>${fmt(d.cashback)} ج.م</td>
 <td>${fmt(d.total_payout)} ج.م</td>
 <td>${fmt(d.month7_sales || 0)} ج.م</td>
