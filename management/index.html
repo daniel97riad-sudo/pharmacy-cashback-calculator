@@ -636,6 +636,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 <div class="note" style="margin-top:0;margin-bottom:12px;">Built from MKT_Report_202607.xlsx (Group_Name field), filtered to SO = CHC, source records only (targets/last-year rows excluded from the sales totals). "This year" covers Jan–Jul 2026 so far; "last year" is the same set of months in 2025. Verified against the report's own Details tab totals for multiple chains (exact match on quantity, invoice value, and last-year figures). Visible on the management link only.</div>
 </div>
 <div id="chainsSection"></div>
+<div id="chainSlabTrackingSection"></div>
 </div>
 
 <footer>الأرقام محسوبة من بيانات مبيعات الموزع (DIST) للربع الثالث والرابع 2025 — الأداة لعرض السيناريوهات قبل التعاقد، وليست تأكيداً نهائياً للمستحقات.</footer>
@@ -703,6 +704,20 @@ const SLABS = [
 {key:'s1', label:'الشريحة 1', growth:0.15, cashRate:0.0125, targetFloor:5000, cashFloor:500, rebateRate:0.0025, color:'slab1'},
 {key:'s2', label:'الشريحة 2', growth:0.25, cashRate:0.0175, targetFloor:6000, cashFloor:700, rebateRate:0.005, color:'slab2'},
 {key:'s3', label:'الشريحة 3', growth:0.35, cashRate:0.025, targetFloor:7000, cashFloor:1000, rebateRate:0.0075, color:'slab3'}
+];
+
+// Pharmacy-code -> chain-name mapping, sourced from Daniel's "chain traking.xlsx"
+// (Google Drive). Only codes he has explicitly tagged with a Chain Name go here.
+// A chain with zero Q3'25 baseline sales renders a "saved, no sales yet" placeholder
+// instead of a slab table -- it will start showing real numbers automatically the
+// next time this file is refreshed after that pharmacy has sales, no code change
+// needed beyond re-running this same list. Added 2026-09-06 per Daniel's request.
+const CHAIN_SLAB_TRACKING = [
+{name:"الطيبي", codes:["NN202409329"]},
+{name:"الدواء", codes:["27299"]},
+{name:"بلبع", codes:["27227"]},
+{name:"محفوظ", codes:["82514"]},
+{name:"خليل", codes:["124167"]}
 ];
 
 // Groups used ONLY to break down the Agreed Deals summary by the pharmacy's
@@ -3533,9 +3548,86 @@ return `<div>${rowsHtml}
 </div>`;
 }
 
+
+// ---------- Chain slab/cashback tracking (Daniel's DM-tagged chains) ----------
+// Sums Q3'25/Q4'25 distributor sales across every pharmacy code tagged to a chain
+// in CHAIN_SLAB_TRACKING, then runs the exact same calcSlabs()/growth-threshold
+// logic used for individual pharmacies on that combined figure -- same slabs
+// (15/25/35%), same target-floor and cashback-rate rules, same "maxed out vs
+// remaining" status. Added 2026-09-06 per Daniel's request ("like the pharmacies
+// but in the chains tab").
+function renderChainSlabTracking(){
+const container = document.getElementById('chainSlabTrackingSection');
+if(!container) return;
+if(typeof CHAIN_SLAB_TRACKING === 'undefined' || !CHAIN_SLAB_TRACKING.length){ container.innerHTML = ''; return; }
+
+const cardsHtml = CHAIN_SLAB_TRACKING.map(chain => {
+const members = chain.codes.map(c => PHARMACIES.find(p => String(p.c) === String(c))).filter(Boolean);
+const sumQ3 = members.reduce((s,p) => s + (p.q3d||0), 0);
+const sumQ4 = members.reduce((s,p) => s + (p.q4d||0), 0);
+
+if(sumQ3 <= 0){
+return `<div class="card">
+<h3>${chain.name} <span class="badge slab-unknown" style="margin-inline-start:8px;">لا تتوفر مبيعات ربع ثالث بعد — سيتم عرض الشريحة تلقائياً عند توفر مبيعات</span></h3>
+<div class="pli-meta">الأكواد: ${chain.codes.join('، ')} · عدد الصيدليات: ${members.length}</div>
+</div>`;
+}
+
+const growth = (sumQ4 - sumQ3) / sumQ3;
+const growthClass = growth >= 0 ? 'growth-pos' : 'growth-neg';
+const slabRows = calcSlabs(sumQ4, {shelf:'none', posm:false, full:false});
+
+const topSlab = SLABS[SLABS.length - 1];
+let statusBadge;
+if(growth >= topSlab.growth){
+const achievedRows = calcSlabs(sumQ3, {shelf:'none', posm:false, full:false});
+const topRow = achievedRows[achievedRows.length - 1];
+statusBadge = `<span class="badge slab-max">🏆 حقّق ${topSlab.label} — كاش باك ${fmt(topRow.cashback)} ج.م</span>`;
+} else {
+const next = SLABS.find(s => growth < s.growth);
+const low = sumQ3 <= LOW_VALUE_THRESHOLD;
+const nextFloor = low ? LOW_VALUE_TARGET_FLOORS[next.key] : next.targetFloor;
+const needed = Math.max(sumQ3 * (1 + next.growth), nextFloor);
+const remaining = Math.max(needed - sumQ4, 0);
+statusBadge = `<span class="badge slab-remaining">📈 يحتاج ${fmt(remaining)} ج.م إضافية للوصول إلى ${next.label}</span>`;
+}
+
+const tableRowsHtml = slabRows.map(r => `
+<tr class="${r.color}">
+<td class="name-cell">${r.label}</td>
+<td>${ltrWrap('+' + pct(r.growth))}</td>
+<td>${fmt(r.target)} ج.م</td>
+<td class="total-cell">${fmt(r.cashback)} ج.م</td>
+</tr>`).join('');
+
+return `<div class="card">
+<h3>${chain.name} <span style="font-weight:normal;font-size:13px;color:var(--muted);">(${members.length} ${members.length===1?'صيدلية':'صيدليات'})</span></h3>
+<div class="pli-meta" style="margin-bottom:8px;">الأكواد: ${chain.codes.join('، ')}</div>
+<div class="totals-grid" style="margin-bottom:12px;">
+<div class="sales-box"><div class="t">إجمالي الربع الثالث 2025</div><div class="v">${fmt(sumQ3)} ج.م</div></div>
+<div class="sales-box"><div class="t">إجمالي الربع الرابع 2025</div><div class="v">${fmt(sumQ4)} ج.م</div></div>
+<div class="sales-box"><div class="t">نسبة النمو</div><div class="v ${growthClass}">${signedPct(growth)}</div></div>
+</div>
+<div class="badge-row" style="margin-bottom:8px;">${statusBadge}</div>
+<div style="overflow-x:auto;">
+<table><thead><tr><th>الشريحة</th><th>نسبة النمو</th><th>المستهدف (على أساس الربع الرابع)</th><th>الكاش باك</th></tr></thead>
+<tbody>${tableRowsHtml}</tbody></table>
+</div>
+</div>`;
+}).join('');
+
+container.innerHTML = `
+<div class="card">
+<h2>🔗 نمو وكاش باك السلاسل المتتبَّعة (Q3←Q4 2025)</h2>
+<div class="note" style="margin-top:0;">لكل سلسلة تم وسمها في ملف "chain traking.xlsx" (كود الصيدلية ← اسم السلسلة). يتم جمع مبيعات كل أكواد السلسلة معاً وتُحسب الشريحة والكاش باك بنفس منطق حاسبة الصيدليات الفردية بالضبط. السلاسل التي ليس لديها مبيعات بعد تُحفظ هنا وستظهر شريحتها تلقائياً بمجرد توفر مبيعات. Visible on the management link only.</div>
+</div>
+${cardsHtml}`;
+}
+
 function renderChains(){
 const section = document.getElementById('chainsSection');
 if(!section) return;
+renderChainSlabTracking();
 if(typeof CHAINS_DATA === 'undefined' || !CHAINS_DATA.months || !CHAINS_DATA.months.length){
 section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">🏬</div>No chain data available.</div></div>`;
 return;
