@@ -4154,6 +4154,72 @@ g.payout += d.total_payout || 0;
 return [groups.posm_yes, groups.posm_no];
 }
 
+let _pharmaciesByCode = null;
+function pharmaciesByCode(){
+if(!_pharmaciesByCode){
+_pharmaciesByCode = new Map(PHARMACIES.map(p => [p.c, p]));
+}
+return _pharmaciesByCode;
+}
+
+// Q3 2025 vs Q3 2026 agreed-deal progress -- added 2026-09-07 per Daniel's
+// request to see actual growth so far and projected growth if the agreed
+// target is hit, both vs a 2025 baseline.
+//
+// Two DIFFERENT 2025 baselines are used deliberately, matching the two
+// different things being compared -- mixing them up (e.g. comparing 2026's
+// Jul+Aug-only actuals against the FULL Jul-Sep 2025 quarter) understates
+// "growth so far" by a whole extra month of 2025 sales that has no 2026
+// counterpart yet:
+//   - "so far":       Jul+Aug 2026 achieved   vs  Jul+Aug 2025 (same 2 months)
+//   - "if achieved":  full Q3 2026 target     vs  full Q3 2025 (q3d, Jul-Sep)
+function computeDealsQ3YoYSummary(deals){
+const byCode = pharmaciesByCode();
+let sumJulAug25 = 0, sumAchieved = 0;
+let noJulAugBaseline = 0, noJulAugTarget = 0;
+let sumQ325Full = 0, sumTarget = 0;
+let noFullBaseline = 0, noFullTarget = 0;
+const rows = deals.map(d => {
+const p = byCode.get(d.code);
+const mo = p ? (p.mo || {}) : {};
+const julAug25 = (mo['202507'] || 0) + (mo['202508'] || 0);
+const q325Full = p ? (p.q3d || 0) : 0;
+const achieved = (d.month7_sales||0) + (d.month8_sales||0) + (d.month9_sales||0);
+const target = d.target_sales || 0;
+const hasJulAugBaseline = julAug25 > 0;
+const hasFullBaseline = q325Full > 0;
+if(hasJulAugBaseline){
+sumJulAug25 += julAug25;
+sumAchieved += achieved;
+} else {
+noJulAugBaseline++;
+noJulAugTarget += target;
+}
+if(hasFullBaseline){
+sumQ325Full += q325Full;
+sumTarget += target;
+} else {
+noFullBaseline++;
+noFullTarget += target;
+}
+return {
+code: d.code, name: d.name,
+julAug25, achieved, hasJulAugBaseline,
+q325Full, target, hasFullBaseline,
+growthSoFar: hasJulAugBaseline ? (achieved - julAug25) / julAug25 : null,
+growthIfAchieved: hasFullBaseline ? (target - q325Full) / q325Full : null
+};
+});
+rows.sort((a,b) => (b.hasFullBaseline ? b.growthIfAchieved : -Infinity) - (a.hasFullBaseline ? a.growthIfAchieved : -Infinity));
+return {
+rows,
+sumJulAug25, sumAchieved, noJulAugBaseline, noJulAugTarget,
+sumQ325Full, sumTarget, noFullBaseline, noFullTarget,
+growthSoFarTotal: sumJulAug25 ? (sumAchieved - sumJulAug25) / sumJulAug25 : 0,
+growthIfAchievedTotal: sumQ325Full ? (sumTarget - sumQ325Full) / sumQ325Full : 0
+};
+}
+
 function renderDeals(){
 const section = document.getElementById('dealsSection');
 if(!section) return;
@@ -4217,6 +4283,7 @@ return acc;
 }, {target:0, m7:0, m8:0, m9:0, remaining:0});
 const q3TimeFrac = q3TimeElapsedFrac();
 const posmSummary = computeDealsPosmSummary(filteredDeals);
+const q3yoy = computeDealsQ3YoYSummary(filteredDeals);
 
 const rowsHtml = filteredDeals.map(d => `<tr>
 <td class="name-cell">${d.name}</td>
@@ -4329,6 +4396,28 @@ const headerRow = `<tr class="dm-group-header" data-dmq3-toggle="${b.dm}"><td cl
 const repRows = expanded ? b.reps.map(r => `<tr style="background:var(--bg);"><td class="name-cell" style="padding-right:26px;color:var(--muted);font-size:13px;">↳ ${r.mr || 'غير محدد'}</td><td>${r.n}</td><td>${fmt(r.target)} ج.م</td><td>${fmt(r.m7)} ج.م</td><td>${fmt(r.m8)} ج.م</td><td>${r.m9 ? fmt(r.m9) + ' ج.م' : '—'}</td><td>${fmt(r.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(r.m7+r.m8+r.m9, r.target), q3TimeFrac)}</td></tr>`).join('') : '';
 return headerRow + repRows;
 }).join('')}</tbody></table></div>
+</div>
+<div class="card">
+<h2>نمو الربع الثالث: 2026 مقابل 2025</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">عمودان منفصلان عمدًا: "حتى الآن" يقارن يوليو+أغسطس 2026 المحقق فعليًا بنفس الشهرين في 2025 (${q3yoy.noJulAugBaseline} صيدلية بدون مبيعات مسجلة في يوليو/أغسطس 2025، مستهدفها ${fmt(q3yoy.noJulAugTarget)} ج.م، مستبعدة). "عند تحقيق المستهدف" يقارن مستهدف الربع الثالث 2026 بالكامل بمبيعات الربع الثالث 2025 كاملاً يوليو-سبتمبر (${q3yoy.noFullBaseline} صيدلية بدون بيانات 2025 مطلقًا، مستهدفها ${fmt(q3yoy.noFullTarget)} ج.م، مستبعدة)${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;">
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">يوليو+أغسطس 2025</div><div class="pli-sales">${fmt(q3yoy.sumJulAug25)} ج.م</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">يوليو+أغسطس 2026 (فعلي)</div><div class="pli-sales">${fmt(q3yoy.sumAchieved)} ج.م</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">النمو الفعلي حتى الآن</div><div class="pli-sales">${signedPct(q3yoy.growthSoFarTotal)}</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">الربع الثالث 2025 (كامل)</div><div class="pli-sales">${fmt(q3yoy.sumQ325Full)} ج.م</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">مستهدف الربع الثالث 2026</div><div class="pli-sales">${fmt(q3yoy.sumTarget)} ج.م</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">النمو المتوقع عند تحقيق المستهدف</div><div class="pli-sales">${signedPct(q3yoy.growthIfAchievedTotal)}</div></div>
+</div>
+<div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>يوليو+أغسطس 2025</th><th>يوليو+أغسطس 2026</th><th>نمو حتى الآن</th><th>الربع الثالث 2025 (كامل)</th><th>مستهدف 2026</th><th>نمو عند التحقيق</th></tr></thead><tbody>${q3yoy.rows.map(r => `<tr>
+<td class="name-cell">${r.name}</td>
+<td>${r.code}</td>
+<td>${r.hasJulAugBaseline ? fmt(r.julAug25) + ' ج.م' : '—'}</td>
+<td>${fmt(r.achieved)} ج.م</td>
+<td>${r.hasJulAugBaseline ? signedPct(r.growthSoFar) : '—'}</td>
+<td>${r.hasFullBaseline ? fmt(r.q325Full) + ' ج.م' : '—'}</td>
+<td>${fmt(r.target)} ج.م</td>
+<td>${r.hasFullBaseline ? signedPct(r.growthIfAchieved) : '—'}</td>
+</tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
 <h2>الرؤية على الرف (POSM)</h2>
