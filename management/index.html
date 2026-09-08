@@ -498,6 +498,21 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 .dm-group-header{cursor:pointer;}
 .dm-group-header:hover td{background:var(--accent);}
 .dm-toggle-arrow{display:inline-block;width:16px;color:var(--muted);}
+
+/* "Make it perfect and good" polish pass for the Agreed Deals tab only
+   (2026-09-08): subtle zebra striping + row hover on every table in this
+   tab, plus a reusable sticky-header + search + sortable-column treatment
+   for the two big (~1,662-row) tables (تفاصيل الصيدليات + نمو الربع الثالث). */
+#dealsView tbody tr:nth-child(even) td{background:rgba(0,0,0,.018);}
+#dealsView tbody tr:not(.dm-group-header):hover td{background:#f8f2ea;}
+#dealsView .dt-table-wrap{position:relative;}
+#dealsView .dt-table-wrap thead th{position:sticky;top:0;z-index:2;box-shadow:0 1px 0 var(--border);}
+#dealsView th.sortable{cursor:pointer;user-select:none;}
+#dealsView th.sortable:hover{color:var(--primary-dark);}
+#dealsView .sort-arrow{font-size:9px;margin-inline-start:4px;color:var(--primary);}
+#dealsView .dt-search-wrap{margin-bottom:10px;max-width:420px;}
+#dealsView .dt-search-wrap .search-box input{padding:10px 40px;font-size:13px;}
+#dealsView .dt-search-wrap .search-count{margin-top:4px;}
 </style>
 </head>
 <body>
@@ -820,6 +835,14 @@ function signedPct(n){
 if(n === null || n === undefined) return '—';
 const sign = n >= 0 ? '+' : '';
 return `<bdi dir="ltr">${sign}${pct(n)}</bdi>`;
+}
+// Color-codes a growth percentage using the site's existing growth-pos/neg
+// tokens (green/red) -- added for the Agreed Deals tab polish pass so
+// growth numbers are readable at a glance, not just via +/- sign.
+function coloredSignedPct(n){
+if(n === null || n === undefined) return '—';
+const cls = n >= 0 ? 'growth-pos' : 'growth-neg';
+return `<span class="${cls}">${signedPct(n)}</span>`;
 }
 function ltrWrap(s){
 return `<bdi dir="ltr">${s}</bdi>`;
@@ -4220,6 +4243,94 @@ growthIfAchievedTotal: sumQ325Full ? (sumTarget - sumQ325Full) / sumQ325Full : 0
 };
 }
 
+// Generic search + sortable-column wiring for a big table -- added for the
+// "make it perfect and good" polish pass (2026-09-08). renderDeals() re-runs
+// on every DM/MR tab click and every dm-group expand/collapse (full
+// innerHTML replace each time), so this must be idempotent: it builds a
+// fresh search box and rebinds fresh listeners against the fresh DOM every
+// single call rather than assume any previous binding survived.
+function enhanceBigTable(wrapId, opts){
+const wrap = document.getElementById(wrapId);
+if(!wrap) return;
+const table = wrap.querySelector('table');
+if(!table) return;
+const thead = table.querySelector('thead');
+const tbody = table.querySelector('tbody');
+if(!thead || !tbody) return;
+const ths = [...thead.querySelectorAll('th')];
+const numericCols = new Set(opts.numericCols || []);
+const noSortCols = new Set(opts.noSortCols || []);
+const searchCols = opts.searchCols || [0,1];
+
+wrap.classList.add('dt-table-wrap');
+
+const searchWrap = document.createElement('div');
+searchWrap.className = 'dt-search-wrap';
+searchWrap.innerHTML = `<div class="search-box">
+<span class="search-icon">🔍</span>
+<input type="text" placeholder="${opts.placeholder || 'ابحث بالاسم أو الكود...'}" autocomplete="off">
+<button class="clear-btn" type="button">✕</button>
+</div>
+<div class="search-count"></div>`;
+wrap.parentNode.insertBefore(searchWrap, wrap);
+const input = searchWrap.querySelector('input');
+const clearBtn = searchWrap.querySelector('.clear-btn');
+const countEl = searchWrap.querySelector('.search-count');
+const allRows = [...tbody.querySelectorAll('tr')];
+
+function applyFilter(){
+const term = input.value.trim().toLowerCase();
+let shown = 0;
+allRows.forEach(tr => {
+if(!term){ tr.style.display=''; shown++; return; }
+const cells = tr.children;
+let text = '';
+searchCols.forEach(ci => { if(cells[ci]) text += cells[ci].textContent.toLowerCase() + ' '; });
+const match = text.includes(term);
+tr.style.display = match ? '' : 'none';
+if(match) shown++;
+});
+countEl.textContent = term ? `${shown} / ${allRows.length}` : `${allRows.length} صف`;
+clearBtn.style.display = term ? 'flex' : 'none';
+}
+input.addEventListener('input', applyFilter);
+clearBtn.addEventListener('click', () => { input.value=''; applyFilter(); input.focus(); });
+applyFilter();
+
+function cellValue(td, numeric){
+if(!td) return numeric ? -Infinity : '';
+const text = td.textContent.trim();
+if(text === '—' || text === '') return numeric ? -Infinity : '';
+if(!numeric) return text;
+const cleaned = text.replace(/[^d.-]/g,'');
+const n = parseFloat(cleaned);
+return isNaN(n) ? -Infinity : n;
+}
+let sortCol = null, sortDir = 1;
+ths.forEach((th, idx) => {
+if(noSortCols.has(idx)) return;
+th.classList.add('sortable');
+th.addEventListener('click', () => {
+sortDir = (sortCol === idx) ? -sortDir : 1;
+sortCol = idx;
+ths.forEach(h => { const a = h.querySelector('.sort-arrow'); if(a) a.remove(); });
+const arrow = document.createElement('span');
+arrow.className = 'sort-arrow';
+arrow.textContent = sortDir === 1 ? '▲' : '▼';
+th.appendChild(arrow);
+const numeric = numericCols.has(idx);
+const rows = [...tbody.querySelectorAll('tr')];
+rows.sort((a,b) => {
+const av = cellValue(a.children[idx], numeric);
+const bv = cellValue(b.children[idx], numeric);
+if(numeric) return (av - bv) * sortDir;
+return av.toString().localeCompare(bv.toString(), 'ar') * sortDir;
+});
+rows.forEach(tr => tbody.appendChild(tr));
+});
+});
+}
+
 function renderDeals(){
 const section = document.getElementById('dealsSection');
 if(!section) return;
@@ -4403,20 +4514,20 @@ return headerRow + repRows;
 <div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;">
 <div class="pli-stats" style="text-align:center;"><div class="pli-name">يوليو+أغسطس 2025</div><div class="pli-sales">${fmt(q3yoy.sumJulAug25)} ج.م</div></div>
 <div class="pli-stats" style="text-align:center;"><div class="pli-name">يوليو+أغسطس 2026 (فعلي)</div><div class="pli-sales">${fmt(q3yoy.sumAchieved)} ج.م</div></div>
-<div class="pli-stats" style="text-align:center;"><div class="pli-name">النمو الفعلي حتى الآن</div><div class="pli-sales">${signedPct(q3yoy.growthSoFarTotal)}</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">النمو الفعلي حتى الآن</div><div class="pli-sales">${coloredSignedPct(q3yoy.growthSoFarTotal)}</div></div>
 <div class="pli-stats" style="text-align:center;"><div class="pli-name">الربع الثالث 2025 (كامل)</div><div class="pli-sales">${fmt(q3yoy.sumQ325Full)} ج.م</div></div>
 <div class="pli-stats" style="text-align:center;"><div class="pli-name">مستهدف الربع الثالث 2026</div><div class="pli-sales">${fmt(q3yoy.sumTarget)} ج.م</div></div>
-<div class="pli-stats" style="text-align:center;"><div class="pli-name">النمو المتوقع عند تحقيق المستهدف</div><div class="pli-sales">${signedPct(q3yoy.growthIfAchievedTotal)}</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">النمو المتوقع عند تحقيق المستهدف</div><div class="pli-sales">${coloredSignedPct(q3yoy.growthIfAchievedTotal)}</div></div>
 </div>
-<div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>يوليو+أغسطس 2025</th><th>يوليو+أغسطس 2026</th><th>نمو حتى الآن</th><th>الربع الثالث 2025 (كامل)</th><th>مستهدف 2026</th><th>نمو عند التحقيق</th></tr></thead><tbody>${q3yoy.rows.map(r => `<tr>
+<div id="q3yoyTableWrap" style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>يوليو+أغسطس 2025</th><th>يوليو+أغسطس 2026</th><th>نمو حتى الآن</th><th>الربع الثالث 2025 (كامل)</th><th>مستهدف 2026</th><th>نمو عند التحقيق</th></tr></thead><tbody>${q3yoy.rows.map(r => `<tr>
 <td class="name-cell">${r.name}</td>
 <td>${r.code}</td>
 <td>${r.hasJulAugBaseline ? fmt(r.julAug25) + ' ج.م' : '—'}</td>
 <td>${fmt(r.achieved)} ج.م</td>
-<td>${r.hasJulAugBaseline ? signedPct(r.growthSoFar) : '—'}</td>
+<td>${r.hasJulAugBaseline ? coloredSignedPct(r.growthSoFar) : '—'}</td>
 <td>${r.hasFullBaseline ? fmt(r.q325Full) + ' ج.م' : '—'}</td>
 <td>${fmt(r.target)} ج.م</td>
-<td>${r.hasFullBaseline ? signedPct(r.growthIfAchieved) : '—'}</td>
+<td>${r.hasFullBaseline ? coloredSignedPct(r.growthIfAchieved) : '—'}</td>
 </tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
@@ -4426,7 +4537,7 @@ return headerRow + repRows;
 </div>
 <div class="card">
 <h2>تفاصيل الصيدليات (${filteredDeals.length})</h2>
-<div style="overflow-x:auto;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>Region</th><th>Territory</th><th>MR</th><th>DM</th><th>Slab</th><th>Cashback</th><th>Total Payout</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي للمستهدف</th><th>التقدم</th><th>الرؤية (POSM)</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
+<div id="pharmDetailsTableWrap" style="overflow-x:auto;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>Region</th><th>Territory</th><th>MR</th><th>DM</th><th>Slab</th><th>Cashback</th><th>Total Payout</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي للمستهدف</th><th>التقدم</th><th>الرؤية (POSM)</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
 </div>`;
 
 document.getElementById('dealsDmTabs')?.addEventListener('click', (e) => {
@@ -4459,6 +4570,9 @@ if(dealsQ3ExpandedDMs.has(dm)) dealsQ3ExpandedDMs.delete(dm); else dealsQ3Expand
 renderDeals();
 });
 });
+
+enhanceBigTable('pharmDetailsTableWrap', {numericCols:[7,8,9,10,11,12], noSortCols:[13], placeholder:'ابحث عن صيدلية بالاسم أو الكود...'});
+enhanceBigTable('q3yoyTableWrap', {numericCols:[2,3,4,5,6,7], placeholder:'ابحث عن صيدلية بالاسم أو الكود...'});
 }
 
 // Logs an agreed deal for one slab of one pharmacy to the live backend. Called from
