@@ -348,6 +348,12 @@ font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;cursor:pointer
 }
 .help-btn:hover{border-color:var(--primary);color:var(--primary-dark);background:#fff8f0;}
 .help-btn.sent{border-color:#c7e9d6;color:#1a7a4d;background:#f2fbf6;cursor:default;}
+#printDetailBtn, #copyDetailBtn{
+border:1px solid var(--border);background:#fff;color:var(--muted);
+font-size:12.5px;font-weight:600;padding:10px 14px;border-radius:8px;cursor:pointer;
+font-family:inherit;min-height:44px;
+}
+#printDetailBtn:hover, #copyDetailBtn:hover{border-color:var(--primary);color:var(--primary-dark);background:#fff8f0;}
 
 /* Help-request modal */
 .help-overlay{
@@ -497,7 +503,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;}
 @media (max-width:600px){
 .header-brand{flex-wrap:wrap;row-gap:8px;}
 .view-tabs{gap:6px;}
-.view-tab-btn{min-width:0;flex:1 1 42%;font-size:12px;padding:10px 6px;}
+.view-tab-btn{min-width:0;flex:1 1 42%;font-size:12px;padding:10px 6px;min-height:44px;display:flex;align-items:center;justify-content:center;}
 .options-row{gap:10px;padding:10px;}
 .prio-item{flex-direction:column;align-items:stretch;}
 .prio-side{text-align:right;margin-top:4px;}
@@ -524,6 +530,13 @@ border:1px solid #7a5b00;background:#fff;color:#7a5b00;border-radius:8px;
 padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;
 }
 .import-warn{font-size:11.5px;color:var(--danger);margin-top:6px;line-height:1.6;}
+#backToTopBtn{
+position:fixed;bottom:20px;inset-inline-end:16px;z-index:500;
+width:46px;height:46px;border-radius:50%;border:1px solid var(--border);
+background:var(--primary);color:#fff;font-size:18px;cursor:pointer;
+box-shadow:0 2px 10px rgba(0,0,0,0.18);display:none;align-items:center;justify-content:center;
+}
+#backToTopBtn.show{display:flex;}
 .dealtype-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--border);min-width:70px;}
 .dealtype-bar-fixed{background:var(--primary);}
 .dealtype-bar-var{background:#4a90d9;}
@@ -580,12 +593,12 @@ padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inher
 <div id="previewBannerSlot"></div>
 <div class="filter-row no-print" style="margin-bottom:2px;">
 <button class="reset-btn" id="previewLoadBtn" type="button">🧪 معاينة ملف بيانات آخر (لهذه الجلسة فقط)</button>
-<input type="file" id="previewFileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+<input type="file" id="previewFileInput" accept=".xlsx,.xls,.csv" style="display:none;" aria-label="اختر ملف بيانات لمعاينته">
 </div>
 <div id="previewWarn"></div>
 <div class="filter-row">
-<select id="mrFilter"><option value="">كل المندوبين الطبيين</option></select>
-<select id="dmFilter"><option value="">كل مديري المناطق</option></select>
+<select id="mrFilter" aria-label="فلترة حسب المندوب الطبي"><option value="">كل المندوبين الطبيين</option></select>
+<select id="dmFilter" aria-label="فلترة حسب مدير المنطقة"><option value="">كل مديري المناطق</option></select>
 </div>
 <div class="search-box">
 <span class="search-icon">🔍</span>
@@ -693,9 +706,9 @@ padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inher
 <div id="chainSlabTrackingSection"></div>
 </div>
 
-<div class="help-overlay no-print" id="howToOverlay" style="display:none;">
-<div class="help-modal">
-<h3>ℹ️ كيف تعمل الأداة</h3>
+<div class="help-overlay no-print" id="howToOverlay" style="display:none;" role="presentation">
+<div class="help-modal" role="dialog" aria-modal="true" aria-labelledby="howToTitle">
+<h3 id="howToTitle">ℹ️ كيف تعمل الأداة</h3>
 <div class="hm-sub" style="line-height:1.8;">
 اكتب اسم الصيدلية أو الكود في تبويب "بحث عن صيدلية" لعرض بياناتها وحاسبة الكاش باك. غيّر أساس الحساب (ربع ثالث/رابع/الاثنين معاً أو رقم مخصص) وعدد الأرفف ومكافآت POSM لمشاهدة تأثيرها على القيمة الإجمالية فوراً.<br><br>
 زر "🖨️ طباعة" و"📋 نسخ الملخص" أسفل بيانات كل صيدلية يجهّزان نسخة قابلة للطباعة أو المشاركة لعرضها على الصيدلي.<br><br>
@@ -4474,7 +4487,7 @@ const dmBreakdownRowsHtml = dmSummary.map(b => {
 const members = teamMembersForDm(b.dm);
 return `<tr>
 <td class="name-cell">${b.dm || 'غير محدد'}</td>
-<td>${members.length ? `<div style="font-size:12px;color:var(--muted);">${members.length} مندوب: ${members.join('، ')}</div>` : '—'}</td>
+<td>${members.length ? `<div style="font-size:12px;color:var(--muted);max-height:64px;overflow-y:auto;line-height:1.5;">${members.length} مندوب: ${members.join('، ')}</div>` : '—'}</td>
 <td>${b.n}</td>
 <td>${fmt(b.sum)} ج.م</td>
 </tr>`;
@@ -5088,10 +5101,10 @@ ${usingCustom ? '<button class="reset-btn" id="resetCustomBtn" type="button">إ�
 <div class="g-lbl">مكافآت إضافية</div>
 <div class="opt-choices">
 <label class="checkbox-chip ${state.posm?'active':''}" id="posmChip">
-<input type="checkbox" id="posmCheck" ${state.posm?'checked':''}> مواد عرض إضافية (POSM)
+<input type="checkbox" id="posmCheck" aria-label="مواد عرض إضافية (POSM)" ${state.posm?'checked':''}> مواد عرض إضافية (POSM)
 </label>
 <label class="checkbox-chip ${state.full?'active':''}" id="fullChip">
-<input type="checkbox" id="fullCheck" ${state.full?'checked':''}> تحقيق الهدف في الربعين معاً (مكافأة نهاية الفترة)
+<input type="checkbox" id="fullCheck" aria-label="تحقيق الهدف في الربعين معاً (مكافأة نهاية الفترة)" ${state.full?'checked':''}> تحقيق الهدف في الربعين معاً (مكافأة نهاية الفترة)
 </label>
 </div>
 </div>
@@ -5355,21 +5368,42 @@ e.target.value = '';
 });
 
 // ---------- "How this works" info panel ----------
-document.getElementById('howToBtn').addEventListener('click', () => {
+let howToLastFocused = null;
+function openHowTo(){
+howToLastFocused = document.activeElement;
 document.getElementById('howToOverlay').style.display = 'flex';
-});
-document.getElementById('howToCloseBtn').addEventListener('click', () => {
+document.getElementById('howToCloseBtn').focus();
+}
+function closeHowTo(){
 document.getElementById('howToOverlay').style.display = 'none';
-});
+if(howToLastFocused && typeof howToLastFocused.focus === 'function') howToLastFocused.focus();
+}
+document.getElementById('howToBtn').addEventListener('click', openHowTo);
+document.getElementById('howToCloseBtn').addEventListener('click', closeHowTo);
 document.getElementById('howToOverlay').addEventListener('click', (e) => {
-if(e.target.id === 'howToOverlay') e.target.style.display = 'none';
+if(e.target.id === 'howToOverlay') closeHowTo();
 });
 document.addEventListener('keydown', (e) => {
 if(e.key === 'Escape'){
 const el = document.getElementById('howToOverlay');
-if(el.style.display !== 'none') el.style.display = 'none';
+if(el.style.display !== 'none') closeHowTo();
 }
 });
+
+// ---------- Back-to-top floating button ----------
+(function(){
+const btn = document.createElement('button');
+btn.id = 'backToTopBtn';
+btn.type = 'button';
+btn.className = 'no-print';
+btn.setAttribute('aria-label', 'العودة لأعلى الصفحة');
+btn.textContent = '⬆';
+document.body.appendChild(btn);
+btn.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+window.addEventListener('scroll', () => {
+btn.classList.toggle('show', window.scrollY > 600);
+}, {passive:true});
+})();
 
 populateFilters();
 updateOverviewBadge();
