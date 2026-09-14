@@ -816,10 +816,10 @@ const CHAIN_SLAB_TRACKING = [
 // for every deal whose target_sales is anything else ("organic"/computed value).
 // Checked in order; first matching group wins, so the catch-all MUST stay last.
 const DEALS_VALUE_BANDS = [
-{key:'fixed_6500', label:'قيمة ثابتة 6,500 ج.م', test:t => t === 6500},
-{key:'fixed_7500', label:'قيمة ثابتة 7,500 ج.م', test:t => t === 7500},
-{key:'fixed_9500', label:'قيمة ثابتة 9,500 ج.م', test:t => t === 9500},
-{key:'other_value', label:'باقي الصفقات (قيمة غير ثابتة)', test:t => true}
+{key:'fixed_6500', label:'قيمة ثابتة 6,500 ج.م', labelEn:'Fixed value 6,500 EGP', test:t => t === 6500},
+{key:'fixed_7500', label:'قيمة ثابتة 7,500 ج.م', labelEn:'Fixed value 7,500 EGP', test:t => t === 7500},
+{key:'fixed_9500', label:'قيمة ثابتة 9,500 ج.م', labelEn:'Fixed value 9,500 EGP', test:t => t === 9500},
+{key:'other_value', label:'باقي الصفقات (قيمة غير ثابتة)', labelEn:'Other deals (variable value)', test:t => true}
 ];
 function dealsValueBandFor(targetSales){
 return DEALS_VALUE_BANDS.find(b => b.test(targetSales)) || DEALS_VALUE_BANDS[DEALS_VALUE_BANDS.length - 1];
@@ -838,17 +838,17 @@ return DEALS_VALUE_BANDS.find(b => b.test(targetSales)) || DEALS_VALUE_BANDS[DEA
 // summary/table in the Agreed Deals tab -- use it instead of d.slab_key/
 // d.slab_label directly anywhere a deal's "slab" is shown or grouped.
 const FIXED_SLABS = [
-{key:'fixed1', label:'الشريحة الثابتة 1 (6,500 ج.م)', value:6500},
-{key:'fixed2', label:'الشريحة الثابتة 2 (7,500 ج.م)', value:7500},
-{key:'fixed3', label:'الشريحة الثابتة 3 (9,500 ج.م)', value:9500},
+{key:'fixed1', label:'الشريحة الثابتة 1 (6,500 ج.م)', labelEn:'Fixed Slab 1 (6,500 EGP)', value:6500},
+{key:'fixed2', label:'الشريحة الثابتة 2 (7,500 ج.م)', labelEn:'Fixed Slab 2 (7,500 EGP)', value:7500},
+{key:'fixed3', label:'الشريحة الثابتة 3 (9,500 ج.م)', labelEn:'Fixed Slab 3 (9,500 EGP)', value:9500},
 ];
 // Combined display order used everywhere: fixed slabs 1-3 first, then the
 // real growth slabs 1-3 -- matches how Daniel asked for them laid out.
 const DEALS_DISPLAY_SLAB_ORDER = [...FIXED_SLABS.map(s => s.key), ...SLABS.map(s => s.key)];
 function dealsDisplaySlab(d){
 const fixed = FIXED_SLABS.find(f => f.value === d.target_sales);
-if(fixed) return { key: fixed.key, label: fixed.label };
-return { key: d.slab_key, label: d.slab_label };
+if(fixed) return { key: fixed.key, label: currentLang === 'en' ? fixed.labelEn : fixed.label };
+return { key: d.slab_key, label: slabLabelFor(d.slab_key) };
 }
 
 // Q3 2026 (Jul-Sep) progress tracking for Agreed Deals (added 2026-08-12). Each
@@ -4140,7 +4140,7 @@ return DEALS_DISPLAY_SLAB_ORDER.filter(k => bySlab[k]).map(k => bySlab[k]);
 // DEALS_VALUE_BANDS above), each band's count + total target value + total cashback.
 function computeDealsPhaseSummary(deals){
 const byBand = {};
-DEALS_VALUE_BANDS.forEach(b => byBand[b.key] = { key: b.key, label: b.label, n: 0, target: 0, cashback: 0 });
+DEALS_VALUE_BANDS.forEach(b => byBand[b.key] = { key: b.key, label: currentLang === 'en' ? b.labelEn : b.label, n: 0, target: 0, cashback: 0 });
 deals.forEach(d => {
 const band = dealsValueBandFor(d.target_sales || 0);
 byBand[band.key].n++;
@@ -4200,10 +4200,13 @@ return Object.values(byDM).sort((a,b) => b.n - a.n);
 // visually instead of as two more numbers buried in a wide table.
 function renderDealTypeBar(fixedTotal, varTotal){
 const total = fixedTotal + varTotal;
-if(!total) return `<div class="dealtype-bar" title="لا توجد صفقات"></div>`;
+if(!total) return `<div class="dealtype-bar" title="${currentLang === 'en' ? 'No deals' : 'لا توجد صفقات'}"></div>`;
 const fixedPct = (fixedTotal / total) * 100;
 const varPct = 100 - fixedPct;
-return `<div class="dealtype-bar" title="ثابتة ${fixedTotal} (${fixedPct.toFixed(0)}%) — متغيرة ${varTotal} (${varPct.toFixed(0)}%)">
+const barTitle = currentLang === 'en'
+? `Fixed ${fixedTotal} (${fixedPct.toFixed(0)}%) — Variable ${varTotal} (${varPct.toFixed(0)}%)`
+: `ثابتة ${fixedTotal} (${fixedPct.toFixed(0)}%) — متغيرة ${varTotal} (${varPct.toFixed(0)}%)`;
+return `<div class="dealtype-bar" title="${barTitle}">
 <div class="dealtype-bar-fixed" style="width:${fixedPct}%;"></div>
 <div class="dealtype-bar-var" style="width:${varPct}%;"></div>
 </div>`;
@@ -4235,13 +4238,19 @@ function renderPacingWidget(achFrac, timeFrac){
 const achPct = achFrac * 100;
 const timePct = timeFrac * 100;
 const gap = achPct - timePct;
-const status = gap >= 5 ? {cls:'ahead', label:'🟢 متقدم على الخطة'}
+const status = currentLang === 'en'
+? (gap >= 5 ? {cls:'ahead', label:'🟢 Ahead of plan'}
+: gap <= -10 ? {cls:'behind', label:'🔴 Behind plan'}
+: {cls:'ontrack', label:'🟡 On track'})
+: (gap >= 5 ? {cls:'ahead', label:'🟢 متقدم على الخطة'}
 : gap <= -10 ? {cls:'behind', label:'🔴 متأخر عن الخطة'}
-: {cls:'ontrack', label:'🟡 على المسار الصحيح'};
+: {cls:'ontrack', label:'🟡 على المسار الصحيح'});
 const barW = p => Math.max(0, Math.min(100, p));
+const achTag = currentLang === 'en' ? 'Achieved' : 'تحقيق';
+const timeTag = currentLang === 'en' ? 'Time' : 'وقت';
 return `<div class="pacing-widget">
-<div class="pacing-row"><span class="pacing-tag">تحقيق</span><div class="pacing-track"><div class="pacing-fill achieved" style="width:${barW(achPct)}%;"></div></div><span class="pacing-pct">${achPct.toFixed(0)}%</span></div>
-<div class="pacing-row"><span class="pacing-tag">وقت</span><div class="pacing-track"><div class="pacing-fill time" style="width:${barW(timePct)}%;"></div></div><span class="pacing-pct">${timePct.toFixed(0)}%</span></div>
+<div class="pacing-row"><span class="pacing-tag">${achTag}</span><div class="pacing-track"><div class="pacing-fill achieved" style="width:${barW(achPct)}%;"></div></div><span class="pacing-pct">${achPct.toFixed(0)}%</span></div>
+<div class="pacing-row"><span class="pacing-tag">${timeTag}</span><div class="pacing-track"><div class="pacing-fill time" style="width:${barW(timePct)}%;"></div></div><span class="pacing-pct">${timePct.toFixed(0)}%</span></div>
 <div class="pacing-status ${status.cls}">${status.label}</div>
 </div>`;
 }
@@ -4298,7 +4307,10 @@ return Object.assign({}, dmB, { reps });
 // Materials placed (the existing `posm` boolean already logged per deal) vs not.
 // Added 2026-08-13 per Daniel's request for a "visibility flag" count.
 function computeDealsPosmSummary(deals){
-const groups = {
+const groups = currentLang === 'en' ? {
+posm_yes: { key: 'posm_yes', label: 'Has POSM visibility ✅', n: 0, cashback: 0, payout: 0 },
+posm_no: { key: 'posm_no', label: 'No POSM visibility ❌', n: 0, cashback: 0, payout: 0 }
+} : {
 posm_yes: { key: 'posm_yes', label: 'بها رؤية (POSM) ✅', n: 0, cashback: 0, payout: 0 },
 posm_no: { key: 'posm_no', label: 'بدون رؤية (POSM) ❌', n: 0, cashback: 0, payout: 0 }
 };
@@ -4404,7 +4416,7 @@ const searchWrap = document.createElement('div');
 searchWrap.className = 'dt-search-wrap';
 searchWrap.innerHTML = `<div class="search-box">
 <span class="search-icon">🔍</span>
-<input type="text" placeholder="${opts.placeholder || 'ابحث بالاسم أو الكود...'}" autocomplete="off">
+<input type="text" placeholder="${opts.placeholder || (currentLang === 'en' ? 'Search by name or code...' : 'ابحث بالاسم أو الكود...')}" autocomplete="off">
 <button class="clear-btn" type="button">✕</button>
 </div>
 <div class="search-count"></div>`;
@@ -4426,7 +4438,7 @@ const match = text.includes(term);
 tr.style.display = match ? '' : 'none';
 if(match) shown++;
 });
-countEl.textContent = term ? `${shown} / ${allRows.length}` : `${allRows.length} صف`;
+countEl.textContent = term ? `${shown} / ${allRows.length}` : (currentLang === 'en' ? `${allRows.length} rows` : `${allRows.length} صف`);
 clearBtn.style.display = term ? 'flex' : 'none';
 }
 input.addEventListener('input', applyFilter);
@@ -4471,30 +4483,98 @@ function renderDeals(){
 const section = document.getElementById('dealsSection');
 if(!section) return;
 
+const DL = currentLang === 'en' ? {
+noDeals:'No agreed deals in this snapshot yet.',
+all:'All', unassigned:'Unassigned', team:'team', rep:'rep', reps:'reps',
+dealWord:(n) => n === 1 ? 'deal' : 'deals', pharmacyWord:(n) => n === 1 ? 'pharmacy' : 'pharmacies',
+allRepsOf:'All reps of', pharmacy:'pharmacy',
+dmLabel:'District Manager', mrLabel:'Medical Rep',
+summaryH2:'Deals Summary',
+slabValueH2:'Total value & cashback by slab',
+slabValueNote:'Total target sales (target_sales) and total cashback per slab',
+slabValueTh:['Slab','Pharmacies','Total value (target)','Total cashback'],
+phaseH2:'Fixed-value deals (6,500 / 7,500 / 9,500)',
+phaseNote:'Pharmacy count and total value/cashback for each recurring fixed target value in the log, then the remaining variable-value (individually computed) deals',
+phaseTh:['Category','Pharmacies','Total value (target)','Total cashback'],
+mrTypeH2:'Deal count by type per rep',
+mrTypeNote:"Two deal types: fixed target-value deals (6,500 / 7,500 / 9,500 EGP), and variable-value deals computed by growth slab (1 / 2 / 3) -- grouped by District Manager, click a manager's name to see their reps",
+mrTypeTh:['Rep / Manager','District Manager','Fixed 6,500','Fixed 7,500','Fixed 9,500','Total fixed','Slab 1','Slab 2','Slab 3','Total variable','Total','Mix'],
+dmBreakdownH2:'By District Manager',
+dmBreakdownTh:['District Manager','Team size','Deal count','Total amount'],
+teamMembersPrefix:'reps:',
+q3H2:'Q3 2026 tracking (Jul - Sep)',
+q3Total:'Total',
+q3TotalsLine:(t,a,r) => `Target ${t} EGP — Achieved ${a} EGP — Remaining ${r} EGP`,
+q3Th:['District Manager','Deal count','Target','July','August (so far)','September','Remaining','Progress'],
+yoyH2:'Q3 growth: 2026 vs 2025',
+yoyStat1:'Jul+Aug 2025', yoyStat2:'Jul+Aug 2026 (actual)', yoyStat3:'Actual growth so far',
+yoyStat4:'Q3 2025 (full)', yoyStat5:'Q3 2026 target', yoyStat6:'Projected growth if target hit',
+yoyTh:['Pharmacy','Code','Jul+Aug 2025','Jul+Aug 2026','Growth so far','Q3 2025 (full)','2026 target','Growth if hit'],
+posmH2:'Shelf Visibility (POSM)',
+posmNote:'Number of deals where point-of-sale materials (POSM) were placed on the shelf, versus deals without it',
+posmTh:['Status','Pharmacies','Total cashback','Total paid'],
+detailsH2:(n) => `Pharmacy details (${n})`,
+detailsTh:['Pharmacy','Code','Region','Territory','MR','DM','Slab','Cashback','Total Payout','July','August (so far)','September','Remaining to target','Progress','POSM Visibility'],
+searchPh:'Search for a pharmacy by name or code...'
+} : {
+noDeals:'لا توجد صفقات متفق عليها في هذه اللقطة بعد.',
+all:'الكل', unassigned:'غير محدد', team:'فريق', rep:'مندوب', reps:'مندوبين',
+dealWord:(n) => 'صفقة', pharmacyWord:(n) => 'صيدلية',
+allRepsOf:'كل مندوبي', pharmacy:'صيدلية',
+dmLabel:'مدير المنطقة', mrLabel:'المندوب',
+summaryH2:'ملخص الاتفاقات',
+slabValueH2:'إجمالي القيمة والكاش باك حسب الشريحة',
+slabValueNote:'إجمالي المستهدف (target_sales) وإجمالي الكاش باك لكل شريحة',
+slabValueTh:['الشريحة','عدد الصيدليات','إجمالي القيمة (المستهدف)','إجمالي الكاش باك'],
+phaseH2:'الصفقات ذات القيمة الثابتة (6,500 / 7,500 / 9,500)',
+phaseNote:'عدد الصيدليات وإجمالي القيمة والكاش باك لكل قيمة مستهدف ثابتة تتكرر في السجل، ثم باقي الصفقات ذات القيمة غير الثابتة (المحسوبة فرديًا)',
+phaseTh:['الفئة','عدد الصيدليات','إجمالي القيمة (المستهدف)','إجمالي الكاش باك'],
+mrTypeH2:'عدد الصفقات حسب النوع لكل مندوب',
+mrTypeNote:'نوعان من الصفقات: صفقات بقيمة مستهدف ثابتة (6,500 / 7,500 / 9,500 ج.م)، وصفقات بقيمة متغيرة محسوبة حسب شريحة النمو (1 / 2 / 3) -- مُجمّعة حسب مدير المنطقة، اضغط على اسم المدير لعرض مندوبيه',
+mrTypeTh:['المندوب / المدير','مدير المنطقة','ثابتة 6,500','ثابتة 7,500','ثابتة 9,500','إجمالي الثابتة','الشريحة 1','الشريحة 2','الشريحة 3','إجمالي المتغيرة','الإجمالي','التركيبة'],
+dmBreakdownH2:'حسب مدير المنطقة',
+dmBreakdownTh:['مدير المنطقة','حجم الفريق','عدد الصفقات','إجمالي المبلغ'],
+teamMembersPrefix:'مندوب:',
+q3H2:'متابعة الربع الثالث 2026 (يوليو - سبتمبر)',
+q3Total:'الإجمالي',
+q3TotalsLine:(t,a,r) => `مستهدف ${t} ج.م — محقق ${a} ج.م — متبقي ${r} ج.م`,
+q3Th:['مدير المنطقة','عدد الصفقات','المستهدف','يوليو','أغسطس (حتى الآن)','سبتمبر','المتبقي','التقدم'],
+yoyH2:'نمو الربع الثالث: 2026 مقابل 2025',
+yoyStat1:'يوليو+أغسطس 2025', yoyStat2:'يوليو+أغسطس 2026 (فعلي)', yoyStat3:'النمو الفعلي حتى الآن',
+yoyStat4:'الربع الثالث 2025 (كامل)', yoyStat5:'مستهدف الربع الثالث 2026', yoyStat6:'النمو المتوقع عند تحقيق المستهدف',
+yoyTh:['Pharmacy','Code','يوليو+أغسطس 2025','يوليو+أغسطس 2026','نمو حتى الآن','الربع الثالث 2025 (كامل)','مستهدف 2026','نمو عند التحقيق'],
+posmH2:'الرؤية على الرف (POSM)',
+posmNote:'عدد الصفقات التي تم فيها وضع مواد نقطة البيع (POSM) على الرف، مقابل الصفقات بدون ذلك',
+posmTh:['الحالة','عدد الصيدليات','إجمالي الكاش باك','إجمالي المدفوع'],
+detailsH2:(n) => `تفاصيل الصيدليات (${n})`,
+detailsTh:['Pharmacy','Code','Region','Territory','MR','DM','Slab','Cashback','Total Payout','يوليو','أغسطس (حتى الآن)','سبتمبر','المتبقي للمستهدف','التقدم','الرؤية (POSM)'],
+searchPh:'ابحث عن صيدلية بالاسم أو الكود...'
+};
+
 if(!AGREED_DEALS.length){
-section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">💰</div>No agreed deals in this snapshot yet.</div></div>`;
+section.innerHTML = `<div class="card"><div class="placeholder"><div class="big">💰</div>${DL.noDeals}</div></div>`;
 return;
 }
 
 const dmSummary = computeDealsDmSummary();
 const dmTabsHtml = `
 <div class="tabs" id="dealsDmTabs" style="margin-bottom:14px;flex-wrap:wrap;">
-<div class="tab-btn ${dealsActiveDM===''?'active':''}" data-dm="">الكل (${AGREED_DEALS.length})</div>
+<div class="tab-btn ${dealsActiveDM===''?'active':''}" data-dm="">${DL.all} (${AGREED_DEALS.length})</div>
 ${dmSummary.map(b => {
 const team = teamSizeForDm(b.dm);
-return `<div class="tab-btn ${dealsActiveDM===b.dm?'active':''}" data-dm="${b.dm}">${b.dm || 'غير محدد'} (${b.n} صفقة${team ? ' · فريق ' + team + (team===1?' مندوب':' مندوبين') : ''})</div>`;
+return `<div class="tab-btn ${dealsActiveDM===b.dm?'active':''}" data-dm="${b.dm}">${b.dm || DL.unassigned} (${b.n} ${DL.dealWord(b.n)}${team ? ' · ' + DL.team + ' ' + team + (currentLang==='en' ? '' : (team===1?' مندوب':' مندوبين')) : ''})</div>`;
 }).join('')}
 </div>`;
 
 const dmFilteredDeals = dealsActiveDM === '' ? AGREED_DEALS : AGREED_DEALS.filter(d => (d.dm || '') === dealsActiveDM);
 
-// MR drill-down only makes sense once a specific DM is picked -- at "الكل" there
+// MR drill-down only makes sense once a specific DM is picked -- at "all" there
 // could be dozens of reps across every district, so we wait for that first click.
 const mrSummary = dealsActiveDM !== '' ? computeDealsMrSummary(dmFilteredDeals) : [];
 const mrTabsHtml = dealsActiveDM === '' ? '' : `
 <div class="tabs" id="dealsMrTabs" style="margin-bottom:14px;flex-wrap:wrap;">
-<div class="tab-btn ${dealsActiveMR===''?'active':''}" data-mr="">كل مندوبي ${dealsActiveDM || 'غير محدد'} (${dmFilteredDeals.length})</div>
-${mrSummary.map(b => `<div class="tab-btn ${dealsActiveMR===b.mr?'active':''}" data-mr="${b.mr}">${b.mr || 'غير محدد'} (${b.n} صيدلية)</div>`).join('')}
+<div class="tab-btn ${dealsActiveMR===''?'active':''}" data-mr="">${DL.allRepsOf} ${dealsActiveDM || DL.unassigned} (${dmFilteredDeals.length})</div>
+${mrSummary.map(b => `<div class="tab-btn ${dealsActiveMR===b.mr?'active':''}" data-mr="${b.mr}">${b.mr || DL.unassigned} (${b.n} ${DL.pharmacyWord(b.n)})</div>`).join('')}
 </div>`;
 
 const filteredDeals = dealsActiveMR === '' ? dmFilteredDeals : dmFilteredDeals.filter(d => (d.mr || '') === dealsActiveMR);
@@ -4512,7 +4592,7 @@ const slabCardsHtml = slabOrder.filter(k => bySlab[k]).map(k => {
 const b = bySlab[k];
 return `<div class="pli-stats" style="text-align:center;">
 <div class="pli-name">${b.label}</div>
-<div class="pli-sales">${b.n} صيدلية — ${fmt(b.sum)} ج.م</div>
+<div class="pli-sales">${b.n} ${DL.pharmacyWord(b.n)} — ${fmt(b.sum)} ${curr()}</div>
 </div>`;
 }).join('');
 
@@ -4540,12 +4620,12 @@ const rowsHtml = filteredDeals.map(d => `<tr>
 <td>${d.mr || '—'}</td>
 <td>${d.dm || '—'}</td>
 <td>${dealsDisplaySlab(d).label}</td>
-<td>${fmt(d.cashback)} ج.م</td>
-<td>${fmt(d.total_payout)} ج.م</td>
-<td>${fmt(d.month7_sales || 0)} ج.م</td>
-<td>${fmt(d.month8_sales || 0)} ج.م</td>
-<td>${d.month9_sales ? fmt(d.month9_sales) + ' ج.م' : '—'}</td>
-<td>${fmt(d.q3_remaining || 0)} ج.م</td>
+<td>${fmt(d.cashback)} ${curr()}</td>
+<td>${fmt(d.total_payout)} ${curr()}</td>
+<td>${fmt(d.month7_sales || 0)} ${curr()}</td>
+<td>${fmt(d.month8_sales || 0)} ${curr()}</td>
+<td>${d.month9_sales ? fmt(d.month9_sales) + ' ' + curr() : '—'}</td>
+<td>${fmt(d.q3_remaining || 0)} ${curr()}</td>
 <td>${renderPacingWidget(achievedFrac((d.month7_sales||0)+(d.month8_sales||0)+(d.month9_sales||0), d.target_sales||0), q3TimeFrac)}</td>
 <td style="text-align:center;">${d.posm ? '✅' : '—'}</td>
 </tr>`).join('');
@@ -4553,46 +4633,46 @@ const rowsHtml = filteredDeals.map(d => `<tr>
 const dmBreakdownRowsHtml = dmSummary.map(b => {
 const members = teamMembersForDm(b.dm);
 return `<tr>
-<td class="name-cell">${b.dm || 'غير محدد'}</td>
-<td>${members.length ? `<div style="font-size:12px;color:var(--muted);max-height:64px;overflow-y:auto;line-height:1.5;">${members.length} مندوب: ${members.join('، ')}</div>` : '—'}</td>
+<td class="name-cell">${b.dm || DL.unassigned}</td>
+<td>${members.length ? `<div style="font-size:12px;color:var(--muted);max-height:64px;overflow-y:auto;line-height:1.5;">${members.length} ${DL.teamMembersPrefix} ${members.join('، ')}</div>` : '—'}</td>
 <td>${b.n}</td>
-<td>${fmt(b.sum)} ج.م</td>
+<td>${fmt(b.sum)} ${curr()}</td>
 </tr>`;
 }).join('');
 
 const filterNote = [
-dealsActiveDM ? `مدير المنطقة: <b>${dealsActiveDM}</b>` : '',
-dealsActiveMR ? `المندوب: <b>${dealsActiveMR}</b>` : ''
+dealsActiveDM ? `${DL.dmLabel}: <b>${dealsActiveDM}</b>` : '',
+dealsActiveMR ? `${DL.mrLabel}: <b>${dealsActiveMR}</b>` : ''
 ].filter(Boolean).join(' — ');
 
 section.innerHTML = `
 <div class="card">
-<h2>ملخص الاتفاقات</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">Snapshot as of ${DEALS_SNAPSHOT_DATE} — ${AGREED_DEALS.length} pharmacy with an agreed deal overall, total payout <b>${fmt(AGREED_DEALS.reduce((s,d)=>s+d.total_payout,0))} ج.م</b>${filterNote ? ` — showing ${filterNote}: ${filteredDeals.length} pharmacy, ${fmt(totalPayout)} ج.م` : ''}.</div>
+<h2>${DL.summaryH2}</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">Snapshot as of ${DEALS_SNAPSHOT_DATE} — ${AGREED_DEALS.length} pharmacy with an agreed deal overall, total payout <b>${fmt(AGREED_DEALS.reduce((s,d)=>s+d.total_payout,0))} ${curr()}</b>${filterNote ? ` — showing ${filterNote}: ${filteredDeals.length} pharmacy, ${fmt(totalPayout)} ${curr()}` : ''}.</div>
 ${dmTabsHtml}
 ${mrTabsHtml}
 <div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;">${slabCardsHtml}</div>
 </div>
 <div class="card">
-<h2>إجمالي القيمة والكاش باك حسب الشريحة</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">إجمالي المستهدف (target_sales) وإجمالي الكاش باك لكل شريحة${filterNote ? ` — ${filterNote}` : ''}.</div>
-<div style="overflow-x:auto;"><table><thead><tr><th>الشريحة</th><th>عدد الصيدليات</th><th>إجمالي القيمة (المستهدف)</th><th>إجمالي الكاش باك</th></tr></thead><tbody>${slabValueSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.cashback)} ج.م</td></tr>`).join('')}</tbody></table></div>
+<h2>${DL.slabValueH2}</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">${DL.slabValueNote}${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div style="overflow-x:auto;"><table><thead><tr><th>${DL.slabValueTh[0]}</th><th>${DL.slabValueTh[1]}</th><th>${DL.slabValueTh[2]}</th><th>${DL.slabValueTh[3]}</th></tr></thead><tbody>${slabValueSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.target)} ${curr()}</td><td>${fmt(b.cashback)} ${curr()}</td></tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
-<h2>الصفقات ذات القيمة الثابتة (6,500 / 7,500 / 9,500)</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">عدد الصيدليات وإجمالي القيمة والكاش باك لكل قيمة مستهدف ثابتة تتكرر في السجل، ثم باقي الصفقات ذات القيمة غير الثابتة (المحسوبة فرديًا)${filterNote ? ` — ${filterNote}` : ''}.</div>
-<div style="overflow-x:auto;"><table><thead><tr><th>الفئة</th><th>عدد الصيدليات</th><th>إجمالي القيمة (المستهدف)</th><th>إجمالي الكاش باك</th></tr></thead><tbody>${phaseSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.cashback)} ج.م</td></tr>`).join('')}</tbody></table></div>
+<h2>${DL.phaseH2}</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">${DL.phaseNote}${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div style="overflow-x:auto;"><table><thead><tr><th>${DL.phaseTh[0]}</th><th>${DL.phaseTh[1]}</th><th>${DL.phaseTh[2]}</th><th>${DL.phaseTh[3]}</th></tr></thead><tbody>${phaseSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.target)} ${curr()}</td><td>${fmt(b.cashback)} ${curr()}</td></tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
-<h2>عدد الصفقات حسب النوع لكل مندوب</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">نوعان من الصفقات: صفقات بقيمة مستهدف ثابتة (6,500 / 7,500 / 9,500 ج.م)، وصفقات بقيمة متغيرة محسوبة حسب شريحة النمو (1 / 2 / 3) -- مُجمّعة حسب مدير المنطقة، اضغط على اسم المدير لعرض مندوبيه${filterNote ? ` — ${filterNote}` : ''}.</div>
-<div style="overflow-x:auto;"><table><thead><tr><th>المندوب / المدير</th><th>مدير المنطقة</th><th>ثابتة 6,500</th><th>ثابتة 7,500</th><th>ثابتة 9,500</th><th>إجمالي الثابتة</th><th>الشريحة 1</th><th>الشريحة 2</th><th>الشريحة 3</th><th>إجمالي المتغيرة</th><th>الإجمالي</th><th>التركيبة</th></tr></thead><tbody>${mrTypeSummary.map(g => {
+<h2>${DL.mrTypeH2}</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">${DL.mrTypeNote}${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div style="overflow-x:auto;"><table><thead><tr><th>${DL.mrTypeTh[0]}</th><th>${DL.mrTypeTh[1]}</th><th>${DL.mrTypeTh[2]}</th><th>${DL.mrTypeTh[3]}</th><th>${DL.mrTypeTh[4]}</th><th>${DL.mrTypeTh[5]}</th><th>${DL.mrTypeTh[6]}</th><th>${DL.mrTypeTh[7]}</th><th>${DL.mrTypeTh[8]}</th><th>${DL.mrTypeTh[9]}</th><th>${DL.mrTypeTh[10]}</th><th>${DL.mrTypeTh[11]}</th></tr></thead><tbody>${mrTypeSummary.map(g => {
 const gFixedTotal = g.fixed_6500 + g.fixed_7500 + g.fixed_9500;
 const gVarTotal = g.s1 + g.s2 + g.s3;
 const expanded = dealsTypeExpandedDMs.has(g.dm);
 const arrow = expanded ? '▾' : '▸';
 const headerRow = `<tr class="dm-group-header" data-dmtype-toggle="${g.dm}">
-<td class="name-cell"><span class="dm-toggle-arrow">${arrow}</span><b>${g.dm || 'غير محدد'}</b> <span style="color:var(--muted);font-size:12px;">(${g.reps.length} مندوب)</span></td>
+<td class="name-cell"><span class="dm-toggle-arrow">${arrow}</span><b>${g.dm || DL.unassigned}</b> <span style="color:var(--muted);font-size:12px;">(${g.reps.length} ${DL.rep})</span></td>
 <td>—</td>
 <td><b>${g.fixed_6500}</b></td>
 <td><b>${g.fixed_7500}</b></td>
@@ -4609,7 +4689,7 @@ const repRows = expanded ? g.reps.map(b => {
 const fixedTotal = b.fixed_6500 + b.fixed_7500 + b.fixed_9500;
 const varTotal = b.s1 + b.s2 + b.s3;
 return `<tr>
-<td class="name-cell" style="padding-right:26px;color:var(--muted);font-size:13px;">↳ ${b.mr || 'غير محدد'}</td>
+<td class="name-cell" style="padding-right:26px;color:var(--muted);font-size:13px;">↳ ${b.mr || DL.unassigned}</td>
 <td>—</td>
 <td>${b.fixed_6500}</td>
 <td>${b.fixed_7500}</td>
@@ -4627,53 +4707,57 @@ return headerRow + repRows;
 }).join('')}</tbody></table></div>
 </div>
 <div class="card">
-<h2>حسب مدير المنطقة</h2>
-<div style="overflow-x:auto;"><table><thead><tr><th>مدير المنطقة</th><th>حجم الفريق</th><th>عدد الصفقات</th><th>إجمالي المبلغ</th></tr></thead><tbody>${dmBreakdownRowsHtml}</tbody></table></div>
+<h2>${DL.dmBreakdownH2}</h2>
+<div style="overflow-x:auto;"><table><thead><tr><th>${DL.dmBreakdownTh[0]}</th><th>${DL.dmBreakdownTh[1]}</th><th>${DL.dmBreakdownTh[2]}</th><th>${DL.dmBreakdownTh[3]}</th></tr></thead><tbody>${dmBreakdownRowsHtml}</tbody></table></div>
 </div>
 <div class="card">
-<h2>متابعة الربع الثالث 2026 (يوليو - سبتمبر)</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">المستهدف = target_sales المتفق عليه في الصفقة. المحقق حتى الآن = يوليو (شهر كامل) + أغسطس (${DEALS_Q3_DATA_AS_OF}) + سبتمبر (لم يبدأ بعد). المتبقي = المستهدف − المحقق حتى الآن (بحد أدنى صفر). التقدم = نسبة المحقق من المستهدف مقارنة بنسبة الوقت المنقضي من الربع الثالث (${(q3TimeFrac*100).toFixed(0)}% حتى اليوم). اضغط على اسم المدير لعرض التقدم لكل مندوب تحته${filterNote ? ` — ${filterNote}` : ''}.</div>
+<h2>${DL.q3H2}</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">${currentLang === 'en'
+? `Target = the deal's agreed target_sales. Achieved so far = July (full month) + August (${DEALS_Q3_DATA_AS_OF}) + September (not started yet). Remaining = target − achieved so far (floored at zero). Progress = % of target achieved vs. % of Q3 elapsed so far (${(q3TimeFrac*100).toFixed(0)}% as of today). Click a manager's name to see progress per rep under them`
+: `المستهدف = target_sales المتفق عليه في الصفقة. المحقق حتى الآن = يوليو (شهر كامل) + أغسطس (${DEALS_Q3_DATA_AS_OF}) + سبتمبر (لم يبدأ بعد). المتبقي = المستهدف − المحقق حتى الآن (بحد أدنى صفر). التقدم = نسبة المحقق من المستهدف مقارنة بنسبة الوقت المنقضي من الربع الثالث (${(q3TimeFrac*100).toFixed(0)}% حتى اليوم). اضغط على اسم المدير لعرض التقدم لكل مندوب تحته`}${filterNote ? ` — ${filterNote}` : ''}.</div>
 <div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;">
-<div class="pli-stats" style="text-align:center;"><div class="pli-name">الإجمالي</div><div class="pli-sales">مستهدف ${fmt(q3Totals.target)} ج.م — محقق ${fmt(q3Totals.m7+q3Totals.m8+q3Totals.m9)} ج.م — متبقي ${fmt(q3Totals.remaining)} ج.م</div><div style="margin-top:8px;">${renderPacingWidget(achievedFrac(q3Totals.m7+q3Totals.m8+q3Totals.m9, q3Totals.target), q3TimeFrac)}</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">${DL.q3Total}</div><div class="pli-sales">${DL.q3TotalsLine(fmt(q3Totals.target), fmt(q3Totals.m7+q3Totals.m8+q3Totals.m9), fmt(q3Totals.remaining))}</div><div style="margin-top:8px;">${renderPacingWidget(achievedFrac(q3Totals.m7+q3Totals.m8+q3Totals.m9, q3Totals.target), q3TimeFrac)}</div></div>
 </div>
-<div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>مدير المنطقة</th><th>عدد الصفقات</th><th>المستهدف</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي</th><th>التقدم</th></tr></thead><tbody>${q3Summary.map(b => {
+<div style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>${DL.q3Th[0]}</th><th>${DL.q3Th[1]}</th><th>${DL.q3Th[2]}</th><th>${DL.q3Th[3]}</th><th>${DL.q3Th[4]}</th><th>${DL.q3Th[5]}</th><th>${DL.q3Th[6]}</th><th>${DL.q3Th[7]}</th></tr></thead><tbody>${q3Summary.map(b => {
 const expanded = dealsQ3ExpandedDMs.has(b.dm);
 const arrow = expanded ? '▾' : '▸';
-const headerRow = `<tr class="dm-group-header" data-dmq3-toggle="${b.dm}"><td class="name-cell"><span class="dm-toggle-arrow">${arrow}</span>${b.dm || 'غير محدد'}</td><td>${b.n}</td><td>${fmt(b.target)} ج.م</td><td>${fmt(b.m7)} ج.م</td><td>${fmt(b.m8)} ج.م</td><td>${b.m9 ? fmt(b.m9) + ' ج.م' : '—'}</td><td>${fmt(b.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(b.m7+b.m8+b.m9, b.target), q3TimeFrac)}</td></tr>`;
-const repRows = expanded ? b.reps.map(r => `<tr style="background:var(--bg);"><td class="name-cell" style="padding-right:26px;color:var(--muted);font-size:13px;">↳ ${r.mr || 'غير محدد'}</td><td>${r.n}</td><td>${fmt(r.target)} ج.م</td><td>${fmt(r.m7)} ج.م</td><td>${fmt(r.m8)} ج.م</td><td>${r.m9 ? fmt(r.m9) + ' ج.م' : '—'}</td><td>${fmt(r.remaining)} ج.م</td><td>${renderPacingWidget(achievedFrac(r.m7+r.m8+r.m9, r.target), q3TimeFrac)}</td></tr>`).join('') : '';
+const headerRow = `<tr class="dm-group-header" data-dmq3-toggle="${b.dm}"><td class="name-cell"><span class="dm-toggle-arrow">${arrow}</span>${b.dm || DL.unassigned}</td><td>${b.n}</td><td>${fmt(b.target)} ${curr()}</td><td>${fmt(b.m7)} ${curr()}</td><td>${fmt(b.m8)} ${curr()}</td><td>${b.m9 ? fmt(b.m9) + ' ' + curr() : '—'}</td><td>${fmt(b.remaining)} ${curr()}</td><td>${renderPacingWidget(achievedFrac(b.m7+b.m8+b.m9, b.target), q3TimeFrac)}</td></tr>`;
+const repRows = expanded ? b.reps.map(r => `<tr style="background:var(--bg);"><td class="name-cell" style="padding-right:26px;color:var(--muted);font-size:13px;">↳ ${r.mr || DL.unassigned}</td><td>${r.n}</td><td>${fmt(r.target)} ${curr()}</td><td>${fmt(r.m7)} ${curr()}</td><td>${fmt(r.m8)} ${curr()}</td><td>${r.m9 ? fmt(r.m9) + ' ' + curr() : '—'}</td><td>${fmt(r.remaining)} ${curr()}</td><td>${renderPacingWidget(achievedFrac(r.m7+r.m8+r.m9, r.target), q3TimeFrac)}</td></tr>`).join('') : '';
 return headerRow + repRows;
 }).join('')}</tbody></table></div>
 </div>
 <div class="card">
-<h2>نمو الربع الثالث: 2026 مقابل 2025</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">عمودان منفصلان عمدًا: "حتى الآن" يقارن يوليو+أغسطس 2026 المحقق فعليًا بنفس الشهرين في 2025 (${q3yoy.noJulAugBaseline} صيدلية بدون مبيعات مسجلة في يوليو/أغسطس 2025، مستهدفها ${fmt(q3yoy.noJulAugTarget)} ج.م، مستبعدة). "عند تحقيق المستهدف" يقارن مستهدف الربع الثالث 2026 بالكامل بمبيعات الربع الثالث 2025 كاملاً يوليو-سبتمبر (${q3yoy.noFullBaseline} صيدلية بدون بيانات 2025 مطلقًا، مستهدفها ${fmt(q3yoy.noFullTarget)} ج.م، مستبعدة)${filterNote ? ` — ${filterNote}` : ''}.</div>
+<h2>${DL.yoyH2}</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">${currentLang === 'en'
+? `Two columns deliberately kept separate: "So far" compares actual July+August 2026 achieved against the same two months in 2025 (${q3yoy.noJulAugBaseline} pharmacies with no recorded July/August 2025 sales, target ${fmt(q3yoy.noJulAugTarget)} EGP, excluded). "If target is hit" compares the full Q3 2026 target against the full Jul-Sep 2025 Q3 sales (${q3yoy.noFullBaseline} pharmacies with no 2025 data at all, target ${fmt(q3yoy.noFullTarget)} EGP, excluded)`
+: `عمودان منفصلان عمدًا: "حتى الآن" يقارن يوليو+أغسطس 2026 المحقق فعليًا بنفس الشهرين في 2025 (${q3yoy.noJulAugBaseline} صيدلية بدون مبيعات مسجلة في يوليو/أغسطس 2025، مستهدفها ${fmt(q3yoy.noJulAugTarget)} ج.م، مستبعدة). "عند تحقيق المستهدف" يقارن مستهدف الربع الثالث 2026 بالكامل بمبيعات الربع الثالث 2025 كاملاً يوليو-سبتمبر (${q3yoy.noFullBaseline} صيدلية بدون بيانات 2025 مطلقًا، مستهدفها ${fmt(q3yoy.noFullTarget)} ج.م، مستبعدة)`}${filterNote ? ` — ${filterNote}` : ''}.</div>
 <div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;">
-<div class="pli-stats" style="text-align:center;"><div class="pli-name">يوليو+أغسطس 2025</div><div class="pli-sales">${fmt(q3yoy.sumJulAug25)} ج.م</div></div>
-<div class="pli-stats" style="text-align:center;"><div class="pli-name">يوليو+أغسطس 2026 (فعلي)</div><div class="pli-sales">${fmt(q3yoy.sumAchievedAll)} ج.م</div></div>
-<div class="pli-stats" style="text-align:center;"><div class="pli-name">النمو الفعلي حتى الآن</div><div class="pli-sales">${coloredSignedPct(q3yoy.growthSoFarTotal)}</div></div>
-<div class="pli-stats" style="text-align:center;"><div class="pli-name">الربع الثالث 2025 (كامل)</div><div class="pli-sales">${fmt(q3yoy.sumQ325Full)} ج.م</div></div>
-<div class="pli-stats" style="text-align:center;"><div class="pli-name">مستهدف الربع الثالث 2026</div><div class="pli-sales">${fmt(q3yoy.sumTargetAll)} ج.م</div></div>
-<div class="pli-stats" style="text-align:center;"><div class="pli-name">النمو المتوقع عند تحقيق المستهدف</div><div class="pli-sales">${coloredSignedPct(q3yoy.growthIfAchievedTotal)}</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">${DL.yoyStat1}</div><div class="pli-sales">${fmt(q3yoy.sumJulAug25)} ${curr()}</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">${DL.yoyStat2}</div><div class="pli-sales">${fmt(q3yoy.sumAchievedAll)} ${curr()}</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">${DL.yoyStat3}</div><div class="pli-sales">${coloredSignedPct(q3yoy.growthSoFarTotal)}</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">${DL.yoyStat4}</div><div class="pli-sales">${fmt(q3yoy.sumQ325Full)} ${curr()}</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">${DL.yoyStat5}</div><div class="pli-sales">${fmt(q3yoy.sumTargetAll)} ${curr()}</div></div>
+<div class="pli-stats" style="text-align:center;"><div class="pli-name">${DL.yoyStat6}</div><div class="pli-sales">${coloredSignedPct(q3yoy.growthIfAchievedTotal)}</div></div>
 </div>
-<div id="q3yoyTableWrap" style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>يوليو+أغسطس 2025</th><th>يوليو+أغسطس 2026</th><th>نمو حتى الآن</th><th>الربع الثالث 2025 (كامل)</th><th>مستهدف 2026</th><th>نمو عند التحقيق</th></tr></thead><tbody>${q3yoy.rows.map(r => `<tr>
+<div id="q3yoyTableWrap" style="overflow-x:auto;margin-top:12px;"><table><thead><tr><th>${DL.yoyTh[0]}</th><th>${DL.yoyTh[1]}</th><th>${DL.yoyTh[2]}</th><th>${DL.yoyTh[3]}</th><th>${DL.yoyTh[4]}</th><th>${DL.yoyTh[5]}</th><th>${DL.yoyTh[6]}</th><th>${DL.yoyTh[7]}</th></tr></thead><tbody>${q3yoy.rows.map(r => `<tr>
 <td class="name-cell">${r.name}</td>
 <td>${r.code}</td>
-<td>${r.hasJulAugBaseline ? fmt(r.julAug25) + ' ج.م' : '—'}</td>
-<td>${fmt(r.achieved)} ج.م</td>
+<td>${r.hasJulAugBaseline ? fmt(r.julAug25) + ' ' + curr() : '—'}</td>
+<td>${fmt(r.achieved)} ${curr()}</td>
 <td>${r.hasJulAugBaseline ? coloredSignedPct(r.growthSoFar) : '—'}</td>
-<td>${r.hasFullBaseline ? fmt(r.q325Full) + ' ج.م' : '—'}</td>
-<td>${fmt(r.target)} ج.م</td>
+<td>${r.hasFullBaseline ? fmt(r.q325Full) + ' ' + curr() : '—'}</td>
+<td>${fmt(r.target)} ${curr()}</td>
 <td>${r.hasFullBaseline ? coloredSignedPct(r.growthIfAchieved) : '—'}</td>
 </tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
-<h2>الرؤية على الرف (POSM)</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">عدد الصفقات التي تم فيها وضع مواد نقطة البيع (POSM) على الرف، مقابل الصفقات بدون ذلك${filterNote ? ` — ${filterNote}` : ''}.</div>
-<div style="overflow-x:auto;"><table><thead><tr><th>الحالة</th><th>عدد الصيدليات</th><th>إجمالي الكاش باك</th><th>إجمالي المدفوع</th></tr></thead><tbody>${posmSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.cashback)} ج.م</td><td>${fmt(b.payout)} ج.م</td></tr>`).join('')}</tbody></table></div>
+<h2>${DL.posmH2}</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">${DL.posmNote}${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div style="overflow-x:auto;"><table><thead><tr><th>${DL.posmTh[0]}</th><th>${DL.posmTh[1]}</th><th>${DL.posmTh[2]}</th><th>${DL.posmTh[3]}</th></tr></thead><tbody>${posmSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.cashback)} ${curr()}</td><td>${fmt(b.payout)} ${curr()}</td></tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
-<h2>تفاصيل الصيدليات (${filteredDeals.length})</h2>
-<div id="pharmDetailsTableWrap" style="overflow-x:auto;"><table><thead><tr><th>Pharmacy</th><th>Code</th><th>Region</th><th>Territory</th><th>MR</th><th>DM</th><th>Slab</th><th>Cashback</th><th>Total Payout</th><th>يوليو</th><th>أغسطس (حتى الآن)</th><th>سبتمبر</th><th>المتبقي للمستهدف</th><th>التقدم</th><th>الرؤية (POSM)</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
+<h2>${DL.detailsH2(filteredDeals.length)}</h2>
+<div id="pharmDetailsTableWrap" style="overflow-x:auto;"><table><thead><tr><th>${DL.detailsTh[0]}</th><th>${DL.detailsTh[1]}</th><th>${DL.detailsTh[2]}</th><th>${DL.detailsTh[3]}</th><th>${DL.detailsTh[4]}</th><th>${DL.detailsTh[5]}</th><th>${DL.detailsTh[6]}</th><th>${DL.detailsTh[7]}</th><th>${DL.detailsTh[8]}</th><th>${DL.detailsTh[9]}</th><th>${DL.detailsTh[10]}</th><th>${DL.detailsTh[11]}</th><th>${DL.detailsTh[12]}</th><th>${DL.detailsTh[13]}</th><th>${DL.detailsTh[14]}</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
 </div>`;
 
 document.getElementById('dealsDmTabs')?.addEventListener('click', (e) => {
@@ -4707,8 +4791,8 @@ renderDeals();
 });
 });
 
-enhanceBigTable('pharmDetailsTableWrap', {numericCols:[7,8,9,10,11,12], noSortCols:[13], placeholder:'ابحث عن صيدلية بالاسم أو الكود...'});
-enhanceBigTable('q3yoyTableWrap', {numericCols:[2,3,4,5,6,7], placeholder:'ابحث عن صيدلية بالاسم أو الكود...'});
+enhanceBigTable('pharmDetailsTableWrap', {numericCols:[7,8,9,10,11,12], noSortCols:[13], placeholder:DL.searchPh});
+enhanceBigTable('q3yoyTableWrap', {numericCols:[2,3,4,5,6,7], placeholder:DL.searchPh});
 }
 
 // Logs an agreed deal for one slab of one pharmacy to the live backend. Called from
