@@ -4201,6 +4201,10 @@ renderChains();
 });
 });
 }
+// Which region ('' = all) is selected in the new place filter -- the
+// outermost filter level: Region -> District Manager -> Medical Rep.
+// Added 2026-09-14 per Daniel's request to filter deals by geography.
+let dealsActiveRegion = '';
 let dealsActiveDM = '';
 // Which MR is drilled into, within the currently selected DM. Reset whenever the
 // DM selection changes, since an MR tab only makes sense inside its DM's context.
@@ -4222,9 +4226,22 @@ let dealsQ3ExpandedDMs = new Set();
 // (highest first) so the busiest district lands first -- plus an "All"
 // tab and, only if the data actually has any, an "Unassigned" tab for deals
 // with no dm_name (never silently drop them from the tab list).
-function computeDealsDmSummary(){
-const byDM = {};
+// One row per region that has at least one agreed deal, ordered by deal
+// count (highest first). Backs the new "filter by place" region tab row.
+function computeDealsRegionSummary(){
+const byRegion = {};
 AGREED_DEALS.forEach(d => {
+const key = d.region || '';
+if(!byRegion[key]) byRegion[key] = { region: key, n: 0, sum: 0 };
+byRegion[key].n++;
+byRegion[key].sum += d.total_payout;
+});
+return Object.values(byRegion).sort((a,b) => b.n - a.n);
+}
+
+function computeDealsDmSummary(deals){
+const byDM = {};
+(deals || AGREED_DEALS).forEach(d => {
 const key = d.dm || '';
 if(!byDM[key]) byDM[key] = { dm: key, n: 0, sum: 0 };
 byDM[key].n++;
@@ -4621,7 +4638,8 @@ noDeals:'No agreed deals in this snapshot yet.',
 all:'All', unassigned:'Unassigned', team:'team', rep:'rep', reps:'reps',
 dealWord:(n) => n === 1 ? 'deal' : 'deals', pharmacyWord:(n) => n === 1 ? 'pharmacy' : 'pharmacies',
 allRepsOf:'All reps of', pharmacy:'pharmacy',
-dmLabel:'District Manager', mrLabel:'Medical Rep',
+dmLabel:'District Manager', mrLabel:'Medical Rep', regionLabel:'Region',
+regionTabsNote:'Filter by place (region), then drill into a District Manager and rep.',
 summaryH2:'Deals Summary',
 slabValueH2:'Total value & cashback by slab',
 slabValueNote:'Total target sales (target_sales) and total cashback per slab',
@@ -4665,7 +4683,8 @@ noDeals:'لا توجد صفقات متفق عليها في هذه اللقطة �
 all:'الكل', unassigned:'غير محدد', team:'فريق', rep:'مندوب', reps:'مندوبين',
 dealWord:(n) => 'صفقة', pharmacyWord:(n) => 'صيدلية',
 allRepsOf:'كل مندوبي', pharmacy:'صيدلية',
-dmLabel:'مدير المنطقة', mrLabel:'المندوب',
+dmLabel:'مدير المنطقة', mrLabel:'المندوب', regionLabel:'المنطقة',
+regionTabsNote:'فلترة حسب المكان (المنطقة)، ثم مدير المنطقة والمندوب.',
 summaryH2:'ملخص الاتفاقات',
 slabValueH2:'إجمالي القيمة والكاش باك حسب الشريحة',
 slabValueNote:'إجمالي المستهدف (target_sales) وإجمالي الكاش باك لكل شريحة',
@@ -4711,17 +4730,26 @@ section.innerHTML = `<div class="card"><div class="placeholder"><div class="big"
 return;
 }
 
-const dmSummary = computeDealsDmSummary();
+const regionSummary = computeDealsRegionSummary();
+const regionTabsHtml = `
+<div class="tabs" id="dealsRegionTabs" style="margin-bottom:14px;flex-wrap:wrap;">
+<div class="tab-btn ${dealsActiveRegion===''?'active':''}" data-region="">${DL.all} (${AGREED_DEALS.length})</div>
+${regionSummary.map(b => `<div class="tab-btn ${dealsActiveRegion===b.region?'active':''}" data-region="${b.region}">${b.region || DL.unassigned} (${b.n} ${DL.dealWord(b.n)})</div>`).join('')}
+</div>`;
+
+const regionFilteredDeals = dealsActiveRegion === '' ? AGREED_DEALS : AGREED_DEALS.filter(d => (d.region || '') === dealsActiveRegion);
+
+const dmSummary = computeDealsDmSummary(regionFilteredDeals);
 const dmTabsHtml = `
 <div class="tabs" id="dealsDmTabs" style="margin-bottom:14px;flex-wrap:wrap;">
-<div class="tab-btn ${dealsActiveDM===''?'active':''}" data-dm="">${DL.all} (${AGREED_DEALS.length})</div>
+<div class="tab-btn ${dealsActiveDM===''?'active':''}" data-dm="">${DL.all} (${regionFilteredDeals.length})</div>
 ${dmSummary.map(b => {
 const team = teamSizeForDm(b.dm);
 return `<div class="tab-btn ${dealsActiveDM===b.dm?'active':''}" data-dm="${b.dm}">${b.dm || DL.unassigned} (${b.n} ${DL.dealWord(b.n)}${team ? ' · ' + DL.team + ' ' + team + (currentLang==='en' ? '' : (team===1?' مندوب':' مندوبين')) : ''})</div>`;
 }).join('')}
 </div>`;
 
-const dmFilteredDeals = dealsActiveDM === '' ? AGREED_DEALS : AGREED_DEALS.filter(d => (d.dm || '') === dealsActiveDM);
+const dmFilteredDeals = dealsActiveDM === '' ? regionFilteredDeals : regionFilteredDeals.filter(d => (d.dm || '') === dealsActiveDM);
 
 // MR drill-down only makes sense once a specific DM is picked -- at "all" there
 // could be dozens of reps across every district, so we wait for that first click.
@@ -4820,6 +4848,7 @@ return `<tr>
 }).join('');
 
 const filterNote = [
+dealsActiveRegion ? `${DL.regionLabel}: <b>${dealsActiveRegion}</b>` : '',
 dealsActiveDM ? `${DL.dmLabel}: <b>${dealsActiveDM}</b>` : '',
 dealsActiveMR ? `${DL.mrLabel}: <b>${dealsActiveMR}</b>` : ''
 ].filter(Boolean).join(' — ');
@@ -4866,6 +4895,8 @@ ${renderHBarChart(regionChartItems, {color:'#4a90d9', valueFmt: v => `${v} ${DL.
 <div class="card">
 <h2>${DL.summaryH2}</h2>
 <div class="note" style="margin-top:0;margin-bottom:12px;">Snapshot as of ${DEALS_SNAPSHOT_DATE} — ${AGREED_DEALS.length} pharmacy with an agreed deal overall, total payout <b>${fmt(AGREED_DEALS.reduce((s,d)=>s+d.total_payout,0))} ${curr()}</b>${filterNote ? ` — showing ${filterNote}: ${filteredDeals.length} pharmacy, ${fmt(totalPayout)} ${curr()}` : ''}.</div>
+<div class="note" style="margin-top:0;margin-bottom:8px;">${DL.regionTabsNote}</div>
+${regionTabsHtml}
 ${dmTabsHtml}
 ${mrTabsHtml}
 <div class="pharm-list" style="display:flex;gap:12px;flex-wrap:wrap;">${slabCardsHtml}</div>
@@ -4983,6 +5014,15 @@ ${slabOrder.filter(k => bySlab[k]).map(k => `<option value="${k}" ${dealsActiveS
 </div>
 <div id="pharmDetailsTableWrap" style="overflow-x:auto;"><table><thead><tr><th>${DL.detailsTh[0]}</th><th>${DL.detailsTh[1]}</th><th>${DL.detailsTh[2]}</th><th>${DL.detailsTh[3]}</th><th>${DL.detailsTh[4]}</th><th>${DL.detailsTh[5]}</th><th>${DL.detailsTh[6]}</th><th>${DL.detailsTh[7]}</th><th>${DL.detailsTh[8]}</th><th>${DL.detailsTh[9]}</th><th>${DL.detailsTh[10]}</th><th>${DL.detailsTh[11]}</th><th>${DL.detailsTh[12]}</th><th>${DL.detailsTh[13]}</th><th>${DL.detailsTh[14]}</th><th>${DL.detailsTh[15]}</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
 </div>`;
+
+document.getElementById('dealsRegionTabs')?.addEventListener('click', (e) => {
+const btn = e.target.closest('.tab-btn');
+if(!btn) return;
+dealsActiveRegion = btn.dataset.region;
+dealsActiveDM = ''; // a region change invalidates whichever DM/MR was drilled into
+dealsActiveMR = '';
+renderDeals();
+});
 
 document.getElementById('dealsDmTabs')?.addEventListener('click', (e) => {
 const btn = e.target.closest('.tab-btn');
