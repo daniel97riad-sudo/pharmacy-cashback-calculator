@@ -4082,6 +4082,10 @@ let dealsActiveDM = '';
 // DM selection changes, since an MR tab only makes sense inside its DM's context.
 let dealsActiveMR = '';
 
+// Which slab/tier the pharmacy-details table is filtered to (table-refactor tier
+// filter dropdown) -- '' means no filter, show every tier.
+let dealsActiveSlabFilter = '';
+
 // Which DM groups are expanded (showing their per-rep sub-rows) in the two
 // grouped-by-DM tables below (deal-type breakdown, Q3 tracker). Both start
 // fully collapsed -- a 35-rep flat list was hard to scan, so now you see DM
@@ -4234,17 +4238,22 @@ return achieved / target;
 // = % of Q3 elapsed. Both bars are visually capped at 100% width (an
 // over-achiever still reads as a full bar) but the printed percentage is the
 // real, uncapped number. The status line below compares the two directly.
+// Single source of truth for the ahead/on-track/behind classification -- used by
+// both the pacing widget (bars + label) and the compact Status pill column, so the
+// two can never disagree about a pharmacy's status.
+function pacingStatusCls(achFrac, timeFrac){
+const gap = (achFrac * 100) - (timeFrac * 100);
+return gap >= 5 ? 'ahead' : (gap <= -10 ? 'behind' : 'ontrack');
+}
+
 function renderPacingWidget(achFrac, timeFrac){
 const achPct = achFrac * 100;
 const timePct = timeFrac * 100;
-const gap = achPct - timePct;
-const status = currentLang === 'en'
-? (gap >= 5 ? {cls:'ahead', label:'🟢 Ahead of plan'}
-: gap <= -10 ? {cls:'behind', label:'🔴 Behind plan'}
-: {cls:'ontrack', label:'🟡 On track'})
-: (gap >= 5 ? {cls:'ahead', label:'🟢 متقدم على الخطة'}
-: gap <= -10 ? {cls:'behind', label:'🔴 متأخر عن الخطة'}
-: {cls:'ontrack', label:'🟡 على المسار الصحيح'});
+const cls = pacingStatusCls(achFrac, timeFrac);
+const labels = currentLang === 'en'
+? {ahead:'🟢 Ahead of plan', behind:'🔴 Behind plan', ontrack:'🟡 On track'}
+: {ahead:'🟢 متقدم على الخطة', behind:'🔴 متأخر عن الخطة', ontrack:'🟡 على المسار الصحيح'};
+const status = {cls, label: labels[cls]};
 const barW = p => Math.max(0, Math.min(100, p));
 const achTag = currentLang === 'en' ? 'Achieved' : 'تحقيق';
 const timeTag = currentLang === 'en' ? 'Time' : 'وقت';
@@ -4514,7 +4523,18 @@ posmH2:'Shelf Visibility (POSM)',
 posmNote:'Number of deals where point-of-sale materials (POSM) were placed on the shelf, versus deals without it',
 posmTh:['Status','Pharmacies','Total cashback','Total paid'],
 detailsH2:(n) => `Pharmacy details (${n})`,
-detailsTh:['Pharmacy','Code','Region','Territory','MR','DM','Slab','Cashback','Total Payout','July','August (so far)','September','Remaining to target','Progress','POSM Visibility'],
+detailsTh:['POSM Visibility','Pharmacy','Code','Region','Territory','MR','DM','Slab','Cashback','Total Payout','July','August (so far)','September','Remaining to target','Progress','Status'],
+tierFilterAll:'All tiers',
+csvExportBtn:'Export CSV',
+statusLabels:{ahead:'Ahead', ontrack:'On track', behind:'Behind'},
+overviewH2:'Deals Overview',
+kpiTotalCashback:'Total Cashback Disbursed',
+kpiTotalPharmacies:'Pharmacies with a Deal',
+kpiAvgPayout:'Avg. Payout per Pharmacy',
+kpiPosmCoverage:'POSM Shelf Coverage',
+slabDistH2:'Deals by Slab',
+regionDistH2:'Deals by Region',
+otherRegion:'Other',
 searchPh:'Search for a pharmacy by name or code...'
 } : {
 noDeals:'لا توجد صفقات متفق عليها في هذه اللقطة بعد.',
@@ -4547,7 +4567,18 @@ posmH2:'الرؤية على الرف (POSM)',
 posmNote:'عدد الصفقات التي تم فيها وضع مواد نقطة البيع (POSM) على الرف، مقابل الصفقات بدون ذلك',
 posmTh:['الحالة','عدد الصيدليات','إجمالي الكاش باك','إجمالي المدفوع'],
 detailsH2:(n) => `تفاصيل الصيدليات (${n})`,
-detailsTh:['Pharmacy','Code','Region','Territory','MR','DM','Slab','Cashback','Total Payout','يوليو','أغسطس (حتى الآن)','سبتمبر','المتبقي للمستهدف','التقدم','الرؤية (POSM)'],
+detailsTh:['الرؤية (POSM)','Pharmacy','Code','Region','Territory','MR','DM','Slab','Cashback','Total Payout','يوليو','أغسطس (حتى الآن)','سبتمبر','المتبقي للمستهدف','التقدم','الحالة'],
+tierFilterAll:'كل الشرائح',
+csvExportBtn:'تصدير CSV',
+statusLabels:{ahead:'متقدم', ontrack:'على المسار', behind:'متأخر'},
+overviewH2:'نظرة عامة على الاتفاقات',
+kpiTotalCashback:'إجمالي الكاش باك المدفوع',
+kpiTotalPharmacies:'صيدليات لديها اتفاق',
+kpiAvgPayout:'متوسط الدفع لكل صيدلية',
+kpiPosmCoverage:'تغطية POSM على الرف',
+slabDistH2:'الاتفاقات حسب الشريحة',
+regionDistH2:'الاتفاقات حسب المنطقة',
+otherRegion:'أخرى',
 searchPh:'ابحث عن صيدلية بالاسم أو الكود...'
 };
 
@@ -4612,7 +4643,30 @@ const q3TimeFrac = q3TimeElapsedFrac();
 const posmSummary = computeDealsPosmSummary(filteredDeals);
 const q3yoy = computeDealsQ3YoYSummary(filteredDeals);
 
-const rowsHtml = filteredDeals.map(d => `<tr>
+const posmCoveredCount = filteredDeals.filter(d => d.posm).length;
+const posmCoveragePct = filteredDeals.length ? Math.round(posmCoveredCount / filteredDeals.length * 100) : 0;
+const avgPayout = filteredDeals.length ? totalPayout / filteredDeals.length : 0;
+const byRegion = {};
+filteredDeals.forEach(d => {
+const r = (d.region || '').trim() || DL.unassigned;
+byRegion[r] = (byRegion[r] || 0) + 1;
+});
+const regionEntriesSorted = Object.entries(byRegion).sort((a,b) => b[1]-a[1]);
+const regionTopN = regionEntriesSorted.slice(0, 5);
+const regionOtherSum = regionEntriesSorted.slice(5).reduce((s,[,n]) => s+n, 0);
+const regionChartItems = regionTopN.map(([label,value]) => ({label, value}));
+if(regionOtherSum > 0) regionChartItems.push({label: DL.otherRegion, value: regionOtherSum});
+const slabChartItems = slabOrder.filter(k => bySlab[k]).map(k => ({label: bySlab[k].label, value: bySlab[k].n}));
+
+const tableFilteredDeals = dealsActiveSlabFilter ? filteredDeals.filter(d => dealsDisplaySlab(d).key === dealsActiveSlabFilter) : filteredDeals;
+
+const rowsHtml = tableFilteredDeals.map(d => {
+const achFrac = achievedFrac((d.month7_sales||0)+(d.month8_sales||0)+(d.month9_sales||0), d.target_sales||0);
+const statusCls = pacingStatusCls(achFrac, q3TimeFrac);
+const statusBg = {ahead:'#e3f5ec', ontrack:'#fdf1de', behind:'#fdf3f2'}[statusCls];
+const statusColor = {ahead:'#1a7a4d', ontrack:'#a0680d', behind:'#d64545'}[statusCls];
+return `<tr>
+<td style="text-align:center;">${d.posm ? '✅' : '—'}</td>
 <td class="name-cell">${d.name}</td>
 <td>${d.code}</td>
 <td>${d.region}</td>
@@ -4626,9 +4680,10 @@ const rowsHtml = filteredDeals.map(d => `<tr>
 <td>${fmt(d.month8_sales || 0)} ${curr()}</td>
 <td>${d.month9_sales ? fmt(d.month9_sales) + ' ' + curr() : '—'}</td>
 <td>${fmt(d.q3_remaining || 0)} ${curr()}</td>
-<td>${renderPacingWidget(achievedFrac((d.month7_sales||0)+(d.month8_sales||0)+(d.month9_sales||0), d.target_sales||0), q3TimeFrac)}</td>
-<td style="text-align:center;">${d.posm ? '✅' : '—'}</td>
-</tr>`).join('');
+<td>${renderPacingWidget(achFrac, q3TimeFrac)}</td>
+<td><span class="badge" style="background:${statusBg};color:${statusColor};">${DL.statusLabels[statusCls]}</span></td>
+</tr>`;
+}).join('');
 
 const dmBreakdownRowsHtml = dmSummary.map(b => {
 const members = teamMembersForDm(b.dm);
@@ -4646,6 +4701,44 @@ dealsActiveMR ? `${DL.mrLabel}: <b>${dealsActiveMR}</b>` : ''
 ].filter(Boolean).join(' — ');
 
 section.innerHTML = `
+<div class="card">
+<h2>${DL.overviewH2}</h2>
+<div class="note" style="margin-top:0;margin-bottom:14px;">Snapshot as of ${DEALS_SNAPSHOT_DATE}${filterNote ? ` — ${filterNote}` : ''}.</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;">
+<div style="flex:1 1 160px;min-width:150px;padding:14px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;">
+<div style="font-size:20px;font-weight:700;color:var(--primary-dark);">${fmt(totalPayout)} ${curr()}</div>
+<div style="font-size:11px;color:var(--muted);margin-top:4px;">${DL.kpiTotalCashback}</div>
+</div>
+<div style="flex:1 1 160px;min-width:150px;padding:14px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;">
+<div style="font-size:20px;font-weight:700;color:var(--primary-dark);">${filteredDeals.length}</div>
+<div style="font-size:11px;color:var(--muted);margin-top:4px;">${DL.kpiTotalPharmacies}</div>
+</div>
+<div style="flex:1 1 160px;min-width:150px;padding:14px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;">
+<div style="font-size:20px;font-weight:700;color:var(--primary-dark);">${fmt(avgPayout)} ${curr()}</div>
+<div style="font-size:11px;color:var(--muted);margin-top:4px;">${DL.kpiAvgPayout}</div>
+</div>
+<div style="flex:1 1 200px;min-width:190px;padding:14px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+<div style="font-size:11px;color:var(--muted);">${DL.kpiPosmCoverage}</div>
+<div style="font-size:15px;font-weight:700;color:#1a7a4d;">${posmCoveragePct}%</div>
+</div>
+<div style="background:var(--bg);border-radius:4px;height:10px;overflow:hidden;">
+<div style="width:${posmCoveragePct}%;height:100%;background:#1a7a4d;border-radius:4px;"></div>
+</div>
+<div style="font-size:11px;color:var(--muted);margin-top:4px;">${posmCoveredCount} / ${filteredDeals.length} ${DL.pharmacyWord(filteredDeals.length)}</div>
+</div>
+</div>
+<div style="display:flex;gap:20px;flex-wrap:wrap;">
+<div style="flex:1 1 260px;min-width:240px;">
+<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">${DL.slabDistH2}</div>
+${renderHBarChart(slabChartItems, {color:'var(--primary)', valueFmt: v => `${v} ${DL.pharmacyWord(v)}`})}
+</div>
+<div style="flex:1 1 260px;min-width:240px;">
+<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">${DL.regionDistH2}</div>
+${renderHBarChart(regionChartItems, {color:'#4a90d9', valueFmt: v => `${v} ${DL.pharmacyWord(v)}`})}
+</div>
+</div>
+</div>
 <div class="card">
 <h2>${DL.summaryH2}</h2>
 <div class="note" style="margin-top:0;margin-bottom:12px;">Snapshot as of ${DEALS_SNAPSHOT_DATE} — ${AGREED_DEALS.length} pharmacy with an agreed deal overall, total payout <b>${fmt(AGREED_DEALS.reduce((s,d)=>s+d.total_payout,0))} ${curr()}</b>${filterNote ? ` — showing ${filterNote}: ${filteredDeals.length} pharmacy, ${fmt(totalPayout)} ${curr()}` : ''}.</div>
@@ -4756,8 +4849,15 @@ return headerRow + repRows;
 <div style="overflow-x:auto;"><table><thead><tr><th>${DL.posmTh[0]}</th><th>${DL.posmTh[1]}</th><th>${DL.posmTh[2]}</th><th>${DL.posmTh[3]}</th></tr></thead><tbody>${posmSummary.map(b => `<tr><td class="name-cell">${b.label}</td><td>${b.n}</td><td>${fmt(b.cashback)} ${curr()}</td><td>${fmt(b.payout)} ${curr()}</td></tr>`).join('')}</tbody></table></div>
 </div>
 <div class="card">
-<h2>${DL.detailsH2(filteredDeals.length)}</h2>
-<div id="pharmDetailsTableWrap" style="overflow-x:auto;"><table><thead><tr><th>${DL.detailsTh[0]}</th><th>${DL.detailsTh[1]}</th><th>${DL.detailsTh[2]}</th><th>${DL.detailsTh[3]}</th><th>${DL.detailsTh[4]}</th><th>${DL.detailsTh[5]}</th><th>${DL.detailsTh[6]}</th><th>${DL.detailsTh[7]}</th><th>${DL.detailsTh[8]}</th><th>${DL.detailsTh[9]}</th><th>${DL.detailsTh[10]}</th><th>${DL.detailsTh[11]}</th><th>${DL.detailsTh[12]}</th><th>${DL.detailsTh[13]}</th><th>${DL.detailsTh[14]}</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
+<h2>${DL.detailsH2(tableFilteredDeals.length)}</h2>
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+<select id="dealsTierFilterSelect" class="reset-btn" style="cursor:pointer;">
+<option value="">${DL.tierFilterAll}</option>
+${slabOrder.filter(k => bySlab[k]).map(k => `<option value="${k}" ${dealsActiveSlabFilter===k?'selected':''}>${bySlab[k].label}</option>`).join('')}
+</select>
+<button class="reset-btn" id="dealsCsvExportBtn" type="button">⬇️ ${DL.csvExportBtn}</button>
+</div>
+<div id="pharmDetailsTableWrap" style="overflow-x:auto;"><table><thead><tr><th>${DL.detailsTh[0]}</th><th>${DL.detailsTh[1]}</th><th>${DL.detailsTh[2]}</th><th>${DL.detailsTh[3]}</th><th>${DL.detailsTh[4]}</th><th>${DL.detailsTh[5]}</th><th>${DL.detailsTh[6]}</th><th>${DL.detailsTh[7]}</th><th>${DL.detailsTh[8]}</th><th>${DL.detailsTh[9]}</th><th>${DL.detailsTh[10]}</th><th>${DL.detailsTh[11]}</th><th>${DL.detailsTh[12]}</th><th>${DL.detailsTh[13]}</th><th>${DL.detailsTh[14]}</th><th>${DL.detailsTh[15]}</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
 </div>`;
 
 document.getElementById('dealsDmTabs')?.addEventListener('click', (e) => {
@@ -4766,6 +4866,38 @@ if(!btn) return;
 dealsActiveDM = btn.dataset.dm;
 dealsActiveMR = ''; // a DM change invalidates whichever MR was drilled into
 renderDeals();
+});
+
+document.getElementById('dealsTierFilterSelect')?.addEventListener('change', (e) => {
+dealsActiveSlabFilter = e.target.value;
+renderDeals();
+});
+
+document.getElementById('dealsCsvExportBtn')?.addEventListener('click', () => {
+const csvEscape = (v) => {
+const s = String(v ?? '');
+return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+};
+const headers = ['Pharmacy','Code','Region','Territory','MR','DM','Slab','Cashback','Total Payout','July','August','September','Remaining','POSM','Status'];
+const lines = [headers.join(',')];
+tableFilteredDeals.forEach(d => {
+const achFrac = achievedFrac((d.month7_sales||0)+(d.month8_sales||0)+(d.month9_sales||0), d.target_sales||0);
+const statusCls = pacingStatusCls(achFrac, q3TimeFrac);
+lines.push([
+d.name, d.code, d.region, d.territory, d.mr || '', d.dm || '', dealsDisplaySlab(d).label,
+d.cashback, d.total_payout, d.month7_sales||0, d.month8_sales||0, d.month9_sales||0, d.q3_remaining||0,
+d.posm ? 'TRUE' : 'FALSE', statusCls
+].map(csvEscape).join(','));
+});
+const blob = new Blob(['\uFEFF' + lines.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `agreed_deals_${new Date().toISOString().slice(0,10)}.csv`;
+document.body.appendChild(a);
+a.click();
+a.remove();
+URL.revokeObjectURL(url);
 });
 
 document.getElementById('dealsMrTabs')?.addEventListener('click', (e) => {
@@ -4791,7 +4923,7 @@ renderDeals();
 });
 });
 
-enhanceBigTable('pharmDetailsTableWrap', {numericCols:[7,8,9,10,11,12], noSortCols:[13], placeholder:DL.searchPh});
+enhanceBigTable('pharmDetailsTableWrap', {numericCols:[8,9,10,11,12,13], noSortCols:[14,15], placeholder:DL.searchPh});
 enhanceBigTable('q3yoyTableWrap', {numericCols:[2,3,4,5,6,7], placeholder:DL.searchPh});
 }
 
