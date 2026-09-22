@@ -1121,7 +1121,8 @@ return `<span class="yoy-chip growth-neg">🚨 توقفت عن الشراء — 
 // kind of conversation to have. It deliberately does not guess the CAUSE --
 // only the pattern -- and reps confirm the real cause via the help-request
 // reason codes, which is the one thing data can never tell us.
-const PROBLEM_TYPES = {
+function getProblemTypes(){
+return currentLang === 'en' ? {
 quiet:  { label:'Stopped completely', icon:'🚨', cls:'growth-neg',
           ask:'Went from regular orders to zero. Find out today whether this is a stock-out, a credit hold, a competitor takeover, or an ownership change -- all four are recoverable if caught early.' },
 cliff:  { label:'Sudden drop',        icon:'⛰️', cls:'growth-neg',
@@ -1132,7 +1133,19 @@ bleed:  { label:'Big account slipping',icon:'💧', cls:'growth-neg',
           ask:'The % drop looks small but this is a large account, so the EGP loss is heavy. Protect this one first -- it is worth more than several small recoveries combined.' },
 watch:  { label:'Softening',          icon:'👀', cls:'',
           ask:'Down slightly. Worth a check-in before it becomes one of the categories above.' }
+} : {
+quiet:  { label:'توقفت تماماً', icon:'🚨', cls:'growth-neg',
+          ask:'انتقلت من طلبات منتظمة إلى الصفر. اعرف اليوم هل السبب نفاد مخزون، إيقاف ائتمان، استحواذ منافس، أم تغيير ملكية -- الأربعة قابلة للاسترجاع إذا اكتُشفت مبكراً.' },
+cliff:  { label:'انخفاض مفاجئ', icon:'⛰️', cls:'growth-neg',
+          ask:'كانت مستقرة ثم انخفضت في شهر محدد. شيء ما تغيّر في ذلك التاريخ -- اسأل عمّا حدث في ذلك الشهر. غالباً نفاد مخزون، عرض منافس جديد، أو صيدلي ترك العمل.' },
+steady: { label:'تراجع مستمر شهرياً', icon:'📉', cls:'growth-neg',
+          ask:'تفقد حصتها شهراً بعد شهر، وليس حدثاً واحداً كبيراً. غالباً موضع الرف، منافس يسحب الحصة تدريجياً، أو صاحب صيدلية توقف عن الترويج للماركة. تحتاج زيارة لإعادة الترتيب، لا مكالمة هاتفية.' },
+bleed:  { label:'حساب كبير يتراجع', icon:'💧', cls:'growth-neg',
+          ask:'نسبة الانخفاض تبدو صغيرة، لكنه حساب كبير، لذا الخسارة بالجنيه كبيرة. احمِ هذا الحساب أولاً -- قيمته تفوق عدة استرجاعات صغيرة مجتمعة.' },
+watch:  { label:'بداية تراجع', icon:'👀', cls:'',
+          ask:'انخفاض طفيف. يستحق متابعة قبل أن يتحول إلى إحدى الفئات أعلاه.' }
 };
+}
 
 // A pharmacy counts as a "big account" if its prior-year revenue in the
 // comparison window puts it in the top tier of the whole base. Computed once
@@ -1147,7 +1160,7 @@ return sums[Math.floor(sums.length * 0.90)]; // top 10% by prior-year revenue
 function classifyProblem(p){
 const y = getYoYGrowth(p);
 const d = getDormancyInfo(p);
-if(d.isDormant) return { type:'quiet', ...PROBLEM_TYPES.quiet, recoverEGP: d.atRiskEGP, y, d };
+if(d.isDormant) return { type:'quiet', ...getProblemTypes().quiet, recoverEGP: d.atRiskEGP, y, d };
 if(y.growth === null || y.deltaEGP >= 0) return null;
 
 const recoverEGP = Math.abs(y.deltaEGP);
@@ -1167,7 +1180,7 @@ const before = ratios.slice(0, split), after = ratios.slice(split);
 const avgBefore = before.reduce((s,v) => s+v, 0) / before.length;
 const avgAfter = after.reduce((s,v) => s+v, 0) / after.length;
 if(avgBefore >= 0.85 && avgAfter <= avgBefore * 0.6){
-return { type:'cliff', ...PROBLEM_TYPES.cliff, recoverEGP, y, d,
+return { type:'cliff', ...getProblemTypes().cliff, recoverEGP, y, d,
 brokeAt: monthAbbr(YOY_WINDOW[split].cur) + ' ' + YOY_WINDOW[split].cur.slice(0,4) };
 }
 }
@@ -1176,14 +1189,14 @@ brokeAt: monthAbbr(YOY_WINDOW[split].cur) + ' ' + YOY_WINDOW[split].cur.slice(0,
 // Down in most months of the window = a slide, not an event.
 const downMonths = ratios.filter(r => r < 0.95).length;
 if(ratios.length >= 3 && downMonths >= Math.ceil(ratios.length * 0.6)){
-return { type:'steady', ...PROBLEM_TYPES.steady, recoverEGP, y, d, downMonths, totalMonths: ratios.length };
+return { type:'steady', ...getProblemTypes().steady, recoverEGP, y, d, downMonths, totalMonths: ratios.length };
 }
 
 if(y.priorSum >= BIG_ACCOUNT_THRESHOLD){
-return { type:'bleed', ...PROBLEM_TYPES.bleed, recoverEGP, y, d };
+return { type:'bleed', ...getProblemTypes().bleed, recoverEGP, y, d };
 }
 
-return { type:'watch', ...PROBLEM_TYPES.watch, recoverEGP, y, d };
+return { type:'watch', ...getProblemTypes().watch, recoverEGP, y, d };
 }
 
 // ---------- Gap to 15% ----------
@@ -2061,10 +2074,23 @@ return pool.map(p => ({ p, problem: classifyProblem(p) }))
 }
 
 function priorityListHtml(list, mrName){
-if(!list.length) return '<div class="empty-msg">Nothing urgent in your book right now — good place to be.</div>';
+const PLT = currentLang === 'en' ? {
+empty:'Nothing urgent in your book right now — good place to be.',
+droppedIn: (m) => ` · dropped in ${m}`,
+downIn: (d,t) => ` · down in ${d} of ${t} months`,
+recoverable:'recoverable',
+sentLbl:'✅ Help request sent', askLbl:"🚨 Need manager's help",
+} : {
+empty:'لا يوجد شيء عاجل في سجلك الآن — وضع جيد.',
+droppedIn: (m) => ` · انخفضت في ${m}`,
+downIn: (d,t) => ` · منخفضة في ${d} من ${t} أشهر`,
+recoverable:'قابلة للاسترجاع',
+sentLbl:'✅ تم إرسال طلب المساعدة', askLbl:'🚨 محتاج مساعدة من المدير',
+};
+if(!list.length) return `<div class="empty-msg">${PLT.empty}</div>`;
 return list.map(({p, problem}, i) => {
-const detail = problem.brokeAt ? ` · dropped in ${problem.brokeAt}`
-: (problem.downMonths ? ` · down in ${problem.downMonths} of ${problem.totalMonths} months` : '');
+const detail = problem.brokeAt ? PLT.droppedIn(problem.brokeAt)
+: (problem.downMonths ? PLT.downIn(problem.downMonths, problem.totalMonths) : '');
 const sent = helpSentThisSession.has(p.c);
 return `
 <div class="prio-item">
@@ -2076,9 +2102,9 @@ return `
 <div class="prio-ask">${problem.ask}</div>
 </div>
 <div class="prio-side">
-<div class="prio-egp">${fmt(problem.recoverEGP)} EGP</div>
-<div class="prio-meta">recoverable</div>
-<button type="button" class="help-btn ${sent ? 'sent' : ''}" data-help-idx="${PHARMACIES.indexOf(p)}" data-help-code="${p.c}">${sent ? '✅ تم إرسال طلب المساعدة' : '🚨 محتاج مساعدة'}</button>
+<div class="prio-egp">${fmt(problem.recoverEGP)} ${curr()}</div>
+<div class="prio-meta">${PLT.recoverable}</div>
+<button type="button" class="help-btn ${sent ? 'sent' : ''}" data-help-idx="${PHARMACIES.indexOf(p)}" data-help-code="${p.c}">${sent ? PLT.sentLbl : PLT.askLbl}</button>
 </div>
 </div>`;
 }).join('');
@@ -2111,7 +2137,8 @@ openHelpModal(p, classifyProblem(p), mrName);
 function gapCardHtml(gap, opts){
 const o = opts || {};
 if(!gap || !gap.priorFullYear) return '';
-const who = o.who || 'Your book';
+const kind = o.kind || 'mine';
+const name = o.name || '';
 const pctToTarget = gap.target > 0 ? Math.min(gap.actualSoFar / gap.target, 1) : 0;
 const reqText = gap.requiredRemainingGrowth === null ? '—'
 : signedPct(gap.requiredRemainingGrowth);
@@ -2123,48 +2150,73 @@ const monthSpan = REMAINING_CUR_MONTHS.length
 : '—';
 const remainLabel = REMAINING_CUR_MONTHS.length ? `${monthSpan} ${LATEST_YEAR}` : '—';
 const remainPriorLabel = REMAINING_CUR_MONTHS.length ? `${monthSpan} ${PRIOR_YEAR}` : '—';
-const mine = who === 'Your book';
-const isCompany = who === 'The company';
+const mine = kind === 'mine';
+const isCompany = kind === 'company';
 // Heading and framing differ by audience: a rep sees their own book, a DM sees
 // their district, management sees the whole company. Same maths, three
 // different sentences -- getting this wrong made a district card read
 // "Company-Wide", which is exactly the kind of thing that makes people stop
 // trusting a number.
-const heading = mine ? 'Your Road to 15%'
-: isCompany ? 'The Road to 15% — Company-Wide'
-: `Road to 15% — ${who}`;
-const intro = mine
-? `Your own target, worked out from your actual ${PRIOR_YEAR} book — not a flat number handed to everyone.`
-: isCompany
-? `The company target, and the basis for every rep's individual number below.`
-: `This district's target, worked out from its actual ${PRIOR_YEAR} book — the sum of the individual rep targets below.`;
+const GT = currentLang === 'en' ? {
+heading: mine ? 'Your Road to 15%' : isCompany ? 'The Road to 15% — Company-Wide' : `Road to 15% — ${name}'s district`,
+intro: mine ? `Your own target, worked out from your actual ${PRIOR_YEAR} book — not a flat number handed to everyone.`
+  : isCompany ? `The company target, and the basis for every rep's individual number below.`
+  : `This district's target, worked out from its actual ${PRIOR_YEAR} book — the sum of the individual rep targets below.`,
+yearMeans: `A 15% year means <b>${fmt(gap.target)} EGP</b> across ${LATEST_YEAR}.`,
+priorFullYear:`${PRIOR_YEAR} Full Year`, actualSoFar:`${LATEST_YEAR} Actual So Far`, bookedSoFar:'booked so far this year',
+target15:`15% Target for ${LATEST_YEAR}`, realGap:'The Real Gap', extraOnTop:'extra, on top of current pace',
+onCurrentPace:'On Current Pace', ifNothingChanges:`${projText} if nothing changes`,
+extraPerMonth:'Extra Per Month', abovePace:`above current pace, for ${gap.monthsLeft} months`,
+growthSoFar:'Growth So Far', targetIs15:'target is +15%',
+requiredFromHere:'Required From Here', vsLabel:`${remainLabel} vs ${remainPriorLabel}`,
+realGapNote:`"The Real Gap" is the number that matters: total still to book this year is ${fmt(Math.max(gap.needRemaining, 0))} EGP, but most of that is already covered by ${mine ? 'your' : 'the'} existing pace — only <b>${fmt(Math.max(gap.extraVsTrend, 0))} EGP</b> of it is genuinely new work.`,
+onTrack:`✅ Already running at or above 15%. Hold this and the year lands — protect the accounts on the list below so it doesn't slip.`,
+bigAsk:`⚠️ Getting to 15% from here needs ${reqText} over the remaining months, which is a big ask on ${mine ? 'your' : 'this'} current base. Recovering the accounts below is the realistic route — and this is a case to ask for help rather than absorb alone.`,
+normal:`That works out to ${gap.extraPerMonth === null ? '—' : fmt(Math.max(gap.extraPerMonth, 0))} EGP a month. The list below is where that money already exists — it was being booked last year and stopped.`,
+} : {
+heading: mine ? 'طريقك نحو 15%' : isCompany ? 'الطريق نحو 15% — على مستوى الشركة' : `الطريق نحو 15% — قطاع ${name}`,
+intro: mine ? `مستهدفك الخاص، محسوب من سجل مبيعاتك الفعلي لعام ${PRIOR_YEAR} — وليس رقماً ثابتاً يُعطى للجميع.`
+  : isCompany ? `مستهدف الشركة، وهو الأساس الذي يُبنى عليه رقم كل مندوب أدناه.`
+  : `مستهدف هذا القطاع، محسوب من سجله الفعلي لعام ${PRIOR_YEAR} — وهو مجموع مستهدفات المندوبين الفرديين أدناه.`,
+yearMeans: `يعني عام بنسبة نمو 15% تحقيق <b>${fmt(gap.target)} ج.م</b> خلال ${LATEST_YEAR}.`,
+priorFullYear:`${PRIOR_YEAR} العام كاملاً`, actualSoFar:`${LATEST_YEAR} الفعلي حتى الآن`, bookedSoFar:'محقق حتى الآن هذا العام',
+target15:`مستهدف 15% لعام ${LATEST_YEAR}`, realGap:'الفجوة الحقيقية', extraOnTop:'إضافية، فوق الوتيرة الحالية',
+onCurrentPace:'بالوتيرة الحالية', ifNothingChanges:`${projText} إذا لم يتغيّر شيء`,
+extraPerMonth:'إضافي شهرياً', abovePace:`فوق الوتيرة الحالية، لمدة ${gap.monthsLeft} أشهر`,
+growthSoFar:'النمو حتى الآن', targetIs15:'المستهدف +15%',
+requiredFromHere:'المطلوب من الآن', vsLabel:`${remainLabel} مقابل ${remainPriorLabel}`,
+realGapNote:`"الفجوة الحقيقية" هي الرقم المهم: إجمالي ما تبقى تحقيقه هذا العام هو ${fmt(Math.max(gap.needRemaining, 0))} ج.م، لكن معظمه مغطى بالفعل بوتيرة ${mine ? 'مبيعاتك' : 'المبيعات'} الحالية — فقط <b>${fmt(Math.max(gap.extraVsTrend, 0))} ج.م</b> منه يمثل عملاً إضافياً حقيقياً جديداً.`,
+onTrack:`✅ تسير بالفعل بمعدل 15% أو أعلى. حافظ على هذه الوتيرة وسيتحقق الهدف — احمِ الحسابات في القائمة أدناه حتى لا يتراجع الأداء.`,
+bigAsk:`⚠️ الوصول إلى 15% من هنا يتطلب ${reqText} خلال الأشهر المتبقية، وهو مطلب كبير على قاعدة ${mine ? 'مبيعاتك' : 'هذا القطاع'} الحالية. استرجاع الحسابات أدناه هو الطريق الواقعي — وهذه حالة تستحق طلب المساعدة بدلاً من تحملها بمفردك.`,
+normal:`هذا يعادل ${gap.extraPerMonth === null ? '—' : fmt(Math.max(gap.extraPerMonth, 0))} ج.م شهرياً. القائمة أدناه هي حيث توجد هذه المبالغ بالفعل — كانت تُحقق العام الماضي ثم توقفت.`,
+};
 return `
 <div class="card">
-<h2>🎯 ${heading}</h2>
+<h2>🎯 ${GT.heading}</h2>
 <div class="note" style="margin-top:0;">
-${intro}
-A 15% year means <b>${fmt(gap.target)} EGP</b> across ${LATEST_YEAR}.
+${GT.intro}
+${GT.yearMeans}
 </div>
 <div class="gap-hero">
-<div class="sales-box"><div class="t">${PRIOR_YEAR} Full Year</div><div class="v">${fmt(gap.priorFullYear)} EGP</div></div>
-<div class="sales-box"><div class="t">${LATEST_YEAR} Actual So Far</div><div class="v">${fmt(gap.actualSoFar)} EGP</div><div class="sub">booked so far this year</div></div>
-<div class="sales-box"><div class="t">15% Target for ${LATEST_YEAR}</div><div class="v">${fmt(gap.target)} EGP</div></div>
-<div class="sales-box"><div class="t">The Real Gap</div><div class="v ${gap.extraVsTrend > 0 ? 'growth-neg' : 'growth-pos'}">${fmt(Math.max(gap.extraVsTrend, 0))} EGP</div><div class="sub">extra, on top of current pace</div></div>
-<div class="sales-box"><div class="t">On Current Pace</div><div class="v">${fmt(gap.projectedFullYear)} EGP</div><div class="sub">${projText} if nothing changes</div></div>
+<div class="sales-box"><div class="t">${GT.priorFullYear}</div><div class="v">${fmt(gap.priorFullYear)} ${curr()}</div></div>
+<div class="sales-box"><div class="t">${GT.actualSoFar}</div><div class="v">${fmt(gap.actualSoFar)} ${curr()}</div><div class="sub">${GT.bookedSoFar}</div></div>
+<div class="sales-box"><div class="t">${GT.target15}</div><div class="v">${fmt(gap.target)} ${curr()}</div></div>
+<div class="sales-box"><div class="t">${GT.realGap}</div><div class="v ${gap.extraVsTrend > 0 ? 'growth-neg' : 'growth-pos'}">${fmt(Math.max(gap.extraVsTrend, 0))} ${curr()}</div><div class="sub">${GT.extraOnTop}</div></div>
+<div class="sales-box"><div class="t">${GT.onCurrentPace}</div><div class="v">${fmt(gap.projectedFullYear)} ${curr()}</div><div class="sub">${GT.ifNothingChanges}</div></div>
 </div>
 <div class="gap-bar-wrap"><div class="gap-bar ${pctToTarget >= 1 ? 'ok' : ''}" style="width:${(pctToTarget*100).toFixed(1)}%"></div></div>
 <div class="totals-grid" style="margin-top:14px;">
-<div class="sales-box"><div class="t">Extra Per Month</div><div class="v">${gap.extraPerMonth === null ? '—' : fmt(Math.max(gap.extraPerMonth, 0))} EGP</div><div class="sub">above current pace, for ${gap.monthsLeft} months</div></div>
-<div class="sales-box"><div class="t">Growth So Far</div><div class="v ${soFarClass}">${soFarText}</div><div class="sub">target is +15%</div></div>
-<div class="sales-box"><div class="t">Required From Here</div><div class="v ${gap.requiredRemainingGrowth !== null && gap.requiredRemainingGrowth > 0.30 ? 'growth-neg' : ''}">${reqText}</div><div class="sub">${remainLabel} vs ${remainPriorLabel}</div></div>
+<div class="sales-box"><div class="t">${GT.extraPerMonth}</div><div class="v">${gap.extraPerMonth === null ? '—' : fmt(Math.max(gap.extraPerMonth, 0))} ${curr()}</div><div class="sub">${GT.abovePace}</div></div>
+<div class="sales-box"><div class="t">${GT.growthSoFar}</div><div class="v ${soFarClass}">${soFarText}</div><div class="sub">${GT.targetIs15}</div></div>
+<div class="sales-box"><div class="t">${GT.requiredFromHere}</div><div class="v ${gap.requiredRemainingGrowth !== null && gap.requiredRemainingGrowth > 0.30 ? 'growth-neg' : ''}">${reqText}</div><div class="sub">${GT.vsLabel}</div></div>
 </div>
 <div class="note">
-"The Real Gap" is the number that matters: total still to book this year is ${fmt(Math.max(gap.needRemaining, 0))} EGP, but most of that is already covered by ${mine ? 'your' : 'the'} existing pace — only <b>${fmt(Math.max(gap.extraVsTrend, 0))} EGP</b> of it is genuinely new work.
+${GT.realGapNote}
 ${gap.onTrack
-? `✅ Already running at or above 15%. Hold this and the year lands — protect the accounts on the list below so it doesn't slip.`
+? GT.onTrack
 : gap.requiredRemainingGrowth !== null && gap.requiredRemainingGrowth > 0.40
-? `⚠️ Getting to 15% from here needs ${reqText} over the remaining months, which is a big ask on ${mine ? 'your' : 'this'} current base. Recovering the accounts below is the realistic route — and this is a case to ask for help rather than absorb alone.`
-: `That works out to ${gap.extraPerMonth === null ? '—' : fmt(Math.max(gap.extraPerMonth, 0))} EGP a month. The list below is where that money already exists — it was being booked last year and stopped.`}
+? GT.bigAsk
+: GT.normal}
 </div>
 </div>`;
 }
@@ -2250,6 +2302,66 @@ const priority = buildPriorityList(subset);
 const priorityHtml = priorityListHtml(priority, myperfActiveMR);
 const priorityRecoverable = priority.reduce((s,x) => s + x.problem.recoverEGP, 0);
 
+const MP = currentLang === 'en' ? {
+bookH2: (mr, n) => `${mr}'s Book (${n} pharmacies)`,
+q3Total:'Q3 Total', q4Total:'Q4 Total', rangeTotal: (r) => `${r} Total`, ofWord:'of', yourGrowthQ:'Your Growth (Q3→Q4, contractual)',
+companyWideNote: (cg, out) => `Company-wide growth this period: ${cg}. ${out}`,
+outperform:'You are outperforming the company average.', behind:'You are behind the company average.',
+trendH2: (cur, prior) => `📅 Your Current-Year Trend (${cur} vs ${prior})`,
+trendNote:`Informational only -- doesn't affect cashback, but tells you how your book is doing right now instead of waiting for the next contract cycle. Any recent month that isn't fully reported by the distributor yet is automatically left out of this comparison.`,
+yourGrowth:'Your Growth',
+companyWideYoyNote: (cg, out) => `Company-wide growth over the same period: ${cg}. ${out}`,
+outperformYear:'You are outperforming the company average so far this year.', behindYear:'You are behind the company average so far this year.',
+startHereH2: (n) => `🎯 Start Here — Your ${n} Priority Pharmacies`,
+startHereNote: (count, recoverable, gapPct) => `Out of your ${count} pharmacies, these are the ones worth acting on first, biggest recoverable EGP at the top. Together they account for <b>${recoverable}</b> that your book was booking last year and isn't now${gapPct}. Each one is tagged with what kind of problem it is, so you know what to ask before you walk in. If you can't fix it alone, hit <b>🚨 Need manager's help</b> and it goes straight to your manager.`,
+gapPctSuffix: (pct) => ` — that covers ${pct}% of the gap between your current pace and 15%`,
+rankingH2: (n) => `📊 Your Ranking (of ${n} reps)`,
+byRevenue:'By Revenue (Q4)', byGrowthPct:'By Growth % (Q3→Q4)', byYearGrowthPct:'By Current-Year Growth %', na:'n/a',
+lockedH2: (n) => `🏆 Already Locked In (${n})`,
+lockedNote: (cb) => `Guaranteed cashback already earned across pharmacies that hit the top growth slab: <b>${cb}</b>`,
+wentQuietH2: (n) => `🚨 Went Quiet (${n})`,
+wentQuietNote:`Was buying regularly, then stopped completely in the last two reliable months -- call these first, before the slow decliners below.`,
+declinesH2: (n) => `📉 Biggest EGP Declines This Year (${n})`,
+declinesNote:`Ranked by EGP lost, not %, so the pharmacies actually worth the most revenue show up first.`,
+bestChanceH2: (n) => `📈 Best Chance to Push (${n})`,
+bestChanceNote:`Closest to their next slab in your book -- a small nudge could tip these over.`,
+attentionH2: (n) => `⚠️ Needs Attention (${n})`,
+remainingTo: (amt, label) => `${amt} to ${label}`,
+quietFor: (n) => ` · quiet for ${n} months`,
+atRisk: (amt) => `🚨 ${amt} at risk`,
+declineEGP: (amt) => `📉 ${amt}`,
+none:'None right now',
+} : {
+bookH2: (mr, n) => `سجل ${mr} (${n} صيدلية)`,
+q3Total:'إجمالي الربع الثالث', q4Total:'إجمالي الربع الرابع', rangeTotal: (r) => `إجمالي ${r}`, ofWord:'من', yourGrowthQ:'نمو مبيعاتك (الثالث→الرابع، التعاقدي)',
+companyWideNote: (cg, out) => `نمو الشركة في هذه الفترة: ${cg}. ${out}`,
+outperform:'أداؤك أعلى من متوسط الشركة.', behind:'أداؤك أقل من متوسط الشركة.',
+trendH2: (cur, prior) => `📅 اتجاه العام الحالي (${cur} مقابل ${prior})`,
+trendNote:`للعلم فقط -- لا يؤثر على الكاش باك، لكنه يوضح كيف يسير سجلك الآن بدلاً من انتظار دورة التعاقد القادمة. أي شهر حديث لم يُبلّغ عنه الموزع بالكامل بعد يُستبعد تلقائياً من هذه المقارنة.`,
+yourGrowth:'نمو مبيعاتك',
+companyWideYoyNote: (cg, out) => `نمو الشركة خلال نفس الفترة: ${cg}. ${out}`,
+outperformYear:'أداؤك أعلى من متوسط الشركة حتى الآن هذا العام.', behindYear:'أداؤك أقل من متوسط الشركة حتى الآن هذا العام.',
+startHereH2: (n) => `🎯 ابدأ من هنا — أولوياتك (${n} صيدلية)`,
+startHereNote: (count, recoverable, gapPct) => `من بين ${count} صيدلية في سجلك، هذه هي الأَولى بالعمل عليها، مرتّبة بأكبر مبلغ قابل للاسترجاع بالجنيه في الأعلى. تمثّل معاً <b>${recoverable}</b> كانت تُحقَّق في سجلك العام الماضي وتوقفت الآن${gapPct}. كل صيدلية مُصنّفة بنوع المشكلة، لتعرف ما تسأل عنه قبل الزيارة. إذا لم تستطع حلها بمفردك، اضغط <b>🚨 محتاج مساعدة من المدير</b> وسيصل الطلب مباشرة لمديرك.`,
+gapPctSuffix: (pct) => ` — وهذا يغطي ${pct}% من الفجوة بين وتيرتك الحالية ونسبة 15%`,
+rankingH2: (n) => `📊 ترتيبك (من بين ${n} مندوباً)`,
+byRevenue:'حسب الإيراد (الربع الرابع)', byGrowthPct:'حسب نسبة النمو (الثالث→الرابع)', byYearGrowthPct:'حسب نمو العام الحالي', na:'غير متاح',
+lockedH2: (n) => `🏆 مضمون بالفعل (${n})`,
+lockedNote: (cb) => `كاش باك مضمون تم تحقيقه بالفعل عبر الصيدليات التي وصلت لأعلى شريحة نمو: <b>${cb}</b>`,
+wentQuietH2: (n) => `🚨 توقفت تماماً (${n})`,
+wentQuietNote:`كانت تشتري بانتظام ثم توقفت تماماً في آخر شهرين موثوقين -- اتصل بهذه أولاً، قبل الحالات المتراجعة ببطء أدناه.`,
+declinesH2: (n) => `📉 أكبر انخفاض بالجنيه هذا العام (${n})`,
+declinesNote:`مرتّبة حسب قيمة الانخفاض بالجنيه لا بالنسبة، لتظهر الصيدليات الأكثر قيمة فعلياً أولاً.`,
+bestChanceH2: (n) => `📈 الأقرب لتحقيق المستهدف (${n})`,
+bestChanceNote:`الأقرب للشريحة التالية في سجلك -- دفعة بسيطة قد تكفي لتخطيها.`,
+attentionH2: (n) => `⚠️ تحتاج متابعة (${n})`,
+remainingTo: (amt, label) => `${amt} للوصول إلى ${label}`,
+quietFor: (n) => ` · متوقفة منذ ${n} أشهر`,
+atRisk: (amt) => `🚨 ${amt} معرضة للخطر`,
+declineEGP: (amt) => `📉 ${amt}`,
+none:'لا يوجد حالياً',
+};
+
 const listItem = (p, s, cls, metaHtml, salesHtml) => `
 <div class="pharm-list-item ${cls}" data-idx="${PHARMACIES.indexOf(p)}">
 <div>
@@ -2262,73 +2374,74 @@ const listItem = (p, s, cls, metaHtml, salesHtml) => `
 </div>`;
 
 const bestChanceHtml = bestChance.slice(0, 5).map(({p,s}) => listItem(p, s, 'pli-best-chance',
-`${p.tr} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
+`${p.tr} ${yoyGrowthBadgeHtml(p)}`, MP.remainingTo(`${fmt(s.remaining)} ${curr()}`, slabLabelFor(s.nextKey)))).join('');
 const needsAttentionHtml = needsAttention.slice(0, 5).map(({p,s}) => listItem(p, s, 'pli-needs-attention',
-`${p.tr} ${yoyGrowthBadgeHtml(p)}`, `${fmt(s.remaining)} EGP to ${s.nextLabel}`)).join('');
+`${p.tr} ${yoyGrowthBadgeHtml(p)}`, MP.remainingTo(`${fmt(s.remaining)} ${curr()}`, slabLabelFor(s.nextKey)))).join('');
 const dormantMineHtml = dormantMine.slice(0, 5).map(({p,d}) => listItem(p, d, 'pli-dormant',
-`${p.tr||'—'} · quiet for ${d.lastTwo.length} months`, `🚨 ${fmt(d.atRiskEGP)} EGP at risk`)).join('');
+`${p.tr||'—'}${MP.quietFor(d.lastTwo.length)}`, MP.atRisk(`${fmt(d.atRiskEGP)} ${curr()}`))).join('');
 const yoyDeclinesMineHtml = yoyDeclinesMine.slice(0, 5).map(({p,y}) => listItem(p, y, 'pli-needs-attention',
-`${p.tr||'—'} · ${y.growth!==null?signedPct(y.growth):'—'}`, `📉 ${fmt(y.deltaEGP)} EGP`)).join('');
+`${p.tr||'—'} · ${y.growth!==null?signedPct(y.growth):'—'}`, MP.declineEGP(`${fmt(y.deltaEGP)} ${curr()}`))).join('');
+
+const gapPct = (gap && gap.extraVsTrend > 0) ? MP.gapPctSuffix(Math.round(priorityRecoverable / gap.extraVsTrend * 100)) : '';
 
 section.innerHTML = `
 <div class="card">
-<h2>${myperfActiveMR}'s Book (${count} pharmacies)</h2>
+<h2>${MP.bookH2(myperfActiveMR, count)}</h2>
 <div class="totals-grid">
-<div class="sales-box"><div class="t">Q3 Total</div><div class="v">${fmt(sumQ3)} EGP</div></div>
-<div class="sales-box"><div class="t">Q4 Total</div><div class="v">${fmt(sumQ4)} EGP</div></div>
-<div class="sales-box"><div class="t">Your Growth (Q3→Q4, contractual)</div><div class="v ${growthClass}">${growthText}</div></div>
+<div class="sales-box"><div class="t">${MP.q3Total}</div><div class="v">${fmt(sumQ3)} ${curr()}</div></div>
+<div class="sales-box"><div class="t">${MP.q4Total}</div><div class="v">${fmt(sumQ4)} ${curr()}</div></div>
+<div class="sales-box"><div class="t">${MP.yourGrowthQ}</div><div class="v ${growthClass}">${growthText}</div></div>
 </div>
-<div class="note">Company-wide growth this period: ${companyGrowth===null?'—':signedPct(companyGrowth)}. ${growth!==null && companyGrowth!==null ? (growth > companyGrowth ? 'You are outperforming the company average.' : 'You are behind the company average.') : ''}</div>
+<div class="note">${MP.companyWideNote(companyGrowth===null?'—':signedPct(companyGrowth), growth!==null && companyGrowth!==null ? (growth > companyGrowth ? MP.outperform : MP.behind) : '')}</div>
 </div>
 <div class="card">
-<h2>📅 Your Current-Year Trend (${curRange} vs ${priorRange})</h2>
-<div class="note" style="margin-top:0;">Informational only -- doesn't affect cashback, but tells you how your book is doing right now instead of waiting for the next contract cycle. Any recent month that isn't fully reported by the distributor yet is automatically left out of this comparison.</div>
+<h2>${MP.trendH2(curRange, priorRange)}</h2>
+<div class="note" style="margin-top:0;">${MP.trendNote}</div>
 <div class="totals-grid">
-<div class="sales-box"><div class="t">${priorRange} Total</div><div class="v">${fmt(sumYoYPrior)} EGP</div></div>
-<div class="sales-box"><div class="t">${curRange} Total</div><div class="v">${fmt(sumYoYCur)} EGP</div></div>
-<div class="sales-box"><div class="t">Your Growth</div><div class="v ${yoyGrowthClass}">${yoyGrowthText}</div></div>
+<div class="sales-box"><div class="t">${MP.rangeTotal(priorRange)}</div><div class="v">${fmt(sumYoYPrior)} ${curr()}</div></div>
+<div class="sales-box"><div class="t">${MP.rangeTotal(curRange)}</div><div class="v">${fmt(sumYoYCur)} ${curr()}</div></div>
+<div class="sales-box"><div class="t">${MP.yourGrowth}</div><div class="v ${yoyGrowthClass}">${yoyGrowthText}</div></div>
 </div>
-<div class="note">Company-wide growth over the same period: ${companyYoYGrowth===null?'—':signedPct(companyYoYGrowth)}. ${yoyGrowth!==null && companyYoYGrowth!==null ? (yoyGrowth > companyYoYGrowth ? 'You are outperforming the company average so far this year.' : 'You are behind the company average so far this year.') : ''}</div>
+<div class="note">${MP.companyWideYoyNote(companyYoYGrowth===null?'—':signedPct(companyYoYGrowth), yoyGrowth!==null && companyYoYGrowth!==null ? (yoyGrowth > companyYoYGrowth ? MP.outperformYear : MP.behindYear) : '')}</div>
 </div>
-${gapCardHtml(gap, { who: 'Your book' })}
+${gapCardHtml(gap, { kind: 'mine' })}
 <div class="card">
-<h2>🎯 Start Here — Your ${priority.length} Priority Pharmacies</h2>
+<h2>${MP.startHereH2(priority.length)}</h2>
 <div class="note" style="margin-top:0;">
-Out of your ${count} pharmacies, these are the ones worth acting on first, biggest recoverable EGP at the top. Together they account for <b>${fmt(priorityRecoverable)} EGP</b> that your book was booking last year and isn't now${gap && gap.extraVsTrend > 0 ? ` — that covers ${Math.round(priorityRecoverable / gap.extraVsTrend * 100)}% of the gap between your current pace and 15%` : ''}.
-Each one is tagged with what kind of problem it is, so you know what to ask before you walk in. If you can't fix it alone, hit <b>محتاج مساعدة</b> and it goes straight to your manager.
+${MP.startHereNote(count, `${fmt(priorityRecoverable)} ${curr()}`, gapPct)}
 </div>
 <div class="pharm-list" id="myperfPriorityList">${priorityHtml}</div>
 </div>
 <div class="card">
-<h2>📊 Your Ranking (of ${totalMRs} reps)</h2>
+<h2>${MP.rankingH2(totalMRs)}</h2>
 <div class="totals-grid">
-<div class="sales-box"><div class="t">By Revenue (Q4)</div><div class="v">#${q4Rank}</div></div>
-<div class="sales-box"><div class="t">By Growth % (Q3→Q4)</div><div class="v">${growthRank ? '#'+growthRank+' of '+byGrowthRank.length : 'n/a'}</div></div>
-<div class="sales-box"><div class="t">By Current-Year Growth %</div><div class="v">${yoyGrowthRank ? '#'+yoyGrowthRank+' of '+byYoYGrowthRank.length : 'n/a'}</div></div>
+<div class="sales-box"><div class="t">${MP.byRevenue}</div><div class="v">#${q4Rank}</div></div>
+<div class="sales-box"><div class="t">${MP.byGrowthPct}</div><div class="v">${growthRank ? '#'+growthRank+' '+MP.ofWord+' '+byGrowthRank.length : MP.na}</div></div>
+<div class="sales-box"><div class="t">${MP.byYearGrowthPct}</div><div class="v">${yoyGrowthRank ? '#'+yoyGrowthRank+' '+MP.ofWord+' '+byYoYGrowthRank.length : MP.na}</div></div>
 </div>
 </div>
 <div class="card">
-<h2>🏆 Already Locked In (${maxed.length})</h2>
-<div class="note" style="margin-top:0;">Guaranteed cashback already earned across pharmacies that hit the top growth slab: <b>${fmt(lockedCashback)} EGP</b></div>
+<h2>${MP.lockedH2(maxed.length)}</h2>
+<div class="note" style="margin-top:0;">${MP.lockedNote(`${fmt(lockedCashback)} ${curr()}`)}</div>
 </div>
 <div class="card">
-<h2>🚨 Went Quiet (${dormantMine.length})</h2>
-<div class="note" style="margin-top:0;">Was buying regularly, then stopped completely in the last two reliable months -- call these first, before the slow decliners below.</div>
-<div class="pharm-list">${dormantMineHtml || '<div class="empty-msg">None right now</div>'}</div>
+<h2>${MP.wentQuietH2(dormantMine.length)}</h2>
+<div class="note" style="margin-top:0;">${MP.wentQuietNote}</div>
+<div class="pharm-list">${dormantMineHtml || `<div class="empty-msg">${MP.none}</div>`}</div>
 </div>
 <div class="card">
-<h2>📉 Biggest EGP Declines This Year (${yoyDeclinesMine.length})</h2>
-<div class="note" style="margin-top:0;">Ranked by EGP lost, not %, so the pharmacies actually worth the most revenue show up first.</div>
-<div class="pharm-list">${yoyDeclinesMineHtml || '<div class="empty-msg">None right now</div>'}</div>
+<h2>${MP.declinesH2(yoyDeclinesMine.length)}</h2>
+<div class="note" style="margin-top:0;">${MP.declinesNote}</div>
+<div class="pharm-list">${yoyDeclinesMineHtml || `<div class="empty-msg">${MP.none}</div>`}</div>
 </div>
 <div class="card">
-<h2>📈 Best Chance to Push (${bestChance.length})</h2>
-<div class="note" style="margin-top:0;">Closest to their next slab in your book -- a small nudge could tip these over.</div>
-<div class="pharm-list">${bestChanceHtml || '<div class="empty-msg">None right now</div>'}</div>
+<h2>${MP.bestChanceH2(bestChance.length)}</h2>
+<div class="note" style="margin-top:0;">${MP.bestChanceNote}</div>
+<div class="pharm-list">${bestChanceHtml || `<div class="empty-msg">${MP.none}</div>`}</div>
 </div>
 <div class="card">
-<h2>⚠️ Needs Attention (${needsAttention.length})</h2>
-<div class="pharm-list">${needsAttentionHtml || '<div class="empty-msg">None right now</div>'}</div>
+<h2>${MP.attentionH2(needsAttention.length)}</h2>
+<div class="pharm-list">${needsAttentionHtml || `<div class="empty-msg">${MP.none}</div>`}</div>
 </div>`;
 
 section.querySelectorAll('.pharm-list-item').forEach(item => {
@@ -2440,7 +2553,7 @@ return `<tr class="clickable-row" data-name="${r.mr}">
 }).join('');
 
 section.innerHTML = `
-${gapCardHtml(teamGap, { who: myteamActiveDM + "'s district" })}
+${gapCardHtml(teamGap, { kind: 'district', name: myteamActiveDM })}
 ${spread !== null ? `
 <div class="card">
 <h2>🎯 Room to Grow in Your District</h2>
@@ -2988,7 +3101,7 @@ return `<tr class="clickable-row" data-name="${r.mr}">
 }).join('');
 
 section.innerHTML = `
-${gapCardHtml(companyGap, { who: 'The company' })}
+${gapCardHtml(companyGap, { kind: 'company' })}
 <div class="card">
 <h2>📋 What the Recovery Lists Actually Cover</h2>
 <div class="note" style="margin-top:0;">
