@@ -586,7 +586,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.18);display:none;align-items:center;justify-c
 <div class="view-tab-btn" data-view="myperf">👤 My Performance</div>
 <div class="view-tab-btn" data-view="myteam">👥 My Team (DM)</div>
 <div class="view-tab-btn" data-view="analysis">📈 Analysis</div>
-<div class="view-tab-btn" data-view="deals">💰 Agreed Deals</div>
+<div class="view-tab-btn" data-view="deals">💰 <span id="navDealsLbl">الاتفاقات المتفق عليها</span></div>
 <div class="view-tab-btn" data-view="chains">🏬 Chains</div>
 </div>
 
@@ -694,8 +694,8 @@ box-shadow:0 2px 10px rgba(0,0,0,0.18);display:none;align-items:center;justify-c
 
 <div id="dealsView" style="display:none;">
 <div class="card">
-<h2>💰 Agreed Deals — Contract Payout Log</h2>
-<div class="note" style="margin-top:0;margin-bottom:12px;">Static snapshot of pharmacies with an actual agreed deal (via "✅ اتفاق مع الصيدلية"), one row per pharmacy using their latest agreed terms. Refreshed manually when requested — not a live feed, and visible on the management link only.</div>
+<h2 id="dealsViewH2">💰 الاتفاقات المتفق عليها — سجل مدفوعات التعاقد</h2>
+<div class="note" id="dealsViewNote" style="margin-top:0;margin-bottom:12px;">لقطة ثابتة للصيدليات التي لديها اتفاق فعلي مسجَّل (عبر "✅ اتفاق مع الصيدلية")، صف واحد لكل صيدلية بأحدث شروط متفق عليها. تُحدَّث يدوياً عند الطلب — ليست بيانات حية، ومتاحة فقط على رابط الإدارة.</div>
 </div>
 <div id="dealsSection"></div>
 </div>
@@ -4686,12 +4686,12 @@ q3Th:['مدير المنطقة','عدد الصفقات','المستهدف','يو
 yoyH2:'نمو الربع الثالث: 2026 مقابل 2025',
 yoyStat1:'يوليو+أغسطس 2025', yoyStat2:'يوليو+أغسطس 2026 (فعلي)', yoyStat3:'النمو الفعلي حتى الآن',
 yoyStat4:'الربع الثالث 2025 (كامل)', yoyStat5:'مستهدف الربع الثالث 2026', yoyStat6:'النمو المتوقع عند تحقيق المستهدف',
-yoyTh:['Pharmacy','Code','يوليو+أغسطس 2025','يوليو+أغسطس 2026','نمو حتى الآن','الربع الثالث 2025 (كامل)','مستهدف 2026','نمو عند التحقيق'],
+yoyTh:['الصيدلية','الكود','يوليو+أغسطس 2025','يوليو+أغسطس 2026','نمو حتى الآن','الربع الثالث 2025 (كامل)','مستهدف 2026','نمو عند التحقيق'],
 posmH2:'الرؤية على الرف (POSM)',
 posmNote:'عدد الصفقات التي تم فيها وضع مواد نقطة البيع (POSM) على الرف، مقابل الصفقات بدون ذلك',
 posmTh:['الحالة','عدد الصيدليات','إجمالي الكاش باك','إجمالي المدفوع'],
 detailsH2:(n) => `تفاصيل الصيدليات (${n})`,
-detailsTh:['الرؤية (POSM)','Pharmacy','Code','Region','Territory','MR','DM','Slab','Cashback','Total Payout','يوليو','أغسطس (حتى الآن)','سبتمبر','المتبقي للمستهدف','التقدم','الحالة'],
+detailsTh:['الرؤية (POSM)','الصيدلية','الكود','المنطقة','القطاع','المندوب','مدير المنطقة','الشريحة','الكاش باك','إجمالي المدفوع','يوليو','أغسطس (حتى الآن)','سبتمبر','المتبقي للمستهدف','التقدم','الحالة'],
 tierFilterAll:'كل الشرائح',
 csvExportBtn:'تصدير CSV',
 statusLabels:{ahead:'متقدم', ontrack:'على المسار', behind:'متأخر'},
@@ -5929,6 +5929,9 @@ navSearch: 'Search for a pharmacy',
 navOverview: 'Opportunities',
 navChain: 'Merge pharmacies',
 navLeaderboard: 'Leaderboard',
+navDeals: 'Agreed Deals',
+dealsViewH2: '💰 Agreed Deals — Contract Payout Log',
+dealsViewNote: 'Static snapshot of pharmacies with an actual agreed deal (via "✅ اتفاق مع الصيدلية"), one row per pharmacy using their latest agreed terms. Refreshed manually when requested — not a live feed, and visible on the management link only.',
 footer: 'Figures are calculated from distributor (DIST) sales data for Q3 and Q4 2025 — this tool is for scenario display before contracting, and is not a final confirmation of entitlements.',
 searchViewTitle: 'Search for a pharmacy',
 previewLoadBtnLbl: '🧪 Preview another data file (this session only)',
@@ -5953,6 +5956,9 @@ navSearch: 'بحث عن صيدلية',
 navOverview: 'نظرة عامة على الفرص',
 navChain: 'دمج صيدليات (سلسلة)',
 navLeaderboard: 'لوحة المتصدرين',
+navDeals: 'الاتفاقات المتفق عليها',
+dealsViewH2: '💰 الاتفاقات المتفق عليها — سجل مدفوعات التعاقد',
+dealsViewNote: 'لقطة ثابتة للصيدليات التي لديها اتفاق فعلي مسجَّل (عبر "✅ اتفاق مع الصيدلية")، صف واحد لكل صيدلية بأحدث شروط متفق عليها. تُحدَّث يدوياً عند الطلب — ليست بيانات حية، ومتاحة فقط على رابط الإدارة.',
 footer: 'الأرقام محسوبة من بيانات مبيعات الموزع (DIST) للربع الثالث والرابع 2025 — الأداة لعرض السيناريوهات قبل التعاقد، وليست تأكيداً نهائياً للمستحقات.',
 searchViewTitle: 'البحث عن صيدلية',
 previewLoadBtnLbl: '🧪 معاينة ملف بيانات آخر (لهذه الجلسة فقط)',
@@ -5976,6 +5982,9 @@ if($('navSearchLbl')) $('navSearchLbl').textContent = LT.navSearch;
 if($('navOverviewLbl')) $('navOverviewLbl').textContent = LT.navOverview;
 if($('navChainLbl')) $('navChainLbl').textContent = LT.navChain;
 if($('navLeaderboardLbl')) $('navLeaderboardLbl').textContent = LT.navLeaderboard;
+if($('navDealsLbl')) $('navDealsLbl').textContent = LT.navDeals;
+if($('dealsViewH2')) $('dealsViewH2').textContent = LT.dealsViewH2;
+if($('dealsViewNote')) $('dealsViewNote').textContent = LT.dealsViewNote;
 if($('mainFooter')) $('mainFooter').textContent = LT.footer;
 if($('searchViewTitle')) $('searchViewTitle').textContent = LT.searchViewTitle;
 if($('previewLoadBtnLbl')) $('previewLoadBtnLbl').textContent = LT.previewLoadBtnLbl;
