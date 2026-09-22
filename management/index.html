@@ -5002,7 +5002,10 @@ const csvEscape = (v) => {
 const s = String(v ?? '');
 return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 };
-const headers = ['Pharmacy','Code','Region','Territory','MR','DM','Slab','Cashback','Total Payout','July','August','September','Remaining','POSM','Status'];
+const csvHeaders = currentLang === 'en'
+? ['Pharmacy','Code','Region','Territory','MR','DM','Slab','Cashback','Total Payout','July','August','September','Remaining','POSM','Status']
+: ['الصيدلية','الكود','المنطقة','القطاع','المندوب','مدير المنطقة','الشريحة','الكاش باك','إجمالي المدفوع','يوليو','أغسطس','سبتمبر','المتبقي','POSM','الحالة'];
+const headers = csvHeaders;
 const lines = [headers.join(',')];
 tableFilteredDeals.forEach(d => {
 const achFrac = achievedFrac((d.month7_sales||0)+(d.month8_sales||0)+(d.month9_sales||0), d.target_sales||0);
@@ -5010,7 +5013,7 @@ const statusCls = pacingStatusCls(achFrac, q3TimeFrac);
 lines.push([
 d.name, d.code, d.region, d.territory, d.mr || '', d.dm || '', dealsDisplaySlab(d).label,
 d.cashback, d.total_payout, d.month7_sales||0, d.month8_sales||0, d.month9_sales||0, d.q3_remaining||0,
-d.posm ? 'TRUE' : 'FALSE', statusCls
+d.posm ? 'TRUE' : 'FALSE', (DL.statusLabels[statusCls] || statusCls)
 ].map(csvEscape).join(','));
 });
 const blob = new Blob(['\uFEFF' + lines.join('\r\n')], {type:'text/csv;charset=utf-8;'});
