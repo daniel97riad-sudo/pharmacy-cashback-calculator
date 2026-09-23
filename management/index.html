@@ -581,9 +581,174 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
 #dealsView .dt-search-wrap{margin-bottom:10px;max-width:420px;}
 #dealsView .dt-search-wrap .search-box input{padding:10px 40px;font-size:13px;}
 #dealsView .dt-search-wrap .search-count{margin-top:4px;}
+
+/* Executive View (added 2026-09-23) -- leadership-facing one-page snapshot.
+   Reuses .card/.totals-grid/.sales-box from the rest of the tool; these
+   rules only add the hero stat strip and the fixed/variable slab-mix cards
+   that are unique to this tab. */
+#execView .exec-hero{padding-bottom:14px;}
+#execView .exec-hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;}
+#execView .exec-stat{text-align:center;padding:8px 6px;}
+#execView .exec-stat .v{font-size:26px;font-weight:700;color:var(--primary-dark);font-variant-numeric:tabular-nums;}
+#execView .exec-stat .v .sub{font-size:13px;font-weight:600;color:var(--success);margin-inline-start:4px;}
+#execView .exec-stat .t{font-size:12px;color:var(--muted);margin-top:4px;}
+#execView .exec-slab-group-label{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px;}
+#execView .exec-slab-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;}
+#execView .exec-slab-card{border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;background:var(--bg);}
+#execView .exec-slab-card-label{font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text);}
+#execView .exec-slab-card-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px;}
+#execView .exec-slab-card-row b{color:var(--text);}
+#execView .exec-slab-card-sub{font-size:11px;color:var(--muted);margin-top:6px;}
+#execView .exec-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-bottom:8px;}
+#execView .exec-bar-fill{height:100%;border-radius:3px;}
+#execView table td.growth-pos{font-weight:700;}
+
+/* ===================================================================
+   App Shell — Pharmacy Commercial Management Platform (Phase 1)
+   Added 2026-09-23. Persistent sidebar + topbar wrapped around the
+   existing calculator/tabs, which are unchanged underneath. New tokens
+   are namespaced --shell-* so they never override the calculator's own
+   --primary (amber) palette used inside the untouched modules.
+   =================================================================== */
+:root{
+--shell-navy:#1E2233;
+/* Unified brand accent, 2026-09-23: the new shell now reuses the tool's
+   existing orange (--primary) instead of a separate red, so the whole
+   app -- old tabs and new platform pages alike -- share one look. */
+--shell-red:var(--primary);
+--shell-red-dark:var(--primary-dark);
+--shell-red-light:var(--primary-light);
+--shell-sidebar-bg:#151A30;
+--shell-sidebar-bg-hover:#1F2540;
+--shell-sidebar-text:#B7BCD4;
+--shell-sidebar-text-active:#FFFFFF;
+--shell-topbar-h:64px;
+--shell-sidebar-w:248px;
+}
+*{box-sizing:border-box;}
+.app-shell{display:flex;min-height:100vh;align-items:stretch;}
+.app-sidebar{position:fixed;top:0;bottom:0;inset-inline-start:0;width:var(--shell-sidebar-w);background:var(--shell-sidebar-bg);display:flex;flex-direction:column;z-index:60;transition:transform .22s ease;}
+.app-sidebar-brand{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+.app-sidebar-brand .app-logo-chip{background:#fff;border-radius:10px;padding:5px 8px;display:flex;align-items:center;}
+.app-sidebar-brand .app-logo-chip img{height:26px;width:auto;display:block;}
+.app-sidebar-brand .app-brand-text{color:#fff;font-weight:700;font-size:14px;line-height:1.25;}
+.app-sidebar-brand .app-brand-text small{display:block;font-weight:500;font-size:10.5px;color:var(--shell-sidebar-text);letter-spacing:.02em;}
+.app-nav{list-style:none;margin:0;padding:10px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.app-nav-btn{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:var(--shell-sidebar-text);font-size:13.5px;font-weight:600;cursor:pointer;border-inline-start:3px solid transparent;user-select:none;}
+.app-nav-btn .app-nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.app-nav-btn:hover{background:var(--shell-sidebar-bg-hover);color:var(--shell-sidebar-text-active);}
+.app-nav-btn.active{background:var(--shell-sidebar-bg-hover);color:var(--shell-sidebar-text-active);border-inline-start-color:var(--shell-red);}
+.app-sidebar-foot{margin-top:auto;padding:14px 18px;font-size:10.5px;color:#6E7392;border-top:1px solid rgba(255,255,255,.08);}
+.app-sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(10,12,24,.45);z-index:55;}
+.app-main{flex:1;min-width:0;margin-left:var(--shell-sidebar-w);display:flex;flex-direction:column;min-height:100vh;}
+.app-topbar{display:flex;align-items:center;gap:14px;padding:0 22px;height:var(--shell-topbar-h);flex-shrink:0;border-bottom:1px solid var(--border);background:var(--card);position:sticky;top:0;z-index:40;}
+.app-hamburger{display:none;background:none;border:1px solid var(--border);border-radius:8px;width:34px;height:34px;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--shell-navy);flex-shrink:0;}
+.app-page-head{flex:1;min-width:0;}
+.app-breadcrumb{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.app-page-title{font-size:17px;font-weight:800;color:var(--shell-navy);margin:1px 0 0;line-height:1.3;}
+.app-topbar-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-inline-start:auto;}
+.app-alert-bell{position:relative;background:none;border:1px solid var(--border);border-radius:9px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;}
+.app-alert-badge{position:absolute;top:-5px;inset-inline-end:-5px;background:var(--shell-red);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+.app-user-chip{width:34px;height:34px;border-radius:50%;background:var(--shell-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.app-content{flex:1;padding:20px 22px 40px;min-width:0;overflow-x:hidden;}
+@media (max-width:1080px){
+.app-sidebar{transform:translateX(-100%);}
+.app-sidebar.open{transform:translateX(0);}
+.app-sidebar-backdrop.open{display:block;}
+.app-main{margin-left:0;}
+.app-hamburger{display:flex;}
+.app-content{padding:16px 14px 32px;}
+}
+@media (max-width:560px){
+.app-topbar{padding:0 12px;gap:8px;}
+.app-page-title{font-size:15px;}
+.app-user-chip{display:none;}
+}
+
+/* Executive dashboard (Phase 1 new content) */
+#execDashView .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:18px;min-width:0;}
+#execDashView .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;box-shadow:var(--shadow-card);min-width:0;}
+#execDashView .kpi-label{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-bottom:8px;}
+#execDashView .kpi-value{font-size:28px;font-weight:800;color:var(--shell-navy);font-variant-numeric:tabular-nums;line-height:1.15;}
+#execDashView .kpi-trend{font-size:12.5px;font-weight:700;margin-top:8px;}
+#execDashView .kpi-trend.up{color:var(--success);}
+#execDashView .kpi-trend.down{color:var(--danger);}
+#execDashView .kpi-trend.neutral{color:var(--muted);font-weight:600;}
+#execDashView .dash-grid-2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px;align-items:start;min-width:0;}
+#execDashView .dash-grid-2 > .card{min-width:0;}
+@media (max-width:980px){#execDashView .dash-grid-2{grid-template-columns:minmax(0,1fr);}}
+#execDashView .chart-legend{display:flex;gap:18px;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:16px;}
+#execDashView .chart-legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-inline-end:5px;vertical-align:middle;}
+#execDashView .chart-bars-row{display:flex;justify-content:space-around;align-items:flex-end;height:190px;padding:26px 10px 0;border-bottom:1px solid var(--border);}
+#execDashView .chart-month-group{display:flex;flex-direction:column;align-items:center;}
+#execDashView .chart-bar-pair{display:flex;align-items:flex-end;gap:7px;height:160px;}
+#execDashView .chart-bar{width:32px;border-radius:5px 5px 0 0;position:relative;min-height:2px;}
+#execDashView .chart-bar-val{position:absolute;top:-20px;inset-inline-start:50%;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:var(--shell-navy);white-space:nowrap;}
+#execDashView .chart-month-label{font-size:12px;color:var(--muted);font-weight:700;margin-top:10px;}
+#execDashView .region-name{font-weight:700;color:var(--shell-navy);}
+#execDashView .region-flag{display:inline-block;margin-inline-start:6px;font-size:11px;color:var(--danger);font-weight:700;}
+#execDashView .exposure-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;min-width:0;}
+#execDashView .exposure-box{min-width:0;}
+#execDashView .exposure-box{border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;background:var(--bg);}
+#execDashView .exposure-box .t{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
+#execDashView .exposure-box .v{font-size:19px;font-weight:800;color:var(--shell-navy);margin-top:5px;font-variant-numeric:tabular-nums;}
+#execDashView .exposure-box .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+#execDashView .exposure-budget-note{margin-top:12px;font-size:11.5px;color:var(--muted);background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:8px 10px;}
+#execDashView .alert-list{display:flex;flex-direction:column;gap:10px;}
+#execDashView .alert-item{display:flex;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);}
+#execDashView .alert-item.sev-critical{border-color:var(--danger-border);background:var(--danger-bg);}
+#execDashView .alert-item.sev-warning{border-color:var(--banner-warn-border);background:var(--banner-warn-bg);}
+#execDashView .alert-icon{font-size:17px;line-height:1.3;flex-shrink:0;}
+#execDashView .alert-title{font-weight:700;color:var(--shell-navy);font-size:13.5px;}
+#execDashView .alert-detail{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+#execDashView .alert-empty{font-size:13px;color:var(--muted);padding:8px 2px;}
+#execDashView .view-all-link{display:inline-block;margin-top:12px;font-size:12.5px;font-weight:700;color:var(--shell-red);cursor:pointer;}
+#alertsPageView .alert-list{display:flex;flex-direction:column;gap:12px;}
+#alertsPageView .alert-item{display:flex;gap:14px;padding:14px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg);}
+#alertsPageView .alert-item.sev-critical{border-color:var(--danger-border);background:var(--danger-bg);}
+#alertsPageView .alert-item.sev-warning{border-color:var(--banner-warn-border);background:var(--banner-warn-bg);}
+#alertsPageView .alert-icon{font-size:20px;flex-shrink:0;}
+#alertsPageView .alert-title{font-weight:700;color:var(--shell-navy);font-size:14.5px;}
+#alertsPageView .alert-detail{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.45;}
+#settingsPageView .settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+#settingsPageView .settings-row:last-child{border-bottom:none;}
+#settingsPageView .settings-label{font-weight:700;color:var(--shell-navy);font-size:13.5px;}
+#settingsPageView .settings-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+#settingsPageView .settings-soon{font-size:12.5px;color:var(--muted);background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-top:6px;}
 </style>
 </head>
 <body>
+<aside class="app-sidebar" id="appSidebar" dir="ltr">
+<div class="app-sidebar-brand">
+<div class="app-logo-chip" id="appLogoChip"></div>
+<div class="app-brand-text">Pharco CHC<small>Commercial Management Platform</small></div>
+</div>
+<nav class="app-nav" id="appNav">
+<div class="app-nav-btn active" data-view="execDash" data-section="executive"><span class="app-nav-icon">🏠</span><span>Executive</span></div>
+<div class="app-nav-btn" data-view="exec" data-section="management"><span class="app-nav-icon">📊</span><span>Management</span></div>
+<div class="app-nav-btn" data-view="search" data-section="calculator"><span class="app-nav-icon">🧮</span><span>Cashback Calculator</span></div>
+<div class="app-nav-btn" data-view="overview" data-section="pharmacies"><span class="app-nav-icon">🏪</span><span>Pharmacies</span></div>
+<div class="app-nav-btn" data-view="deals" data-section="cashback"><span class="app-nav-icon">💰</span><span>Cashback</span></div>
+<div class="app-nav-btn" data-view="myperf" data-section="targets"><span class="app-nav-icon">🎯</span><span>Targets</span></div>
+<div class="app-nav-btn" data-view="analysis" data-section="analytics"><span class="app-nav-icon">📈</span><span>Analytics</span></div>
+<div class="app-nav-btn" data-view="alertsPage" data-section="alerts"><span class="app-nav-icon">⚠️</span><span>Alerts</span></div>
+<div class="app-nav-btn" data-view="settingsPage" data-section="settings"><span class="app-nav-icon">⚙️</span><span>Settings</span></div>
+</nav>
+<div class="app-sidebar-foot">Management build · Phase 1</div>
+</aside>
+<div class="app-sidebar-backdrop" id="appSidebarBackdrop"></div>
+<div class="app-main">
+<div class="app-topbar" id="appTopbar" dir="ltr">
+<button class="app-hamburger" id="appHamburger" type="button" aria-label="Toggle menu">☰</button>
+<div class="app-page-head" id="appPageHead">
+<div class="app-breadcrumb" id="appBreadcrumb">Home / Executive</div>
+<div class="app-page-title" id="appPageTitleText">Executive</div>
+</div>
+<div class="app-topbar-actions">
+<button class="app-alert-bell" id="appAlertBell" type="button" aria-label="Alerts">🔔<span class="app-alert-badge" id="appAlertBadge" style="display:none;">0</span></button>
+<div class="app-user-chip" id="appUserChip" title="Signed in">DR</div>
+</div>
+</div>
 <div class="wrap">
 
 <header>
@@ -595,12 +760,12 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
 <button class="help-btn no-print" id="howToBtn" type="button">ℹ️ <span id="howToBtnLbl">كيف تعمل الأداة</span></button>
 </div>
 <div class="signed-in-as" id="signedInAs" style="display:none;"></div>
-<h1 id="mainTitle">🧮 حاسبة كاش باك ومكافآت الصيدليات</h1>
-<p id="mainSubtitle">اكتب اسم الصيدلية أو الكود، وشاهد مبيعات الربع الثالث والرابع، ونسبة النمو، وقيمة الكاش باك المستهدف للعقد الجديد.</p>
+<h1 id="mainTitle" style="display:none;">🧮 حاسبة كاش باك ومكافآت الصيدليات</h1>
+<p id="mainSubtitle" style="display:none;">اكتب اسم الصيدلية أو الكود، وشاهد مبيعات الربع الثالث والرابع، ونسبة النمو، وقيمة الكاش باك المستهدف للعقد الجديد.</p>
 </header>
 
-<div class="view-tabs" id="viewTabs">
-<div class="view-tab-btn active" data-view="search">🔍 <span id="navSearchLbl">بحث عن صيدلية</span></div>
+<div class="view-tabs" id="viewTabs" style="display:none;">
+<div class="view-tab-btn" data-view="search">🔍 <span id="navSearchLbl">بحث عن صيدلية</span></div>
 <div class="view-tab-btn" data-view="overview"><span class="tab-badge" id="overviewBadge" style="display:none;">0</span>📊 <span id="navOverviewLbl">نظرة عامة على الفرص</span></div>
 <div class="view-tab-btn" data-view="chain">🔗 <span id="navChainLbl">دمج صيدليات (سلسلة)</span></div>
 <div class="view-tab-btn" data-view="leaderboard">🏆 <span id="navLeaderboardLbl">لوحة المتصدرين</span></div>
@@ -609,9 +774,12 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
 <div class="view-tab-btn" data-view="analysis">📈 Analysis</div>
 <div class="view-tab-btn" data-view="deals">💰 <span id="navDealsLbl">الاتفاقات المتفق عليها</span></div>
 <div class="view-tab-btn" data-view="chains">🏬 Chains</div>
+<div class="view-tab-btn" data-view="exec">📊 Management</div>
 </div>
 
-<div id="searchView">
+<div id="execDashView" dir="ltr"></div>
+
+<div id="searchView" style="display:none;">
 <div class="card">
 <h2 id="searchViewTitle">البحث عن صيدلية</h2>
 <div id="previewBannerSlot"></div>
@@ -721,6 +889,18 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
 <div id="dealsSection"></div>
 </div>
 
+<div id="execView" style="display:none;" dir="ltr">
+<div id="execSection"></div>
+</div>
+
+<div id="alertsPageView" style="display:none;" dir="ltr">
+<div id="alertsPageSection"></div>
+</div>
+
+<div id="settingsPageView" style="display:none;" dir="ltr">
+<div id="settingsPageSection"></div>
+</div>
+
 <div id="chainsView" style="display:none;">
 <div class="card">
 <h2>🏬 Chains — MKT Report (CHC)</h2>
@@ -744,6 +924,7 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
 </div>
 
 <footer id="mainFooter">الأرقام محسوبة من بيانات مبيعات الموزع (DIST) للربع الثالث والرابع 2025 — الأداة لعرض السيناريوهات قبل التعاقد، وليست تأكيداً نهائياً للمستحقات.</footer>
+</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -3489,6 +3670,54 @@ document.querySelectorAll('#analysisSubTabs .tab-btn').forEach(b => b.classList.
 renderAnalysis();
 });
 
+// App shell (Phase 1, added 2026-09-23): 9-section sidebar wrapped around the
+// pre-existing views above. Each section maps to one or more of the original
+// view ids -- the calculator logic and every render*() function below are
+// untouched; this just groups them under a new nav and keeps the sidebar /
+// topbar in sync with whichever view is showing, however it was reached.
+const APP_SECTIONS = [
+{key:'executive', label:'Executive', subtitle:'How is the pharmacy commercial business performing?', views:['execDash']},
+{key:'management', label:'Management', subtitle:'Where is performance coming from?', views:['exec']},
+{key:'calculator', label:'Cashback Calculator', subtitle:'', views:['search']},
+{key:'pharmacies', label:'Pharmacies', subtitle:'What is happening with this pharmacy?', views:['overview','chain','chains']},
+{key:'cashback', label:'Cashback', subtitle:'Where is cashback money going?', views:['deals']},
+{key:'targets', label:'Targets', subtitle:'Are we achieving plan?', views:['myperf','myteam','leaderboard']},
+{key:'analytics', label:'Analytics', subtitle:'Why is this happening?', views:['analysis']},
+{key:'alerts', label:'Alerts', subtitle:'What needs your attention?', views:['alertsPage']},
+{key:'settings', label:'Settings', subtitle:'', views:['settingsPage']},
+];
+const VIEW_TO_SECTION = {};
+APP_SECTIONS.forEach(s => s.views.forEach(v => { VIEW_TO_SECTION[v] = s.key; }));
+
+function syncAppShell(view){
+const sectionKey = VIEW_TO_SECTION[view] || 'calculator';
+const section = APP_SECTIONS.find(s => s.key === sectionKey);
+document.querySelectorAll('.app-nav-btn').forEach(btn => {
+btn.classList.toggle('active', btn.dataset.section === sectionKey);
+});
+const isCalc = sectionKey === 'calculator';
+const mainTitleEl = document.getElementById('mainTitle');
+const mainSubtitleEl = document.getElementById('mainSubtitle');
+if(mainTitleEl) mainTitleEl.style.display = isCalc ? '' : 'none';
+if(mainSubtitleEl) mainSubtitleEl.style.display = isCalc ? '' : 'none';
+const crumb = document.getElementById('appBreadcrumb');
+const titleText = document.getElementById('appPageTitleText');
+if(crumb) crumb.textContent = 'Home / ' + (section ? section.label : 'Cashback Calculator');
+if(titleText) titleText.textContent = section ? section.label : 'Cashback Calculator';
+const subViews = section ? section.views : ['search'];
+const tabsBar = document.getElementById('viewTabs');
+if(tabsBar){
+tabsBar.style.display = subViews.length > 1 ? '' : 'none';
+tabsBar.querySelectorAll('.view-tab-btn').forEach(btn => {
+btn.style.display = subViews.includes(btn.dataset.view) ? '' : 'none';
+});
+}
+const sidebar = document.getElementById('appSidebar');
+const backdrop = document.getElementById('appSidebarBackdrop');
+if(sidebar) sidebar.classList.remove('open');
+if(backdrop) backdrop.classList.remove('open');
+}
+
 function switchView(view){
 if(previewModeActive && view !== 'search') return;
 document.getElementById('searchView').style.display = view === 'search' ? '' : 'none';
@@ -3500,6 +3729,10 @@ document.getElementById('myteamView').style.display = view === 'myteam' ? '' : '
 document.getElementById('analysisView').style.display = view === 'analysis' ? '' : 'none';
 document.getElementById('dealsView').style.display = view === 'deals' ? '' : 'none';
 document.getElementById('chainsView').style.display = view === 'chains' ? '' : 'none';
+document.getElementById('execView').style.display = view === 'exec' ? '' : 'none';
+document.getElementById('execDashView').style.display = view === 'execDash' ? '' : 'none';
+document.getElementById('alertsPageView').style.display = view === 'alertsPage' ? '' : 'none';
+document.getElementById('settingsPageView').style.display = view === 'settingsPage' ? '' : 'none';
 document.querySelectorAll('.view-tab-btn').forEach(btn => {
 btn.classList.toggle('active', btn.dataset.view === view);
 });
@@ -3511,12 +3744,36 @@ if(view === 'myteam') renderMyTeam();
 if(view === 'analysis') renderAnalysis();
 if(view === 'deals') renderDeals();
 if(view === 'chains') renderChains();
+if(view === 'exec') renderExec();
+if(view === 'execDash') renderExecDash();
+if(view === 'alertsPage') renderAlertsPage();
+if(view === 'settingsPage') renderSettingsPage();
+syncAppShell(view);
 }
 document.getElementById('viewTabs').addEventListener('click', (e) => {
 const btn = e.target.closest('.view-tab-btn');
 if(!btn) return;
 switchView(btn.dataset.view);
 });
+document.getElementById('appNav').addEventListener('click', (e) => {
+const btn = e.target.closest('.app-nav-btn');
+if(!btn) return;
+switchView(btn.dataset.view);
+});
+document.getElementById('appHamburger').addEventListener('click', () => {
+document.getElementById('appSidebar').classList.toggle('open');
+document.getElementById('appSidebarBackdrop').classList.toggle('open');
+});
+document.getElementById('appSidebarBackdrop').addEventListener('click', () => {
+document.getElementById('appSidebar').classList.remove('open');
+document.getElementById('appSidebarBackdrop').classList.remove('open');
+});
+document.getElementById('appAlertBell').addEventListener('click', () => switchView('alertsPage'));
+(function cloneSidebarLogo(){
+const src = document.querySelector('.header-brand .brand-logo');
+const chip = document.getElementById('appLogoChip');
+if(src && chip) chip.appendChild(src.cloneNode(true));
+})();
 
 mrFilter.addEventListener('change', () => {
 activeMR = mrFilter.value;
@@ -4656,6 +4913,443 @@ sumQ325Full, sumTargetAll, sumTargetMatched, noFullBaseline, noFullTarget,
 growthSoFarTotal: sumJulAug25 ? (sumAchievedMatched - sumJulAug25) / sumJulAug25 : 0,
 growthIfAchievedTotal: sumQ325Full ? (sumTargetMatched - sumQ325Full) / sumQ325Full : 0
 };
+}
+
+// ---------- Executive View ----------
+// One-page leadership snapshot: overall slab achievement across the whole
+// pharmacy base, a breakdown of the Agreed Deals log by DM and by deal type
+// (fixed-value vs growth-slab), total payout exposure, YoY growth vs the
+// Q3 2025 baseline, and POSM coverage. Every figure here is computed fresh
+// from PHARMACIES/AGREED_DEALS at render time using the SAME functions and
+// definitions as the rest of this tool (calcSlabs, dealsDisplaySlab,
+// computeDealsQ3YoYSummary) -- nothing here is a separately-maintained
+// number that can drift out of sync with the Agreed Deals tab. Added
+// 2026-09-23 per Daniel's request for a leadership-facing summary tab.
+// English-only content (no currentLang branching), matching the existing
+// My Performance / My Team (DM) tabs.
+function fmtBig(n){
+if(n === null || n === undefined || isNaN(n)) return '—';
+const sign = n < 0 ? '-' : '';
+const abs = Math.abs(n);
+if(abs >= 1000000) return sign + (abs/1000000).toFixed(1) + 'M';
+if(abs >= 1000) return sign + Math.round(abs/1000).toLocaleString('en-US') + 'K';
+return sign + Math.round(abs).toLocaleString('en-US');
+}
+
+function computeExecSnapshot(){
+// Slab achievers across the WHOLE pharmacy base (not just agreed deals) --
+// same real-EGP-target logic as calcSlabs/getSlabStatus (fixed floor for
+// low-baseline pharmacies, growth-based target otherwise). A pharmacy's
+// "achieved tier" is the highest slab whose real target its Q4'25 actual
+// sales meet or beat.
+let tierCounts = { s1:0, s2:0, s3:0, none:0 };
+PHARMACIES.forEach(p => {
+if(!p.q3d || p.q3d <= 0){ tierCounts.none++; return; }
+const rows = calcSlabs(p.q3d, {shelf:'none', posm:false, full:false});
+const actual = p.q4d || 0;
+let best = 'none';
+rows.forEach(r => { if(actual >= r.target) best = r.key; });
+tierCounts[best]++;
+});
+const anyAchieved = tierCounts.s1 + tierCounts.s2 + tierCounts.s3;
+
+// Agreed Deals: achieved = Jul+Aug+Sep 2026 actual sales already at/above
+// the deal's own target_sales (same definition used in the deals log and
+// the delivered Excel report -- never raw growth %).
+let achievedDealsN = 0, totalPayoutAll = 0, totalPayoutAchieved = 0, posmN = 0;
+AGREED_DEALS.forEach(d => {
+const achieved = (d.month7_sales||0) + (d.month8_sales||0) + (d.month9_sales||0);
+const isAch = achieved >= (d.target_sales||0);
+if(isAch) achievedDealsN++;
+totalPayoutAll += d.total_payout || 0;
+if(isAch) totalPayoutAchieved += d.total_payout || 0;
+if(d.posm) posmN++;
+});
+
+// Per-DM roll-up.
+const byDM = {};
+AGREED_DEALS.forEach(d => {
+const key = d.dm || '(No DM)';
+if(!byDM[key]) byDM[key] = { dm:key, n:0, target:0, achievedSales:0, achievedDeals:0 };
+const b = byDM[key];
+const achieved = (d.month7_sales||0) + (d.month8_sales||0) + (d.month9_sales||0);
+b.n++;
+b.target += d.target_sales || 0;
+b.achievedSales += achieved;
+if(achieved >= (d.target_sales||0)) b.achievedDeals++;
+});
+const dmRows = Object.values(byDM).sort((a,b) => b.n - a.n);
+
+// Deal mix by slab -- dealsDisplaySlab() already separates the 3 flat
+// 6,500/7,500/9,500-EGP fixed deals from real growth-slab deals that
+// happen to share the same s1/s2/s3 slab_key (see its own comment above).
+// This tab is English-only (see note above), so labels are always taken
+// from the *_En variants regardless of currentLang -- dealsDisplaySlab()'s
+// own .label would flip to Arabic whenever the app's default language (ar)
+// is active, which would look broken next to this tab's English headers.
+const bandTotals = {};
+AGREED_DEALS.forEach(d => {
+const disp = dealsDisplaySlab(d);
+if(!bandTotals[disp.key]) bandTotals[disp.key] = { key:disp.key, n:0, achN:0, target:0, achievedSales:0 };
+const b = bandTotals[disp.key];
+const achieved = (d.month7_sales||0) + (d.month8_sales||0) + (d.month9_sales||0);
+b.n++;
+b.target += d.target_sales || 0;
+b.achievedSales += achieved;
+if(achieved >= (d.target_sales||0)) b.achN++;
+});
+const fixedBands = FIXED_SLABS.map(f => Object.assign({ key:f.key, n:0, achN:0, target:0, achievedSales:0 }, bandTotals[f.key], { label: f.labelEn }));
+const varBands = SLABS.map(s => Object.assign({ key:s.key, n:0, achN:0, target:0, achievedSales:0 }, bandTotals[s.key], { label: SLAB_LABELS_EN[s.key] || s.key }));
+
+// Actual growth vs Q3 2025 -- reuses the exact same function that powers
+// the Agreed Deals tab's own Q3 YoY card, so the numbers here always match.
+const yoy = computeDealsQ3YoYSummary(AGREED_DEALS);
+
+return {
+totalPharmacies: PHARMACIES.length, tierCounts, anyAchieved,
+totalDeals: AGREED_DEALS.length, achievedDealsN,
+totalPayoutAll, totalPayoutAchieved, posmN,
+dmRows, fixedBands, varBands, yoy
+};
+}
+
+function execBarHtml(fracPct, color){
+const w = Math.max(0, Math.min(100, fracPct));
+return `<div class="exec-bar"><div class="exec-bar-fill" style="width:${w}%;background:${color};"></div></div>`;
+}
+
+function execSlabCardHtml(b, color){
+const achPct = b.n ? (b.achN / b.n * 100) : 0;
+const targetPct = b.target ? (b.achievedSales / b.target * 100) : 0;
+return `<div class="exec-slab-card">
+<div class="exec-slab-card-label">${b.label}</div>
+<div class="exec-slab-card-row"><span>Deals achieved</span><b><bdi dir="ltr">${b.achN} / ${b.n}</bdi></b></div>
+${execBarHtml(achPct, color)}
+<div class="exec-slab-card-row"><span>Target value achieved</span><b>${targetPct.toFixed(0)}%</b></div>
+${execBarHtml(targetPct, color)}
+<div class="exec-slab-card-sub">${fmtBig(b.target)} EGP target</div>
+</div>`;
+}
+
+function renderExec(){
+const section = document.getElementById('execSection');
+if(!section) return;
+const s = computeExecSnapshot();
+
+const heroHtml = `
+<div class="card exec-hero">
+<h2>📊 Management Snapshot</h2>
+<div class="exec-hero-grid">
+<div class="exec-stat"><div class="v">${s.totalPharmacies.toLocaleString('en-US')}</div><div class="t">Total Pharmacies</div></div>
+<div class="exec-stat"><div class="v">${s.anyAchieved.toLocaleString('en-US')}<span class="sub">${(s.anyAchieved/s.totalPharmacies*100).toFixed(1)}%</span></div><div class="t">Achieved ≥1 Slab</div></div>
+<div class="exec-stat"><div class="v">${s.achievedDealsN.toLocaleString('en-US')}<span class="sub">${(s.achievedDealsN/s.totalDeals*100).toFixed(1)}%</span></div><div class="t">Agreed Deals Achieved (of ${s.totalDeals.toLocaleString('en-US')})</div></div>
+</div>
+<div class="note" style="margin-top:10px;margin-bottom:0;">Agreed Deals data as of: ${DEALS_SNAPSHOT_DATE}</div>
+</div>`;
+
+const dmRowsHtml = s.dmRows.map(r => {
+const achPct = r.target ? (r.achievedSales / r.target * 100) : 0;
+const dealPct = r.n ? (r.achievedDeals / r.n * 100) : 0;
+return `<tr>
+<td class="name-cell">${r.dm}</td>
+<td>${r.n}</td>
+<td>${fmtBig(r.target)} EGP</td>
+<td class="${achPct>=50?'growth-pos':''}">${achPct.toFixed(0)}%</td>
+<td><bdi dir="ltr">${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</bdi></td>
+</tr>`;
+}).join('');
+
+const dmHtml = `
+<div class="card">
+<h2>👥 By District Manager</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;"><bdi dir="ltr">"Target Achieved" = actual sales booked so far (Jul+Aug+Sep) as a share of the total agreed target across that DM's deals.</bdi></div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>District Manager</th><th>Deals</th><th>Target Sales</th><th>Target Achieved</th><th>Deals Achieved</th></tr></thead>
+<tbody>${dmRowsHtml}</tbody>
+</table>
+</div>
+</div>`;
+
+const slabMixHtml = `
+<div class="card">
+<h2>🎯 Deal Mix by Slab</h2>
+<div class="exec-slab-group-label">Fixed-value deals (target pinned at a flat EGP figure)</div>
+<div class="exec-slab-grid">${s.fixedBands.map(b => execSlabCardHtml(b, 'var(--primary)')).join('')}</div>
+<div class="exec-slab-group-label" style="margin-top:16px;">Variable deals (target computed from growth %)</div>
+<div class="exec-slab-grid">${s.varBands.map(b => execSlabCardHtml(b, 'var(--variable-blue)')).join('')}</div>
+</div>`;
+
+const moneyHtml = `
+<div class="card">
+<h2>💰 Payout Exposure</h2>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">Payout Owed Now</div><div class="v">${fmtBig(s.totalPayoutAchieved)} EGP</div><div class="sub">achieved deals only</div></div>
+<div class="sales-box"><div class="t">Total Potential Payout</div><div class="v">${fmtBig(s.totalPayoutAll)} EGP</div><div class="sub">if every agreed deal hits target</div></div>
+</div>
+</div>`;
+
+const growthHtml = `
+<div class="card">
+<h2>📈 Growth vs Q3 2025</h2>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">Growth So Far</div><div class="v ${s.yoy.growthSoFarTotal>=0?'growth-pos':'growth-neg'}">${signedPct(s.yoy.growthSoFarTotal)}</div><div class="sub">Jul+Aug 2026 vs Jul+Aug 2025</div></div>
+<div class="sales-box"><div class="t">Growth If Targets Hit</div><div class="v ${s.yoy.growthIfAchievedTotal>=0?'growth-pos':'growth-neg'}">${signedPct(s.yoy.growthIfAchievedTotal)}</div><div class="sub">full Q3 2026 target vs Q3 2025</div></div>
+</div>
+</div>`;
+
+const posmHtml = `
+<div class="card">
+<h2>🏷️ POSM Coverage</h2>
+<div class="totals-grid">
+<div class="sales-box"><div class="t">Deals with POSM</div><div class="v"><bdi dir="ltr">${s.posmN.toLocaleString('en-US')} / ${s.totalDeals.toLocaleString('en-US')}</bdi></div><div class="sub"><bdi dir="ltr">${(s.posmN/s.totalDeals*100).toFixed(1)}% of agreed deals</bdi></div></div>
+</div>
+</div>`;
+
+section.innerHTML = heroHtml + dmHtml + slabMixHtml + moneyHtml + growthHtml + posmHtml;
+}
+
+// ===================================================================
+// Executive dashboard / Alerts / Settings (Phase 1 app-shell content,
+// added 2026-09-23). All numbers below are computed live from the same
+// AGREED_DEALS / PHARMACIES arrays the rest of the tool already uses --
+// nothing here is invented or hardcoded. Where a real figure isn't
+// available (e.g. a cashback budget), the UI says so instead of
+// showing a fabricated number -- see the Cashback Exposure budget note.
+// ===================================================================
+function computeExecutiveKPIs(){
+const byCode = pharmaciesByCode();
+let totalSales = 0, totalCashbackActual = 0, totalPotentialPayout = 0, totalTarget = 0;
+let m7 = 0, m8 = 0, m9 = 0, py7 = 0, py8 = 0, py9 = 0;
+let atRisk = 0, atRiskPayout = 0, critical = 0, noRegion = 0;
+const regions = {};
+const byDM = {};
+AGREED_DEALS.forEach(d => {
+const achieved = (d.month7_sales||0) + (d.month8_sales||0) + (d.month9_sales||0);
+const target = d.target_sales || 0;
+const isAch = achieved >= target;
+totalSales += achieved;
+totalTarget += target;
+m7 += d.month7_sales||0; m8 += d.month8_sales||0; m9 += d.month9_sales||0;
+totalPotentialPayout += d.total_payout || 0;
+if(isAch) totalCashbackActual += d.total_payout || 0;
+const p = byCode.get(d.code);
+if(p && p.mo){ py7 += p.mo['202507']||0; py8 += p.mo['202508']||0; py9 += p.mo['202509']||0; }
+const pctOfTarget = target ? achieved/target : 0;
+if(!isAch && pctOfTarget < 0.5){ atRisk++; atRiskPayout += d.total_payout || 0; }
+if(!isAch && pctOfTarget < 0.25) critical++;
+const rg = d.region || null;
+if(!rg) noRegion++;
+const rk = rg || 'Unassigned';
+if(!regions[rk]) regions[rk] = {sales:0, cashback:0, target:0, n:0, achN:0, hasRegion: !!rg};
+regions[rk].sales += achieved;
+regions[rk].target += target;
+regions[rk].n++;
+if(isAch){ regions[rk].cashback += d.total_payout || 0; regions[rk].achN++; }
+const dm = d.dm || '(Unassigned)';
+if(!byDM[dm]) byDM[dm] = {pending:0};
+if(!isAch) byDM[dm].pending += d.total_payout || 0;
+});
+const regionRows = Object.entries(regions).map(([name, r]) => ({
+name,
+hasRegion: r.hasRegion,
+sales: r.sales,
+cashback: r.cashback,
+cashbackPct: r.sales ? (r.cashback/r.sales*100) : 0,
+target: r.target,
+achPct: r.target ? (r.sales/r.target*100) : 0,
+n: r.n
+})).sort((a,b) => b.sales - a.sales);
+const topDMEntry = Object.entries(byDM).sort((a,b) => b[1].pending - a[1].pending)[0];
+const pendingPayout = totalPotentialPayout - totalCashbackActual;
+const overallAchRatio = totalTarget ? (totalSales/totalTarget) : 0;
+// Forecast = what's already owed, plus the still-pending payout scaled by how
+// close agreed deals are to target on average right now. It's a stated,
+// reproducible projection (not a guarantee) -- see the exposure card copy.
+const forecastPayout = totalCashbackActual + pendingPayout * overallAchRatio;
+return {
+pharmCount: PHARMACIES.length,
+dealsCount: AGREED_DEALS.length,
+totalSales, totalTarget, overallAchRatio,
+totalCashbackActual, totalPotentialPayout, pendingPayout, forecastPayout,
+avgCashbackPct: totalSales ? (totalCashbackActual/totalSales*100) : 0,
+monthly: {m7, m8, m9, py7, py8, py9},
+regionRows,
+atRisk, atRiskPayout, critical, noRegion,
+topDM: topDMEntry ? {name: topDMEntry[0], pending: topDMEntry[1].pending} : null,
+};
+}
+
+function computeAlerts(kpis){
+const alerts = [];
+const q3Close = new Date('2026-09-30T23:59:59+03:00');
+const now = new Date();
+const daysLeft = Math.max(0, Math.ceil((q3Close - now) / 86400000));
+if(kpis.critical > 0){
+alerts.push({sev:'critical', icon:'🔴', title:`${kpis.critical.toLocaleString('en-US')} agreed deals are under 25% of target`, detail:`With ${daysLeft} day${daysLeft===1?'':'s'} left in Q3 2026, these are very unlikely to hit target and earn their agreed cashback.`});
+}
+if(kpis.atRisk > 0){
+alerts.push({sev:'warning', icon:'🟠', title:`${kpis.atRisk.toLocaleString('en-US')} agreed deals are below 50% of target`, detail:`${fmtBig(kpis.atRiskPayout)} EGP in agreed cashback is riding on deals currently behind pace.`});
+}
+if(kpis.topDM){
+alerts.push({sev:'info', icon:'🔵', title:`Highest pending exposure: ${kpis.topDM.name}`, detail:`${fmtBig(kpis.topDM.pending)} EGP in not-yet-achieved cashback sits in this DM's book of agreed deals.`});
+}
+if(kpis.noRegion > 0){
+alerts.push({sev:'info', icon:'⚪', title:`${kpis.noRegion} agreed deal${kpis.noRegion===1?'':'s'} missing a region tag`, detail:`Data quality issue — grouped under "Unassigned" in Regional Performance instead of a real region.`});
+}
+return alerts;
+}
+
+function monthlyChartHtml(monthly){
+const months = [
+{label:'Jul', py: monthly.py7, cy: monthly.m7},
+{label:'Aug', py: monthly.py8, cy: monthly.m8},
+{label:'Sep', py: monthly.py9, cy: monthly.m9},
+];
+const max = Math.max(1, ...months.flatMap(m => [m.py, m.cy]));
+const barsHtml = months.map(m => {
+const pyH = Math.max(2, Math.round(m.py/max*160));
+const cyH = Math.max(2, Math.round(m.cy/max*160));
+return `<div class="chart-month-group">
+<div class="chart-bar-pair">
+<div class="chart-bar" style="height:${pyH}px;background:var(--muted);"><span class="chart-bar-val">${fmtBig(m.py)}</span></div>
+<div class="chart-bar" style="height:${cyH}px;background:var(--shell-red);"><span class="chart-bar-val">${fmtBig(m.cy)}</span></div>
+</div>
+<div class="chart-month-label">${m.label}</div>
+</div>`;
+}).join('');
+return `<div class="chart-legend"><span><span class="dot" style="background:var(--muted);"></span>Q3 2025 actual</span><span><span class="dot" style="background:var(--shell-red);"></span>Q3 2026 actual</span></div>
+<div class="chart-bars-row">${barsHtml}</div>`;
+}
+
+function renderExecDash(){
+const section = document.getElementById('execDashView');
+if(!section) return;
+const kpis = computeExecutiveKPIs();
+const alerts = computeAlerts(kpis);
+
+const badge = document.getElementById('appAlertBadge');
+if(badge){
+if(alerts.length){ badge.textContent = alerts.length; badge.style.display = ''; }
+else badge.style.display = 'none';
+}
+
+const priorQ3Total = kpis.monthly.py7 + kpis.monthly.py8 + kpis.monthly.py9;
+const salesGrowth = priorQ3Total > 0 ? ((kpis.totalSales - priorQ3Total) / priorQ3Total) : null;
+
+const kpiHtml = `
+<div class="kpi-row">
+<div class="kpi-card">
+<div class="kpi-label">Total Sales</div>
+<div class="kpi-value">${fmtBig(kpis.totalSales)} EGP</div>
+<div class="kpi-trend ${salesGrowth===null?'neutral':(salesGrowth>=0?'up':'down')}">${salesGrowth===null ? 'Agreed deals, Q3 2026' : (signedPct(salesGrowth) + ' vs Q3 2025')}</div>
+</div>
+<div class="kpi-card">
+<div class="kpi-label">Total Cashback</div>
+<div class="kpi-value">${fmtBig(kpis.totalCashbackActual)} EGP</div>
+<div class="kpi-trend neutral">Owed now, on achieved deals</div>
+</div>
+<div class="kpi-card">
+<div class="kpi-label">Average Cashback %</div>
+<div class="kpi-value">${kpis.avgCashbackPct.toFixed(2)}%</div>
+<div class="kpi-trend neutral">Cashback ÷ sales, achieved deals</div>
+</div>
+<div class="kpi-card">
+<div class="kpi-label">Pharmacies</div>
+<div class="kpi-value">${kpis.pharmCount.toLocaleString('en-US')}</div>
+<div class="kpi-trend neutral"><bdi dir="ltr">${kpis.dealsCount.toLocaleString('en-US')} in an agreed cashback deal</bdi></div>
+</div>
+</div>`;
+
+const regionRowsHtml = kpis.regionRows.map(r => `<tr>
+<td class="region-name">${r.name}${r.hasRegion ? '' : '<span class="region-flag">⚠ unassigned</span>'}</td>
+<td>${fmtBig(r.sales)} EGP</td>
+<td>${fmtBig(r.cashback)} EGP</td>
+<td>${r.cashbackPct.toFixed(2)}%</td>
+<td>${fmtBig(r.target)} EGP</td>
+<td class="${r.achPct>=50?'growth-pos':''}">${r.achPct.toFixed(0)}%</td>
+</tr>`).join('');
+
+const dashGridHtml = `
+<div class="dash-grid-2">
+<div class="card">
+<h2>🏬 Regional Performance</h2>
+<div class="note" style="margin-top:0;margin-bottom:12px;">Agreed-deal pharmacies only, grouped by region. Territory drill-down is planned for a later phase.</div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>Region</th><th>Sales</th><th>Cashback</th><th>Cashback %</th><th>Target</th><th>Achievement %</th></tr></thead>
+<tbody>${regionRowsHtml}</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<h2>💰 Cashback Exposure</h2>
+<div class="exposure-grid">
+<div class="exposure-box"><div class="t">Actual</div><div class="v">${fmtBig(kpis.totalCashbackActual)} EGP</div><div class="sub">already earned / owed</div></div>
+<div class="exposure-box"><div class="t">Committed</div><div class="v">${fmtBig(kpis.totalPotentialPayout)} EGP</div><div class="sub">if every agreed deal hits target</div></div>
+<div class="exposure-box"><div class="t">Forecast</div><div class="v">${fmtBig(kpis.forecastPayout)} EGP</div><div class="sub">actual + pending × overall pace</div></div>
+</div>
+<div class="exposure-budget-note">No Q3 2026 cashback budget is configured yet, so "% of budget consumed" isn't shown — a placeholder number here would be misleading. Once a budget is set (planned for Settings in a later phase), this card can show consumption against it.</div>
+</div>
+</div>`;
+
+const alertsHtml = alerts.length
+? alerts.slice(0,3).map(a => `<div class="alert-item sev-${a.sev}"><div class="alert-icon">${a.icon}</div><div><div class="alert-title">${a.title}</div><div class="alert-detail">${a.detail}</div></div></div>`).join('')
+: `<div class="alert-empty">No alerts right now.</div>`;
+
+const needsAttentionHtml = `
+<div class="card">
+<h2>⚠️ Needs Attention</h2>
+<div class="alert-list">${alertsHtml}</div>
+${alerts.length > 3 ? `<div class="view-all-link" id="execDashViewAllAlerts">View all ${alerts.length} alerts →</div>` : ''}
+</div>`;
+
+section.innerHTML = kpiHtml
++ `<div class="chart-card card" style="margin-bottom:16px;"><h2>📈 Sales Performance — Q3 2026 vs Q3 2025</h2>${monthlyChartHtml(kpis.monthly)}</div>`
++ dashGridHtml + needsAttentionHtml;
+
+const link = document.getElementById('execDashViewAllAlerts');
+if(link) link.addEventListener('click', () => switchView('alertsPage'));
+}
+
+function renderAlertsPage(){
+const section = document.getElementById('alertsPageSection');
+if(!section) return;
+const kpis = computeExecutiveKPIs();
+const alerts = computeAlerts(kpis);
+const badge = document.getElementById('appAlertBadge');
+if(badge){
+if(alerts.length){ badge.textContent = alerts.length; badge.style.display = ''; }
+else badge.style.display = 'none';
+}
+const listHtml = alerts.length
+? alerts.map(a => `<div class="alert-item sev-${a.sev}"><div class="alert-icon">${a.icon}</div><div><div class="alert-title">${a.title}</div><div class="alert-detail">${a.detail}</div></div></div>`).join('')
+: `<div class="alert-empty">No alerts right now — all agreed deals are tracking within normal ranges.</div>`;
+section.innerHTML = `
+<div class="card">
+<h2>⚠️ Alerts</h2>
+<div class="note" style="margin-top:0;margin-bottom:14px;">Computed live from the current Agreed Deals data (achievement pace, cashback exposure, data quality). Nothing here is manually entered or placeholder.</div>
+<div class="alert-list">${listHtml}</div>
+</div>`;
+}
+
+function renderSettingsPage(){
+const section = document.getElementById('settingsPageSection');
+if(!section) return;
+section.innerHTML = `
+<div class="card">
+<h2>⚙️ Settings</h2>
+<div class="settings-row">
+<div><div class="settings-label">Language</div><div class="settings-sub">Switch the calculator's interface between Arabic and English.</div></div>
+<button class="reset-btn" id="settingsLangBtn" type="button">${currentLang === 'en' ? 'Switch to Arabic' : 'Switch to English'}</button>
+</div>
+<div class="settings-row">
+<div><div class="settings-label">Q3 2026 cashback budget</div><div class="settings-sub">Not yet configured — needed to show "% of budget consumed" on the Executive dashboard.</div></div>
+</div>
+<div class="settings-soon">User accounts, notification preferences, and data-source management are planned for a later phase of the platform.</div>
+</div>`;
+const btn = document.getElementById('settingsLangBtn');
+if(btn) btn.addEventListener('click', () => applyLanguage(currentLang === 'en' ? 'ar' : 'en'));
 }
 
 // Generic search + sortable-column wiring for a big table -- added for the
@@ -6157,6 +6851,13 @@ applyLanguage(currentLang === 'en' ? 'ar' : 'en');
 
 populateFilters();
 updateOverviewBadge();
+
+// App shell (Phase 1): land on the Executive dashboard by default rather than
+// the calculator, matching a management-platform entry point. A signed-in
+// rep/DM identity (below) can still redirect to their own My Performance /
+// My Team view exactly as before -- switchView() always keeps the sidebar,
+// breadcrumb and page title in sync no matter which view ends up active.
+switchView('execDash');
 
 // Identity is resolved after the tool is already usable, so a slow or missing
 // Access endpoint never delays first paint. If a role is found, the view narrows
