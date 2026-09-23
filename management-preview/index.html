@@ -4794,7 +4794,7 @@ const achPct = b.n ? (b.achN / b.n * 100) : 0;
 const targetPct = b.target ? (b.achievedSales / b.target * 100) : 0;
 return `<div class="exec-slab-card">
 <div class="exec-slab-card-label">${b.label}</div>
-<div class="exec-slab-card-row"><span>Deals achieved</span><b>${b.achN} / ${b.n}</b></div>
+<div class="exec-slab-card-row"><span>Deals achieved</span><b><bdi dir="ltr">${b.achN} / ${b.n}</bdi></b></div>
 ${execBarHtml(achPct, color)}
 <div class="exec-slab-card-row"><span>Target value achieved</span><b>${targetPct.toFixed(0)}%</b></div>
 ${execBarHtml(targetPct, color)}
@@ -4826,7 +4826,7 @@ return `<tr>
 <td>${r.n}</td>
 <td>${fmtBig(r.target)} EGP</td>
 <td class="${achPct>=50?'growth-pos':''}">${achPct.toFixed(0)}%</td>
-<td>${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</td>
+<td><bdi dir="ltr">${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</bdi></td>
 </tr>`;
 }).join('');
 
@@ -4873,7 +4873,7 @@ const posmHtml = `
 <div class="card">
 <h2>🏷️ POSM Coverage</h2>
 <div class="totals-grid">
-<div class="sales-box"><div class="t">Deals with POSM</div><div class="v">${s.posmN.toLocaleString('en-US')} / ${s.totalDeals.toLocaleString('en-US')}</div><div class="sub">${(s.posmN/s.totalDeals*100).toFixed(1)}% of agreed deals</div></div>
+<div class="sales-box"><div class="t">Deals with POSM</div><div class="v"><bdi dir="ltr">${s.posmN.toLocaleString('en-US')} / ${s.totalDeals.toLocaleString('en-US')}</bdi></div><div class="sub">${(s.posmN/s.totalDeals*100).toFixed(1)}% of agreed deals</div></div>
 </div>
 </div>`;
 
