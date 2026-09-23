@@ -712,6 +712,13 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
 .filter-chip .icon{width:11px;height:11px;}
 .filter-clear-all{font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer;text-decoration:underline;padding-top:14px;}
 
+/* ---- Drill-path breadcrumb (Executive / Cairo / Yasser Omara / ...) ---- */
+.drill-breadcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;margin-bottom:10px;}
+.drill-crumb-link{color:var(--primary-dark);font-weight:700;cursor:pointer;}
+.drill-crumb-link:hover{text-decoration:underline;}
+.drill-crumb-sep{color:var(--muted);}
+.drill-crumb-current{color:var(--muted);font-weight:600;}
+
 /* ---- Data-updated / summary strip ---- */
 .data-updated-line{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:16px;}
 .data-updated-line b{color:var(--text);font-weight:700;}
@@ -752,10 +759,10 @@ table tr.row-clickable:hover .row-drill-icon{color:var(--primary-dark);}
 .alert-group-count{font-weight:700;color:var(--text);margin-inline-start:6px;}
 
 /* ---- Sales performance chart: target-pace reference line ---- */
-#execDashView .chart-plot{position:relative;}
-#execDashView .chart-target-line{position:absolute;left:0;right:0;border-top:2px dashed var(--shell-navy);}
-#execDashView .chart-target-label{position:absolute;top:-17px;inset-inline-end:2px;font-size:10px;font-weight:700;color:var(--shell-navy);background:var(--card);padding:0 4px;white-space:nowrap;}
-#execDashView .chart-legend .dot-line{width:14px;height:0;border-radius:0;border-top:2px dashed var(--shell-navy);}
+#execDashView .chart-plot, #pharmacy360View .chart-plot{position:relative;}
+#execDashView .chart-target-line, #pharmacy360View .chart-target-line{position:absolute;left:0;right:0;border-top:2px dashed var(--shell-navy);}
+#execDashView .chart-target-label, #pharmacy360View .chart-target-label{position:absolute;top:-17px;inset-inline-end:2px;font-size:10px;font-weight:700;color:var(--shell-navy);background:var(--card);padding:0 4px;white-space:nowrap;}
+#execDashView .chart-legend .dot-line, #pharmacy360View .chart-legend .dot-line{width:14px;height:0;border-radius:0;border-top:2px dashed var(--shell-navy);}
 
 /* ---- Management page: compact overview strip (replaces the old big hero card) ---- */
 .mgmt-overview-strip{display:flex;flex-wrap:wrap;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:18px;overflow:hidden;}
@@ -775,6 +782,45 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 .slab-progress-track{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:4px;}
 .slab-progress-fill{height:100%;border-radius:3px;}
 .slab-group-tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin:14px 0 4px;}
+
+/* ---- Data quality: a value that isn't meaningful, not a normal number ---- */
+.dq-na{color:var(--shell-quality);font-weight:700;}
+
+/* ---- Mobile-specific dense-table representation (Phase 2 step 1) ----
+   Below 900px a 5-6 column data table doesn't have room to breathe even
+   though the sidebar itself doesn't collapse until 1080px -- rather than
+   just shrinking font size (which is what clipped columns before), the
+   District Manager and Slab Performance tables get a real card-per-row
+   layout on narrow screens instead. Desktop tables (table-desktop-only)
+   are completely unchanged above this breakpoint. */
+.mobile-card-list{display:none;}
+@media (max-width:900px){
+.table-desktop-only{display:none;}
+.mobile-card-list{display:flex;flex-direction:column;gap:10px;}
+.mobile-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;cursor:pointer;}
+.mobile-card:hover{background:var(--primary-light);}
+.mobile-card-head{font-weight:700;color:var(--shell-navy);font-size:13.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.mobile-card-head .row-drill-icon{margin-inline-start:auto;}
+.mobile-card-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;font-size:12.5px;border-top:1px dashed var(--border);}
+.mobile-card-row:first-of-type{border-top:none;}
+.mobile-card-label{color:var(--muted);}
+.mobile-card-value{font-weight:600;color:var(--text);text-align:end;}
+.mobile-card .slab-progress-track{margin-top:8px;}
+.mobile-card-investigate{margin-top:8px;width:100%;text-align:center;}
+}
+
+/* ---- Pharmacies table: local search/filter row + name-cell code subtext ---- */
+.pharm-table-controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.table-subtext{font-size:11px;color:var(--muted);margin-top:2px;font-weight:400;}
+
+/* ---- Pharmacy 360: header field grid + agreement-status badge ---- */
+.p360-header-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
+.p360-status-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:3px 10px;border-radius:20px;margin-inline-start:10px;vertical-align:middle;}
+.p360-status-achieved{background:#DCFCE7;color:#166534;}
+.p360-status-in_progress{background:#DBEAFE;color:#1E40AF;}
+.p360-status-at_risk{background:#FEE2E2;color:#991B1B;}
+.p360-status-not_started{background:var(--shell-quality-bg);color:var(--shell-quality);}
+.p360-status-no_agreement{background:var(--shell-quality-bg);color:var(--shell-quality);}
 
 /* ---- Filtered-records modal (generic "View affected deals") ---- */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(16,20,35,.5);z-index:200;align-items:flex-start;justify-content:center;padding:6vh 16px;overflow-y:auto;}
@@ -803,26 +849,26 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 }
 
 /* Executive dashboard (Phase 1 new content) */
-#execDashView .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:18px;min-width:0;}
-#execDashView .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;box-shadow:var(--shadow-card);min-width:0;}
-#execDashView .kpi-label{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-#execDashView .kpi-label .icon{width:15px;height:15px;color:var(--primary-dark);flex-shrink:0;}
-#execDashView .kpi-value{font-size:28px;font-weight:800;color:var(--shell-navy);font-variant-numeric:tabular-nums;line-height:1.15;}
-#execDashView .kpi-trend{font-size:12.5px;font-weight:700;margin-top:8px;}
-#execDashView .kpi-trend.up{color:var(--success);}
-#execDashView .kpi-trend.down{color:var(--danger);}
-#execDashView .kpi-trend.neutral{color:var(--muted);font-weight:600;}
+#execDashView .kpi-row, #pharmacy360View .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:18px;min-width:0;}
+#execDashView .kpi-card, #pharmacy360View .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;box-shadow:var(--shadow-card);min-width:0;}
+#execDashView .kpi-label, #pharmacy360View .kpi-label{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+#execDashView .kpi-label .icon, #pharmacy360View .kpi-label .icon{width:15px;height:15px;color:var(--primary-dark);flex-shrink:0;}
+#execDashView .kpi-value, #pharmacy360View .kpi-value{font-size:28px;font-weight:800;color:var(--shell-navy);font-variant-numeric:tabular-nums;line-height:1.15;}
+#execDashView .kpi-trend, #pharmacy360View .kpi-trend{font-size:12.5px;font-weight:700;margin-top:8px;}
+#execDashView .kpi-trend.up, #pharmacy360View .kpi-trend.up{color:var(--success);}
+#execDashView .kpi-trend.down, #pharmacy360View .kpi-trend.down{color:var(--danger);}
+#execDashView .kpi-trend.neutral, #pharmacy360View .kpi-trend.neutral{color:var(--muted);font-weight:600;}
 #execDashView .dash-grid-2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px;align-items:start;min-width:0;}
 #execDashView .dash-grid-2 > .card{min-width:0;}
 @media (max-width:980px){#execDashView .dash-grid-2{grid-template-columns:minmax(0,1fr);}}
-#execDashView .chart-legend{display:flex;gap:18px;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:16px;}
-#execDashView .chart-legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-inline-end:5px;vertical-align:middle;}
-#execDashView .chart-bars-row{display:flex;justify-content:space-around;align-items:flex-end;height:190px;padding:26px 10px 0;border-bottom:1px solid var(--border);}
-#execDashView .chart-month-group{display:flex;flex-direction:column;align-items:center;}
-#execDashView .chart-bar-pair{display:flex;align-items:flex-end;gap:7px;height:160px;}
-#execDashView .chart-bar{width:32px;border-radius:5px 5px 0 0;position:relative;min-height:2px;}
-#execDashView .chart-bar-val{position:absolute;top:-20px;inset-inline-start:50%;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:var(--shell-navy);white-space:nowrap;}
-#execDashView .chart-month-label{font-size:12px;color:var(--muted);font-weight:700;margin-top:10px;}
+#execDashView .chart-legend, #pharmacy360View .chart-legend{display:flex;gap:18px;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:16px;}
+#execDashView .chart-legend .dot, #pharmacy360View .chart-legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-inline-end:5px;vertical-align:middle;}
+#execDashView .chart-bars-row, #pharmacy360View .chart-bars-row{display:flex;justify-content:space-around;align-items:flex-end;height:190px;padding:26px 10px 0;border-bottom:1px solid var(--border);}
+#execDashView .chart-month-group, #pharmacy360View .chart-month-group{display:flex;flex-direction:column;align-items:center;}
+#execDashView .chart-bar-pair, #pharmacy360View .chart-bar-pair{display:flex;align-items:flex-end;gap:7px;height:160px;}
+#execDashView .chart-bar, #pharmacy360View .chart-bar{width:32px;border-radius:5px 5px 0 0;position:relative;min-height:2px;}
+#execDashView .chart-bar-val, #pharmacy360View .chart-bar-val{position:absolute;top:-20px;inset-inline-start:50%;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:var(--shell-navy);white-space:nowrap;}
+#execDashView .chart-month-label, #pharmacy360View .chart-month-label{font-size:12px;color:var(--muted);font-weight:700;margin-top:10px;}
 #execDashView .region-name{font-weight:700;color:var(--shell-navy);}
 #execDashView .region-flag{display:inline-block;margin-inline-start:6px;font-size:11px;color:var(--danger);font-weight:700;}
 #execDashView .exposure-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;min-width:0;}
@@ -865,7 +911,7 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 <div class="app-nav-btn active" data-view="execDash" data-section="executive"><span class="app-nav-icon" data-icon="home"></span><span>Executive</span></div>
 <div class="app-nav-btn" data-view="exec" data-section="management"><span class="app-nav-icon" data-icon="grid"></span><span>Management</span></div>
 <div class="app-nav-btn" data-view="search" data-section="calculator"><span class="app-nav-icon" data-icon="calculator"></span><span>Cashback Calculator</span></div>
-<div class="app-nav-btn" data-view="overview" data-section="pharmacies"><span class="app-nav-icon" data-icon="store"></span><span>Pharmacies</span></div>
+<div class="app-nav-btn" data-view="pharmaciesTable" data-section="pharmacies"><span class="app-nav-icon" data-icon="store"></span><span>Pharmacies</span></div>
 <div class="app-nav-btn" data-view="deals" data-section="cashback"><span class="app-nav-icon" data-icon="dollar"></span><span>Cashback</span></div>
 <div class="app-nav-btn" data-view="myperf" data-section="targets"><span class="app-nav-icon" data-icon="target"></span><span>Targets</span></div>
 <div class="app-nav-btn" data-view="analysis" data-section="analytics"><span class="app-nav-icon" data-icon="trending-up"></span><span>Analytics</span></div>
@@ -903,6 +949,7 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 
 <div class="view-tabs" id="viewTabs" style="display:none;">
 <div class="view-tab-btn" data-view="search">🔍 <span id="navSearchLbl">بحث عن صيدلية</span></div>
+<div class="view-tab-btn" data-view="pharmaciesTable"><span data-icon="store"></span> Pharmacies</div>
 <div class="view-tab-btn" data-view="overview"><span class="tab-badge" id="overviewBadge" style="display:none;">0</span>📊 <span id="navOverviewLbl">نظرة عامة على الفرص</span></div>
 <div class="view-tab-btn" data-view="chain">🔗 <span id="navChainLbl">دمج صيدليات (سلسلة)</span></div>
 <div class="view-tab-btn" data-view="leaderboard">🏆 <span id="navLeaderboardLbl">لوحة المتصدرين</span></div>
@@ -1036,6 +1083,14 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 
 <div id="settingsPageView" style="display:none;" dir="ltr">
 <div id="settingsPageSection"></div>
+</div>
+
+<div id="pharmaciesTableView" style="display:none;" dir="ltr">
+<div id="pharmaciesTableSection"></div>
+</div>
+
+<div id="pharmacy360View" style="display:none;" dir="ltr">
+<div id="pharmacy360Section"></div>
 </div>
 
 <div id="chainsView" style="display:none;">
@@ -3871,7 +3926,7 @@ const APP_SECTIONS = [
 {key:'executive', label:'Executive', subtitle:'Commercial performance overview', views:['execDash']},
 {key:'management', label:'Management', subtitle:'Where is performance coming from?', views:['exec']},
 {key:'calculator', label:'Cashback Calculator', subtitle:'', views:['search']},
-{key:'pharmacies', label:'Pharmacies', subtitle:'What is happening with this pharmacy?', views:['overview','chain','chains']},
+{key:'pharmacies', label:'Pharmacies', subtitle:'What is happening with this customer?', views:['pharmaciesTable','overview','chain','chains']},
 {key:'cashback', label:'Cashback', subtitle:'Where is cashback money going?', views:['deals']},
 {key:'targets', label:'Targets', subtitle:'Are we achieving plan?', views:['myperf','myteam','leaderboard']},
 {key:'analytics', label:'Analytics', subtitle:'Why is this happening?', views:['analysis']},
@@ -3880,6 +3935,10 @@ const APP_SECTIONS = [
 ];
 const VIEW_TO_SECTION = {};
 APP_SECTIONS.forEach(s => s.views.forEach(v => { VIEW_TO_SECTION[v] = s.key; }));
+// Pharmacy 360 is a drill-down destination (reached via search or a row
+// click), not a pinned tab -- map it explicitly so the sidebar/breadcrumb
+// still recognise it as part of the Pharmacies section.
+VIEW_TO_SECTION['pharmacy360'] = 'pharmacies';
 
 function syncAppShell(view){
 const sectionKey = VIEW_TO_SECTION[view] || 'calculator';
@@ -3935,6 +3994,8 @@ document.getElementById('execView').style.display = view === 'exec' ? '' : 'none
 document.getElementById('execDashView').style.display = view === 'execDash' ? '' : 'none';
 document.getElementById('alertsPageView').style.display = view === 'alertsPage' ? '' : 'none';
 document.getElementById('settingsPageView').style.display = view === 'settingsPage' ? '' : 'none';
+document.getElementById('pharmaciesTableView').style.display = view === 'pharmaciesTable' ? '' : 'none';
+document.getElementById('pharmacy360View').style.display = view === 'pharmacy360' ? '' : 'none';
 document.querySelectorAll('.view-tab-btn').forEach(btn => {
 btn.classList.toggle('active', btn.dataset.view === view);
 });
@@ -3950,6 +4011,8 @@ if(view === 'exec') renderExec();
 if(view === 'execDash') renderExecDash();
 if(view === 'alertsPage') renderAlertsPage();
 if(view === 'settingsPage') renderSettingsPage();
+if(view === 'pharmaciesTable') renderPharmaciesTable();
+if(view === 'pharmacy360') renderPharmacy360();
 syncAppShell(view);
 }
 document.getElementById('viewTabs').addEventListener('click', (e) => {
@@ -5151,7 +5214,7 @@ return sign + Math.round(abs).toLocaleString('en-US');
 // "Unassigned") -- that distinction is what lets a manager filter down
 // to exactly the data-quality gap instead of accidentally clearing it.
 // ===================================================================
-let platformFilters = { region: null, dm: null, code: '' };
+let platformFilters = { region: null, dm: null, territory: null, code: '' };
 
 function filterRegionOptions(){
 const set = new Set();
@@ -5163,18 +5226,25 @@ const set = new Set();
 AGREED_DEALS.forEach(d => set.add(d.dm || ''));
 return [...set].sort((a,b) => (a===''?1:0) - (b===''?1:0) || a.localeCompare(b));
 }
+function filterTerritoryOptions(){
+const set = new Set();
+AGREED_DEALS.forEach(d => set.add(d.territory || ''));
+return [...set].sort((a,b) => (a===''?1:0) - (b===''?1:0) || a.localeCompare(b));
+}
 function filteredAgreedDeals(){
 return AGREED_DEALS.filter(d =>
 (platformFilters.region === null || (d.region||'') === platformFilters.region) &&
 (platformFilters.dm === null || (d.dm||'') === platformFilters.dm) &&
+(platformFilters.territory === null || (d.territory||'') === platformFilters.territory) &&
 (!platformFilters.code || d.code === platformFilters.code)
 );
 }
 function filteredPharmacies(){
-if(platformFilters.region === null && platformFilters.dm === null && !platformFilters.code) return PHARMACIES;
+if(platformFilters.region === null && platformFilters.dm === null && platformFilters.territory === null && !platformFilters.code) return PHARMACIES;
 return PHARMACIES.filter(p =>
 (platformFilters.region === null || (p.rg||'') === platformFilters.region) &&
 (platformFilters.dm === null || (p.dm||'') === platformFilters.dm) &&
+(platformFilters.territory === null || (p.tr||'') === platformFilters.territory) &&
 (!platformFilters.code || p.c === platformFilters.code)
 );
 }
@@ -5182,6 +5252,7 @@ function activeFilterChips(){
 const chips = [];
 if(platformFilters.region !== null) chips.push({k:'region', label: platformFilters.region === '' ? 'Region: Unassigned' : ('Region: ' + platformFilters.region)});
 if(platformFilters.dm !== null) chips.push({k:'dm', label: platformFilters.dm === '' ? 'DM: Unassigned' : ('DM: ' + platformFilters.dm)});
+if(platformFilters.territory !== null) chips.push({k:'territory', label: platformFilters.territory === '' ? 'Territory: Unassigned' : ('Territory: ' + platformFilters.territory)});
 if(platformFilters.code){
 const d = AGREED_DEALS.find(x => x.code === platformFilters.code);
 chips.push({k:'code', label: 'Pharmacy: ' + (d ? `${d.name} (${d.code})` : platformFilters.code)});
@@ -5193,33 +5264,93 @@ platformFilters[key] = (key === 'code') ? '' : null;
 rerenderCurrentShellView();
 }
 function clearAllFilters(){
-platformFilters = { region: null, dm: null, code: '' };
+platformFilters = { region: null, dm: null, territory: null, code: '' };
+rerenderCurrentShellView();
+}
+// Reset the filter state back to a given drill level, for breadcrumb clicks --
+// clicking "Cairo" in "Executive / Cairo / Yasser Omara / DAKAHLEIA I" keeps
+// region=Cairo but clears everything deeper than it (dm/territory/pharmacy).
+function resetFiltersToLevel(level){
+if(level === 'root'){ platformFilters = { region: null, dm: null, territory: null, code: '' }; }
+else if(level === 'region'){ platformFilters.dm = null; platformFilters.territory = null; platformFilters.code = ''; }
+else if(level === 'dm'){ platformFilters.territory = null; platformFilters.code = ''; }
+else if(level === 'territory'){ platformFilters.code = ''; }
 rerenderCurrentShellView();
 }
 function drillToRegion(region, view){
 platformFilters.region = region;
+platformFilters.dm = null;
+platformFilters.territory = null;
+platformFilters.code = '';
 if(view) switchView(view); else rerenderCurrentShellView();
 }
 function drillToDM(dm, view){
 platformFilters.dm = dm;
+platformFilters.territory = null;
+platformFilters.code = '';
 if(view) switchView(view); else rerenderCurrentShellView();
 }
+function drillToTerritory(territory, view){
+platformFilters.territory = territory;
+platformFilters.code = '';
+if(view) switchView(view); else rerenderCurrentShellView();
+}
+function drillToPharmacy(code){
+platformFilters.code = code;
+switchView('pharmacy360');
+}
 function rerenderCurrentShellView(){
-const active = document.querySelector('.app-nav-btn.active');
-const view = active ? active.dataset.view : null;
+const viewIds = {
+execDash: 'execDashView',
+exec: 'execView',
+alertsPage: 'alertsPageView',
+pharmaciesTable: 'pharmaciesTableView',
+pharmacy360: 'pharmacy360View',
+};
+for(const view in viewIds){
+const el = document.getElementById(viewIds[view]);
+if(el && el.style.display !== 'none'){
 if(view === 'execDash') renderExecDash();
 else if(view === 'exec') renderExec();
 else if(view === 'alertsPage') renderAlertsPage();
+else if(view === 'pharmaciesTable') renderPharmaciesTable();
+else if(view === 'pharmacy360') renderPharmacy360();
+return;
+}
+}
 }
 
-function filterBarHtml(idPrefix){
+// Clickable drill-path trail (e.g. "Executive / Cairo / Yasser Omara / DAKAHLEIA I")
+// reflecting the shared platformFilters state. Clicking a crumb resets the
+// filter state back to that level -- it never reloads the app, just
+// re-renders the current view with a shallower filter.
+function drillBreadcrumbHtml(rootLabel){
+if(platformFilters.region === null && platformFilters.dm === null && platformFilters.territory === null && !platformFilters.code) return '';
+const crumbs = [`<span class="drill-crumb-link" data-reset-level="root">${rootLabel}</span>`];
+if(platformFilters.region !== null) crumbs.push(`<span class="drill-crumb-link" data-reset-level="region">${platformFilters.region === '' ? 'Unassigned region' : platformFilters.region}</span>`);
+if(platformFilters.dm !== null) crumbs.push(`<span class="drill-crumb-link" data-reset-level="dm">${platformFilters.dm === '' ? 'Unassigned DM' : platformFilters.dm}</span>`);
+if(platformFilters.territory !== null) crumbs.push(`<span class="drill-crumb-link" data-reset-level="territory">${platformFilters.territory === '' ? 'Unassigned territory' : platformFilters.territory}</span>`);
+if(platformFilters.code){
+const d = AGREED_DEALS.find(x => x.code === platformFilters.code);
+const p = !d ? pharmaciesByCode().get(platformFilters.code) : null;
+const nm = d ? d.name : (p ? p.n : platformFilters.code);
+crumbs.push(`<span class="drill-crumb-current">${nm}</span>`);
+}
+return `<div class="drill-breadcrumb">${crumbs.join('<span class="drill-crumb-sep">/</span>')}</div>`;
+}
+
+function filterBarHtml(idPrefix, sectionLabel){
 const regions = filterRegionOptions();
 const dms = filterDMOptions();
+const territories = filterTerritoryOptions();
 const regionOpts = regions.map(r => `<option value="${r}" ${platformFilters.region===r?'selected':''}>${r === '' ? '⚠ Unassigned' : r}</option>`).join('');
 const dmOpts = dms.map(d => `<option value="${d}" ${platformFilters.dm===d?'selected':''}>${d === '' ? '(No DM)' : d}</option>`).join('');
+const territoryOpts = territories.map(t => `<option value="${t}" ${platformFilters.territory===t?'selected':''}>${t === '' ? '(No territory)' : t}</option>`).join('');
 const chips = activeFilterChips();
 const chipsHtml = chips.length ? `<div class="filter-chips">${chips.map(c => `<span class="filter-chip" data-clear="${c.k}">${c.label}${iconSvg('x')}</span>`).join('')}<span class="filter-clear-all" id="${idPrefix}ClearAll">Clear all</span></div>` : '';
+const breadcrumbHtml = sectionLabel ? drillBreadcrumbHtml(sectionLabel) : '';
 return `
+${breadcrumbHtml}
 <div class="platform-filterbar" id="${idPrefix}FilterBar">
 <div class="filter-field">
 <span class="filter-field-icon">${iconSvg('filter')}</span>
@@ -5241,6 +5372,13 @@ ${regionOpts}
 ${dmOpts}
 </select>
 </div>
+<div class="filter-field">
+<label>Territory</label>
+<select class="filter-select" data-filter-key="territory">
+<option value="__all__" ${platformFilters.territory===null?'selected':''}>All territories</option>
+${territoryOpts}
+</select>
+</div>
 <div class="filter-field filter-field-pharmacy">
 <label>Pharmacy</label>
 <input class="filter-input" list="${idPrefix}PharmacyList" data-filter-key="code" placeholder="Search name or code…" value="${(() => { const d = AGREED_DEALS.find(x=>x.code===platformFilters.code); return d ? `${d.name} (${d.code})` : ''; })()}" />
@@ -5251,6 +5389,9 @@ ${chipsHtml}
 }
 
 function wireFilterBar(idPrefix){
+document.querySelectorAll('.drill-crumb-link[data-reset-level]').forEach(el => {
+el.addEventListener('click', () => resetFiltersToLevel(el.dataset.resetLevel));
+});
 const bar = document.getElementById(idPrefix + 'FilterBar');
 if(!bar) return;
 bar.querySelectorAll('select.filter-select[data-filter-key]').forEach(sel => {
@@ -5258,6 +5399,8 @@ sel.addEventListener('change', () => {
 const key = sel.dataset.filterKey;
 if(key === '__period') return;
 platformFilters[key] = sel.value === '__all__' ? null : sel.value;
+if(key === 'region'){ platformFilters.dm = null; platformFilters.territory = null; platformFilters.code = ''; }
+else if(key === 'dm'){ platformFilters.territory = null; platformFilters.code = ''; }
 rerenderCurrentShellView();
 });
 });
@@ -5363,16 +5506,17 @@ const dmRows = Object.values(byDM).sort((a,b) => b.n - a.n);
 const bandTotals = {};
 deals.forEach(d => {
 const disp = dealsDisplaySlab(d);
-if(!bandTotals[disp.key]) bandTotals[disp.key] = { key:disp.key, n:0, achN:0, target:0, achievedSales:0 };
+if(!bandTotals[disp.key]) bandTotals[disp.key] = { key:disp.key, n:0, achN:0, target:0, achievedSales:0, deals:[] };
 const b = bandTotals[disp.key];
 const achieved = (d.month7_sales||0) + (d.month8_sales||0) + (d.month9_sales||0);
 b.n++;
 b.target += d.target_sales || 0;
 b.achievedSales += achieved;
+b.deals.push(d);
 if(achieved >= (d.target_sales||0)) b.achN++;
 });
-const fixedBands = FIXED_SLABS.map(f => Object.assign({ key:f.key, n:0, achN:0, target:0, achievedSales:0 }, bandTotals[f.key], { label: f.labelEn }));
-const varBands = SLABS.map(s => Object.assign({ key:s.key, n:0, achN:0, target:0, achievedSales:0 }, bandTotals[s.key], { label: SLAB_LABELS_EN[s.key] || s.key }));
+const fixedBands = FIXED_SLABS.map(f => Object.assign({ key:f.key, n:0, achN:0, target:0, achievedSales:0, deals:[] }, bandTotals[f.key], { label: f.labelEn }));
+const varBands = SLABS.map(s => Object.assign({ key:s.key, n:0, achN:0, target:0, achievedSales:0, deals:[] }, bandTotals[s.key], { label: SLAB_LABELS_EN[s.key] || s.key }));
 
 // Actual growth vs Q3 2025 -- reuses the exact same function that powers
 // the Agreed Deals tab's own Q3 YoY card, so the numbers here always match.
@@ -5392,18 +5536,37 @@ const w = Math.max(0, Math.min(100, fracPct));
 return `<div class="slab-progress-track"><div class="slab-progress-fill" style="width:${w}%;background:${color};"></div></div>`;
 }
 
-function slabTableRowsHtml(bands, color){
-return bands.map(b => {
+function slabTableRowsHtml(bands, color, groupKey){
+return bands.map((b,i) => {
 const achPct = b.n ? (b.achN / b.n * 100) : 0;
 const targetPct = b.target ? (b.achievedSales / b.target * 100) : 0;
-return `<tr>
-<td class="slab-name">${b.label}</td>
+return `<tr class="row-clickable" data-slab-band="${groupKey}:${i}">
+<td class="slab-name">${b.label}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
 <td><bdi dir="ltr">${b.n.toLocaleString('en-US')}</bdi></td>
 <td><bdi dir="ltr">${b.achN.toLocaleString('en-US')}</bdi></td>
 <td>${fmtBig(b.target)} EGP</td>
 <td>${fmtBig(b.achievedSales)} EGP</td>
 <td class="slab-progress-cell">${targetPct.toFixed(0)}%${execBarHtml(targetPct, color)}</td>
 </tr>`;
+}).join('');
+}
+
+// Mobile-only card representation of the same slab band data -- same
+// fields, same numbers, just laid out for a narrow viewport instead of
+// a 6-column table. Tapping a card opens the same "affected deals"
+// modal a desktop row-click would.
+function slabMobileCardsHtml(bands, color, groupKey){
+return bands.map((b,i) => {
+const targetPct = b.target ? (b.achievedSales / b.target * 100) : 0;
+return `<div class="mobile-card row-clickable" data-slab-band="${groupKey}:${i}">
+<div class="mobile-card-head">${b.label}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Deals</span><span class="mobile-card-value"><bdi dir="ltr">${b.n.toLocaleString('en-US')}</bdi></span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Achieved</span><span class="mobile-card-value"><bdi dir="ltr">${b.achN.toLocaleString('en-US')}</bdi></span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Target Value</span><span class="mobile-card-value">${fmtBig(b.target)} EGP</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Value Achieved</span><span class="mobile-card-value">${fmtBig(b.achievedSales)} EGP</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Achievement %</span><span class="mobile-card-value">${targetPct.toFixed(0)}%</span></div>
+${execBarHtml(targetPct, color)}
+</div>`;
 }).join('');
 }
 
@@ -5421,15 +5584,30 @@ const overviewStripHtml = `
 </div>`;
 
 const dmRowsHtml = s.dmRows.map(r => {
+const hasDM = r.dm !== '(No DM)';
 const achPct = r.target ? (r.achievedSales / r.target * 100) : 0;
 const dealPct = r.n ? (r.achievedDeals / r.n * 100) : 0;
-return `<tr class="row-clickable" data-drill-dm="${r.dm === '(No DM)' ? '' : r.dm}">
-<td class="name-cell">${r.dm}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
+return `<tr class="row-clickable" data-drill-dm="${hasDM ? r.dm : ''}">
+<td class="name-cell">${r.dm}${hasDM ? '' : '<span class="dq-badge">'+iconSvg('database')+'Data quality</span><button class="dq-investigate-btn" data-investigate-dm type="button">Investigate →</button>'}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
 <td>${r.n}</td>
 <td>${fmtBig(r.target)} EGP</td>
-<td class="${achPct>=50?'growth-pos':''}">${achPct.toFixed(0)}%</td>
+<td class="${hasDM && achPct>=50?'growth-pos':''}">${hasDM ? achPct.toFixed(0)+'%' : '<span class="dq-na" title="Achievement % is not meaningful without a District Manager assignment">—</span>'}</td>
 <td><bdi dir="ltr">${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</bdi></td>
 </tr>`;
+}).join('');
+
+const dmMobileCardsHtml = s.dmRows.map(r => {
+const hasDM = r.dm !== '(No DM)';
+const achPct = r.target ? (r.achievedSales / r.target * 100) : 0;
+const dealPct = r.n ? (r.achievedDeals / r.n * 100) : 0;
+return `<div class="mobile-card row-clickable" data-drill-dm="${hasDM ? r.dm : ''}">
+<div class="mobile-card-head">${r.dm}${hasDM ? '' : '<span class="dq-badge">'+iconSvg('database')+'Data quality</span>'}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Deals</span><span class="mobile-card-value">${r.n}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Target Sales</span><span class="mobile-card-value">${fmtBig(r.target)} EGP</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Achievement %</span><span class="mobile-card-value">${hasDM ? achPct.toFixed(0)+'%' : '<span class=\'dq-na\'>—</span>'}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Deals Achieved</span><span class="mobile-card-value"><bdi dir="ltr">${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</bdi></span></div>
+${hasDM ? '' : '<button class="dq-investigate-btn mobile-card-investigate" data-investigate-dm type="button">Investigate →</button>'}
+</div>`;
 }).join('');
 
 const dmHtml = `
@@ -5437,29 +5615,88 @@ const dmHtml = `
 <div class="section-head"><h2>${iconSvg('users')}Performance by District Manager</h2><span class="section-sub">Click a row to filter the whole page to that DM</span></div>
 <div class="panel">
 <div class="note" style="margin-top:0;margin-bottom:12px;"><bdi dir="ltr">"Target Achieved" = actual sales booked so far (Jul+Aug+Sep) as a share of the total agreed target across that DM's deals.</bdi></div>
-<div style="overflow-x:auto;">
+<div class="table-desktop-only" style="overflow-x:auto;">
 <table>
 <thead><tr><th>District Manager</th><th>Deals</th><th>Target Sales</th><th>Target Achieved</th><th>Deals Achieved</th></tr></thead>
 <tbody>${dmRowsHtml || '<tr><td colspan="5" class="alert-empty">No agreed deals match the current filters.</td></tr>'}</tbody>
 </table>
 </div>
+<div class="mobile-card-list">${dmMobileCardsHtml || '<div class="alert-empty">No agreed deals match the current filters.</div>'}</div>
 </div>
 </div>`;
 
+// Only shown once a DM is selected -- Region -> DM -> Territory is the
+// requested drill order, and an unfiltered "all territories, all DMs"
+// table would just be a noisier restatement of the Region table above.
+const territoryGroups = platformFilters.dm !== null ? (() => {
+const byT = {};
+filteredAgreedDeals().forEach(d => {
+const hasTerritory = !!d.territory;
+const key = hasTerritory ? d.territory : '(No Territory)';
+if(!byT[key]) byT[key] = { territory:key, hasTerritory, n:0, target:0, achievedSales:0, achievedDeals:0, deals:[] };
+const b = byT[key];
+const achieved = (d.month7_sales||0) + (d.month8_sales||0) + (d.month9_sales||0);
+b.n++; b.target += d.target_sales || 0; b.achievedSales += achieved; b.deals.push(d);
+if(achieved >= (d.target_sales||0)) b.achievedDeals++;
+});
+return Object.values(byT).sort((a,b) => b.n - a.n);
+})() : null;
+
+const territoryRowHtml = (r, mobile) => {
+const achPct = r.target ? (r.achievedSales / r.target * 100) : 0;
+const dealPct = r.n ? (r.achievedDeals / r.n * 100) : 0;
+const naSpan = '<span class="dq-na">—</span>';
+const dqBadge = '<span class="dq-badge">'+iconSvg('database')+'Data quality</span>';
+const investigateBtn = (cls) => `<button class="dq-investigate-btn ${cls}" data-investigate-territory type="button">Investigate →</button>`;
+if(mobile){
+return `<div class="mobile-card row-clickable" data-drill-territory="${r.hasTerritory ? r.territory : ''}">
+<div class="mobile-card-head">${r.territory}${r.hasTerritory ? '' : dqBadge}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Deals</span><span class="mobile-card-value">${r.n}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Target Sales</span><span class="mobile-card-value">${fmtBig(r.target)} EGP</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Achievement %</span><span class="mobile-card-value">${r.hasTerritory ? achPct.toFixed(0)+'%' : naSpan}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Deals Achieved</span><span class="mobile-card-value"><bdi dir="ltr">${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</bdi></span></div>
+${r.hasTerritory ? '' : investigateBtn('mobile-card-investigate')}
+</div>`;
+}
+return `<tr class="row-clickable" data-drill-territory="${r.hasTerritory ? r.territory : ''}">
+<td class="name-cell">${r.territory}${r.hasTerritory ? '' : dqBadge + investigateBtn('')}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
+<td>${r.n}</td>
+<td>${fmtBig(r.target)} EGP</td>
+<td class="${r.hasTerritory && achPct>=50?'growth-pos':''}">${r.hasTerritory ? achPct.toFixed(0)+'%' : naSpan}</td>
+<td><bdi dir="ltr">${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</bdi></td>
+</tr>`;
+};
+
+const territoryHtml = territoryGroups ? `
+<div class="section flow-tables">
+<div class="section-head"><h2>${iconSvg('flag')}Performance by Territory</h2><span class="section-sub">Within ${platformFilters.dm === '' ? 'Unassigned DM' : platformFilters.dm} — click a territory to view its pharmacies</span></div>
+<div class="panel">
+<div class="table-desktop-only" style="overflow-x:auto;">
+<table>
+<thead><tr><th>Territory</th><th>Deals</th><th>Target Sales</th><th>Target Achieved</th><th>Deals Achieved</th></tr></thead>
+<tbody>${territoryGroups.map(r => territoryRowHtml(r, false)).join('') || '<tr><td colspan="5" class="alert-empty">No agreed deals match the current filters.</td></tr>'}</tbody>
+</table>
+</div>
+<div class="mobile-card-list">${territoryGroups.map(r => territoryRowHtml(r, true)).join('') || '<div class="alert-empty">No agreed deals match the current filters.</div>'}</div>
+</div>
+</div>` : '';
+
 const slabMixHtml = `
 <div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('layers')}Deal Performance by Slab</h2></div>
+<div class="section-head"><h2>${iconSvg('layers')}Deal Performance by Slab</h2><span class="section-sub">Tap a slab to view its deals</span></div>
 <div class="panel slab-table-wrap">
 <div class="slab-group-tag">Fixed-value deals (target pinned at a flat EGP figure)</div>
-<table class="slab-table">
+<table class="slab-table table-desktop-only">
 <thead><tr><th>Slab</th><th>Deals</th><th>Achieved</th><th>Target value</th><th>Value achieved</th><th>Achievement %</th></tr></thead>
-<tbody>${slabTableRowsHtml(s.fixedBands, 'var(--primary)')}</tbody>
+<tbody>${slabTableRowsHtml(s.fixedBands, 'var(--primary)', 'fixed')}</tbody>
 </table>
+<div class="mobile-card-list">${slabMobileCardsHtml(s.fixedBands, 'var(--primary)', 'fixed')}</div>
 <div class="slab-group-tag" style="margin-top:18px;">Variable deals (target computed from growth %)</div>
-<table class="slab-table">
+<table class="slab-table table-desktop-only">
 <thead><tr><th>Slab</th><th>Deals</th><th>Achieved</th><th>Target value</th><th>Value achieved</th><th>Achievement %</th></tr></thead>
-<tbody>${slabTableRowsHtml(s.varBands, 'var(--variable-blue)')}</tbody>
+<tbody>${slabTableRowsHtml(s.varBands, 'var(--variable-blue)', 'variable')}</tbody>
 </table>
+<div class="mobile-card-list">${slabMobileCardsHtml(s.varBands, 'var(--variable-blue)', 'variable')}</div>
 </div>
 </div>`;
 
@@ -5488,10 +5725,37 @@ ${dqIssues.length ? dqIssues.map((iss,i) => `<div style="${i>0?'margin-top:10px;
 </div>
 </div>`;
 
-section.innerHTML = filterBarHtml('mgmt') + overviewStripHtml + dmHtml + slabMixHtml + exposureHtml + dataQualityHtml;
+section.innerHTML = filterBarHtml('mgmt', 'Management') + overviewStripHtml + dmHtml + territoryHtml + slabMixHtml + exposureHtml + dataQualityHtml;
 wireFilterBar('mgmt');
-section.querySelectorAll('tr[data-drill-dm]').forEach(row => {
-row.addEventListener('click', () => drillToDM(row.dataset.drillDm));
+section.querySelectorAll('tr[data-drill-dm], .mobile-card[data-drill-dm]').forEach(row => {
+row.addEventListener('click', (e) => {
+if(e.target.closest('[data-investigate-dm]')) return;
+if(row.dataset.drillDm) drillToDM(row.dataset.drillDm);
+});
+});
+section.querySelectorAll('[data-investigate-dm]').forEach(btn => {
+btn.addEventListener('click', (e) => { e.stopPropagation(); openFilteredDealsModal('Deals missing a District Manager', s.noDMDeals); });
+});
+section.querySelectorAll('tr[data-drill-territory], .mobile-card[data-drill-territory]').forEach(row => {
+row.addEventListener('click', (e) => {
+if(e.target.closest('[data-investigate-territory]')) return;
+if(row.dataset.drillTerritory) drillToTerritory(row.dataset.drillTerritory, 'pharmaciesTable');
+});
+});
+section.querySelectorAll('[data-investigate-territory]').forEach(btn => {
+btn.addEventListener('click', (e) => {
+e.stopPropagation();
+const noTerritory = (territoryGroups || []).find(r => !r.hasTerritory);
+openFilteredDealsModal('Deals missing a territory', noTerritory ? noTerritory.deals : []);
+});
+});
+section.querySelectorAll('[data-slab-band]').forEach(el => {
+el.addEventListener('click', () => {
+const [group, idx] = el.dataset.slabBand.split(':');
+const bands = group === 'fixed' ? s.fixedBands : s.varBands;
+const band = bands[Number(idx)];
+if(band) openFilteredDealsModal(`${group === 'fixed' ? 'Fixed-value' : 'Variable'} slab deals — ${band.label}`, band.deals || []);
+});
 });
 section.querySelectorAll('.dq-investigate-btn[data-dq-idx]').forEach(btn => {
 btn.addEventListener('click', () => {
@@ -5515,8 +5779,8 @@ const deals = filteredAgreedDeals();
 const byCode = pharmaciesByCode();
 let totalSales = 0, totalCashbackActual = 0, totalPotentialPayout = 0, totalTarget = 0;
 let m7 = 0, m8 = 0, m9 = 0, py7 = 0, py8 = 0, py9 = 0;
-let atRisk = 0, atRiskPayout = 0, critical = 0, noRegion = 0;
-const criticalDeals = [], atRiskDeals = [], noRegionDeals = [];
+let atRisk = 0, atRiskPayout = 0, critical = 0, noRegion = 0, noDM = 0;
+const criticalDeals = [], atRiskDeals = [], noRegionDeals = [], noDMDeals = [];
 const regions = {};
 const byDM = {};
 deals.forEach(d => {
@@ -5535,6 +5799,7 @@ if(!isAch && pctOfTarget < 0.5){ atRisk++; atRiskPayout += d.total_payout || 0; 
 if(!isAch && pctOfTarget < 0.25){ critical++; criticalDeals.push(d); }
 const rg = d.region || null;
 if(!rg){ noRegion++; noRegionDeals.push(d); }
+if(!d.dm){ noDM++; noDMDeals.push(d); }
 const rk = rg || 'Unassigned';
 if(!regions[rk]) regions[rk] = {sales:0, cashback:0, target:0, n:0, achN:0, hasRegion: !!rg};
 regions[rk].sales += achieved;
@@ -5570,8 +5835,8 @@ totalCashbackActual, totalPotentialPayout, pendingPayout, forecastPayout,
 avgCashbackPct: totalSales ? (totalCashbackActual/totalSales*100) : 0,
 monthly: {m7, m8, m9, py7, py8, py9},
 regionRows,
-atRisk, atRiskPayout, critical, noRegion,
-criticalDeals, atRiskDeals, noRegionDeals,
+atRisk, atRiskPayout, critical, noRegion, noDM,
+criticalDeals, atRiskDeals, noRegionDeals, noDMDeals,
 topDM: topDMEntry ? {name: topDMEntry[0], pending: topDMEntry[1].pending} : null,
 };
 }
@@ -5592,6 +5857,9 @@ alerts.push({sev:'info', icon:'users', title:`Highest pending exposure: ${kpis.t
 }
 if(kpis.noRegion > 0){
 alerts.push({sev:'quality', icon:'database', title:`${kpis.noRegion} agreed deal${kpis.noRegion===1?'':'s'} missing a region tag`, detail:`Data quality issue — grouped under "Unassigned" in Regional Performance instead of a real region.`, deals: kpis.noRegionDeals, actionLabel:'View affected deals'});
+}
+if(kpis.noDM > 0){
+alerts.push({sev:'quality', icon:'database', title:`${kpis.noDM} agreed deal${kpis.noDM===1?'':'s'} missing a District Manager`, detail:`Data quality issue — organizational classification is incomplete, so this deal isn't attributed to any DM's performance.`, deals: kpis.noDMDeals, actionLabel:'View affected deals'});
 }
 return alerts;
 }
@@ -5676,7 +5944,7 @@ const regionRowsHtml = kpis.regionRows.map(r => `<tr class="row-clickable" data-
 <td>${fmtBig(r.cashback)} EGP</td>
 <td>${r.cashbackPct.toFixed(2)}%</td>
 <td>${fmtBig(r.target)} EGP</td>
-<td class="${r.hasRegion && r.achPct>=50?'growth-pos':''}">${r.achPct.toFixed(0)}%</td>
+<td class="${r.hasRegion && r.achPct>=50?'growth-pos':''}">${r.hasRegion ? r.achPct.toFixed(0)+'%' : '<span class="dq-na" title="Achievement % is not meaningful without a region assignment">—</span>'}</td>
 </tr>`).join('');
 
 const dashGridHtml = `
@@ -5718,7 +5986,7 @@ ${alerts.length > 3 ? `<div class="view-all-link" id="execDashViewAllAlerts">Vie
 </div>
 </div>`;
 
-section.innerHTML = filterBarHtml('execDash') + dataUpdatedHtml + kpiHtml
+section.innerHTML = filterBarHtml('execDash', 'Executive') + dataUpdatedHtml + kpiHtml
 + `<div class="section flow-chart"><div class="section-head"><h2>${iconSvg('trending-up')}Sales Performance — Q3 2026 vs Q3 2025</h2></div><div class="panel">${monthlyChartHtml(kpis.monthly, kpis.totalTarget ? kpis.totalTarget/3 : 0)}</div></div>`
 + dashGridHtml + needsAttentionHtml;
 
@@ -5784,6 +6052,328 @@ if(a.drillDM !== undefined) drillToDM(a.drillDM, 'exec');
 else if(a.deals) openFilteredDealsModal(a.title, a.deals);
 });
 });
+}
+
+
+// ===================================================================
+// Phase 2 step 3+4+5: Pharmacies searchable management table,
+// Pharmacy 360, and "Calculate Scenario" (reuses the existing search/
+// selectPharmacy/renderDetail calculator flow -- no calculation logic
+// is duplicated here). All figures below come straight from PHARMACIES
+// / AGREED_DEALS via the same fields already used on Executive and
+// Management; nothing here introduces a new business rule.
+// ===================================================================
+let _agreedDealsByCode = null;
+function agreedDealsByCode(){
+if(!_agreedDealsByCode){
+_agreedDealsByCode = new Map(AGREED_DEALS.map(d => [d.code, d]));
+}
+return _agreedDealsByCode;
+}
+
+// Q3 2026 / Q3 2025 actual sales from the pharmacy's own monthly figures --
+// the exact same three months (07/08/09) that AGREED_DEALS.month7_sales/
+// month8_sales/month9_sales are sourced from, so a pharmacy's "Sales" here
+// always matches its own deal's achieved figure when one exists.
+function pharmacyQ3Sales(p){
+if(!p || !p.mo) return 0;
+return (p.mo['202607']||0) + (p.mo['202608']||0) + (p.mo['202609']||0);
+}
+function pharmacyPriorQ3Sales(p){
+if(!p || !p.mo) return 0;
+return (p.mo['202507']||0) + (p.mo['202508']||0) + (p.mo['202509']||0);
+}
+
+// Status is derived only from fields that already exist -- no new
+// thresholds invented: 25% reuses the exact "critical" cutoff already
+// established in computeExecutiveKPIs' Needs Attention alerts.
+function pharmacyAgreementStatus(deal){
+if(!deal) return {key:'no_agreement', label:'No agreement'};
+const achieved = (deal.month7_sales||0) + (deal.month8_sales||0) + (deal.month9_sales||0);
+const target = deal.target_sales || 0;
+if(target > 0 && achieved >= target) return {key:'achieved', label:'Achieved'};
+if(achieved <= 0) return {key:'not_started', label:'Not started'};
+const pct = target ? achieved/target : 0;
+if(pct < 0.25) return {key:'at_risk', label:'At risk'};
+return {key:'in_progress', label:'In progress'};
+}
+
+// Opens the existing Cashback Calculator (the "search" view) preloaded
+// with this pharmacy already selected -- selectPharmacy()/renderDetail()
+// are the same, unmodified functions the calculator always used, so
+// every slab/shelf/POSM/full-period toggle and the calculation engine
+// behind them are identical to before. This IS "Calculate Scenario".
+function openCalculatorForPharmacy(code){
+const p = pharmaciesByCode().get(code);
+if(!p) return;
+selectPharmacy(p);
+switchView('search');
+}
+
+// ---------------------------------------------------------------------
+// STEP 3: Pharmacies -- real searchable/filterable management table.
+// ---------------------------------------------------------------------
+let pharmTableSearch = '';
+let pharmTableFilters = { classification: null, status: null, agreement: null };
+
+function renderPharmaciesTable(){
+const section = document.getElementById('pharmaciesTableSection');
+if(!section) return;
+const dealsByCode = agreedDealsByCode();
+
+let pool = filteredPharmacies();
+const q = normalize(pharmTableSearch.trim());
+if(q) pool = pool.filter(p => normalize(p.n).includes(q) || (p.c && String(p.c).includes(pharmTableSearch.trim())));
+if(pharmTableFilters.classification !== null) pool = pool.filter(p => (p.ct||'') === pharmTableFilters.classification);
+if(pharmTableFilters.status !== null) pool = pool.filter(p => (p.st||'') === pharmTableFilters.status);
+if(pharmTableFilters.agreement !== null){
+pool = pool.filter(p => pharmTableFilters.agreement === 'agreed' ? dealsByCode.has(p.c) : !dealsByCode.has(p.c));
+}
+
+const rows = pool.map(p => ({ p, deal: dealsByCode.get(p.c), sales: pharmacyQ3Sales(p) }))
+.sort((a,b) => b.sales - a.sales);
+
+const RENDER_CAP = 500;
+const totalMatches = rows.length;
+const shown = rows.slice(0, RENDER_CAP);
+
+const classifications = [...new Set(PHARMACIES.map(p => p.ct || ''))].sort((a,b) => (a===''?1:0)-(b===''?1:0) || a.localeCompare(b));
+const statuses = [...new Set(PHARMACIES.map(p => p.st || ''))].sort();
+
+const rowHtml = (r, mobile) => {
+const { p, deal, sales } = r;
+const na = '<span class="dq-na">—</span>';
+const achPct = (deal && deal.target_sales) ? (sales/deal.target_sales*100) : null;
+const agreementLabel = deal ? dealsDisplaySlab(deal).label : 'No agreement';
+if(mobile){
+return `<div class="mobile-card row-clickable" data-open-pharmacy="${p.c}">
+<div class="mobile-card-head">${p.n}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Code</span><span class="mobile-card-value"><bdi dir="ltr">${p.c}</bdi></span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Region</span><span class="mobile-card-value">${p.rg || na}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">District Manager</span><span class="mobile-card-value">${p.dm || na}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Territory</span><span class="mobile-card-value">${p.tr || na}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Sales</span><span class="mobile-card-value">${fmtBig(sales)} EGP</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Target</span><span class="mobile-card-value">${deal ? fmtBig(deal.target_sales)+' EGP' : na}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Achievement %</span><span class="mobile-card-value">${achPct===null?na:achPct.toFixed(0)+'%'}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Cashback</span><span class="mobile-card-value">${deal ? fmtBig(deal.total_payout)+' EGP' : na}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Agreement</span><span class="mobile-card-value">${agreementLabel}</span></div>
+</div>`;
+}
+return `<tr class="row-clickable" data-open-pharmacy="${p.c}">
+<td class="name-cell">${p.n}<span class="row-drill-icon">${iconSvg('chevron-right')}</span><div class="table-subtext"><bdi dir="ltr">${p.c}</bdi></div></td>
+<td>${p.rg || na}</td>
+<td>${p.dm || na}</td>
+<td>${p.tr || na}</td>
+<td>${fmtBig(sales)} EGP</td>
+<td>${deal ? fmtBig(deal.target_sales)+' EGP' : na}</td>
+<td>${achPct===null?na:achPct.toFixed(0)+'%'}</td>
+<td>${deal ? fmtBig(deal.total_payout)+' EGP' : na}</td>
+<td>${agreementLabel}</td>
+</tr>`;
+};
+
+section.innerHTML = `
+<div class="section">
+<div class="section-head"><h2>${iconSvg('store')}Pharmacies</h2><span class="section-sub">What is happening with this customer?</span></div>
+${filterBarHtml('pharmTable', 'Pharmacies')}
+<div class="panel">
+<div class="pharm-table-controls">
+<div class="filter-field filter-field-pharmacy">
+<label>Search</label>
+<input class="filter-input" id="pharmTableSearchInput" placeholder="Search pharmacy name or code…" value="${pharmTableSearch.replace(/"/g,'&quot;')}" />
+</div>
+<div class="filter-field">
+<label>Classification</label>
+<select class="filter-select" id="pharmTableClassFilter">
+<option value="__all__" ${pharmTableFilters.classification===null?'selected':''}>All classifications</option>
+${classifications.map(c => `<option value="${c}" ${pharmTableFilters.classification===c?'selected':''}>${c===''?'(Unclassified)':c}</option>`).join('')}
+</select>
+</div>
+<div class="filter-field">
+<label>Customer Status</label>
+<select class="filter-select" id="pharmTableStatusFilter">
+<option value="__all__" ${pharmTableFilters.status===null?'selected':''}>All statuses</option>
+${statuses.map(s => `<option value="${s}" ${pharmTableFilters.status===s?'selected':''}>${s}</option>`).join('')}
+</select>
+</div>
+<div class="filter-field">
+<label>Agreement</label>
+<select class="filter-select" id="pharmTableAgreementFilter">
+<option value="__all__" ${pharmTableFilters.agreement===null?'selected':''}>All</option>
+<option value="agreed" ${pharmTableFilters.agreement==='agreed'?'selected':''}>Agreed deal</option>
+<option value="none" ${pharmTableFilters.agreement==='none'?'selected':''}>No agreement</option>
+</select>
+</div>
+</div>
+<div class="note" style="margin-bottom:12px;"><bdi dir="ltr">${totalMatches.toLocaleString('en-US')}</bdi> pharmacies match${totalMatches>RENDER_CAP ? ` — showing top ${RENDER_CAP.toLocaleString('en-US')} by Q3 2026 sales; narrow with search or filters to see more` : ''}.</div>
+<div class="table-desktop-only" style="overflow-x:auto;">
+<table>
+<thead><tr><th>Pharmacy</th><th>Region</th><th>District Manager</th><th>Territory</th><th>Sales</th><th>Target</th><th>Achievement %</th><th>Cashback</th><th>Agreement</th></tr></thead>
+<tbody>${shown.map(r => rowHtml(r, false)).join('') || '<tr><td colspan="9" class="alert-empty">No pharmacies match the current search/filters.</td></tr>'}</tbody>
+</table>
+</div>
+<div class="mobile-card-list">${shown.map(r => rowHtml(r, true)).join('') || '<div class="alert-empty">No pharmacies match the current search/filters.</div>'}</div>
+</div>`;
+
+wireFilterBar('pharmTable');
+section.querySelectorAll('[data-open-pharmacy]').forEach(el => {
+el.addEventListener('click', () => drillToPharmacy(el.dataset.openPharmacy));
+});
+const searchInputEl = document.getElementById('pharmTableSearchInput');
+if(searchInputEl){
+searchInputEl.addEventListener('input', () => { pharmTableSearch = searchInputEl.value; });
+searchInputEl.addEventListener('change', () => { pharmTableSearch = searchInputEl.value; renderPharmaciesTable(); });
+searchInputEl.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ pharmTableSearch = searchInputEl.value; renderPharmaciesTable(); } });
+}
+const classSel = document.getElementById('pharmTableClassFilter');
+if(classSel) classSel.addEventListener('change', () => { pharmTableFilters.classification = classSel.value === '__all__' ? null : classSel.value; renderPharmaciesTable(); });
+const statusSel = document.getElementById('pharmTableStatusFilter');
+if(statusSel) statusSel.addEventListener('change', () => { pharmTableFilters.status = statusSel.value === '__all__' ? null : statusSel.value; renderPharmaciesTable(); });
+const agreementSel = document.getElementById('pharmTableAgreementFilter');
+if(agreementSel) agreementSel.addEventListener('change', () => { pharmTableFilters.agreement = agreementSel.value === '__all__' ? null : agreementSel.value; renderPharmaciesTable(); });
+}
+
+// ---------------------------------------------------------------------
+// STEP 4: Pharmacy 360.
+// ---------------------------------------------------------------------
+let pharmacy360SearchQuery = '';
+
+function wireP360Search(section){
+const input = section.querySelector('#p360SearchInput');
+const resultsBox = section.querySelector('#p360SearchResults');
+if(!input || !resultsBox) return;
+const runP360Search = () => {
+pharmacy360SearchQuery = input.value;
+const q = normalize(input.value.trim());
+if(q.length < 1){ resultsBox.innerHTML=''; resultsBox.classList.remove('show'); return; }
+const matches = PHARMACIES.filter(p => normalize(p.n).includes(q) || (p.c && String(p.c).includes(input.value.trim()))).slice(0, 20);
+resultsBox.innerHTML = matches.length ? matches.map(p => `<div class="result-item" data-p360-pick="${p.c}"><div class="rname">${p.n}</div><div class="rmeta">Code: <bdi dir="ltr">${p.c}</bdi> · ${p.rg||'—'} / ${p.tr||'—'}</div></div>`).join('') : '<div class="empty-msg">No matching results</div>';
+resultsBox.classList.add('show');
+resultsBox.querySelectorAll('[data-p360-pick]').forEach(el => {
+el.addEventListener('click', () => drillToPharmacy(el.dataset.p360Pick));
+});
+};
+input.addEventListener('input', runP360Search);
+input.addEventListener('focus', runP360Search);
+}
+
+function renderPharmacy360(){
+const section = document.getElementById('pharmacy360Section');
+if(!section) return;
+const code = platformFilters.code;
+const p = code ? pharmaciesByCode().get(code) : null;
+
+const searchBoxHtml = `
+<div class="section">
+<div class="filter-field filter-field-pharmacy" style="position:relative;max-width:420px;">
+<label>Search pharmacy</label>
+<input class="filter-input" id="p360SearchInput" placeholder="Search by name or code…" autocomplete="off" />
+<div class="results" id="p360SearchResults"></div>
+</div>
+</div>`;
+
+if(!p){
+section.innerHTML = `
+<div class="section">
+<div class="section-head"><h2>${iconSvg('store')}Pharmacy 360</h2><span class="section-sub">What is happening with this customer?</span></div>
+</div>
+${searchBoxHtml}
+<div class="panel" style="text-align:center;color:var(--muted);padding:32px 16px;">${code ? 'No pharmacy found for code "'+code+'".' : 'Search for a pharmacy above to open its profile.'}</div>`;
+wireP360Search(section);
+return;
+}
+
+const deal = agreedDealsByCode().get(p.c);
+const sales = pharmacyQ3Sales(p);
+const priorSales = pharmacyPriorQ3Sales(p);
+const salesGrowth = priorSales > 0 ? ((sales - priorSales)/priorSales) : null;
+const target = deal ? (deal.target_sales||0) : null;
+const achPct = (deal && target) ? (sales/target*100) : null;
+const isAchieved = deal ? (sales >= target && target > 0) : false;
+const earnedCashback = deal ? (isAchieved ? (deal.total_payout||0) : 0) : null;
+const committedCashback = deal ? (deal.total_payout||0) : null;
+const forecastCashback = deal ? (isAchieved ? (deal.total_payout||0) : (deal.total_payout||0) * Math.min(1, target ? sales/target : 0)) : null;
+const status = pharmacyAgreementStatus(deal);
+const na = '<span class="dq-na">—</span>';
+
+const breadcrumbHtml = `<div class="drill-breadcrumb">
+<span class="drill-crumb-link" data-p360-back-to-table="1">Pharmacies</span>
+<span class="drill-crumb-sep">/</span>
+<span class="drill-crumb-current">${p.n}</span>
+</div>`;
+
+const headerHtml = `
+<div class="section">
+<div class="section-head"><h2>${iconSvg('store')}${p.n}<span class="p360-status-badge p360-status-${status.key}">${status.label}</span></h2></div>
+<div class="panel p360-header-grid">
+<div><div class="mobile-card-label">Code</div><div class="mobile-card-value"><bdi dir="ltr">${p.c}</bdi></div></div>
+<div><div class="mobile-card-label">Region</div><div class="mobile-card-value">${p.rg || na}</div></div>
+<div><div class="mobile-card-label">District Manager</div><div class="mobile-card-value">${p.dm || na}</div></div>
+<div><div class="mobile-card-label">Territory</div><div class="mobile-card-value">${p.tr || na}</div></div>
+<div><div class="mobile-card-label">Classification</div><div class="mobile-card-value">${p.ct || na}</div></div>
+<div><div class="mobile-card-label">Agreement Status</div><div class="mobile-card-value">${status.label}</div></div>
+</div>
+</div>`;
+
+const summaryHtml = `
+<div class="section">
+<div class="section-head"><h2>${iconSvg('dollar')}Performance Summary</h2></div>
+<div class="panel">
+<div class="kpi-row" style="margin-bottom:0;">
+<div class="kpi-card"><div class="kpi-label">Sales</div><div class="kpi-value">${fmtBig(sales)} EGP</div><div class="kpi-trend ${salesGrowth===null?'neutral':(salesGrowth>=0?'up':'down')}">${salesGrowth===null?'Q3 2026':signedPct(salesGrowth)+' vs Q3 2025'}</div></div>
+<div class="kpi-card"><div class="kpi-label">Target</div><div class="kpi-value">${target!==null?fmtBig(target)+' EGP':na}</div><div class="kpi-trend neutral">${deal?'Agreed target':'No agreement'}</div></div>
+<div class="kpi-card"><div class="kpi-label">Achievement %</div><div class="kpi-value">${achPct===null?na:achPct.toFixed(0)+'%'}</div><div class="kpi-trend neutral">Sales ÷ target</div></div>
+<div class="kpi-card"><div class="kpi-label">Earned Cashback</div><div class="kpi-value">${earnedCashback===null?na:fmtBig(earnedCashback)+' EGP'}</div><div class="kpi-trend neutral">Owed now</div></div>
+<div class="kpi-card"><div class="kpi-label">Committed Cashback</div><div class="kpi-value">${committedCashback===null?na:fmtBig(committedCashback)+' EGP'}</div><div class="kpi-trend neutral">If target is hit</div></div>
+<div class="kpi-card"><div class="kpi-label">Forecast Cashback</div><div class="kpi-value">${forecastCashback===null?na:fmtBig(forecastCashback)+' EGP'}</div><div class="kpi-trend neutral">Committed × pace so far</div></div>
+</div>
+</div>
+</div>`;
+
+const trendHtml = `
+<div class="section">
+<div class="section-head"><h2>${iconSvg('grid')}Performance Trend</h2></div>
+<div class="panel">${monthlyChartHtml({m7:(p.mo&&p.mo['202607'])||0, m8:(p.mo&&p.mo['202608'])||0, m9:(p.mo&&p.mo['202609'])||0, py7:(p.mo&&p.mo['202507'])||0, py8:(p.mo&&p.mo['202508'])||0, py9:(p.mo&&p.mo['202509'])||0}, target ? target/3 : 0)}</div>
+</div>`;
+
+const agreementHtml = deal ? `
+<div class="section">
+<div class="section-head"><h2>${iconSvg('layers')}Agreement</h2></div>
+<div class="panel">
+<div class="totals-grid">
+<div class="sales-box"><div class="t">Slab</div><div class="v">${dealsDisplaySlab(deal).label}</div></div>
+<div class="sales-box"><div class="t">Target</div><div class="v">${fmtBig(deal.target_sales||0)} EGP</div></div>
+<div class="sales-box"><div class="t">Current sales</div><div class="v">${fmtBig(sales)} EGP</div></div>
+<div class="sales-box"><div class="t">Achievement %</div><div class="v">${achPct===null?na:achPct.toFixed(0)+'%'}</div></div>
+<div class="sales-box"><div class="t">Expected cashback</div><div class="v">${fmtBig(deal.total_payout||0)} EGP</div></div>
+<div class="sales-box"><div class="t">Current earned cashback</div><div class="v">${fmtBig(earnedCashback||0)} EGP</div></div>
+<div class="sales-box"><div class="t">Remaining gap to target</div><div class="v">${fmtBig(deal.q3_remaining||0)} EGP</div></div>
+</div>
+<div class="note" style="margin-bottom:0;">Shelf option: ${deal.shelf_option||'none'} · POSM: ${deal.posm?'Yes':'No'} · Agreed Deals data as of: ${DEALS_SNAPSHOT_DATE}</div>
+</div>
+</div>` : `
+<div class="section">
+<div class="section-head"><h2>${iconSvg('layers')}Agreement</h2></div>
+<div class="panel" style="text-align:center;color:var(--muted);padding:20px;">No agreement recorded for this pharmacy yet.</div>
+</div>`;
+
+const scenarioHtml = `
+<div class="section">
+<div class="panel" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+<div>
+<div style="font-weight:700;color:var(--shell-navy);margin-bottom:2px;">Calculate Scenario</div>
+<div style="font-size:12px;color:var(--muted);">Opens the Cashback Calculator preloaded with this pharmacy's own sales data — compare the current agreement against a what-if scenario using the same calculation engine.</div>
+</div>
+<button class="dq-investigate-btn" id="p360CalcScenarioBtn" type="button" style="white-space:nowrap;">Calculate Scenario ${iconSvg('arrow-right')}</button>
+</div>
+</div>`;
+
+section.innerHTML = breadcrumbHtml + searchBoxHtml + headerHtml + summaryHtml + trendHtml + agreementHtml + scenarioHtml;
+wireP360Search(section);
+const backLink = section.querySelector('[data-p360-back-to-table]');
+if(backLink) backLink.addEventListener('click', () => { platformFilters.code=''; switchView('pharmaciesTable'); });
+const calcBtn = document.getElementById('p360CalcScenarioBtn');
+if(calcBtn) calcBtn.addEventListener('click', () => openCalculatorForPharmacy(p.c));
 }
 
 
