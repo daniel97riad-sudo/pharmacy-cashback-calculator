@@ -735,6 +735,10 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
 /* ---- Clickable table rows (drill-down affordance) ---- */
 table tr.row-clickable{cursor:pointer;}
 table tr.row-clickable:hover{background:var(--primary-light);}
+/* ---- Sortable table headers (Executive's Cashback Eligible table) ---- */
+th.sortable-th{cursor:pointer;user-select:none;}
+th.sortable-th:hover{color:var(--shell-navy);}
+th.sortable-th.active{color:var(--shell-navy);}
 .row-drill-icon{display:inline-flex;color:var(--muted);width:14px;height:14px;margin-inline-start:6px;vertical-align:middle;}
 table tr.row-clickable:hover .row-drill-icon{color:var(--primary-dark);}
 
@@ -913,6 +917,7 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 <div class="app-nav-btn" data-view="search" data-section="calculator"><span class="app-nav-icon" data-icon="calculator"></span><span>Cashback Calculator</span></div>
 <div class="app-nav-btn" data-view="pharmaciesTable" data-section="pharmacies"><span class="app-nav-icon" data-icon="store"></span><span>Pharmacies</span></div>
 <div class="app-nav-btn" data-view="deals" data-section="cashback"><span class="app-nav-icon" data-icon="dollar"></span><span>Cashback</span></div>
+<div class="app-nav-btn" data-view="visibilityPage" data-section="visibility"><span class="app-nav-icon" data-icon="eye"></span><span>Visibility</span></div>
 <div class="app-nav-btn" data-view="myperf" data-section="targets"><span class="app-nav-icon" data-icon="target"></span><span>Targets</span></div>
 <div class="app-nav-btn" data-view="analysis" data-section="analytics"><span class="app-nav-icon" data-icon="trending-up"></span><span>Analytics</span></div>
 <div class="app-nav-btn" data-view="alertsPage" data-section="alerts"><span class="app-nav-icon" data-icon="alert-triangle"></span><span>Alerts</span></div>
@@ -1091,6 +1096,10 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 
 <div id="pharmacy360View" style="display:none;" dir="ltr">
 <div id="pharmacy360Section"></div>
+</div>
+
+<div id="visibilityPageView" style="display:none;" dir="ltr">
+<div id="visibilityPageSection"></div>
 </div>
 
 <div id="chainsView" style="display:none;">
@@ -4043,6 +4052,9 @@ layers: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 2
 'alert-octagon': '<polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
 database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>',
 flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+activity: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+'arrow-up-down': '<polyline points="21 16 17 20 13 16"/><line x1="17" y1="4" x2="17" y2="20"/><polyline points="3 8 7 4 11 8"/><line x1="7" y1="4" x2="7" y2="20"/>',
 };
 function iconSvg(name){
 const body = ICON_DEFS[name] || '';
@@ -4056,11 +4068,12 @@ el.innerHTML = iconSvg(name);
 }
 
 const APP_SECTIONS = [
-{key:'executive', label:'Executive', subtitle:'Commercial performance overview', views:['execDash']},
-{key:'management', label:'Management', subtitle:'Where is performance coming from?', views:['exec']},
+{key:'executive', label:'Executive', subtitle:'What did we achieve and what are we paying?', views:['execDash']},
+{key:'management', label:'Management', subtitle:'Why did we get this result and what needs action?', views:['exec']},
 {key:'calculator', label:'Cashback Calculator', subtitle:'', views:['search']},
 {key:'pharmacies', label:'Pharmacies', subtitle:'What is happening with this customer?', views:['pharmaciesTable','overview','chain','chains']},
 {key:'cashback', label:'Cashback', subtitle:'Where is cashback money going?', views:['deals']},
+{key:'visibility', label:'Visibility', subtitle:'Who qualifies for visibility money according to the field team?', views:['visibilityPage']},
 {key:'targets', label:'Targets', subtitle:'Are we achieving plan?', views:['myperf','myteam','leaderboard']},
 {key:'analytics', label:'Analytics', subtitle:'Why is this happening?', views:['analysis']},
 {key:'alerts', label:'Alerts', subtitle:'What needs your attention?', views:['alertsPage']},
@@ -4129,6 +4142,7 @@ document.getElementById('alertsPageView').style.display = view === 'alertsPage' 
 document.getElementById('settingsPageView').style.display = view === 'settingsPage' ? '' : 'none';
 document.getElementById('pharmaciesTableView').style.display = view === 'pharmaciesTable' ? '' : 'none';
 document.getElementById('pharmacy360View').style.display = view === 'pharmacy360' ? '' : 'none';
+document.getElementById('visibilityPageView').style.display = view === 'visibilityPage' ? '' : 'none';
 document.querySelectorAll('.view-tab-btn').forEach(btn => {
 btn.classList.toggle('active', btn.dataset.view === view);
 });
@@ -4146,6 +4160,7 @@ if(view === 'alertsPage') renderAlertsPage();
 if(view === 'settingsPage') renderSettingsPage();
 if(view === 'pharmaciesTable') renderPharmaciesTable();
 if(view === 'pharmacy360') renderPharmacy360();
+if(view === 'visibilityPage') renderVisibilityPage();
 syncAppShell(view);
 }
 document.getElementById('viewTabs').addEventListener('click', (e) => {
@@ -5439,6 +5454,7 @@ exec: 'execView',
 alertsPage: 'alertsPageView',
 pharmaciesTable: 'pharmaciesTableView',
 pharmacy360: 'pharmacy360View',
+visibilityPage: 'visibilityPageView',
 };
 for(const view in viewIds){
 const el = document.getElementById(viewIds[view]);
@@ -5448,6 +5464,7 @@ else if(view === 'exec') renderExec();
 else if(view === 'alertsPage') renderAlertsPage();
 else if(view === 'pharmaciesTable') renderPharmaciesTable();
 else if(view === 'pharmacy360') renderPharmacy360();
+else if(view === 'visibilityPage') renderVisibilityPage();
 return;
 }
 }
@@ -5934,8 +5951,86 @@ ${commercialRollupTableHtml(commercialRollupRows, commercialGroupLabel)}
 </div>
 </div>`;
 
-section.innerHTML = filterBarHtml('mgmt', 'Management') + overviewStripHtml + dmHtml + territoryHtml + commercialRollupHtml + slabMixHtml + exposureHtml + dataQualityHtml;
+// ---- 2026 Commercial Truth operations block (moved here from Executive,
+// 2026-09-24, per Daniel's information-architecture correction: Executive
+// answers "what did we achieve and what are we paying", Management answers
+// "why did we get this result and what needs action" -- Region performance,
+// Cashback Exposure and the alert/Needs-Attention list all belong here, not
+// on Executive. Same computeCommercialKPIs()/computeCommercialAlerts()
+// engine as everywhere else -- nothing recomputed differently. ----
+const mgmtKpis = computeCommercialKPIs();
+const mgmtAlerts = computeCommercialAlerts(mgmtKpis);
+const commercialOpsKpiHtml = `
+<div class="section flow-tables">
+<div class="section-head"><h2>${iconSvg('activity')}2026 Commercial Truth — Operations</h2><span class="section-sub">Q3 2026 — through September Week 3 · whole pharmacy universe, TOTAL Dist_Value</span></div>
+<div class="panel">
+<div class="kpi-row">
+<div class="kpi-card"><div class="kpi-label">${iconSvg('check-circle')}With Valid Baseline</div><div class="kpi-value">${mgmtKpis.withBaseline.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Q3 2025 Dist_Value &gt; 0</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('alert-triangle')}Target Not Achieved</div><div class="kpi-value">${mgmtKpis.targetNotAchieved.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Has baseline, below tier</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('alert-octagon')}Achieved, No Registered Deal</div><div class="kpi-value">${mgmtKpis.achievedNoDeal.toLocaleString('en-US')}</div><div class="kpi-trend warning">Registration gap</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('users')}Registered, Not Achieved</div><div class="kpi-value">${mgmtKpis.dealNoAchieve.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Deal on file, tier not reached</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('database')}No Baseline</div><div class="kpi-value">${mgmtKpis.noBaselineList.length.toLocaleString('en-US')}</div><div class="kpi-trend neutral">No Q3 2025 Dist_Value</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('eye')}Visibility Pending Audit</div><div class="kpi-value">${mgmtKpis.visibilityPending.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Full detail on the Visibility tab</div></div>
+</div>
+</div>
+</div>`;
+
+const mgmtRegionRowsHtml = mgmtKpis.regionRows.map(r => `<tr class="row-clickable" data-drill-region="${r.hasRegion ? r.region : ''}">
+<td class="region-name">${r.hasRegion ? r.region : '(Unassigned)'}${r.hasRegion ? '' : '<span class="dq-badge">'+iconSvg('database')+'Data quality</span>'}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
+<td>${r.n.toLocaleString('en-US')}</td>
+<td>${r.targetAchieved.toLocaleString('en-US')}</td>
+<td>${fmtBig(r.fixedCashback + r.variableCashback)} EGP</td>
+<td>${r.dealRegistered.toLocaleString('en-US')}</td>
+<td>${r.achievedNoDeal.toLocaleString('en-US')}</td>
+</tr>`).join('');
+const commercialRegionHtml = `
+<div class="section flow-tables">
+<div class="section-head"><h2>${iconSvg('grid')}Regional Performance — 2026 Commercial Truth</h2><span class="section-sub">Click a region to drill in</span></div>
+<div class="panel">
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>Region</th><th>Pharmacies</th><th>Cashback Eligible</th><th>Cashback Earned</th><th>Deal Registered</th><th>Achieved, No Deal</th></tr></thead>
+<tbody>${mgmtRegionRowsHtml}</tbody>
+</table>
+</div>
+</div>
+</div>`;
+
+const commercialExposureHtml = `
+<div class="section flow-tables">
+<div class="section-head"><h2>${iconSvg('dollar')}Cashback Exposure — Q3 2026 (through Sep Wk3)</h2><span class="section-sub">Based on actual Q3 2026 Total Dist_Value through September Week 3</span></div>
+<div class="panel">
+<div class="exposure-grid">
+<div class="exposure-box"><div class="t">Fixed</div><div class="v">${fmtBig(mgmtKpis.fixedCashback)} EGP</div><div class="sub">${mgmtKpis.records.filter(r=>r.commercial_structure==='fixed'&&r.target_achieved).length.toLocaleString('en-US')} pharmacies</div></div>
+<div class="exposure-box"><div class="t">Variable</div><div class="v">${fmtBig(mgmtKpis.variableCashback)} EGP</div><div class="sub">${mgmtKpis.records.filter(r=>r.commercial_structure==='variable'&&r.target_achieved).length.toLocaleString('en-US')} pharmacies</div></div>
+<div class="exposure-box"><div class="t">Total</div><div class="v">${fmtBig(mgmtKpis.totalCashback)} EGP</div><div class="sub">${(mgmtKpis.targetAchieved).toLocaleString('en-US')} qualifying pharmacies</div></div>
+</div>
+<div class="exposure-budget-note">Based on ACTUAL Q3 2026 Dist_Value through September Week 3 × the achieved tier's rate — never target × rate. September is partial and not extrapolated, so this total will keep moving until the quarter closes.</div>
+</div>
+</div>`;
+
+const mgmtAlertsListHtml = mgmtAlerts.length
+? mgmtAlerts.map((a,i) => `<div class="alert-item sev-${a.sev}"><div class="alert-icon">${iconSvg(a.icon)}</div><div><div class="alert-title">${a.title}</div><div class="alert-detail">${a.detail}</div>${a.actionLabel ? `<button class="alert-action-btn" data-mgmt-alert-idx="${i}" type="button">${a.actionLabel}${iconSvg('arrow-right')}</button>` : ''}</div></div>`).join('')
+: `<div class="alert-empty">No alerts right now.</div>`;
+const commercialNeedsAttentionHtml = `
+<div class="section flow-tables">
+<div class="section-head"><h2>${iconSvg('alert-triangle')}Needs Attention — 2026 Commercial Truth</h2><span class="section-sub">Achieved/no-deal, registered/not-achieved, no-baseline and high-exposure signals — everything operational, in one place</span></div>
+<div class="panel">
+<div class="alert-list">${mgmtAlertsListHtml}</div>
+</div>
+</div>`;
+
+section.innerHTML = filterBarHtml('mgmt', 'Management') + overviewStripHtml + dmHtml + territoryHtml + commercialRollupHtml + commercialOpsKpiHtml + commercialRegionHtml + commercialExposureHtml + commercialNeedsAttentionHtml + slabMixHtml + exposureHtml + dataQualityHtml;
 wireFilterBar('mgmt');
+section.querySelectorAll('tr[data-drill-region]').forEach(row => {
+row.addEventListener('click', () => { if(row.dataset.drillRegion) drillToRegion(row.dataset.drillRegion, 'exec'); });
+});
+section.querySelectorAll('.alert-action-btn[data-mgmt-alert-idx]').forEach(btn => {
+btn.addEventListener('click', () => {
+const a = mgmtAlerts[Number(btn.dataset.mgmtAlertIdx)];
+if(a && a.records) openFilteredPharmaciesModal(a.title, a.records);
+});
+});
 section.querySelectorAll('[data-commercial-drill]').forEach(row => {
 row.addEventListener('click', () => {
 const val = row.dataset.commercialDrill;
@@ -6200,22 +6295,220 @@ return `<div class="chart-legend"><span><span class="dot" style="background:var(
 <div class="chart-plot"><div class="chart-bars-row">${barsHtml}</div>${targetLineHtml}</div>`;
 }
 
+// Executive Dashboard's Commercial Performance section -- whole pharmacy
+// universe, Q3 2025-to-Q3-2026 TOTAL Dist_Value, on the exact same
+// commercial-truth basis as the KPI cards above it (see
+// computeCommercialKPIs()/computeCommercial2026()). This replaces the old
+// "Agreed Deals Sales Pacing" chart, which mixed a registered-deals-only,
+// Value-basis measurement into the same dashboard as the whole-universe,
+// Dist_Value KPI cards -- two different measurement bases presented as one
+// commercial picture. Corrected 2026-09-24 per Daniel's review.
+//
+// Deliberately does NOT show one blended "target pace": the fixed
+// structure's threshold is a flat Q3 2026 Dist_Value level (EGP) and the
+// variable structure's threshold is a % growth rate over the Q3 2025
+// baseline. Those two units can't be combined into a single universal
+// number, so each structure's applicable threshold is broken out on its
+// own below instead.
+function commercialPerformanceHtml(kpis){
+const withBaselineRecords = kpis.records.filter(r => r.commercial_structure !== 'no_baseline');
+const sumQ32025 = withBaselineRecords.reduce((s,r) => s + (r.q3_2025_dv||0), 0);
+const sumQ32026 = withBaselineRecords.reduce((s,r) => s + (r.q3_2026_dv||0), 0);
+const aggGrowthPct = sumQ32025 ? (sumQ32026 - sumQ32025) / sumQ32025 * 100 : null;
+const achievementPct = withBaselineRecords.length ? (kpis.targetAchieved / withBaselineRecords.length * 100) : null;
+
+const fixedPool = kpis.records.filter(r => r.commercial_structure === 'fixed');
+const variablePool = kpis.records.filter(r => r.commercial_structure === 'variable');
+
+const fixedRowsHtml = COMMERCIAL_2026_FIXED_SLABS.slice().reverse().map(f => {
+const n = fixedPool.filter(r => r.achieved_slab === f.key).length;
+return `<tr><td>${f.label}</td><td>Q3 2026 Dist_Value &ge; ${f.threshold.toLocaleString('en-US')} EGP</td><td>${f.cash.toLocaleString('en-US')} EGP flat</td><td>${n.toLocaleString('en-US')}</td></tr>`;
+}).join('');
+const varRowsHtml = COMMERCIAL_2026_VARIABLE_TIERS.slice().reverse().map(t => {
+const n = variablePool.filter(r => r.achieved_slab === t.key).length;
+return `<tr><td>${t.label}</td><td>Growth &ge; ${(t.minGrowth*100).toFixed(0)}% vs Q3 2025</td><td>${(t.rate*100).toFixed(2)}%</td><td>${n.toLocaleString('en-US')}</td></tr>`;
+}).join('');
+
+return `<div class="section flow-chart">
+<div class="section-head"><h2>${iconSvg('trending-up')}Commercial Performance — 2026 Commercial Truth</h2><span class="section-sub">Q3 2026 — through September Week 3 · whole pharmacy universe · TOTAL Dist_Value, not extrapolated — same basis as the KPI cards above</span></div>
+<div class="panel">
+<div class="exposure-grid">
+<div class="exposure-box"><div class="t">Q3 2025 Dist_Value</div><div class="v">${fmtBig(sumQ32025)} EGP</div><div class="sub">${withBaselineRecords.length.toLocaleString('en-US')} pharmacies with a baseline</div></div>
+<div class="exposure-box"><div class="t">Q3 2026 Dist_Value</div><div class="v">${fmtBig(sumQ32026)} EGP</div><div class="sub">Same population, through Sep Wk3</div></div>
+<div class="exposure-box"><div class="t">Growth %</div><div class="v">${aggGrowthPct!==null ? (aggGrowthPct>=0?'+':'')+aggGrowthPct.toFixed(1)+'%' : 'N/A'}</div><div class="sub">Aggregate YoY, Dist_Value basis</div></div>
+<div class="exposure-box"><div class="t">Achievement %</div><div class="v">${achievementPct!==null ? achievementPct.toFixed(1)+'%' : 'N/A'}</div><div class="sub">${kpis.targetAchieved.toLocaleString('en-US')} of ${withBaselineRecords.length.toLocaleString('en-US')} with baseline</div></div>
+</div>
+<div class="slab-group-tag">FIXED STRUCTURE — applicable threshold (Q3 2025 Dist_Value &le; 5,000 EGP), ${fixedPool.length.toLocaleString('en-US')} pharmacies</div>
+<table class="slab-table" style="margin-bottom:16px;"><thead><tr><th>Slab</th><th>Applicable threshold</th><th>Cashback</th><th>Achieved</th></tr></thead><tbody>${fixedRowsHtml}</tbody></table>
+<div class="slab-group-tag">VARIABLE STRUCTURE — applicable threshold (Q3 2025 Dist_Value &gt; 5,000 EGP), ${variablePool.length.toLocaleString('en-US')} pharmacies</div>
+<table class="slab-table"><thead><tr><th>Tier</th><th>Applicable threshold</th><th>Rate</th><th>Achieved</th></tr></thead><tbody>${varRowsHtml}</tbody></table>
+<div class="exposure-budget-note">No single blended target/pace is shown here: the fixed structure's threshold is a flat Q3 2026 Dist_Value level and the variable structure's threshold is a % growth rate over the Q3 2025 baseline — the two use different units, so each structure's applicable threshold is broken out separately above rather than averaged into one number.</div>
+</div>
+</div>`;
+}
+
+// ---------------------------------------------------------------------
+// Visibility -- its own tab, deliberately separate from Executive and
+// Management. Visibility status is an entirely separate operational
+// process from commercial (fixed/variable) cashback: it comes from the
+// field team's own audit, defaults to Pending / Not Audited, and missing
+// data here is never read as Not Eligible. No visibility cashback is
+// calculated yet (visibility_cashback stays null in commercialRecordFor),
+// so the KPI below reports 0 EGP and says so rather than implying a real
+// number exists. Added 2026-09-24 per Daniel's information-architecture
+// correction -- "Who qualifies for visibility money according to the
+// field team?" is its own question, not an Executive/Management KPI.
+// ---------------------------------------------------------------------
+let visibilityTableFilters = { status: null };
+let visibilityTablePage = 1;
+const VISIBILITY_PAGE_SIZE = 50;
+
+function renderVisibilityPage(){
+const section = document.getElementById('visibilityPageSection');
+if(!section) return;
+
+const wholeFilteredPool = filteredPharmacies();
+let pool = wholeFilteredPool;
+if(visibilityTableFilters.status !== null) pool = pool.filter(p => getVisibilityStatus(p.c) === visibilityTableFilters.status);
+
+let audited = 0, pending = 0, eligible = 0, notEligible = 0;
+wholeFilteredPool.forEach(p => {
+const st = getVisibilityStatus(p.c);
+if(st === 'pending') pending++; else audited++;
+if(st === 'eligible') eligible++;
+if(st === 'not_eligible') notEligible++;
+});
+
+const totalPages = Math.max(1, Math.ceil(pool.length / VISIBILITY_PAGE_SIZE));
+if(visibilityTablePage > totalPages) visibilityTablePage = totalPages;
+if(visibilityTablePage < 1) visibilityTablePage = 1;
+const pageStart = (visibilityTablePage - 1) * VISIBILITY_PAGE_SIZE;
+const pageRows = pool.slice(pageStart, pageStart + VISIBILITY_PAGE_SIZE);
+
+const kpiHtml = `
+<div class="kpi-row flow-kpi">
+<div class="kpi-card"><div class="kpi-label">${iconSvg('store')}Total Pharmacies</div><div class="kpi-value">${wholeFilteredPool.length.toLocaleString('en-US')}</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('check-circle')}Audited</div><div class="kpi-value">${audited.toLocaleString('en-US')}</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('eye')}Pending</div><div class="kpi-value">${pending.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Pending / Not Audited (default)</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('check-circle')}Eligible</div><div class="kpi-value">${eligible.toLocaleString('en-US')}</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('alert-triangle')}Not Eligible</div><div class="kpi-value">${notEligible.toLocaleString('en-US')}</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('dollar')}Visibility Cashback</div><div class="kpi-value">0 EGP</div><div class="kpi-trend neutral">Not yet calculated — fully separate from commercial cashback</div></div>
+</div>`;
+
+const rowHtml = (p, mobile) => {
+const st = getVisibilityStatus(p.c);
+const label = VISIBILITY_STATUS_LABELS[st] || st;
+if(mobile){
+return `<div class="mobile-card row-clickable" data-open-pharmacy="${p.c}">
+<div class="mobile-card-head">${p.n}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Code</span><span class="mobile-card-value"><bdi dir="ltr">${p.c}</bdi></span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Region</span><span class="mobile-card-value">${p.rg || '—'}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">District Manager</span><span class="mobile-card-value">${p.dm || '—'}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Territory</span><span class="mobile-card-value">${p.tr || '—'}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Visibility Status</span><span class="mobile-card-value">${label}</span></div>
+</div>`;
+}
+return `<tr class="row-clickable" data-open-pharmacy="${p.c}">
+<td class="name-cell">${p.n}<span class="row-drill-icon">${iconSvg('chevron-right')}</span><div class="table-subtext"><bdi dir="ltr">${p.c}</bdi></div></td>
+<td>${p.rg || '—'}</td>
+<td>${p.dm || '—'}</td>
+<td>${p.tr || '—'}</td>
+<td>${label}</td>
+</tr>`;
+};
+
+const paginationHtml = `<div class="table-pagination" style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:10px;">
+<div class="section-sub">Showing ${pool.length ? pageStart + 1 : 0}-${Math.min(pageStart + VISIBILITY_PAGE_SIZE, pool.length)} of ${pool.length.toLocaleString('en-US')}</div>
+<div style="display:flex;gap:8px;align-items:center;">
+<button class="reset-btn" id="visTablePrevBtn" type="button" ${visibilityTablePage<=1?'disabled':''}>← Prev</button>
+<span class="section-sub">Page ${visibilityTablePage} of ${totalPages}</span>
+<button class="reset-btn" id="visTableNextBtn" type="button" ${visibilityTablePage>=totalPages?'disabled':''}>Next →</button>
+</div>
+</div>`;
+
+section.innerHTML = `
+<div class="section">
+<div class="section-head"><h2>${iconSvg('eye')}Visibility</h2><span class="section-sub">Who qualifies for visibility money according to the field team — status comes from the field team's own audit, separate from commercial cashback</span></div>
+${filterBarHtml('visibility', 'Visibility')}
+<div class="panel">
+${kpiHtml}
+<div class="pharm-table-controls" style="margin-bottom:14px;">
+<div class="filter-field">
+<label>Visibility Status</label>
+<select class="filter-select" id="visStatusFilter">
+<option value="__all__" ${visibilityTableFilters.status===null?'selected':''}>All statuses</option>
+${Object.entries(VISIBILITY_STATUS_LABELS).map(([k,l]) => `<option value="${k}" ${visibilityTableFilters.status===k?'selected':''}>${l}</option>`).join('')}
+</select>
+</div>
+</div>
+<div class="table-desktop-only" style="overflow-x:auto;">
+<table>
+<thead><tr><th>Pharmacy</th><th>Region</th><th>District Manager</th><th>Territory</th><th>Visibility Status</th></tr></thead>
+<tbody>${pageRows.map(p => rowHtml(p, false)).join('') || '<tr><td colspan="5" class="alert-empty">No pharmacies match the current filters.</td></tr>'}</tbody>
+</table>
+</div>
+<div class="mobile-card-list">${pageRows.map(p => rowHtml(p, true)).join('') || '<div class="alert-empty">No pharmacies match the current filters.</div>'}</div>
+${paginationHtml}
+<div class="exposure-budget-note">Visibility status comes from the field team and defaults to Pending / Not Audited until confirmed — missing visibility information is never read as Not Eligible. Visibility cashback is calculated completely separately from commercial (fixed/variable) cashback.</div>
+</div>
+</div>`;
+
+wireFilterBar('visibility');
+section.querySelectorAll('[data-open-pharmacy]').forEach(el => {
+el.addEventListener('click', () => drillToPharmacy(el.dataset.openPharmacy));
+});
+const statusSel = document.getElementById('visStatusFilter');
+if(statusSel) statusSel.addEventListener('change', () => { visibilityTableFilters.status = statusSel.value === '__all__' ? null : statusSel.value; visibilityTablePage = 1; renderVisibilityPage(); });
+const prevBtn = document.getElementById('visTablePrevBtn');
+if(prevBtn) prevBtn.addEventListener('click', () => { if(visibilityTablePage > 1){ visibilityTablePage--; renderVisibilityPage(); } });
+const nextBtn = document.getElementById('visTableNextBtn');
+if(nextBtn) nextBtn.addEventListener('click', () => { visibilityTablePage++; renderVisibilityPage(); });
+}
+
+// Executive's Cashback Eligible Pharmacies table -- sort/page state and a
+// small sort-value helper. Tier/slab sorts by structural rank (highest
+// fixed slab, then highest variable tier, down to the lowest) since the
+// two structures aren't on a common numeric scale.
+let execTableSort = { field: 'cashback', dir: 'desc' };
+let execTablePage = 1;
+const EXEC_TABLE_PAGE_SIZE = 25;
+const EXEC_TIER_ORDER = [...COMMERCIAL_2026_FIXED_SLABS, ...COMMERCIAL_2026_VARIABLE_TIERS].map(t => t.key);
+function execEligibleSortValue(r, field){
+switch(field){
+case 'cashback': return r.cashback_amount || 0;
+case 'q32026': return r.q3_2026_dv || 0;
+case 'growth': return r.growth_pct === null ? -Infinity : r.growth_pct;
+case 'region': return (r.p.rg || '').toLowerCase();
+case 'tier': { const i = EXEC_TIER_ORDER.indexOf(r.achieved_slab); return i === -1 ? -1 : (EXEC_TIER_ORDER.length - i); }
+default: return 0;
+}
+}
+
 function renderExecDash(){
 const section = document.getElementById('execDashView');
 if(!section) return;
 // 2026 commercial truth -- the whole filtered PHARMACIES universe, not
 // just registered deals. See computeCommercialKPIs()/computeCommercial2026().
+// Executive is deliberately narrow: "what did we achieve and what are we
+// paying?" -- one KPI row, the pharmacies that actually qualify, and the
+// two tier/slab summaries the payout is built from. Everything
+// operational/diagnostic (alerts, regional/DM/territory performance,
+// exposure, data quality) lives on Management instead -- see renderExec().
+// Redesigned 2026-09-24 per Daniel's information-architecture correction.
 const kpis = computeCommercialKPIs();
-const alerts = computeCommercialAlerts(kpis);
-// Kept only for the Jul/Aug/Sep pacing chart below (Agreed Deals-only,
-// Value-basis monthly split -- Dist_Value isn't available month-by-month).
-const dealKpis = computeExecutiveKPIs();
 
 const badge = document.getElementById('appAlertBadge');
 if(badge){
-if(alerts.length){ badge.textContent = alerts.length; badge.style.display = ''; }
+const alertCount = computeCommercialAlerts(kpis).length;
+if(alertCount){ badge.textContent = alertCount; badge.style.display = ''; }
 else badge.style.display = 'none';
 }
+
+const withBaselineRecords = kpis.records.filter(r => r.commercial_structure !== 'no_baseline');
+const sumQ32026All = withBaselineRecords.reduce((s,r) => s + (r.q3_2026_dv||0), 0);
+const eligibleRecords = kpis.records.filter(r => r.target_achieved);
+const sumQ32026Eligible = eligibleRecords.reduce((s,r) => s + (r.q3_2026_dv||0), 0);
+const cashbackSalesPct = sumQ32026Eligible ? (kpis.totalCashback / sumQ32026Eligible * 100) : null;
 
 const dataUpdatedHtml = `
 <div class="data-updated-line flow-updated">
@@ -6229,83 +6522,173 @@ const dataUpdatedHtml = `
 const kpiHtml = `
 <div class="kpi-row flow-kpi">
 <div class="kpi-card"><div class="kpi-label">${iconSvg('store')}Total Pharmacies</div><div class="kpi-value">${kpis.totalPharmacies.toLocaleString('en-US')}</div><div class="kpi-trend neutral">In current filter</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('check-circle')}With Valid Baseline</div><div class="kpi-value">${kpis.withBaseline.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Q3 2025 Dist_Value &gt; 0</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('target')}Target Achieved</div><div class="kpi-value">${kpis.targetAchieved.toLocaleString('en-US')}</div><div class="kpi-trend up">Fixed + Variable</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('alert-triangle')}Target Not Achieved</div><div class="kpi-value">${kpis.targetNotAchieved.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Has baseline, below tier</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('dollar')}Fixed Cashback Earned</div><div class="kpi-value">${fmtBig(kpis.fixedCashback)} EGP</div><div class="kpi-trend neutral">Q3 2025 ≤ 5,000 EGP structure</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('dollar')}Variable Cashback Earned</div><div class="kpi-value">${fmtBig(kpis.variableCashback)} EGP</div><div class="kpi-trend neutral">Actual Q3 2026 × tier rate</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('dollar')}Total Cashback Earned</div><div class="kpi-value">${fmtBig(kpis.totalCashback)} EGP</div><div class="kpi-trend neutral">Fixed + Variable</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('alert-octagon')}Achieved, No Registered Deal</div><div class="kpi-value">${kpis.achievedNoDeal.toLocaleString('en-US')}</div><div class="kpi-trend warning">Commercially eligible either way</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('users')}Registered, Not Achieved</div><div class="kpi-value">${kpis.dealNoAchieve.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Deal on file, tier not reached yet</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('eye')}Visibility Pending Audit</div><div class="kpi-value">${kpis.visibilityPending.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Not yet confirmed by field team</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('check-circle')}Cashback Eligible</div><div class="kpi-value">${kpis.targetAchieved.toLocaleString('en-US')}</div><div class="kpi-trend up">Fixed + Variable</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('trending-up')}Q3 2026 Total Dist_Value</div><div class="kpi-value">${fmtBig(sumQ32026All)} EGP</div><div class="kpi-trend neutral">${withBaselineRecords.length.toLocaleString('en-US')} pharmacies with a baseline</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('dollar')}Total Cashback</div><div class="kpi-value">${fmtBig(kpis.totalCashback)} EGP</div><div class="kpi-trend neutral">Fixed + Variable</div></div>
+<div class="kpi-card"><div class="kpi-label">${iconSvg('activity')}Cashback / Sales</div><div class="kpi-value">${cashbackSalesPct!==null ? cashbackSalesPct.toFixed(2)+'%' : 'N/A'}</div><div class="kpi-trend neutral">Total cashback ÷ Q3 2026 Dist_Value of eligible pharmacies</div></div>
 </div>`;
 
-const regionRowsHtml = kpis.regionRows.map(r => `<tr class="row-clickable" data-drill-region="${r.hasRegion ? r.region : ''}">
-<td class="region-name">${r.hasRegion ? r.region : '(Unassigned)'}${r.hasRegion ? '' : '<span class="dq-badge">'+iconSvg('database')+'Data quality</span>'}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
-<td>${r.n.toLocaleString('en-US')}</td>
-<td>${r.targetAchieved.toLocaleString('en-US')}</td>
-<td>${fmtBig(r.fixedCashback + r.variableCashback)} EGP</td>
-<td>${r.dealRegistered.toLocaleString('en-US')}</td>
-<td>${r.achievedNoDeal.toLocaleString('en-US')}</td>
-</tr>`).join('');
+// ---- Main table: Cashback Eligible Pharmacies -- sortable, paginated ----
+const eligibleAll = eligibleRecords.slice().sort((a,b) => {
+const av = execEligibleSortValue(a, execTableSort.field);
+const bv = execEligibleSortValue(b, execTableSort.field);
+let cmp;
+if(typeof av === 'string' || typeof bv === 'string') cmp = String(av).localeCompare(String(bv));
+else cmp = av - bv;
+return execTableSort.dir === 'desc' ? -cmp : cmp;
+});
+const totalEligible = eligibleAll.length;
+const totalPages = Math.max(1, Math.ceil(totalEligible / EXEC_TABLE_PAGE_SIZE));
+if(execTablePage > totalPages) execTablePage = totalPages;
+if(execTablePage < 1) execTablePage = 1;
+const pageStart = (execTablePage - 1) * EXEC_TABLE_PAGE_SIZE;
+const pageRows = eligibleAll.slice(pageStart, pageStart + EXEC_TABLE_PAGE_SIZE);
 
-const dashGridHtml = `
-<div class="dash-grid-2 flow-tables">
-<div class="section">
-<div class="section-head"><h2>${iconSvg('grid')}Regional Performance — 2026 Commercial Truth</h2><span class="section-sub">Click a region to drill into Management</span></div>
+const tierLabelFor = (r) => r.achieved_slab ? (COMMERCIAL_2026_VARIABLE_TIERS.find(t=>t.key===r.achieved_slab)?.label || COMMERCIAL_2026_FIXED_SLABS.find(f=>f.key===r.achieved_slab)?.label || r.achieved_slab) : '—';
+const rateLabelFor = (r) => r.commercial_structure === 'variable' ? `${(r.cashback_rate*100).toFixed(2)}%` : (r.commercial_structure === 'fixed' ? 'Flat' : '—');
+const growthLabelFor = (r) => r.growth_pct === null ? '—' : (r.growth_pct>=0?'+':'') + (r.growth_pct*100).toFixed(1) + '%';
+
+const eligibleRowHtml = (r, mobile) => {
+const p = r.p;
+const structLabel = r.commercial_structure === 'fixed' ? 'Fixed' : 'Variable';
+if(mobile){
+return `<div class="mobile-card row-clickable" data-open-pharmacy="${p.c}">
+<div class="mobile-card-head">${p.n}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Region</span><span class="mobile-card-value">${p.rg || '—'}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Q3 2025 Dist_Value</span><span class="mobile-card-value">${fmtBig(r.q3_2025_dv)} EGP</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Q3 2026 Dist_Value</span><span class="mobile-card-value">${fmtBig(r.q3_2026_dv)} EGP</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Growth %</span><span class="mobile-card-value">${growthLabelFor(r)}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Structure</span><span class="mobile-card-value">${structLabel}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Slab / Tier</span><span class="mobile-card-value">${tierLabelFor(r)}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Cashback Rate</span><span class="mobile-card-value">${rateLabelFor(r)}</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Cashback Amount</span><span class="mobile-card-value">${fmtBig(r.cashback_amount||0)} EGP</span></div>
+</div>`;
+}
+return `<tr class="row-clickable" data-open-pharmacy="${p.c}">
+<td class="name-cell">${p.n}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
+<td>${p.rg || '—'}</td>
+<td>${fmtBig(r.q3_2025_dv)} EGP</td>
+<td>${fmtBig(r.q3_2026_dv)} EGP</td>
+<td>${growthLabelFor(r)}</td>
+<td>${structLabel}</td>
+<td>${tierLabelFor(r)}</td>
+<td>${rateLabelFor(r)}</td>
+<td>${fmtBig(r.cashback_amount||0)} EGP</td>
+</tr>`;
+};
+
+const sortTh = (field, label) => {
+const active = execTableSort.field === field;
+return `<th class="sortable-th${active?' active':''}" data-sort-field="${field}" title="Click to sort">${label}${active ? (execTableSort.dir==='desc' ? ' ▼' : ' ▲') : ''}</th>`;
+};
+const tableHeadHtml = `<tr>
+<th>Pharmacy</th>
+${sortTh('region','Region')}
+<th>Q3 2025 Dist_Value</th>
+${sortTh('q32026','Q3 2026 Dist_Value')}
+${sortTh('growth','Growth %')}
+<th>Structure</th>
+${sortTh('tier','Slab / Tier')}
+<th>Cashback Rate</th>
+${sortTh('cashback','Cashback Amount')}
+</tr>`;
+
+const paginationHtml = `<div class="table-pagination" style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:10px;">
+<div class="section-sub">Showing ${totalEligible ? pageStart+1 : 0}-${Math.min(pageStart+EXEC_TABLE_PAGE_SIZE, totalEligible)} of ${totalEligible.toLocaleString('en-US')}</div>
+<div style="display:flex;gap:8px;align-items:center;">
+<button class="reset-btn" id="execTablePrevBtn" type="button" ${execTablePage<=1?'disabled':''}>← Prev</button>
+<span class="section-sub">Page ${execTablePage} of ${totalPages}</span>
+<button class="reset-btn" id="execTableNextBtn" type="button" ${execTablePage>=totalPages?'disabled':''}>Next →</button>
+</div>
+</div>`;
+
+const eligibleTableHtml = `
+<div class="section flow-tables">
+<div class="section-head"><h2>${iconSvg('store')}Cashback Eligible Pharmacies</h2><span class="section-sub">Q3 2026 — through September Week 3 · ${totalEligible.toLocaleString('en-US')} pharmacies currently qualify · click a row to open Pharmacy 360</span></div>
+<div class="panel">
+<div class="table-desktop-only" style="overflow-x:auto;">
+<table>
+<thead>${tableHeadHtml}</thead>
+<tbody>${pageRows.map(r => eligibleRowHtml(r,false)).join('') || '<tr><td colspan="9" class="alert-empty">No cashback-eligible pharmacies match the current filters.</td></tr>'}</tbody>
+</table>
+</div>
+<div class="mobile-card-list">${pageRows.map(r => eligibleRowHtml(r,true)).join('') || '<div class="alert-empty">No cashback-eligible pharmacies match the current filters.</div>'}</div>
+${paginationHtml}
+</div>
+</div>`;
+
+// ---- Variable growth tier summary -- derived from the engine, not hardcoded ----
+const varTiersAsc = COMMERCIAL_2026_VARIABLE_TIERS.slice().reverse();
+const varSummaryRows = varTiersAsc.map((t, idx) => {
+const nextT = varTiersAsc[idx+1];
+const growthLabel = nextT ? `${(t.minGrowth*100).toFixed(0)}%–<${(nextT.minGrowth*100).toFixed(0)}%` : `&ge;${(t.minGrowth*100).toFixed(0)}%`;
+const recs = kpis.records.filter(r => r.commercial_structure==='variable' && r.achieved_slab===t.key);
+const cashback = recs.reduce((s,r) => s+(r.cashback_amount||0), 0);
+return `<tr><td>Tier ${idx+1}</td><td>${growthLabel}</td><td>${(t.rate*100).toFixed(2)}%</td><td>${recs.length.toLocaleString('en-US')}</td><td>${fmtBig(cashback)} EGP</td></tr>`;
+});
+const varTotalN = kpis.records.filter(r => r.commercial_structure==='variable' && r.target_achieved).length;
+const varTotalCashback = kpis.records.filter(r => r.commercial_structure==='variable' && r.target_achieved).reduce((s,r)=>s+(r.cashback_amount||0),0);
+const variableSummaryHtml = `
+<div class="section flow-tables">
+<div class="section-head"><h2>${iconSvg('trending-up')}Variable Growth Summary</h2><span class="section-sub">Actual Q3 2026 Dist_Value × the achieved tier's rate — derived live from the commercial engine</span></div>
 <div class="panel">
 <div style="overflow-x:auto;">
-<table>
-<thead><tr><th>Region</th><th>Pharmacies</th><th>Target Achieved</th><th>Cashback Earned</th><th>Deal Registered</th><th>Achieved, No Deal</th></tr></thead>
-<tbody>${regionRowsHtml}</tbody>
+<table class="slab-table">
+<thead><tr><th>Tier</th><th>Growth</th><th>Rate</th><th>Pharmacies</th><th>Cashback</th></tr></thead>
+<tbody>${varSummaryRows.join('')}
+<tr style="font-weight:700;border-top:2px solid var(--border);"><td colspan="3">Total</td><td>${varTotalN.toLocaleString('en-US')} pharmacies</td><td>${fmtBig(varTotalCashback)} EGP</td></tr>
+</tbody>
 </table>
 </div>
 </div>
-</div>
-<div class="section">
-<div class="section-head"><h2>${iconSvg('dollar')}Cashback Exposure — Q3 2026 (through Sep Wk3)</h2></div>
-<div class="panel">
-<div class="exposure-grid">
-<div class="exposure-box"><div class="t">Fixed</div><div class="v">${fmtBig(kpis.fixedCashback)} EGP</div><div class="sub">${kpis.records.filter(r=>r.commercial_structure==='fixed'&&r.target_achieved).length.toLocaleString('en-US')} pharmacies</div></div>
-<div class="exposure-box"><div class="t">Variable</div><div class="v">${fmtBig(kpis.variableCashback)} EGP</div><div class="sub">${kpis.records.filter(r=>r.commercial_structure==='variable'&&r.target_achieved).length.toLocaleString('en-US')} pharmacies</div></div>
-<div class="exposure-box"><div class="t">Total</div><div class="v">${fmtBig(kpis.totalCashback)} EGP</div><div class="sub">${(kpis.targetAchieved).toLocaleString('en-US')} qualifying pharmacies</div></div>
-</div>
-<div class="exposure-budget-note">Based on ACTUAL Q3 2026 Dist_Value through September Week 3 × the achieved tier's rate — never target × rate. September is partial and not extrapolated, so this total will keep moving until the quarter closes.</div>
-</div>
-</div>
 </div>`;
 
-const alertsHtml = alerts.length
-? alerts.slice(0,3).map((a,i) => `<div class="alert-item sev-${a.sev}"><div class="alert-icon">${iconSvg(a.icon)}</div><div><div class="alert-title">${a.title}</div><div class="alert-detail">${a.detail}</div>${a.actionLabel ? `<button class="alert-action-btn" data-alert-idx="${i}" type="button">${a.actionLabel}${iconSvg('arrow-right')}</button>` : ''}</div></div>`).join('')
-: `<div class="alert-empty">No alerts right now.</div>`;
-
-const needsAttentionHtml = `
-<div class="section flow-alerts">
-<div class="section-head"><h2>${iconSvg('alert-triangle')}Needs Attention</h2></div>
+// ---- Fixed slab summary -- derived from the engine, not hardcoded ----
+const fixedSlabsAsc = COMMERCIAL_2026_FIXED_SLABS.slice().reverse();
+const fixedSummaryRows = fixedSlabsAsc.map((f, idx) => {
+const recs = kpis.records.filter(r => r.commercial_structure==='fixed' && r.achieved_slab===f.key);
+const total = recs.reduce((s,r) => s+(r.cashback_amount||0), 0);
+return `<tr><td>Fixed Slab ${idx+1}</td><td>&ge; ${f.threshold.toLocaleString('en-US')} EGP</td><td>${f.cash.toLocaleString('en-US')} EGP</td><td>${recs.length.toLocaleString('en-US')}</td><td>${fmtBig(total)} EGP</td></tr>`;
+});
+const fixedTotalN = kpis.records.filter(r => r.commercial_structure==='fixed' && r.target_achieved).length;
+const fixedTotalCashback = kpis.records.filter(r => r.commercial_structure==='fixed' && r.target_achieved).reduce((s,r)=>s+(r.cashback_amount||0),0);
+const fixedSummaryHtml = `
+<div class="section flow-tables">
+<div class="section-head"><h2>${iconSvg('dollar')}Fixed Slab Summary</h2><span class="section-sub">Q3 2025 Dist_Value ≤ 5,000 EGP — derived live from the commercial engine</span></div>
 <div class="panel">
-<div class="alert-list">${alertsHtml}</div>
-${alerts.length > 3 ? `<div class="view-all-link" id="execDashViewAllAlerts">View all ${alerts.length} alerts →</div>` : ''}
+<div style="overflow-x:auto;">
+<table class="slab-table">
+<thead><tr><th>Slab</th><th>Q3 2026 Threshold</th><th>Cashback</th><th>Pharmacies</th><th>Total Cashback</th></tr></thead>
+<tbody>${fixedSummaryRows.join('')}
+<tr style="font-weight:700;border-top:2px solid var(--border);"><td colspan="3">Total</td><td>${fixedTotalN.toLocaleString('en-US')} pharmacies</td><td>${fmtBig(fixedTotalCashback)} EGP</td></tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>`;
 
 section.innerHTML = filterBarHtml('execDash', 'Executive') + dataUpdatedHtml + kpiHtml
-+ `<div class="section flow-chart"><div class="section-head"><h2>${iconSvg('trending-up')}Agreed Deals Sales Pacing — Jul/Aug/Sep 2026 vs 2025</h2><span class="section-sub">Registered deals only, Value basis (month-by-month Dist_Value isn't available) — the commercial-truth KPIs above are Dist_Value, whole universe</span></div><div class="panel">${monthlyChartHtml(dealKpis.monthly, dealKpis.totalTarget ? dealKpis.totalTarget/3 : 0)}</div></div>`
-+ dashGridHtml + needsAttentionHtml;
++ eligibleTableHtml + variableSummaryHtml + fixedSummaryHtml;
 
-const link = document.getElementById('execDashViewAllAlerts');
-if(link) link.addEventListener('click', () => switchView('alertsPage'));
 wireFilterBar('execDash');
-section.querySelectorAll('tr[data-drill-region]').forEach(row => {
-row.addEventListener('click', () => { if(row.dataset.drillRegion) drillToRegion(row.dataset.drillRegion, 'exec'); });
+section.querySelectorAll('[data-open-pharmacy]').forEach(el => {
+el.addEventListener('click', () => drillToPharmacy(el.dataset.openPharmacy));
 });
-section.querySelectorAll('.alert-action-btn[data-alert-idx]').forEach(btn => {
-btn.addEventListener('click', () => {
-const a = alerts[Number(btn.dataset.alertIdx)];
-if(!a) return;
-if(a.records) openFilteredPharmaciesModal(a.title, a.records);
+section.querySelectorAll('.sortable-th[data-sort-field]').forEach(th => {
+th.addEventListener('click', () => {
+const field = th.dataset.sortField;
+if(execTableSort.field === field) execTableSort.dir = execTableSort.dir === 'desc' ? 'asc' : 'desc';
+else { execTableSort.field = field; execTableSort.dir = 'desc'; }
+execTablePage = 1;
+renderExecDash();
 });
 });
+const prevBtn = document.getElementById('execTablePrevBtn');
+if(prevBtn) prevBtn.addEventListener('click', () => { if(execTablePage > 1){ execTablePage--; renderExecDash(); } });
+const nextBtn = document.getElementById('execTableNextBtn');
+if(nextBtn) nextBtn.addEventListener('click', () => { execTablePage++; renderExecDash(); });
 }
+
 
 function renderAlertsPage(){
 const section = document.getElementById('alertsPageSection');
