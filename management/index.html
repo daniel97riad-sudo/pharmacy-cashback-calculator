@@ -685,6 +685,22 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
 --shell-quality-bg:#EEF1F5;
 --shell-quality-border:#D8DDE6;
 }
+/* ===================================================================
+   PHARCO CHC brand tokens -- sampled directly from the supplied PHARCO
+   CHC logo (logo_header.b64, already embedded in the sidebar chip):
+   dominant orange pixel = #FFA400, dominant wordmark gray = #63656A.
+   Scoped to the Executive page (#execDashView) and its Intelligence
+   Drawer (.xdw-*) only -- these never touch the sidebar/topbar navy
+   (--shell-navy, --shell-sidebar-bg) or any other view's --primary. ---- */
+:root{
+--pharco-orange:#FFA400;
+--pharco-orange-dark:#9E6600;
+--pharco-orange-light:#FFF6E6;
+--pharco-charcoal:#63656A;
+--pharco-white:#FFFFFF;
+--pharco-surface:#F7F7F8;
+--pharco-border:#E4E5E8;
+}
 .icon{width:1em;height:1em;display:inline-block;vertical-align:-0.15em;}
 .icon svg, [data-icon] svg{width:100%;height:100%;display:block;}
 .app-nav-icon{font-size:18px;width:20px;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
@@ -847,7 +863,8 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 #execDashView .flow-updated{order:2;}
 #execDashView .flow-hero-identity{order:3;}
 #execDashView .flow-composition{order:4;}
-#execDashView .flow-tables{order:5;}
+#execDashView .flow-visibility{order:5;}
+#execDashView .flow-tables{order:6;}
 .platform-filterbar{gap:8px;}
 .filter-select,.filter-input{min-width:0;flex:1;}
 .filter-field{flex:1 1 130px;}
@@ -882,16 +899,20 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 #execDashView .exec-story-divider-h{height:1px;background:var(--border);margin:0 -14px;}
 #execDashView .exec-hero-stat{flex:1 1 150px;min-width:130px;display:flex;flex-direction:column;gap:6px;}
 #execDashView .exec-hero-divider{width:1px;align-self:stretch;background:var(--border);}
-#execDashView .exec-hero-value{font-size:32px;font-weight:800;color:var(--shell-navy);font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.1;}
+#execDashView .exec-hero-value{font-size:32px;font-weight:800;color:var(--pharco-charcoal);font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.1;}
 #execDashView .exec-hero-label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;display:flex;align-items:center;gap:6px;}
-#execDashView .exec-hero-label .icon{width:14px;height:14px;color:var(--primary-dark);flex-shrink:0;}
-#execDashView .exec-hero-stat--money .exec-hero-value{font-size:34px;}
+#execDashView .exec-hero-label .icon{width:14px;height:14px;color:var(--pharco-orange-dark);flex-shrink:0;}
+#execDashView .exec-hero-stat--money .exec-hero-value{font-size:34px;color:var(--pharco-orange-dark);}
+/* Cashback / Sales sits beside Total Cashback in the financial row -- also
+   an "important financial figure" per brand direction, so it gets the same
+   orange treatment even though it has no --money modifier of its own. */
+#execDashView .exec-story-financial .exec-hero-stat:not(.exec-hero-stat--money) .exec-hero-value{color:var(--pharco-orange-dark);}
 /* Cashback Eligible is the single most important count on the page --
    larger figure, accent color, and a soft tint (no border) so it reads as
    the headline of the identity row without adding another boxed card. */
-#execDashView .exec-hero-stat--eligible{background:var(--primary-light);border-radius:var(--radius-md);padding:10px 18px;margin:-10px 0;}
-#execDashView .exec-hero-stat--eligible .exec-hero-value{font-size:42px;color:var(--primary-dark);}
-#execDashView .exec-hero-stat--eligible .exec-hero-label{color:var(--primary-dark);}
+#execDashView .exec-hero-stat--eligible{background:var(--pharco-orange-light);border-radius:var(--radius-md);padding:10px 18px;margin:-10px 0;}
+#execDashView .exec-hero-stat--eligible .exec-hero-value{font-size:42px;color:var(--pharco-orange-dark);}
+#execDashView .exec-hero-stat--eligible .exec-hero-label{color:var(--pharco-orange-dark);}
 @media (max-width:640px){
 #execDashView .exec-story-row{flex-direction:column;align-items:stretch;gap:14px;padding:18px 0;}
 #execDashView .exec-hero-stat{flex:none;}
@@ -901,12 +922,12 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 
 #execDashView .exec-story-sales{flex-direction:column;gap:14px;}
 #execDashView .exec-story-label-inline{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.04em;flex-wrap:wrap;text-align:center;}
-#execDashView .exec-story-label-inline .icon{width:14px;height:14px;color:var(--primary-dark);flex-shrink:0;}
+#execDashView .exec-story-label-inline .icon{width:14px;height:14px;color:var(--pharco-orange-dark);flex-shrink:0;}
 #execDashView .exec-story-sublabel{display:block;width:100%;font-size:11px;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;margin-top:2px;}
 #execDashView .exec-salesstory{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;}
 #execDashView .exec-salesstory-point{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:100px;}
 #execDashView .exec-salesstory-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
-#execDashView .exec-salesstory-value{font-size:23px;font-weight:800;color:var(--shell-navy);font-variant-numeric:tabular-nums;}
+#execDashView .exec-salesstory-value{font-size:23px;font-weight:800;color:var(--pharco-charcoal);font-variant-numeric:tabular-nums;}
 #execDashView .exec-salesstory-value.up{color:var(--success);}
 #execDashView .exec-salesstory-value.down{color:var(--danger);}
 #execDashView .exec-salesstory-value.neutral{color:var(--muted);}
@@ -924,30 +945,158 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 #execDashView .exec-salesstory-arrow{transform:rotate(90deg);}
 }
 
-#execDashView .exec-comp-active-chip{display:inline-flex;align-items:center;gap:5px;background:var(--primary-light);color:var(--primary-dark);border:1px solid var(--primary);border-radius:20px;padding:3px 8px 3px 10px;font-weight:700;font-size:11px;cursor:pointer;margin-inline-start:6px;}
-#execDashView .exec-comp-active-chip:hover{background:var(--primary);color:#fff;}
+#execDashView .exec-comp-active-chip{display:inline-flex;align-items:center;gap:5px;background:var(--pharco-orange-light);color:var(--pharco-orange-dark);border:1px solid var(--pharco-orange);border-radius:20px;padding:3px 8px 3px 10px;font-weight:700;font-size:11px;cursor:pointer;margin-inline-start:6px;}
+#execDashView .exec-comp-active-chip:hover{background:var(--pharco-orange);color:#fff;}
 #execDashView .exec-comp-active-chip .icon{width:11px;height:11px;}
 #execDashView .exec-comp-split{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
 #execDashView .exec-comp-tile{flex:1 1 200px;min-width:160px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;cursor:pointer;transition:box-shadow .15s ease,border-color .15s ease,transform .08s ease;}
-#execDashView .exec-comp-tile:hover{box-shadow:var(--shadow-card);border-color:var(--primary);}
+#execDashView .exec-comp-tile:hover{box-shadow:var(--shadow-card);border-color:var(--pharco-orange);}
 #execDashView .exec-comp-tile:active{transform:translateY(1px);}
-#execDashView .exec-comp-tile.active{border-color:var(--primary);background:var(--primary-light);box-shadow:var(--shadow-card);}
+#execDashView .exec-comp-tile.active{border-color:var(--pharco-orange);background:var(--pharco-orange-light);box-shadow:var(--shadow-card);}
 #execDashView .exec-comp-tile-label{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:800;margin-bottom:8px;}
 #execDashView .exec-comp-tile-n{font-size:12.5px;color:var(--text);font-weight:600;margin-bottom:4px;}
-#execDashView .exec-comp-tile-value{font-size:21px;font-weight:800;color:var(--shell-navy);font-variant-numeric:tabular-nums;}
-#execDashView .exec-comp-tile.active .exec-comp-tile-value{color:var(--primary-dark);}
+#execDashView .exec-comp-tile-value{font-size:21px;font-weight:800;color:var(--pharco-charcoal);font-variant-numeric:tabular-nums;}
+#execDashView .exec-comp-tile.active .exec-comp-tile-value{color:var(--pharco-orange-dark);}
 #execDashView .exec-comp-detail{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
 #execDashView .exec-comp-group-label{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:800;margin-bottom:8px;}
 #execDashView .exec-comp-tiers{display:flex;flex-direction:column;gap:8px;}
 #execDashView .exec-comp-tier{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;cursor:pointer;transition:background .15s ease,border-color .15s ease;}
-#execDashView .exec-comp-tier:hover{border-color:var(--primary);}
-#execDashView .exec-comp-tier.active{background:var(--primary-light);border-color:var(--primary);}
-#execDashView .exec-comp-tier-rate{font-weight:800;color:var(--shell-navy);font-size:13px;min-width:66px;}
-#execDashView .exec-comp-tier.active .exec-comp-tier-rate{color:var(--primary-dark);}
+#execDashView .exec-comp-tier:hover{border-color:var(--pharco-orange);}
+#execDashView .exec-comp-tier.active{background:var(--pharco-orange-light);border-color:var(--pharco-orange);}
+#execDashView .exec-comp-tier-rate{font-weight:800;color:var(--pharco-charcoal);font-size:13px;min-width:66px;}
+#execDashView .exec-comp-tier.active .exec-comp-tier-rate{color:var(--pharco-orange-dark);}
 #execDashView .exec-comp-tier-range{color:var(--muted);font-size:11.5px;flex:1;}
 #execDashView .exec-comp-tier-n{color:var(--text);font-size:11.5px;font-weight:700;white-space:nowrap;}
-#execDashView .exec-comp-tile:focus-visible, #execDashView .exec-comp-tier:focus-visible{outline:2px solid var(--primary-dark);outline-offset:2px;}
+#execDashView .exec-comp-tile:focus-visible, #execDashView .exec-comp-tier:focus-visible{outline:2px solid var(--pharco-orange-dark);outline-offset:2px;}
 @media (max-width:820px){#execDashView .exec-comp-detail{grid-template-columns:1fr;}}
+
+/* ===================================================================
+   Executive "Command Center" redesign (2026-09-24-c) -- every stat in
+   the story panel is now a real <button>, so this resets default button
+   chrome back to the existing exec-hero-* look before layering hover/
+   focus affordance on top. No color/typography change to the values
+   themselves -- same tokens as the prior polish pass. ---- */
+#execDashView button.exec-hero-stat,
+#execDashView button.exec-salesstory-point{
+background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;text-align:inherit;cursor:pointer;
+}
+#execDashView button.exec-hero-stat:hover .exec-hero-value,
+#execDashView button.exec-salesstory-point:hover .exec-salesstory-value{color:var(--pharco-orange-dark);}
+#execDashView button.exec-hero-stat--eligible:hover .exec-hero-value{color:var(--pharco-orange-dark);}
+#execDashView button.exec-hero-stat:focus-visible,
+#execDashView button.exec-salesstory-point:focus-visible{outline:2px solid var(--pharco-orange-dark);outline-offset:3px;border-radius:6px;}
+/* Visibility is a distinct data domain (field-team audit, not commercial
+   money) -- same stat shape as Total/Agreed so it reads as first-class,
+   but without the orange "eligible" tint so it never competes with the
+   commercial headline. */
+#execDashView .exec-hero-stat--visibility .exec-hero-label{color:var(--muted);}
+#execDashView .exec-hero-stat--visibility .exec-hero-label .icon{color:var(--muted);}
+
+/* ---- 5. Visibility / POSM module ---- */
+#execDashView .exec-vis-audit-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px;}
+#execDashView .exec-vis-audit-stat{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;text-align:start;cursor:pointer;font-family:inherit;transition:border-color .15s ease,background .15s ease;}
+#execDashView .exec-vis-audit-stat:hover{border-color:var(--pharco-orange);background:var(--pharco-orange-light);}
+#execDashView .exec-vis-audit-stat:focus-visible{outline:2px solid var(--pharco-orange-dark);outline-offset:2px;}
+#execDashView .exec-vis-audit-value{font-size:22px;font-weight:800;color:var(--pharco-charcoal);font-variant-numeric:tabular-nums;}
+#execDashView .exec-vis-audit-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-top:4px;}
+#execDashView .exec-vis-posm-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:14px;}
+#execDashView .exec-vis-posm-metric{background:none;border:none;margin:0;font:inherit;display:block;width:100%;padding:12px 16px;border-inline-end:1px solid var(--border);text-align:start;cursor:pointer;font-family:inherit;transition:background .15s ease;}
+#execDashView .exec-vis-posm-metric:last-child{border-inline-end:none;}
+#execDashView .exec-vis-posm-metric:hover{background:var(--pharco-orange-light);}
+#execDashView .exec-vis-posm-metric:focus-visible{outline:2px solid var(--pharco-orange-dark);outline-offset:-2px;}
+#execDashView .exec-vis-posm-metric-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
+#execDashView .exec-vis-posm-metric-value{font-size:19px;font-weight:800;color:var(--pharco-charcoal);margin-top:5px;font-variant-numeric:tabular-nums;}
+/* Money rows (POSM Investment / Shelf Bonus / Total Visibility Investment)
+   get the PHARCO orange treatment per brand direction -- "important
+   financial figures" and "visibility investment" are explicit orange
+   use-cases, distinct from the plain pharmacy/deal counts above them. ---- */
+#execDashView .exec-vis-posm-row--money{margin-top:10px;border-color:var(--pharco-orange-light);}
+#execDashView .exec-vis-posm-metric--money{background:var(--pharco-orange-light);}
+#execDashView .exec-vis-posm-metric--money:hover{background:var(--pharco-orange);}
+#execDashView .exec-vis-posm-metric--money:hover .exec-vis-posm-metric-label,
+#execDashView .exec-vis-posm-metric--money:hover .exec-vis-posm-metric-value{color:#fff;}
+#execDashView .exec-vis-posm-metric--money .exec-vis-posm-metric-value{color:var(--pharco-orange-dark);}
+#execDashView .exec-vis-note{display:flex;gap:8px;align-items:flex-start;background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:11.5px;color:var(--muted);line-height:1.5;margin-bottom:16px;}
+#execDashView .exec-vis-note .icon{flex-shrink:0;width:14px;height:14px;margin-top:1px;}
+#execDashView .exec-vis-posm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
+#execDashView .exec-posm-tile{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;text-align:start;cursor:pointer;font-family:inherit;transition:border-color .15s ease;}
+#execDashView .exec-posm-tile:hover{border-color:var(--pharco-orange);background:var(--pharco-orange-light);}
+#execDashView .exec-posm-tile:focus-visible{outline:2px solid var(--pharco-orange-dark);outline-offset:2px;}
+#execDashView .exec-posm-tile-label{font-size:12.5px;font-weight:700;color:var(--pharco-charcoal);}
+#execDashView .exec-posm-tile-state{font-size:10.5px;color:var(--pharco-orange-dark);font-weight:700;margin-top:4px;letter-spacing:.01em;}
+@media (max-width:640px){
+#execDashView .exec-vis-posm-row{grid-template-columns:1fr 1fr;}
+#execDashView .exec-vis-posm-metric{border-bottom:1px solid var(--border);}
+}
+
+/* ---- Intelligence Drawer: one reusable panel, desktop side-drawer /
+   mobile bottom-sheet. Deliberately no full-dark backdrop -- a soft tint
+   only, so the Executive page stays visible/in-context behind it per
+   the "preserve the user's current position" requirement. ---- */
+.xdw-overlay{position:fixed;inset:0;background:rgba(16,20,35,.14);z-index:149;}
+/* Always anchored to the visual right edge of the screen, per the brief's
+   "right-side intelligence drawer" spec -- deliberately independent of the
+   outer app shell's RTL (Arabic) text direction, matching execDashView's
+   own forced dir="ltr" (Executive's content is English/numeric throughout). */
+.xdw-panel{position:fixed;top:0;right:0;left:auto;height:100vh;width:min(430px,92vw);background:var(--card);border-left:1px solid var(--border);box-shadow:-10px 0 34px rgba(16,24,40,.14);z-index:150;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;}
+.xdw-panel.open{transform:translateX(0);}
+.xdw-head{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.xdw-crumbs{flex:1;display:flex;align-items:center;gap:6px;overflow-x:auto;white-space:nowrap;font-size:12px;scrollbar-width:none;}
+.xdw-crumbs::-webkit-scrollbar{display:none;}
+.xdw-crumb{color:var(--muted);font-weight:700;cursor:pointer;flex-shrink:0;}
+.xdw-crumb:hover{text-decoration:underline;}
+.xdw-crumb.current{color:var(--pharco-charcoal);cursor:default;}
+.xdw-crumb.current:hover{text-decoration:none;}
+.xdw-crumb-sep{color:var(--border);flex-shrink:0;}
+.xdw-back-btn,.xdw-close-btn{background:none;border:1px solid var(--border);border-radius:8px;width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);}
+.xdw-back-btn .icon,.xdw-close-btn .icon{width:15px;height:15px;}
+.xdw-back-btn:hover,.xdw-close-btn:hover{color:var(--text);background:var(--bg);}
+.xdw-body{padding:20px 22px 28px;overflow-y:auto;flex:1;}
+.xdw-eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--pharco-orange-dark);font-weight:800;margin-bottom:6px;}
+.xdw-title{margin:0 0 8px;font-size:27px;font-weight:800;color:var(--pharco-charcoal);font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.15;}
+.xdw-subtitle{font-size:12.5px;color:var(--muted);line-height:1.55;margin-bottom:20px;}
+.xdw-metric-list{display:flex;flex-direction:column;border-top:1px solid var(--border);margin-bottom:20px;}
+.xdw-metric-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 1px;border-bottom:1px solid var(--border);font-size:13px;}
+.xdw-metric-row span{color:var(--muted);}
+.xdw-metric-row b{font-weight:800;color:var(--pharco-charcoal);font-variant-numeric:tabular-nums;}
+.xdw-region-list{margin-bottom:20px;}
+.xdw-region-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:7px 1px;border-bottom:1px dashed var(--border);font-size:12.5px;align-items:center;}
+.xdw-region-row.xdw-region-head{border-bottom:1px solid var(--border);border-top:none;color:var(--muted);font-weight:800;text-transform:uppercase;font-size:10px;letter-spacing:.03em;}
+.xdw-region-name{color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.xdw-region-n,.xdw-region-val{text-align:end;font-variant-numeric:tabular-nums;color:var(--pharco-charcoal);font-weight:700;white-space:nowrap;}
+.xdw-region-row--rest{color:var(--muted);}
+.xdw-region-row--rest .xdw-region-name,.xdw-region-row--rest .xdw-region-n,.xdw-region-row--rest .xdw-region-val{color:var(--muted);font-weight:600;}
+.xdw-actions{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.xdw-action-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--pharco-orange-light);color:var(--pharco-orange-dark);border:1px solid var(--pharco-orange);border-radius:var(--radius-sm);padding:11px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;text-align:start;width:100%;}
+.xdw-action-btn:hover{background:var(--pharco-orange);color:#fff;}
+.xdw-action-btn .icon{width:14px;height:14px;flex-shrink:0;}
+.xdw-split-row{display:flex;gap:12px;margin-bottom:18px;}
+.xdw-split-tile{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;cursor:pointer;text-align:start;font-family:inherit;transition:border-color .15s ease,background .15s ease;}
+.xdw-split-tile:hover{border-color:var(--pharco-orange);background:var(--pharco-orange-light);}
+.xdw-split-label{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:800;margin-bottom:7px;}
+.xdw-split-value{font-size:17px;font-weight:800;color:var(--pharco-charcoal);font-variant-numeric:tabular-nums;}
+.xdw-split-n{font-size:12.5px;font-weight:700;color:var(--text);margin-top:3px;}
+.xdw-group-label{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:800;margin:6px 0 9px;}
+.xdw-note{display:flex;gap:8px;align-items:flex-start;background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:11px 13px;font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:18px;}
+.xdw-note .icon{flex-shrink:0;width:14px;height:14px;margin-top:1px;}
+.xdw-posm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:6px;}
+.xdw-posm-tile{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:11.5px;font-weight:700;color:var(--text);cursor:pointer;text-align:center;font-family:inherit;}
+.xdw-posm-tile:hover{border-color:var(--pharco-orange);background:var(--pharco-orange-light);}
+.xdw-posm-tile-n{font-size:10.5px;font-weight:700;color:var(--pharco-orange-dark);margin-top:4px;}
+.xdw-tier-list{display:flex;flex-direction:column;border-top:1px solid var(--border);margin-bottom:18px;}
+.xdw-tier-row{display:grid;grid-template-columns:84px 1fr 90px;gap:8px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--border);font-size:12.5px;}
+button.xdw-tier-row{background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;text-align:start;font-family:inherit;width:100%;}
+button.xdw-tier-row:hover{background:var(--pharco-orange-light);}
+.xdw-tier-row.xdw-tier-head{color:var(--muted);font-weight:800;text-transform:uppercase;font-size:10px;letter-spacing:.03em;}
+.xdw-tier-rate{font-weight:800;color:var(--pharco-charcoal);}
+.xdw-tier-range{color:var(--muted);}
+.xdw-tier-n{text-align:end;font-weight:700;color:var(--text);white-space:nowrap;}
+@media (max-width:760px){
+.xdw-panel{top:auto;bottom:0;left:0;right:0;height:auto;max-height:85vh;width:100%;border-left:none;border-top:1px solid var(--border);border-radius:16px 16px 0 0;box-shadow:0 -10px 34px rgba(16,24,40,.18);transform:translateY(100%);}
+.xdw-panel.open{transform:translateY(0);}
+.xdw-body{padding:16px 18px 24px;}
+.xdw-title{font-size:23px;}
+}
 
 #execDashView .dash-grid-2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px;align-items:start;min-width:0;}
 #execDashView .dash-grid-2 > .card{min-width:0;}
@@ -1054,6 +1203,9 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 </div>
 
 <div id="execDashView" dir="ltr"></div>
+
+<div id="execIntelDrawerOverlay" class="xdw-overlay" style="display:none;"></div>
+<div id="execIntelDrawer" class="xdw-panel" style="display:none;" dir="ltr"></div>
 
 <div id="searchView" style="display:none;">
 <div class="card">
@@ -4131,6 +4283,7 @@ info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><l
 globe: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
 filter: '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
 'chevron-right': '<polyline points="9 18 15 12 9 6"/>',
+'chevron-left': '<polyline points="15 18 9 12 15 6"/>',
 x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
 'arrow-right': '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
 users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -4248,6 +4401,7 @@ if(view === 'settingsPage') renderSettingsPage();
 if(view === 'pharmaciesTable') renderPharmaciesTable();
 if(view === 'pharmacy360') renderPharmacy360();
 if(view === 'visibilityPage') renderVisibilityPage();
+if(view !== 'execDash') closeExecDrawer();
 syncAppShell(view);
 }
 document.getElementById('viewTabs').addEventListener('click', (e) => {
@@ -4269,6 +4423,8 @@ document.getElementById('appSidebar').classList.remove('open');
 document.getElementById('appSidebarBackdrop').classList.remove('open');
 });
 document.getElementById('appAlertBell').addEventListener('click', () => switchView('alertsPage'));
+document.getElementById('execIntelDrawerOverlay').addEventListener('click', closeExecDrawer);
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && execDrawerStack.length) closeExecDrawer(); });
 (function cloneSidebarLogo(){
 const src = document.querySelector('.header-brand .brand-logo');
 const chip = document.getElementById('appLogoChip');
@@ -6589,6 +6745,16 @@ if(execCompositionFilter.tier) return r.achieved_slab === execCompositionFilter.
 if(execCompositionFilter.structure) return r.commercial_structure === execCompositionFilter.structure;
 return true;
 }
+// Visibility/POSM drill-down filter for the pharmacy explorer -- a real
+// pharmacy-code set (Set<string> of AGREED_DEALS codes), or null. Separate
+// from the composition filter above because it's keyed by shelf/POSM deal
+// terms, not by commercial structure/tier; both can be described in the
+// table's section-sub line, but applying one clears the other so the
+// explorer's active filter is never ambiguous about which axis it reflects.
+let execVisibilityCodeFilter = null;
+let execVisibilityCodeFilterLabel = '';
+function execVisibilityFilterActive(){ return execVisibilityCodeFilter !== null; }
+function execVisibilityFilterMatches(r){ return !execVisibilityCodeFilter || execVisibilityCodeFilter.has(r.p.c); }
 function execEligibleSortValue(r, field){
 switch(field){
 case 'cashback': return r.cashback_amount || 0;
@@ -6598,6 +6764,502 @@ case 'region': return (r.p.rg || '').toLowerCase();
 case 'tier': { const i = EXEC_TIER_ORDER.indexOf(r.achieved_slab); return i === -1 ? -1 : (EXEC_TIER_ORDER.length - i); }
 default: return 0;
 }
+}
+
+// ===================================================================
+// Executive "Command Center" redesign (2026-09-24-c). Visual/UX layer
+// only -- everything below reads commercial truth through the existing
+// computeCommercialKPIs()/commercialRecordFor()/getVisibilityStatus()
+// helpers and never recomputes eligibility, tiers, slabs, or cashback
+// itself. Two additions:
+//   1. A single reusable "Intelligence Drawer" (execDrawerStack + the
+//      render/open/push/back/close functions) that every clickable
+//      number on Executive opens into, so exploring the business never
+//      requires leaving the page.
+//   2. A read-only Visibility/POSM adapter (getExecVisibilityIntelligence)
+//      that surfaces the real field-team audit counts already used by
+//      Visibility (renderVisibilityPage) and leaves a clean, explicit
+//      null slot for POSM inventory/investment/type data -- which does
+//      not exist anywhere in this build yet. No numbers are invented.
+// ===================================================================
+
+// ---- Visibility/POSM data adapter --------------------------------
+// Modular integration point for Executive's Visibility module. Investigated
+// 2026-09-24-d against the actual Calculator/Deals implementation before
+// writing this: there is no per-pharmacy POSM inventory, no "Shop Science /
+// Posters / Shelf Tokens / Floor Stands / Shelf Fridges" catalog anywhere in
+// this build (confirmed by grep across the whole file) -- the ONLY real
+// POSM/visibility facts that exist are two fields logged per closed deal in
+// AGREED_DEALS: `posm` (boolean -- did this pharmacy's agreed deal include
+// point-of-sale materials) and `shelf_option` ('none'/'2'/'3'/'4' extra
+// shelves committed). Both are already surfaced today in Management's
+// Cashback Exposure note ("POSM on shelf: X / Y agreed deals") and in the
+// Deals page's own POSM coverage bar and computeDealsPosmSummary() table --
+// this adapter reuses that exact same real data rather than duplicating it,
+// and additionally derives the EGP bonus each bucket represents using the
+// SAME rate constants the live calculator applies (SHELF_RATES/POSM_RATE),
+// applied to each deal's own stored target_sales -- never a new formula,
+// never the commercial cashback engine, never invented figures.
+const EXEC_SHELF_BUCKETS = [
+{key:'none', label:'No extra shelf'},
+{key:'2', label:'2 shelves'},
+{key:'3', label:'3 shelves'},
+{key:'4', label:'4 shelves'},
+];
+function getExecVisibilityIntelligence(pool, deals){
+let audited = 0, pending = 0, eligible = 0, notEligible = 0;
+pool.forEach(p => {
+const st = getVisibilityStatus(p.c);
+if(st === 'pending') pending++; else audited++;
+if(st === 'eligible') eligible++;
+if(st === 'not_eligible') notEligible++;
+});
+// Real per-deal POSM/shelf facts -- see computeDealsPosmSummary() (Deals
+// page, unchanged) for the same posm_yes/posm_no split this reuses.
+const posmSummary = computeDealsPosmSummary(deals);
+const posmYes = posmSummary.find(g => g.key === 'posm_yes') || {n:0};
+const posmDeployedCount = posmYes.n;
+const posmAvailableCount = deals.length;
+const posmCoveragePct = deals.length ? (posmDeployedCount / deals.length * 100) : null;
+// EGP bonus actually paid for POSM presence -- each deal's own target_sales
+// x the live calculator's POSM_RATE constant (0.5%), summed only across
+// deals that actually have posm=true. Isolated from the shelf bonus below.
+const posmInvestmentEgp = deals.filter(d => d.posm).reduce((s,d) => s + (d.target_sales||0) * POSM_RATE, 0);
+const byShelf = EXEC_SHELF_BUCKETS.map(b => {
+const inBucket = deals.filter(d => (d.shelf_option || 'none') === b.key);
+const bonusEgp = inBucket.reduce((s,d) => s + (d.target_sales||0) * (SHELF_RATES[b.key] || 0), 0);
+return { key: b.key, label: b.label, n: inBucket.length, bonusEgp };
+});
+// Shelf bonus total = sum of every bucket's own bonusEgp (computed above from
+// each deal's own target_sales x its bucket's SHELF_RATES entry) -- summed
+// from the underlying per-bucket figures, never from rounded displayed
+// numbers. Total visibility investment = POSM investment + shelf bonus --
+// the two real EGP flows this module tracks, added exactly, then formatted
+// for display only at render time.
+const shelfBonusEgp = byShelf.reduce((s,b) => s + b.bonusEgp, 0);
+const totalInvestmentEgp = posmInvestmentEgp + shelfBonusEgp;
+return {
+total: pool.length, audited, pending, eligible, notEligible,
+posm: {
+availableCount: posmAvailableCount, // agreed deals -- the only population with logged POSM/shelf terms
+deployedCount: posmDeployedCount, // deals with posm=true (computeDealsPosmSummary, same as Deals/Management)
+coveragePct: posmCoveragePct, // same ratio as the Deals page's own POSM coverage bar
+investmentEgp: posmInvestmentEgp, // real: sum(target_sales x POSM_RATE) over posm=true deals
+shelfBonusEgp, // real: sum of byShelf[].bonusEgp across all four shelf buckets
+totalInvestmentEgp, // real: investmentEgp + shelfBonusEgp, exact sum (not rounded-then-added)
+byShelf // real: per shelf_option bucket, count + sum(target_sales x SHELF_RATES[bucket])
+}
+};
+}
+
+// ---- Intelligence Drawer: state + open/push/back/close ------------
+// A stack of small entry descriptors (e.g. {type:'eligible'}), never
+// rendered HTML -- renderExecDrawer() re-derives everything live from
+// computeExecDrawerContext() each time, so the drawer can never show a
+// stale number even if filters change while it's open.
+let execDrawerStack = [];
+function openExecDrawer(entry){ execDrawerStack = [entry]; renderExecDrawer(); }
+function pushExecDrawer(entry){ execDrawerStack.push(entry); renderExecDrawer(); }
+function execDrawerBackTo(idx){ execDrawerStack = execDrawerStack.slice(0, idx + 1); renderExecDrawer(); }
+function execDrawerBack(){ if(execDrawerStack.length > 1){ execDrawerStack.pop(); renderExecDrawer(); } }
+function closeExecDrawer(){
+execDrawerStack = [];
+const panel = document.getElementById('execIntelDrawer');
+const overlay = document.getElementById('execIntelDrawerOverlay');
+if(panel){ panel.classList.remove('open'); panel.style.display = 'none'; }
+if(overlay) overlay.style.display = 'none';
+}
+// Applies a composition selection (same state the on-page composition
+// tiles use) from inside the drawer's "View N pharmacies" action, then
+// closes the drawer and scrolls the explorer table into view.
+function execDrawerApplyCompositionAndClose(structure, tier){
+execCompositionFilter = { structure: structure || null, tier: tier || null };
+execVisibilityCodeFilter = null;
+execVisibilityCodeFilterLabel = '';
+execTablePage = 1;
+closeExecDrawer();
+renderExecDash();
+const tableSection = document.querySelector('#execDashView .flow-tables');
+if(tableSection) tableSection.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+// Applies a real, pharmacy-code-level Visibility/POSM filter (from the
+// drawer's shelf-bucket "View N pharmacies" action) to the explorer table.
+// Codes are re-derived live from filteredAgreedDeals() at click time (never
+// serialized into the DOM), so this always reflects the current filter bar.
+function execDrawerApplyVisibilityFilterAndClose(kind, value){
+const deals = filteredAgreedDeals();
+let matched, label;
+if(kind === 'shelf'){
+matched = deals.filter(d => (d.shelf_option||'none') === value);
+label = (EXEC_SHELF_BUCKETS.find(b=>b.key===value)||{}).label || value;
+} else if(kind === 'posm'){
+matched = deals.filter(d => !!d.posm === value);
+label = value ? 'POSM Deployed' : 'No POSM';
+} else {
+matched = [];
+label = '';
+}
+execCompositionFilter = { structure: null, tier: null };
+execVisibilityCodeFilter = new Set(matched.map(d => d.code));
+execVisibilityCodeFilterLabel = label;
+execTablePage = 1;
+closeExecDrawer();
+renderExecDash();
+const tableSection = document.querySelector('#execDashView .flow-tables');
+if(tableSection) tableSection.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// Recomputes everything the drawer's content renderers need, live, in
+// one place -- the same eligible-only sales-story figures Executive's
+// own hero uses (see renderExecDash), never a separate calculation.
+function computeExecDrawerContext(){
+const kpis = computeCommercialKPIs();
+const eligibleRecords = kpis.records.filter(r => r.target_achieved);
+const sumQ32025Eligible = eligibleRecords.reduce((s,r) => s + (r.q3_2025_dv||0), 0);
+const sumQ32026Eligible = eligibleRecords.reduce((s,r) => s + (r.q3_2026_dv||0), 0);
+const eligibleGrowthPct = sumQ32025Eligible > 0 ? (sumQ32026Eligible / sumQ32025Eligible - 1) : null;
+const cashbackSalesPct = sumQ32026Eligible ? (kpis.totalCashback / sumQ32026Eligible * 100) : null;
+const agreedPharmaciesCount = kpis.records.filter(r => r.deal_registered).length;
+const fixedRecords = kpis.records.filter(r => r.commercial_structure==='fixed' && r.target_achieved);
+const variableRecords = kpis.records.filter(r => r.commercial_structure==='variable' && r.target_achieved);
+const fixedTotalCashback = fixedRecords.reduce((s,r)=>s+(r.cashback_amount||0),0);
+const variableTotalCashback = variableRecords.reduce((s,r)=>s+(r.cashback_amount||0),0);
+const visibility = getExecVisibilityIntelligence(filteredPharmacies(), filteredAgreedDeals());
+return { kpis, eligibleRecords, sumQ32025Eligible, sumQ32026Eligible, eligibleGrowthPct, cashbackSalesPct, agreedPharmaciesCount, fixedRecords, variableRecords, fixedTotalCashback, variableTotalCashback, visibility };
+}
+
+// Groups a set of eligible records by region and sums a chosen numeric
+// field -- a plain read-only rollup for the drawer's region breakdowns
+// (top N + "other"), not a new commercial calculation.
+function execRegionBreakdown(records, valueFn, limit){
+const map = {};
+records.forEach(r => {
+const key = r.p.rg || '';
+if(!map[key]) map[key] = { region:key, n:0, value:0 };
+map[key].n++;
+map[key].value += valueFn(r);
+});
+const rows = Object.values(map).sort((a,b) => b.value - a.value);
+const top = rows.slice(0, limit);
+const rest = rows.slice(limit);
+const restN = rest.reduce((s,r)=>s+r.n, 0);
+const restValue = rest.reduce((s,r)=>s+r.value, 0);
+return { top, restN, restValue, restCount: rest.length, totalRegions: rows.length };
+}
+
+function execDrawerEntryLabel(entry){
+switch(entry.type){
+case 'total': return 'Total Pharmacies';
+case 'agreed': return 'Agreed Pharmacies';
+case 'eligible': return 'Cashback Eligible';
+case 'visibility': return 'Visibility';
+case 'shelfBucket': return (EXEC_SHELF_BUCKETS.find(t=>t.key===entry.key)||{}).label || 'Shelf';
+case 'salesPoint': return entry.point==='q325' ? 'Q3 2025' : entry.point==='q326' ? 'Q3 2026' : 'Growth';
+case 'cashbackTotal': return 'Total Cashback';
+case 'cashbackRatio': return 'Cashback / Sales';
+case 'compStructure': return entry.structure === 'fixed' ? 'Fixed' : 'Variable';
+case 'compTier': {
+const vt = COMMERCIAL_2026_VARIABLE_TIERS.find(t=>t.key===entry.tierKey);
+if(vt) return vt.label.split(' (')[0];
+const ft = COMMERCIAL_2026_FIXED_SLABS.find(f=>f.key===entry.tierKey);
+if(ft) return ft.label.split(' (')[0];
+return entry.tierKey;
+}
+default: return '';
+}
+}
+
+// The one place that turns a drawer entry into markup. Every number
+// shown here is read straight from ctx (itself read straight off the
+// commercial engine / visibility helper) -- this function does no
+// eligibility, tier, slab, or cashback math of its own.
+function execDrawerEntryContent(entry, ctx){
+const regionRowsHtml = (bd, valueFmt) => {
+const rows = bd.top.map(r => `<div class="xdw-region-row"><span class="xdw-region-name">${r.region || 'Unassigned'}</span><span class="xdw-region-n">${r.n.toLocaleString('en-US')}</span><span class="xdw-region-val">${valueFmt(r.value)}</span></div>`).join('');
+const restRow = bd.restCount > 0 ? `<div class="xdw-region-row xdw-region-row--rest"><span class="xdw-region-name">Other (${bd.restCount} regions)</span><span class="xdw-region-n">${bd.restN.toLocaleString('en-US')}</span><span class="xdw-region-val">${valueFmt(bd.restValue)}</span></div>` : '';
+return `<div class="xdw-region-list"><div class="xdw-region-row xdw-region-head"><span>Region</span><span>Pharmacies</span><span>Value</span></div>${rows}${restRow}</div>`;
+};
+
+switch(entry.type){
+case 'total': {
+const bd = execRegionBreakdown(ctx.kpis.records, () => 1, 5);
+return {
+eyebrow: 'Commercial Population',
+title: `${ctx.kpis.totalPharmacies.toLocaleString('en-US')} pharmacies`,
+subtitle: 'Every pharmacy in the current filter, regardless of agreement or eligibility status.',
+bodyHtml: `
+<div class="xdw-metric-list">
+<div class="xdw-metric-row"><span>Agreed Pharmacies</span><b>${ctx.agreedPharmaciesCount.toLocaleString('en-US')}</b></div>
+<div class="xdw-metric-row"><span>Cashback Eligible</span><b>${ctx.kpis.targetAchieved.toLocaleString('en-US')}</b></div>
+</div>
+${regionRowsHtml(bd, v => v.toLocaleString('en-US'))}
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-push='{"type":"agreed"}'>Explore Agreed Pharmacies${iconSvg('arrow-right')}</button>
+<button class="xdw-action-btn" data-push='{"type":"eligible"}'>Explore Cashback Eligible${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
+case 'agreed': {
+const dealNoAchieve = ctx.kpis.dealNoAchieveList.length;
+const dealAndEligible = ctx.agreedPharmaciesCount - dealNoAchieve;
+return {
+eyebrow: 'Commercial Population',
+title: `${ctx.agreedPharmaciesCount.toLocaleString('en-US')} pharmacies`,
+subtitle: 'Has a registered deal on file -- a distinct, smaller concept than commercial eligibility. An agreed pharmacy still has to hit its slab/tier on actual Q3 2026 sales to earn cashback.',
+bodyHtml: `
+<div class="xdw-metric-list">
+<div class="xdw-metric-row"><span>Agreed and already cashback-eligible</span><b>${dealAndEligible.toLocaleString('en-US')}</b></div>
+<div class="xdw-metric-row"><span>Agreed, not yet reaching a slab/tier</span><b>${dealNoAchieve.toLocaleString('en-US')}</b></div>
+</div>
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-push='{"type":"eligible"}'>Explore Cashback Eligible${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
+case 'eligible': {
+const varN = ctx.variableRecords.length, fixN = ctx.fixedRecords.length, total = ctx.kpis.targetAchieved || 1;
+return {
+eyebrow: 'Commercial Population',
+title: `${ctx.kpis.targetAchieved.toLocaleString('en-US')} pharmacies`,
+subtitle: 'Reached a qualifying Fixed slab or Variable growth tier on actual Q3 2026 Dist_Value -- the population that earns cashback.',
+bodyHtml: `
+<div class="xdw-split-row">
+<button class="xdw-split-tile" data-push='{"type":"compStructure","structure":"variable"}'><div class="xdw-split-label">Variable</div><div class="xdw-split-n">${varN.toLocaleString('en-US')} · ${(varN/total*100).toFixed(1)}%</div></button>
+<button class="xdw-split-tile" data-push='{"type":"compStructure","structure":"fixed"}'><div class="xdw-split-label">Fixed</div><div class="xdw-split-n">${fixN.toLocaleString('en-US')} · ${(fixN/total*100).toFixed(1)}%</div></button>
+</div>
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-push='{"type":"compStructure","structure":"variable"}'>Explore Variable${iconSvg('arrow-right')}</button>
+<button class="xdw-action-btn" data-push='{"type":"compStructure","structure":"fixed"}'>Explore Fixed${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
+case 'visibility': {
+const v = ctx.visibility;
+const posm = v.posm;
+const shelfTilesHtml = posm.byShelf.map(b => `<button class="xdw-posm-tile" data-push='{"type":"shelfBucket","key":"${b.key}"}'><div>${b.label}</div><div class="xdw-posm-tile-n">${b.n.toLocaleString('en-US')} deals</div></button>`).join('');
+// Each Visibility Investment tile on the main page passes its own `focus`
+// so the drawer headline mirrors exactly the number that was clicked --
+// the full breakdown below stays the same either way, so nothing is ever
+// hidden, just re-headlined per Daniel's "click the number, see that
+// number's detail first" interaction model.
+const focusMap = {
+posmAvailable: { eyebrow: 'Visibility · POSM Available', title: `${posm.availableCount.toLocaleString('en-US')} agreed deals`, subtitle: 'Agreed deals are the only pharmacies with logged POSM/shelf terms -- the base population POSM Deployed and Coverage are measured against.' },
+posmDeployed: { eyebrow: 'Visibility · POSM Deployed', title: `${posm.deployedCount.toLocaleString('en-US')} agreed deals`, subtitle: 'Deals with posm=true -- the same posm_yes figure Management’s "POSM on shelf" note and the Deals page’s POSM table already show.' },
+coverage: { eyebrow: 'Visibility · Coverage', title: posm.coveragePct!==null ? posm.coveragePct.toFixed(1)+'%' : 'N/A', subtitle: 'POSM Deployed ÷ POSM Available -- the same ratio the Deals page’s own coverage bar computes.' },
+posmInvestment: { eyebrow: 'Visibility · POSM Investment', title: `${fmtExec(posm.investmentEgp)} EGP`, subtitle: 'Sum of target_sales × POSM_RATE (0.5%) over every agreed deal with posm=true -- real EGP already paid, not estimated.' },
+shelfBonus: { eyebrow: 'Visibility · Shelf Bonus', title: `${fmtExec(posm.shelfBonusEgp)} EGP`, subtitle: 'Sum of every shelf-commitment bucket’s own bonus (target_sales × that bucket’s SHELF_RATES entry) -- see the breakdown below.' },
+totalInvestment: { eyebrow: 'Visibility · Total Investment', title: `${fmtExec(posm.totalInvestmentEgp)} EGP`, subtitle: 'POSM Investment + Shelf Bonus -- the full real EGP visibility spend, an exact sum of the two figures below (never rounded-then-added).' },
+};
+const focus = focusMap[entry.focus];
+return {
+eyebrow: focus ? focus.eyebrow : 'Visibility',
+title: focus ? focus.title : `${v.total.toLocaleString('en-US')} pharmacies in view`,
+subtitle: focus ? focus.subtitle : "Field-team audit status comes from Visibility's own source -- completely separate from commercial (Fixed/Variable) cashback. Missing data always defaults to Pending, never Not Eligible.",
+bodyHtml: `
+<div class="xdw-metric-list">
+<div class="xdw-metric-row"><span>Audited</span><b>${v.audited.toLocaleString('en-US')}</b></div>
+<div class="xdw-metric-row"><span>Pending / Not Audited</span><b>${v.pending.toLocaleString('en-US')}</b></div>
+<div class="xdw-metric-row"><span>Eligible</span><b>${v.eligible.toLocaleString('en-US')}</b></div>
+<div class="xdw-metric-row"><span>Not Eligible</span><b>${v.notEligible.toLocaleString('en-US')}</b></div>
+</div>
+<div class="xdw-group-label">POSM / visibility investment</div>
+<div class="xdw-note">${iconSvg('info')}Sourced from Agreed Deals -- the only real POSM/shelf facts in this build are the posm flag and shelf_option logged per closed deal (same data Management's "POSM on shelf" note and the Deals page's coverage bar already use). EGP figures are each deal's own target_sales × the live calculator's POSM_RATE/SHELF_RATES constants -- never invented.</div>
+<div class="xdw-metric-list">
+<div class="xdw-metric-row"><span>POSM Available (agreed deals)</span><b>${posm.availableCount.toLocaleString('en-US')}</b></div>
+<div class="xdw-metric-row"><span>POSM Deployed</span><b>${posm.deployedCount.toLocaleString('en-US')}</b></div>
+<div class="xdw-metric-row"><span>Visibility Coverage</span><b>${posm.coveragePct!==null ? posm.coveragePct.toFixed(1)+'%' : 'N/A'}</b></div>
+<div class="xdw-metric-row"><span>POSM Investment</span><b>${fmtExec(posm.investmentEgp)} EGP</b></div>
+<div class="xdw-metric-row"><span>Shelf Bonus</span><b>${fmtExec(posm.shelfBonusEgp)} EGP</b></div>
+<div class="xdw-metric-row"><span>Total Visibility Investment</span><b>${fmtExec(posm.totalInvestmentEgp)} EGP</b></div>
+</div>
+<div class="xdw-group-label">By shelf commitment</div>
+<div class="xdw-posm-grid">${shelfTilesHtml}</div>
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-switch-view="visibilityPage">Open Visibility Page${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
+case 'shelfBucket': {
+const def = EXEC_SHELF_BUCKETS.find(t=>t.key===entry.key) || {label: entry.key};
+const bucket = ctx.visibility.posm.byShelf.find(b => b.key === entry.key) || {n:0, bonusEgp:0};
+return {
+eyebrow: 'Visibility · Shelf commitment',
+title: def.label,
+subtitle: `${bucket.n.toLocaleString('en-US')} agreed deals with this shelf commitment -- bonus EGP is each deal's target_sales × the shelf rate for "${def.label}".`,
+bodyHtml: `
+<div class="xdw-metric-list">
+<div class="xdw-metric-row"><span>Agreed deals</span><b>${bucket.n.toLocaleString('en-US')}</b></div>
+<div class="xdw-metric-row"><span>Shelf bonus paid</span><b>${fmtExec(bucket.bonusEgp)} EGP</b></div>
+</div>
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-apply-visibility-filter='{"kind":"shelf","value":"${entry.key}"}'>View ${bucket.n.toLocaleString('en-US')} pharmacies${iconSvg('arrow-right')}</button>
+<button class="xdw-action-btn" data-push='{"type":"visibility"}'>Back to Visibility${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
+case 'salesPoint': {
+const label = entry.point==='q325' ? 'Q3 2025' : entry.point==='q326' ? 'Q3 2026' : 'Growth';
+if(entry.point === 'growth'){
+const up = ctx.eligibleRecords.filter(r=>r.growth_pct!==null && r.growth_pct>=0).length;
+const down = ctx.eligibleRecords.length - up;
+const label2 = ctx.eligibleGrowthPct===null ? '—' : (ctx.eligibleGrowthPct>=0?'+':'') + (ctx.eligibleGrowthPct*100).toFixed(1) + '%';
+return {
+eyebrow: 'Cashback-Eligible Pharmacy Sales',
+title: label2,
+subtitle: 'Q3 2026 vs Q3 2025 Dist_Value, cashback-eligible pharmacies only -- the same population as the Cashback Eligible count above, not the whole filtered pool.',
+bodyHtml: `
+<div class="xdw-metric-list">
+<div class="xdw-metric-row"><span>Pharmacies growing Q3'25→Q3'26</span><b>${up.toLocaleString('en-US')}</b></div>
+<div class="xdw-metric-row"><span>Pharmacies declining Q3'25→Q3'26</span><b>${down.toLocaleString('en-US')}</b></div>
+</div>
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-apply-filter='{}'>View Cashback-Eligible Pharmacies${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
+const value = entry.point==='q325' ? ctx.sumQ32025Eligible : ctx.sumQ32026Eligible;
+const bd = execRegionBreakdown(ctx.eligibleRecords, r => entry.point==='q325' ? (r.q3_2025_dv||0) : (r.q3_2026_dv||0), 5);
+return {
+eyebrow: 'Cashback-Eligible Pharmacy Sales',
+title: `${Math.round(value).toLocaleString('en-US')} EGP`,
+subtitle: `Actual cumulative sales through September Week 3, ${label}, cashback-eligible pharmacies only.`,
+bodyHtml: `${regionRowsHtml(bd, v => Math.round(v).toLocaleString('en-US') + ' EGP')}
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-apply-filter='{}'>View Cashback-Eligible Pharmacies${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
+case 'cashbackTotal': {
+return {
+eyebrow: 'Cashback',
+title: `${Math.round(ctx.kpis.totalCashback).toLocaleString('en-US')} EGP`,
+subtitle: 'Fixed + Variable cashback earned by the current eligible population.',
+bodyHtml: `
+<div class="xdw-split-row">
+<button class="xdw-split-tile" data-push='{"type":"compStructure","structure":"fixed"}'><div class="xdw-split-label">Fixed</div><div class="xdw-split-value">${fmtExec(ctx.fixedTotalCashback)} EGP</div><div class="xdw-split-n">${ctx.fixedRecords.length.toLocaleString('en-US')} pharmacies</div></button>
+<button class="xdw-split-tile" data-push='{"type":"compStructure","structure":"variable"}'><div class="xdw-split-label">Variable</div><div class="xdw-split-value">${fmtExec(ctx.variableTotalCashback)} EGP</div><div class="xdw-split-n">${ctx.variableRecords.length.toLocaleString('en-US')} pharmacies</div></button>
+</div>
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-push='{"type":"compStructure","structure":"fixed"}'>Explore Fixed${iconSvg('arrow-right')}</button>
+<button class="xdw-action-btn" data-push='{"type":"compStructure","structure":"variable"}'>Explore Variable${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
+case 'cashbackRatio': {
+const fixedPct = ctx.sumQ32026Eligible ? (ctx.fixedTotalCashback/ctx.sumQ32026Eligible*100) : null;
+const varPct = ctx.sumQ32026Eligible ? (ctx.variableTotalCashback/ctx.sumQ32026Eligible*100) : null;
+return {
+eyebrow: 'Cashback',
+title: ctx.cashbackSalesPct!==null ? ctx.cashbackSalesPct.toFixed(2)+'%' : 'N/A',
+subtitle: 'Total Cashback ÷ Q3 2026 Dist_Value of cashback-eligible pharmacies × 100 -- recalculated live from the current filter, never hardcoded.',
+bodyHtml: `
+<div class="xdw-metric-list">
+<div class="xdw-metric-row"><span>From Fixed cashback</span><b>${fixedPct!==null ? fixedPct.toFixed(2)+'%' : 'N/A'}</b></div>
+<div class="xdw-metric-row"><span>From Variable cashback</span><b>${varPct!==null ? varPct.toFixed(2)+'%' : 'N/A'}</b></div>
+</div>`
+};
+}
+case 'compStructure': {
+const isFixed = entry.structure === 'fixed';
+const records = isFixed ? ctx.fixedRecords : ctx.variableRecords;
+const total = isFixed ? ctx.fixedTotalCashback : ctx.variableTotalCashback;
+const tierDefs = isFixed ? COMMERCIAL_2026_FIXED_SLABS.slice().reverse() : COMMERCIAL_2026_VARIABLE_TIERS.slice().reverse();
+const tierRowsHtml = tierDefs.map(t => {
+const n = records.filter(r => r.achieved_slab === t.key).length;
+const rateLabel = isFixed ? `${t.cash.toLocaleString('en-US')} EGP` : `${(t.rate*100).toFixed(2)}%`;
+return `<button class="xdw-tier-row" data-push='{"type":"compTier","tierKey":"${t.key}"}'><span class="xdw-tier-rate">${rateLabel}</span><span class="xdw-tier-range">${t.label.replace(/^.*\(/, '').replace(')', '')}</span><span class="xdw-tier-n">${n.toLocaleString('en-US')}</span></button>`;
+}).join('');
+return {
+eyebrow: 'Cashback Composition',
+title: `${isFixed ? 'Fixed' : 'Variable'} · ${records.length.toLocaleString('en-US')} pharmacies`,
+subtitle: `${fmtExec(total)} EGP total cashback.`,
+bodyHtml: `
+<div class="xdw-tier-list">
+<div class="xdw-tier-row xdw-tier-head"><span>Rate</span><span>Range</span><span>Pharmacies</span></div>
+${tierRowsHtml}
+</div>
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-apply-filter='{"structure":"${entry.structure}"}'>View ${records.length.toLocaleString('en-US')} pharmacies${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
+case 'compTier': {
+const vt = COMMERCIAL_2026_VARIABLE_TIERS.find(t=>t.key===entry.tierKey);
+const ft = !vt ? COMMERCIAL_2026_FIXED_SLABS.find(f=>f.key===entry.tierKey) : null;
+const def = vt || ft;
+const n = ctx.kpis.records.filter(r => r.achieved_slab === entry.tierKey && r.target_achieved).length;
+const rateLabel = vt ? `${(vt.rate*100).toFixed(2)}% cashback rate` : `${ft.cash.toLocaleString('en-US')} EGP flat cashback`;
+return {
+eyebrow: 'Cashback Composition',
+title: def ? def.label.replace(/\s*\(.*/, '') : entry.tierKey,
+subtitle: rateLabel,
+bodyHtml: `
+<div class="xdw-metric-list">
+<div class="xdw-metric-row"><span>Pharmacies in this ${vt ? 'tier' : 'slab'}</span><b>${n.toLocaleString('en-US')}</b></div>
+</div>
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-apply-filter='{"tier":"${entry.tierKey}"}'>View ${n.toLocaleString('en-US')} pharmacies${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
+default:
+return { eyebrow:'', title:'', subtitle:'', bodyHtml:'' };
+}
+}
+
+function renderExecDrawer(){
+const overlay = document.getElementById('execIntelDrawerOverlay');
+const panel = document.getElementById('execIntelDrawer');
+if(!overlay || !panel) return;
+if(!execDrawerStack.length){
+panel.classList.remove('open'); panel.style.display = 'none'; overlay.style.display = 'none';
+return;
+}
+const ctx = computeExecDrawerContext();
+const entry = execDrawerStack[execDrawerStack.length - 1];
+const content = execDrawerEntryContent(entry, ctx);
+const crumbsHtml = execDrawerStack.map((e,i) => {
+const isLast = i === execDrawerStack.length - 1;
+return `<span class="xdw-crumb${isLast?' current':''}"${isLast?'':` data-crumb-idx="${i}"`}>${execDrawerEntryLabel(e)}</span>`;
+}).join('<span class="xdw-crumb-sep">/</span>');
+panel.innerHTML = `
+<div class="xdw-head">
+<button class="xdw-back-btn" id="xdwBackBtn" type="button" aria-label="Back"${execDrawerStack.length>1?'':' style="visibility:hidden;"'}>${iconSvg('chevron-left')}</button>
+<div class="xdw-crumbs">${crumbsHtml}</div>
+<button class="xdw-close-btn" id="xdwCloseBtn" type="button" aria-label="Close">${iconSvg('x')}</button>
+</div>
+<div class="xdw-body">
+<div class="xdw-eyebrow">${content.eyebrow}</div>
+<h3 class="xdw-title">${content.title}</h3>
+${content.subtitle ? `<div class="xdw-subtitle">${content.subtitle}</div>` : ''}
+${content.bodyHtml}
+</div>`;
+overlay.style.display = 'block';
+panel.style.display = 'flex';
+requestAnimationFrame(() => panel.classList.add('open'));
+document.getElementById('xdwBackBtn').addEventListener('click', execDrawerBack);
+document.getElementById('xdwCloseBtn').addEventListener('click', closeExecDrawer);
+panel.querySelectorAll('.xdw-crumb[data-crumb-idx]').forEach(el => {
+el.addEventListener('click', () => execDrawerBackTo(parseInt(el.dataset.crumbIdx, 10)));
+});
+panel.querySelectorAll('[data-push]').forEach(el => {
+el.addEventListener('click', () => pushExecDrawer(JSON.parse(el.dataset.push)));
+});
+panel.querySelectorAll('[data-apply-filter]').forEach(el => {
+el.addEventListener('click', () => {
+const f = JSON.parse(el.dataset.applyFilter);
+execDrawerApplyCompositionAndClose(f.structure || null, f.tier || null);
+});
+});
+panel.querySelectorAll('[data-apply-visibility-filter]').forEach(el => {
+el.addEventListener('click', () => {
+const f = JSON.parse(el.dataset.applyVisibilityFilter);
+execDrawerApplyVisibilityFilterAndClose(f.kind, f.value);
+});
+});
+panel.querySelectorAll('[data-switch-view]').forEach(el => {
+el.addEventListener('click', () => { closeExecDrawer(); switchView(el.dataset.switchView); });
+});
 }
 
 function renderExecDash(){
@@ -6656,37 +7318,44 @@ const dataUpdatedHtml = `
 <span>Agreed Deals data as of: <b>${DEALS_SNAPSHOT_DATE}</b></span>
 </div>`;
 
-// ---- B+C. Executive Story -- ONE continuous panel (2026-09-24 final polish) ----
-// Daniel's brief: "reduce unnecessary card borders," "treat the sales story
-// as one continuous visual narrative," "make Cashback Eligible more
-// prominent," "connect Total Cashback visually to Cashback/Sales." Rather
-// than three separately-boxed KPI panels (identity / sales story /
-// financial), this is now a single bordered panel with three rows
-// separated by thin rules -- same data, same formulas, purely a
-// presentation merge. Total Pharmacies -> Agreed Pharmacies -> Cashback
-// Eligible stays in that order of magnitude so the eligible count is never
-// mistaken for the agreed-deals count.
+// ---- 1-3. Executive Story -- ONE continuous panel, now the command
+// center's primary click surface (2026-09-24-c). Every stat below is a
+// button carrying data-drawer="{...}" -- clicking it opens the shared
+// Intelligence Drawer (see execDrawerStack / renderExecDrawer above) so
+// "what's behind this number" never requires leaving the page. Same
+// three rows as the prior polish pass (population / sales / cashback),
+// same formulas -- Population's row now also carries a fourth,
+// visually-distinct Visibility entry point (a real, live audit count;
+// never a POSM number, per Daniel's data-safety instruction) so
+// Visibility is reachable as a first-class module straight from the
+// headline story, not only from its own dedicated section below.
 const growthClass = eligibleGrowthPct===null ? 'neutral' : (eligibleGrowthPct>=0 ? 'up' : 'down');
 const growthLabel = eligibleGrowthPct===null ? '—' : (eligibleGrowthPct>=0?'+':'') + (eligibleGrowthPct*100).toFixed(1) + '%';
+const visInline = getExecVisibilityIntelligence(filteredPharmacies(), filteredAgreedDeals());
 const heroIdentityHtml = `
 <div class="section flow-hero-identity">
 <div class="panel exec-story-panel">
 
 <div class="exec-story-row exec-story-identity">
-<div class="exec-hero-stat" title="${kpis.totalPharmacies.toLocaleString('en-US')} pharmacies in the current filter">
+<button class="exec-hero-stat" type="button" data-drawer='{"type":"total"}' title="${kpis.totalPharmacies.toLocaleString('en-US')} pharmacies in the current filter · click for detail">
 <div class="exec-hero-value">${fmtExec(kpis.totalPharmacies)}</div>
 <div class="exec-hero-label">${iconSvg('store')}Total Pharmacies</div>
-</div>
+</button>
 <div class="exec-hero-divider" aria-hidden="true"></div>
-<div class="exec-hero-stat" title="${agreedPharmaciesCount.toLocaleString('en-US')} pharmacies with a registered/agreed deal">
+<button class="exec-hero-stat" type="button" data-drawer='{"type":"agreed"}' title="${agreedPharmaciesCount.toLocaleString('en-US')} pharmacies with a registered/agreed deal · click for detail">
 <div class="exec-hero-value">${fmtExec(agreedPharmaciesCount)}</div>
 <div class="exec-hero-label">${iconSvg('users')}Agreed Pharmacies</div>
-</div>
+</button>
 <div class="exec-hero-divider" aria-hidden="true"></div>
-<div class="exec-hero-stat exec-hero-stat--eligible" title="${kpis.targetAchieved.toLocaleString('en-US')} pharmacies qualify for cashback (Fixed + Variable)">
+<button class="exec-hero-stat exec-hero-stat--eligible" type="button" data-drawer='{"type":"eligible"}' title="${kpis.targetAchieved.toLocaleString('en-US')} pharmacies qualify for cashback (Fixed + Variable) · click for detail">
 <div class="exec-hero-value">${fmtExec(kpis.targetAchieved)}</div>
 <div class="exec-hero-label">${iconSvg('check-circle')}Cashback Eligible</div>
-</div>
+</button>
+<div class="exec-hero-divider" aria-hidden="true"></div>
+<button class="exec-hero-stat exec-hero-stat--visibility" type="button" data-drawer='{"type":"visibility"}' title="Field-team visibility audit · click for detail">
+<div class="exec-hero-value">${fmtExec(visInline.pending)}</div>
+<div class="exec-hero-label">${iconSvg('eye')}Visibility · Pending Audit</div>
+</button>
 </div>
 
 <div class="exec-story-divider-h" aria-hidden="true"></div>
@@ -6694,29 +7363,29 @@ const heroIdentityHtml = `
 <div class="exec-story-row exec-story-sales">
 <div class="exec-story-label-inline">${iconSvg('trending-up')}Cashback-Eligible Pharmacy Sales<span class="exec-story-sublabel">Actual cumulative sales through September Week 3 · current eligible population</span></div>
 <div class="exec-salesstory">
-<div class="exec-salesstory-point"><div class="exec-salesstory-label">Q3 2025</div><div class="exec-salesstory-value" title="${Math.round(sumQ32025Eligible).toLocaleString('en-US')} EGP">${fmtExec(sumQ32025Eligible)} EGP</div></div>
+<button class="exec-salesstory-point" type="button" data-drawer='{"type":"salesPoint","point":"q325"}' title="Click for detail"><div class="exec-salesstory-label">Q3 2025</div><div class="exec-salesstory-value" title="${Math.round(sumQ32025Eligible).toLocaleString('en-US')} EGP">${fmtExec(sumQ32025Eligible)} EGP</div></button>
 <div class="exec-salesstory-arrow">${iconSvg('arrow-right')}</div>
-<div class="exec-salesstory-point"><div class="exec-salesstory-label">Q3 2026</div><div class="exec-salesstory-value" title="${Math.round(sumQ32026Eligible).toLocaleString('en-US')} EGP">${fmtExec(sumQ32026Eligible)} EGP</div></div>
+<button class="exec-salesstory-point" type="button" data-drawer='{"type":"salesPoint","point":"q326"}' title="Click for detail"><div class="exec-salesstory-label">Q3 2026</div><div class="exec-salesstory-value" title="${Math.round(sumQ32026Eligible).toLocaleString('en-US')} EGP">${fmtExec(sumQ32026Eligible)} EGP</div></button>
 <div class="exec-salesstory-arrow">${iconSvg('arrow-right')}</div>
-<div class="exec-salesstory-point exec-salesstory-point--growth"><div class="exec-salesstory-label">Growth</div><div class="exec-salesstory-value ${growthClass}">${growthLabel}</div></div>
+<button class="exec-salesstory-point exec-salesstory-point--growth" type="button" data-drawer='{"type":"salesPoint","point":"growth"}' title="Click for detail"><div class="exec-salesstory-label">Growth</div><div class="exec-salesstory-value ${growthClass}">${growthLabel}</div></button>
 </div>
 </div>
 
 <div class="exec-story-divider-h" aria-hidden="true"></div>
 
 <div class="exec-story-row exec-story-financial">
-<div class="exec-hero-stat exec-hero-stat--money" title="${Math.round(kpis.totalCashback).toLocaleString('en-US')} EGP (Fixed + Variable)">
+<button class="exec-hero-stat exec-hero-stat--money" type="button" data-drawer='{"type":"cashbackTotal"}' title="${Math.round(kpis.totalCashback).toLocaleString('en-US')} EGP (Fixed + Variable) · click for detail">
 <div class="exec-hero-value">${fmtExec(kpis.totalCashback)} EGP</div>
 <div class="exec-hero-label">${iconSvg('dollar')}Total Cashback</div>
-</div>
+</button>
 <div class="exec-story-connector" aria-hidden="true">
 <div class="exec-story-connector-symbol">÷</div>
 <div class="exec-story-connector-label">eligible sales</div>
 </div>
-<div class="exec-hero-stat" title="Total cashback ÷ Q3 2026 Dist_Value of cashback-eligible pharmacies">
+<button class="exec-hero-stat" type="button" data-drawer='{"type":"cashbackRatio"}' title="Total cashback ÷ Q3 2026 Dist_Value of cashback-eligible pharmacies · click for detail">
 <div class="exec-hero-value">${cashbackSalesPct!==null ? cashbackSalesPct.toFixed(2)+'%' : 'N/A'}</div>
 <div class="exec-hero-label">${iconSvg('activity')}Cashback / Sales</div>
-</div>
+</button>
 </div>
 
 </div>
@@ -6797,8 +7466,56 @@ const compositionHtml = `
 </div>
 </div>`;
 
-// ---- E. Pharmacy Explorer: Cashback Eligible Pharmacies -- sortable, paginated, composition-filtered ----
-const compositionFiltered = eligibleRecords.filter(execCompositionMatches);
+// ---- 5. Visibility / POSM module -- first-class on Executive. The audit
+// counts (audited/pending/eligible/notEligible) are the same real, read-only
+// source Visibility itself uses. The POSM/shelf figures are ALSO real,
+// reused from Agreed Deals -- the same posm/shelf_option facts already
+// surfaced in Management's "POSM on shelf" note and the Deals page's own
+// POSM coverage bar (computeDealsPosmSummary) -- with EGP amounts derived
+// from each deal's own target_sales x the live calculator's POSM_RATE /
+// SHELF_RATES constants. There is no per-POSM-type (e.g. "Shop Science")
+// inventory anywhere in this codebase, so the breakdown below is by real
+// shelf commitment (None/2/3/4), not an invented product catalog. Every
+// tile is clickable into the same Intelligence Drawer as the rest of the
+// page (see execDrawerEntryContent's 'visibility'/'shelfBucket' cases). ----
+const visModule = getExecVisibilityIntelligence(filteredPharmacies(), filteredAgreedDeals());
+const posmM = visModule.posm;
+const shelfModuleTilesHtml = posmM.byShelf.map(b => `
+<button class="exec-posm-tile" type="button" data-drawer='{"type":"shelfBucket","key":"${b.key}"}'>
+<div class="exec-posm-tile-label">${b.label}</div>
+<div class="exec-posm-tile-state">${b.n.toLocaleString('en-US')} deals · ${fmtExec(b.bonusEgp)} EGP</div>
+</button>`).join('');
+const visibilityModuleHtml = `
+<div class="section flow-visibility">
+<div class="section-head">
+<h2>${iconSvg('eye')}Visibility Investment</h2>
+<span class="section-sub">Field-team audit + real POSM/shelf deal terms (Agreed Deals) · separate from commercial cashback · click any tile for detail</span>
+</div>
+<div class="panel">
+<div class="exec-vis-audit-row">
+<button class="exec-vis-audit-stat" type="button" data-drawer='{"type":"visibility"}'><div class="exec-vis-audit-value">${visModule.audited.toLocaleString('en-US')}</div><div class="exec-vis-audit-label">Audited</div></button>
+<button class="exec-vis-audit-stat" type="button" data-drawer='{"type":"visibility"}'><div class="exec-vis-audit-value">${visModule.pending.toLocaleString('en-US')}</div><div class="exec-vis-audit-label">Pending / Not Audited</div></button>
+<button class="exec-vis-audit-stat" type="button" data-drawer='{"type":"visibility"}'><div class="exec-vis-audit-value">${visModule.eligible.toLocaleString('en-US')}</div><div class="exec-vis-audit-label">Eligible</div></button>
+<button class="exec-vis-audit-stat" type="button" data-drawer='{"type":"visibility"}'><div class="exec-vis-audit-value">${visModule.notEligible.toLocaleString('en-US')}</div><div class="exec-vis-audit-label">Not Eligible</div></button>
+</div>
+<div class="exec-vis-posm-row">
+<button class="exec-vis-posm-metric" type="button" data-drawer='{"type":"visibility","focus":"posmAvailable"}'><div class="exec-vis-posm-metric-label">POSM Available</div><div class="exec-vis-posm-metric-value">${posmM.availableCount.toLocaleString('en-US')}</div></button>
+<button class="exec-vis-posm-metric" type="button" data-drawer='{"type":"visibility","focus":"posmDeployed"}'><div class="exec-vis-posm-metric-label">POSM Deployed</div><div class="exec-vis-posm-metric-value">${posmM.deployedCount.toLocaleString('en-US')}</div></button>
+<button class="exec-vis-posm-metric" type="button" data-drawer='{"type":"visibility","focus":"coverage"}'><div class="exec-vis-posm-metric-label">Visibility Coverage</div><div class="exec-vis-posm-metric-value">${posmM.coveragePct!==null ? posmM.coveragePct.toFixed(1)+'%' : 'N/A'}</div></button>
+</div>
+<div class="exec-vis-posm-row exec-vis-posm-row--money">
+<button class="exec-vis-posm-metric exec-vis-posm-metric--money" type="button" data-drawer='{"type":"visibility","focus":"posmInvestment"}'><div class="exec-vis-posm-metric-label">POSM Investment</div><div class="exec-vis-posm-metric-value">${fmtExec(posmM.investmentEgp)} EGP</div></button>
+<button class="exec-vis-posm-metric exec-vis-posm-metric--money" type="button" data-drawer='{"type":"visibility","focus":"shelfBonus"}'><div class="exec-vis-posm-metric-label">Shelf Bonus</div><div class="exec-vis-posm-metric-value">${fmtExec(posmM.shelfBonusEgp)} EGP</div></button>
+<button class="exec-vis-posm-metric exec-vis-posm-metric--money" type="button" data-drawer='{"type":"visibility","focus":"totalInvestment"}'><div class="exec-vis-posm-metric-label">Total Visibility Investment</div><div class="exec-vis-posm-metric-value">${fmtExec(posmM.totalInvestmentEgp)} EGP</div></button>
+</div>
+<div class="exec-vis-note">${iconSvg('info')}Sourced from Agreed Deals: POSM Available = agreed deals (the only pharmacies with logged shelf/POSM terms); Deployed = deals with posm=true; Investment = sum(target_sales × POSM_RATE) over those deals; Coverage = Deployed ÷ Available. Same underlying facts as Management's "POSM on shelf" note and the Deals page's POSM table -- reused here, not recalculated.</div>
+<div class="exec-vis-posm-grid">${shelfModuleTilesHtml}</div>
+</div>
+</div>`;
+
+// ---- E. Pharmacy Explorer: Cashback Eligible Pharmacies -- sortable, paginated, composition- and/or visibility-filtered ----
+const visibilityFilterActive = execVisibilityFilterActive();
+const compositionFiltered = eligibleRecords.filter(execCompositionMatches).filter(execVisibilityFilterMatches);
 const eligibleAll = compositionFiltered.slice().sort((a,b) => {
 const av = execEligibleSortValue(a, execTableSort.field);
 const bv = execEligibleSortValue(b, execTableSort.field);
@@ -6872,9 +7589,10 @@ const paginationHtml = `<div class="table-pagination" style="display:flex;align-
 </div>
 </div>`;
 
+const activeFilterDescription = compositionActive ? `match ${compositionActiveLabel}` : (visibilityFilterActive ? `match Visibility · ${execVisibilityCodeFilterLabel}` : 'currently qualify');
 const eligibleTableHtml = `
 <div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('store')}Cashback Eligible Pharmacies</h2><span class="section-sub">Q3 2026 — through September Week 3 · ${totalEligible.toLocaleString('en-US')} pharmacies${compositionActive ? ` match ${compositionActiveLabel}` : ' currently qualify'} · click a row to open Pharmacy 360</span></div>
+<div class="section-head"><h2>${iconSvg('store')}Cashback Eligible Pharmacies</h2><span class="section-sub">Q3 2026 — through September Week 3 · ${totalEligible.toLocaleString('en-US')} pharmacies ${activeFilterDescription}${visibilityFilterActive ? ` · <span class="exec-comp-active-chip" id="execVisClearBtn">Clear${iconSvg('x')}</span>` : ''} · click a row to open Pharmacy 360</span></div>
 <div class="panel">
 <div class="table-desktop-only" style="overflow-x:auto;">
 <table>
@@ -6896,11 +7614,19 @@ ${paginationHtml}
 // exposure content, which this change does not touch.
 
 section.innerHTML = filterBarHtml('execDash', 'Executive') + dataUpdatedHtml
-+ heroIdentityHtml + compositionHtml + eligibleTableHtml;
++ heroIdentityHtml + compositionHtml + visibilityModuleHtml + eligibleTableHtml;
 
 wireFilterBar('execDash');
 section.querySelectorAll('[data-open-pharmacy]').forEach(el => {
 el.addEventListener('click', () => drillToPharmacy(el.dataset.openPharmacy));
+});
+
+// ---- Intelligence Drawer entry points: every clickable number/tile on
+// the page carries data-drawer="{...}" and opens the same reusable
+// drawer (see openExecDrawer/renderExecDrawer above) -- this never
+// filters the page itself, it only opens contextual detail. ----
+section.querySelectorAll('[data-drawer]').forEach(el => {
+el.addEventListener('click', () => openExecDrawer(JSON.parse(el.dataset.drawer)));
 });
 section.querySelectorAll('.sortable-th[data-sort-field]').forEach(th => {
 th.addEventListener('click', () => {
@@ -6922,6 +7648,7 @@ el.addEventListener('click', () => {
 const s = el.dataset.compStructure;
 if(execCompositionFilter.structure === s && !execCompositionFilter.tier){ execCompositionFilter.structure = null; }
 else { execCompositionFilter.structure = s; execCompositionFilter.tier = null; }
+execVisibilityCodeFilter = null; execVisibilityCodeFilterLabel = '';
 execTablePage = 1;
 renderExecDash();
 });
@@ -6932,6 +7659,7 @@ el.addEventListener('click', () => {
 const t = el.dataset.compTier;
 if(execCompositionFilter.tier === t){ execCompositionFilter.tier = null; execCompositionFilter.structure = null; }
 else { execCompositionFilter.tier = t; execCompositionFilter.structure = null; }
+execVisibilityCodeFilter = null; execVisibilityCodeFilterLabel = '';
 execTablePage = 1;
 renderExecDash();
 });
@@ -6939,6 +7667,8 @@ el.addEventListener('keydown', (e) => { if(e.key==='Enter' || e.key===' '){ e.pr
 });
 const compClearBtn = document.getElementById('execCompClearBtn');
 if(compClearBtn) compClearBtn.addEventListener('click', () => { execCompositionFilter = { structure: null, tier: null }; execTablePage = 1; renderExecDash(); });
+const visClearBtn = document.getElementById('execVisClearBtn');
+if(visClearBtn) visClearBtn.addEventListener('click', () => { execVisibilityCodeFilter = null; execVisibilityCodeFilterLabel = ''; execTablePage = 1; renderExecDash(); });
 }
 
 
