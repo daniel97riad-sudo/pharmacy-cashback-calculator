@@ -835,15 +835,19 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 .modal-close-btn{background:none;border:1px solid var(--border);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);}
 .modal-close-btn:hover{color:var(--text);background:var(--bg);}
 
-/* ---- Mobile content ordering: Title (topbar, fixed) > Filters > KPI > Alerts > Chart > Tables ---- */
+/* ---- Mobile content ordering (2026-09-24 redesign, merged into one panel
+   2026-09-24 final polish): Title (topbar, fixed) > Filters > data-updated
+   line > the one Executive Story panel (identity row -> Q3 sales story row
+   -> financial row) > composition > pharmacy table. Same order as desktop
+   reading order, so this is really just an explicit safety net in case
+   flex default ordering ever drifts -- see Daniel's mobile-priority spec. ---- */
 @media (max-width:1080px){
 #execDashView{display:flex;flex-direction:column;}
 #execDashView .platform-filterbar{order:1;}
-#execDashView .flow-kpi{order:2;}
-#execDashView .flow-updated{order:3;}
-#execDashView .flow-alerts{order:4;}
-#execDashView .flow-chart{order:5;}
-#execDashView .flow-tables{order:6;}
+#execDashView .flow-updated{order:2;}
+#execDashView .flow-hero-identity{order:3;}
+#execDashView .flow-composition{order:4;}
+#execDashView .flow-tables{order:5;}
 .platform-filterbar{gap:8px;}
 .filter-select,.filter-input{min-width:0;flex:1;}
 .filter-field{flex:1 1 130px;}
@@ -862,6 +866,89 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 #execDashView .kpi-trend.up, #pharmacy360View .kpi-trend.up{color:var(--success);}
 #execDashView .kpi-trend.down, #pharmacy360View .kpi-trend.down{color:var(--danger);}
 #execDashView .kpi-trend.neutral, #pharmacy360View .kpi-trend.neutral{color:var(--muted);font-weight:600;}
+
+/* ---- Executive redesign (2026-09-24): hero identity/financial strips,
+   Q3 sales story, and the interactive cashback composition. Reuses the
+   app's existing tokens (--shell-navy, --primary as the brand accent,
+   --success/--danger) rather than introducing new colors -- premium
+   through hierarchy and whitespace, not decoration. All scoped to
+   #execDashView so nothing here touches Management/Visibility/Pharmacy 360. ---- */
+/* ---- Final polish (2026-09-24): one continuous "Executive Story" panel --
+   identity row / Q3 sales-story row / financial row, divided by thin rules
+   instead of three separate boxed panels. Reduces card-border count from
+   3 to 1 while keeping each row's own generous vertical whitespace. ---- */
+#execDashView .exec-story-panel{padding:6px 30px;}
+#execDashView .exec-story-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:22px;padding:22px 0;}
+#execDashView .exec-story-divider-h{height:1px;background:var(--border);margin:0 -14px;}
+#execDashView .exec-hero-stat{flex:1 1 150px;min-width:130px;display:flex;flex-direction:column;gap:6px;}
+#execDashView .exec-hero-divider{width:1px;align-self:stretch;background:var(--border);}
+#execDashView .exec-hero-value{font-size:32px;font-weight:800;color:var(--shell-navy);font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.1;}
+#execDashView .exec-hero-label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;display:flex;align-items:center;gap:6px;}
+#execDashView .exec-hero-label .icon{width:14px;height:14px;color:var(--primary-dark);flex-shrink:0;}
+#execDashView .exec-hero-stat--money .exec-hero-value{font-size:34px;}
+/* Cashback Eligible is the single most important count on the page --
+   larger figure, accent color, and a soft tint (no border) so it reads as
+   the headline of the identity row without adding another boxed card. */
+#execDashView .exec-hero-stat--eligible{background:var(--primary-light);border-radius:var(--radius-md);padding:10px 18px;margin:-10px 0;}
+#execDashView .exec-hero-stat--eligible .exec-hero-value{font-size:42px;color:var(--primary-dark);}
+#execDashView .exec-hero-stat--eligible .exec-hero-label{color:var(--primary-dark);}
+@media (max-width:640px){
+#execDashView .exec-story-row{flex-direction:column;align-items:stretch;gap:14px;padding:18px 0;}
+#execDashView .exec-hero-stat{flex:none;}
+#execDashView .exec-hero-divider{width:100%;height:1px;}
+#execDashView .exec-hero-stat--eligible{margin:0;}
+}
+
+#execDashView .exec-story-sales{flex-direction:column;gap:14px;}
+#execDashView .exec-story-label-inline{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.04em;flex-wrap:wrap;text-align:center;}
+#execDashView .exec-story-label-inline .icon{width:14px;height:14px;color:var(--primary-dark);flex-shrink:0;}
+#execDashView .exec-story-sublabel{display:block;width:100%;font-size:11px;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;margin-top:2px;}
+#execDashView .exec-salesstory{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;}
+#execDashView .exec-salesstory-point{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:100px;}
+#execDashView .exec-salesstory-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+#execDashView .exec-salesstory-value{font-size:23px;font-weight:800;color:var(--shell-navy);font-variant-numeric:tabular-nums;}
+#execDashView .exec-salesstory-value.up{color:var(--success);}
+#execDashView .exec-salesstory-value.down{color:var(--danger);}
+#execDashView .exec-salesstory-value.neutral{color:var(--muted);}
+#execDashView .exec-salesstory-point--growth .exec-salesstory-value{font-size:25px;}
+#execDashView .exec-salesstory-arrow{color:var(--muted);display:flex;align-items:center;}
+#execDashView .exec-salesstory-arrow .icon{width:18px;height:18px;}
+/* Connects Total Cashback directly to Cashback/Sales -- a small "÷ eligible
+   sales" glyph in place of the plain divider used elsewhere, so the two
+   numbers read as one relationship rather than two unrelated stats. */
+#execDashView .exec-story-connector{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0 2px;color:var(--muted);}
+#execDashView .exec-story-connector-symbol{font-size:20px;font-weight:700;line-height:1;}
+#execDashView .exec-story-connector-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
+@media (max-width:640px){
+#execDashView .exec-salesstory{gap:10px;}
+#execDashView .exec-salesstory-arrow{transform:rotate(90deg);}
+}
+
+#execDashView .exec-comp-active-chip{display:inline-flex;align-items:center;gap:5px;background:var(--primary-light);color:var(--primary-dark);border:1px solid var(--primary);border-radius:20px;padding:3px 8px 3px 10px;font-weight:700;font-size:11px;cursor:pointer;margin-inline-start:6px;}
+#execDashView .exec-comp-active-chip:hover{background:var(--primary);color:#fff;}
+#execDashView .exec-comp-active-chip .icon{width:11px;height:11px;}
+#execDashView .exec-comp-split{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+#execDashView .exec-comp-tile{flex:1 1 200px;min-width:160px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;cursor:pointer;transition:box-shadow .15s ease,border-color .15s ease,transform .08s ease;}
+#execDashView .exec-comp-tile:hover{box-shadow:var(--shadow-card);border-color:var(--primary);}
+#execDashView .exec-comp-tile:active{transform:translateY(1px);}
+#execDashView .exec-comp-tile.active{border-color:var(--primary);background:var(--primary-light);box-shadow:var(--shadow-card);}
+#execDashView .exec-comp-tile-label{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:800;margin-bottom:8px;}
+#execDashView .exec-comp-tile-n{font-size:12.5px;color:var(--text);font-weight:600;margin-bottom:4px;}
+#execDashView .exec-comp-tile-value{font-size:21px;font-weight:800;color:var(--shell-navy);font-variant-numeric:tabular-nums;}
+#execDashView .exec-comp-tile.active .exec-comp-tile-value{color:var(--primary-dark);}
+#execDashView .exec-comp-detail{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+#execDashView .exec-comp-group-label{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:800;margin-bottom:8px;}
+#execDashView .exec-comp-tiers{display:flex;flex-direction:column;gap:8px;}
+#execDashView .exec-comp-tier{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;cursor:pointer;transition:background .15s ease,border-color .15s ease;}
+#execDashView .exec-comp-tier:hover{border-color:var(--primary);}
+#execDashView .exec-comp-tier.active{background:var(--primary-light);border-color:var(--primary);}
+#execDashView .exec-comp-tier-rate{font-weight:800;color:var(--shell-navy);font-size:13px;min-width:66px;}
+#execDashView .exec-comp-tier.active .exec-comp-tier-rate{color:var(--primary-dark);}
+#execDashView .exec-comp-tier-range{color:var(--muted);font-size:11.5px;flex:1;}
+#execDashView .exec-comp-tier-n{color:var(--text);font-size:11.5px;font-weight:700;white-space:nowrap;}
+#execDashView .exec-comp-tile:focus-visible, #execDashView .exec-comp-tier:focus-visible{outline:2px solid var(--primary-dark);outline-offset:2px;}
+@media (max-width:820px){#execDashView .exec-comp-detail{grid-template-columns:1fr;}}
+
 #execDashView .dash-grid-2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px;align-items:start;min-width:0;}
 #execDashView .dash-grid-2 > .card{min-width:0;}
 @media (max-width:980px){#execDashView .dash-grid-2{grid-template-columns:minmax(0,1fr);}}
@@ -5350,6 +5437,23 @@ if(abs >= 1000) return sign + Math.round(abs/1000).toLocaleString('en-US') + 'K'
 return sign + Math.round(abs).toLocaleString('en-US');
 }
 
+// Executive-only compact formatter (2026-09-24 redesign): one decimal place
+// on K/M so 7,216 reads as "7.2K" and 621,829.52 as "621.8K", per Daniel's
+// exact number-formatting spec. Deliberately a separate function from
+// fmtBig() -- fmtBig() (whole-K rounding) is used throughout Management,
+// Visibility and Pharmacy 360, and none of those displays are in scope for
+// this redesign, so they keep their existing formatting untouched. Full
+// precision is never lost -- every value using fmtExec() also carries the
+// exact number in a `title` tooltip.
+function fmtExec(n){
+if(n === null || n === undefined || isNaN(n)) return '—';
+const sign = n < 0 ? '-' : '';
+const abs = Math.abs(n);
+if(abs >= 1000000) return sign + (abs/1000000).toFixed(1) + 'M';
+if(abs >= 1000) return sign + (abs/1000).toFixed(1) + 'K';
+return sign + Math.round(abs).toLocaleString('en-US');
+}
+
 
 // ===================================================================
 // Global platform filters + generic "filtered records" modal
@@ -6473,6 +6577,18 @@ let execTableSort = { field: 'cashback', dir: 'desc' };
 let execTablePage = 1;
 const EXEC_TABLE_PAGE_SIZE = 25;
 const EXEC_TIER_ORDER = [...COMMERCIAL_2026_FIXED_SLABS, ...COMMERCIAL_2026_VARIABLE_TIERS].map(t => t.key);
+// Cashback Composition click-to-filter state (Executive presentation layer
+// only -- narrows which already-computed eligible records feed the table
+// below; never recomputes eligibility/rates itself). Setting `tier` implies
+// its structure (fixed*/s* key namespaces don't collide); `structure` alone
+// means "either tier within that structure." Added 2026-09-24 redesign.
+let execCompositionFilter = { structure: null, tier: null };
+function execCompositionFilterActive(){ return !!(execCompositionFilter.structure || execCompositionFilter.tier); }
+function execCompositionMatches(r){
+if(execCompositionFilter.tier) return r.achieved_slab === execCompositionFilter.tier;
+if(execCompositionFilter.structure) return r.commercial_structure === execCompositionFilter.structure;
+return true;
+}
 function execEligibleSortValue(r, field){
 switch(field){
 case 'cashback': return r.cashback_amount || 0;
@@ -6490,11 +6606,13 @@ if(!section) return;
 // 2026 commercial truth -- the whole filtered PHARMACIES universe, not
 // just registered deals. See computeCommercialKPIs()/computeCommercial2026().
 // Executive is deliberately narrow: "what did we achieve and what are we
-// paying?" -- one KPI row, the pharmacies that actually qualify, and the
-// two tier/slab summaries the payout is built from. Everything
-// operational/diagnostic (alerts, regional/DM/territory performance,
-// exposure, data quality) lives on Management instead -- see renderExec().
-// Redesigned 2026-09-24 per Daniel's information-architecture correction.
+// paying?" -- an executive hero (identity + financial numbers), the Q3
+// sales story, an interactive cashback composition, and the pharmacies
+// that actually qualify. Everything operational/diagnostic (alerts,
+// regional/DM/territory performance, exposure, data quality) lives on
+// Management instead -- see renderExec(). Redesigned 2026-09-24 as a
+// premium presentation layer per Daniel's UX brief; no formula, tier,
+// slab, or eligibility logic changes anywhere in this function.
 const kpis = computeCommercialKPIs();
 
 const badge = document.getElementById('appAlertBadge');
@@ -6504,11 +6622,30 @@ if(alertCount){ badge.textContent = alertCount; badge.style.display = ''; }
 else badge.style.display = 'none';
 }
 
-const withBaselineRecords = kpis.records.filter(r => r.commercial_structure !== 'no_baseline');
-const sumQ32026All = withBaselineRecords.reduce((s,r) => s + (r.q3_2026_dv||0), 0);
 const eligibleRecords = kpis.records.filter(r => r.target_achieved);
+// 2026-09-24 correction: the Q3 sales story and Cashback/Sales both moved
+// from the whole filtered population to the cashback-eligible population
+// only. A diagnostic investigation (same day) found the whole-population
+// comparison mixed a complete Q3'25 quarter against a Q3'26 figure that,
+// for a meaningful slice of pharmacies, reflected a data-completeness gap
+// rather than real commercial performance -- not something to headline for
+// leadership. The eligible-only comparison uses exactly the same records
+// (`eligibleRecords`, i.e. kpis.records where the engine's own
+// target_achieved flag is true) that already drive the KPI hero, the
+// composition section, and the explorer table below, so this is a
+// presentation-layer narrowing, not a new calculation.
+const sumQ32025Eligible = eligibleRecords.reduce((s,r) => s + (r.q3_2025_dv||0), 0);
 const sumQ32026Eligible = eligibleRecords.reduce((s,r) => s + (r.q3_2026_dv||0), 0);
+const eligibleGrowthPct = sumQ32025Eligible > 0 ? (sumQ32026Eligible / sumQ32025Eligible - 1) : null;
+// Confirmed with Daniel 2026-09-24: denominator stays the Q3'26 Dist_Value
+// of cashback-eligible pharmacies only (the previously validated basis) --
+// recomputed live every render, never hardcoded to the 2.99% seen in validation.
 const cashbackSalesPct = sumQ32026Eligible ? (kpis.totalCashback / sumQ32026Eligible * 100) : null;
+// "Agreed" = has a registered deal on file -- a distinct, smaller concept
+// than commercial eligibility (see r.deal_registered from commercialRecordFor).
+// Kept separate from Cashback Eligible per Daniel's correction so a CEO/CFO
+// never reads "1.8K agreed" as "only these can receive cashback."
+const agreedPharmaciesCount = kpis.records.filter(r => r.deal_registered).length;
 
 const dataUpdatedHtml = `
 <div class="data-updated-line flow-updated">
@@ -6519,17 +6656,150 @@ const dataUpdatedHtml = `
 <span>Agreed Deals data as of: <b>${DEALS_SNAPSHOT_DATE}</b></span>
 </div>`;
 
-const kpiHtml = `
-<div class="kpi-row flow-kpi">
-<div class="kpi-card"><div class="kpi-label">${iconSvg('store')}Total Pharmacies</div><div class="kpi-value">${kpis.totalPharmacies.toLocaleString('en-US')}</div><div class="kpi-trend neutral">In current filter</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('check-circle')}Cashback Eligible</div><div class="kpi-value">${kpis.targetAchieved.toLocaleString('en-US')}</div><div class="kpi-trend up">Fixed + Variable</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('trending-up')}Q3 2026 Total Dist_Value</div><div class="kpi-value">${fmtBig(sumQ32026All)} EGP</div><div class="kpi-trend neutral">${withBaselineRecords.length.toLocaleString('en-US')} pharmacies with a baseline</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('dollar')}Total Cashback</div><div class="kpi-value">${fmtBig(kpis.totalCashback)} EGP</div><div class="kpi-trend neutral">Fixed + Variable</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('activity')}Cashback / Sales</div><div class="kpi-value">${cashbackSalesPct!==null ? cashbackSalesPct.toFixed(2)+'%' : 'N/A'}</div><div class="kpi-trend neutral">Total cashback ÷ Q3 2026 Dist_Value of eligible pharmacies</div></div>
+// ---- B+C. Executive Story -- ONE continuous panel (2026-09-24 final polish) ----
+// Daniel's brief: "reduce unnecessary card borders," "treat the sales story
+// as one continuous visual narrative," "make Cashback Eligible more
+// prominent," "connect Total Cashback visually to Cashback/Sales." Rather
+// than three separately-boxed KPI panels (identity / sales story /
+// financial), this is now a single bordered panel with three rows
+// separated by thin rules -- same data, same formulas, purely a
+// presentation merge. Total Pharmacies -> Agreed Pharmacies -> Cashback
+// Eligible stays in that order of magnitude so the eligible count is never
+// mistaken for the agreed-deals count.
+const growthClass = eligibleGrowthPct===null ? 'neutral' : (eligibleGrowthPct>=0 ? 'up' : 'down');
+const growthLabel = eligibleGrowthPct===null ? '—' : (eligibleGrowthPct>=0?'+':'') + (eligibleGrowthPct*100).toFixed(1) + '%';
+const heroIdentityHtml = `
+<div class="section flow-hero-identity">
+<div class="panel exec-story-panel">
+
+<div class="exec-story-row exec-story-identity">
+<div class="exec-hero-stat" title="${kpis.totalPharmacies.toLocaleString('en-US')} pharmacies in the current filter">
+<div class="exec-hero-value">${fmtExec(kpis.totalPharmacies)}</div>
+<div class="exec-hero-label">${iconSvg('store')}Total Pharmacies</div>
+</div>
+<div class="exec-hero-divider" aria-hidden="true"></div>
+<div class="exec-hero-stat" title="${agreedPharmaciesCount.toLocaleString('en-US')} pharmacies with a registered/agreed deal">
+<div class="exec-hero-value">${fmtExec(agreedPharmaciesCount)}</div>
+<div class="exec-hero-label">${iconSvg('users')}Agreed Pharmacies</div>
+</div>
+<div class="exec-hero-divider" aria-hidden="true"></div>
+<div class="exec-hero-stat exec-hero-stat--eligible" title="${kpis.targetAchieved.toLocaleString('en-US')} pharmacies qualify for cashback (Fixed + Variable)">
+<div class="exec-hero-value">${fmtExec(kpis.targetAchieved)}</div>
+<div class="exec-hero-label">${iconSvg('check-circle')}Cashback Eligible</div>
+</div>
+</div>
+
+<div class="exec-story-divider-h" aria-hidden="true"></div>
+
+<div class="exec-story-row exec-story-sales">
+<div class="exec-story-label-inline">${iconSvg('trending-up')}Cashback-Eligible Pharmacy Sales<span class="exec-story-sublabel">Actual cumulative sales through September Week 3 · current eligible population</span></div>
+<div class="exec-salesstory">
+<div class="exec-salesstory-point"><div class="exec-salesstory-label">Q3 2025</div><div class="exec-salesstory-value" title="${Math.round(sumQ32025Eligible).toLocaleString('en-US')} EGP">${fmtExec(sumQ32025Eligible)} EGP</div></div>
+<div class="exec-salesstory-arrow">${iconSvg('arrow-right')}</div>
+<div class="exec-salesstory-point"><div class="exec-salesstory-label">Q3 2026</div><div class="exec-salesstory-value" title="${Math.round(sumQ32026Eligible).toLocaleString('en-US')} EGP">${fmtExec(sumQ32026Eligible)} EGP</div></div>
+<div class="exec-salesstory-arrow">${iconSvg('arrow-right')}</div>
+<div class="exec-salesstory-point exec-salesstory-point--growth"><div class="exec-salesstory-label">Growth</div><div class="exec-salesstory-value ${growthClass}">${growthLabel}</div></div>
+</div>
+</div>
+
+<div class="exec-story-divider-h" aria-hidden="true"></div>
+
+<div class="exec-story-row exec-story-financial">
+<div class="exec-hero-stat exec-hero-stat--money" title="${Math.round(kpis.totalCashback).toLocaleString('en-US')} EGP (Fixed + Variable)">
+<div class="exec-hero-value">${fmtExec(kpis.totalCashback)} EGP</div>
+<div class="exec-hero-label">${iconSvg('dollar')}Total Cashback</div>
+</div>
+<div class="exec-story-connector" aria-hidden="true">
+<div class="exec-story-connector-symbol">÷</div>
+<div class="exec-story-connector-label">eligible sales</div>
+</div>
+<div class="exec-hero-stat" title="Total cashback ÷ Q3 2026 Dist_Value of cashback-eligible pharmacies">
+<div class="exec-hero-value">${cashbackSalesPct!==null ? cashbackSalesPct.toFixed(2)+'%' : 'N/A'}</div>
+<div class="exec-hero-label">${iconSvg('activity')}Cashback / Sales</div>
+</div>
+</div>
+
+</div>
 </div>`;
 
-// ---- Main table: Cashback Eligible Pharmacies -- sortable, paginated ----
-const eligibleAll = eligibleRecords.slice().sort((a,b) => {
+// ---- D. Cashback Composition -- interactive, click-to-filter the table ----
+const fixedRecords = kpis.records.filter(r => r.commercial_structure==='fixed' && r.target_achieved);
+const variableRecords = kpis.records.filter(r => r.commercial_structure==='variable' && r.target_achieved);
+const fixedTotalCashbackTop = fixedRecords.reduce((s,r)=>s+(r.cashback_amount||0),0);
+const variableTotalCashbackTop = variableRecords.reduce((s,r)=>s+(r.cashback_amount||0),0);
+const isStructureActive = (s) => execCompositionFilter.structure===s || (execCompositionFilter.tier && (s==='fixed' ? execCompositionFilter.tier.startsWith('fixed') : COMMERCIAL_2026_VARIABLE_TIERS.some(t=>t.key===execCompositionFilter.tier)));
+
+const varTiersAsc = COMMERCIAL_2026_VARIABLE_TIERS.slice().reverse();
+const variableTierTilesHtml = varTiersAsc.map((t, idx) => {
+const nextT = varTiersAsc[idx+1];
+const growthLabelTier = nextT ? `${(t.minGrowth*100).toFixed(0)}%–&lt;${(nextT.minGrowth*100).toFixed(0)}%` : `&ge;${(t.minGrowth*100).toFixed(0)}%`;
+const recs = kpis.records.filter(r => r.commercial_structure==='variable' && r.achieved_slab===t.key);
+const active = execCompositionFilter.tier === t.key;
+return `<div class="exec-comp-tier${active?' active':''}" data-comp-tier="${t.key}" tabindex="0" role="button">
+<div class="exec-comp-tier-rate">${(t.rate*100).toFixed(2)}%</div>
+<div class="exec-comp-tier-range">${growthLabelTier} growth</div>
+<div class="exec-comp-tier-n">${recs.length.toLocaleString('en-US')} pharmacies</div>
+</div>`;
+}).join('');
+
+const fixedSlabsAsc = COMMERCIAL_2026_FIXED_SLABS.slice().reverse();
+const fixedTierTilesHtml = fixedSlabsAsc.map((f) => {
+const recs = kpis.records.filter(r => r.commercial_structure==='fixed' && r.achieved_slab===f.key);
+const active = execCompositionFilter.tier === f.key;
+return `<div class="exec-comp-tier${active?' active':''}" data-comp-tier="${f.key}" tabindex="0" role="button">
+<div class="exec-comp-tier-rate">${f.cash.toLocaleString('en-US')} EGP</div>
+<div class="exec-comp-tier-range">&ge; ${f.threshold.toLocaleString('en-US')} EGP</div>
+<div class="exec-comp-tier-n">${recs.length.toLocaleString('en-US')} pharmacies</div>
+</div>`;
+}).join('');
+
+const compositionActive = execCompositionFilterActive();
+const compositionActiveLabel = (() => {
+if(execCompositionFilter.tier){
+const vt = COMMERCIAL_2026_VARIABLE_TIERS.find(t=>t.key===execCompositionFilter.tier);
+if(vt) return `Variable · ${(vt.rate*100).toFixed(2)}%`;
+const ft = COMMERCIAL_2026_FIXED_SLABS.find(f=>f.key===execCompositionFilter.tier);
+if(ft) return `Fixed · ${ft.cash.toLocaleString('en-US')} EGP`;
+}
+if(execCompositionFilter.structure) return execCompositionFilter.structure === 'fixed' ? 'Fixed' : 'Variable';
+return '';
+})();
+
+const compositionHtml = `
+<div class="section flow-composition">
+<div class="section-head">
+<h2>${iconSvg('dollar')}Cashback Composition</h2>
+<span class="section-sub">Click Fixed, Variable, or a tier to filter the pharmacy table below${compositionActive ? ` · <span class="exec-comp-active-chip" id="execCompClearBtn">Filtered: ${compositionActiveLabel}${iconSvg('x')}</span>` : ''}</span>
+</div>
+<div class="panel">
+<div class="exec-comp-split">
+<div class="exec-comp-tile${isStructureActive('fixed')?' active':''}" data-comp-structure="fixed" tabindex="0" role="button">
+<div class="exec-comp-tile-label">Fixed</div>
+<div class="exec-comp-tile-n">${fixedRecords.length.toLocaleString('en-US')} pharmacies</div>
+<div class="exec-comp-tile-value">${fmtExec(fixedTotalCashbackTop)} EGP</div>
+</div>
+<div class="exec-comp-tile${isStructureActive('variable')?' active':''}" data-comp-structure="variable" tabindex="0" role="button">
+<div class="exec-comp-tile-label">Variable</div>
+<div class="exec-comp-tile-n">${variableRecords.length.toLocaleString('en-US')} pharmacies</div>
+<div class="exec-comp-tile-value">${fmtExec(variableTotalCashbackTop)} EGP</div>
+</div>
+</div>
+<div class="exec-comp-detail">
+<div class="exec-comp-group">
+<div class="exec-comp-group-label">Variable tiers</div>
+<div class="exec-comp-tiers">${variableTierTilesHtml}</div>
+</div>
+<div class="exec-comp-group">
+<div class="exec-comp-group-label">Fixed slabs</div>
+<div class="exec-comp-tiers">${fixedTierTilesHtml}</div>
+</div>
+</div>
+</div>
+</div>`;
+
+// ---- E. Pharmacy Explorer: Cashback Eligible Pharmacies -- sortable, paginated, composition-filtered ----
+const compositionFiltered = eligibleRecords.filter(execCompositionMatches);
+const eligibleAll = compositionFiltered.slice().sort((a,b) => {
 const av = execEligibleSortValue(a, execTableSort.field);
 const bv = execEligibleSortValue(b, execTableSort.field);
 let cmp;
@@ -6555,25 +6825,25 @@ if(mobile){
 return `<div class="mobile-card row-clickable" data-open-pharmacy="${p.c}">
 <div class="mobile-card-head">${p.n}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></div>
 <div class="mobile-card-row"><span class="mobile-card-label">Region</span><span class="mobile-card-value">${p.rg || '—'}</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Q3 2025 Dist_Value</span><span class="mobile-card-value">${fmtBig(r.q3_2025_dv)} EGP</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Q3 2026 Dist_Value</span><span class="mobile-card-value">${fmtBig(r.q3_2026_dv)} EGP</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Q3 2025 Dist_Value</span><span class="mobile-card-value">${fmtExec(r.q3_2025_dv)} EGP</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Q3 2026 Dist_Value</span><span class="mobile-card-value">${fmtExec(r.q3_2026_dv)} EGP</span></div>
 <div class="mobile-card-row"><span class="mobile-card-label">Growth %</span><span class="mobile-card-value">${growthLabelFor(r)}</span></div>
 <div class="mobile-card-row"><span class="mobile-card-label">Structure</span><span class="mobile-card-value">${structLabel}</span></div>
 <div class="mobile-card-row"><span class="mobile-card-label">Slab / Tier</span><span class="mobile-card-value">${tierLabelFor(r)}</span></div>
 <div class="mobile-card-row"><span class="mobile-card-label">Cashback Rate</span><span class="mobile-card-value">${rateLabelFor(r)}</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Cashback Amount</span><span class="mobile-card-value">${fmtBig(r.cashback_amount||0)} EGP</span></div>
+<div class="mobile-card-row"><span class="mobile-card-label">Cashback Amount</span><span class="mobile-card-value">${fmtExec(r.cashback_amount||0)} EGP</span></div>
 </div>`;
 }
 return `<tr class="row-clickable" data-open-pharmacy="${p.c}">
 <td class="name-cell">${p.n}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
 <td>${p.rg || '—'}</td>
-<td>${fmtBig(r.q3_2025_dv)} EGP</td>
-<td>${fmtBig(r.q3_2026_dv)} EGP</td>
+<td>${fmtExec(r.q3_2025_dv)} EGP</td>
+<td>${fmtExec(r.q3_2026_dv)} EGP</td>
 <td>${growthLabelFor(r)}</td>
 <td>${structLabel}</td>
 <td>${tierLabelFor(r)}</td>
 <td>${rateLabelFor(r)}</td>
-<td>${fmtBig(r.cashback_amount||0)} EGP</td>
+<td>${fmtExec(r.cashback_amount||0)} EGP</td>
 </tr>`;
 };
 
@@ -6604,7 +6874,7 @@ const paginationHtml = `<div class="table-pagination" style="display:flex;align-
 
 const eligibleTableHtml = `
 <div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('store')}Cashback Eligible Pharmacies</h2><span class="section-sub">Q3 2026 — through September Week 3 · ${totalEligible.toLocaleString('en-US')} pharmacies currently qualify · click a row to open Pharmacy 360</span></div>
+<div class="section-head"><h2>${iconSvg('store')}Cashback Eligible Pharmacies</h2><span class="section-sub">Q3 2026 — through September Week 3 · ${totalEligible.toLocaleString('en-US')} pharmacies${compositionActive ? ` match ${compositionActiveLabel}` : ' currently qualify'} · click a row to open Pharmacy 360</span></div>
 <div class="panel">
 <div class="table-desktop-only" style="overflow-x:auto;">
 <table>
@@ -6617,58 +6887,16 @@ ${paginationHtml}
 </div>
 </div>`;
 
-// ---- Variable growth tier summary -- derived from the engine, not hardcoded ----
-const varTiersAsc = COMMERCIAL_2026_VARIABLE_TIERS.slice().reverse();
-const varSummaryRows = varTiersAsc.map((t, idx) => {
-const nextT = varTiersAsc[idx+1];
-const growthLabel = nextT ? `${(t.minGrowth*100).toFixed(0)}%–<${(nextT.minGrowth*100).toFixed(0)}%` : `&ge;${(t.minGrowth*100).toFixed(0)}%`;
-const recs = kpis.records.filter(r => r.commercial_structure==='variable' && r.achieved_slab===t.key);
-const cashback = recs.reduce((s,r) => s+(r.cashback_amount||0), 0);
-return `<tr><td>Tier ${idx+1}</td><td>${growthLabel}</td><td>${(t.rate*100).toFixed(2)}%</td><td>${recs.length.toLocaleString('en-US')}</td><td>${fmtBig(cashback)} EGP</td></tr>`;
-});
-const varTotalN = kpis.records.filter(r => r.commercial_structure==='variable' && r.target_achieved).length;
-const varTotalCashback = kpis.records.filter(r => r.commercial_structure==='variable' && r.target_achieved).reduce((s,r)=>s+(r.cashback_amount||0),0);
-const variableSummaryHtml = `
-<div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('trending-up')}Variable Growth Summary</h2><span class="section-sub">Actual Q3 2026 Dist_Value × the achieved tier's rate — derived live from the commercial engine</span></div>
-<div class="panel">
-<div style="overflow-x:auto;">
-<table class="slab-table">
-<thead><tr><th>Tier</th><th>Growth</th><th>Rate</th><th>Pharmacies</th><th>Cashback</th></tr></thead>
-<tbody>${varSummaryRows.join('')}
-<tr style="font-weight:700;border-top:2px solid var(--border);"><td colspan="3">Total</td><td>${varTotalN.toLocaleString('en-US')} pharmacies</td><td>${fmtBig(varTotalCashback)} EGP</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>`;
+// Note: the old separate "Variable Growth Summary" / "Fixed Slab Summary"
+// tables are intentionally gone from Executive -- the Cashback Composition
+// section above now covers the same per-tier/per-slab breakdown
+// interactively (click a tier to filter the table). Per Daniel's page-
+// structure spec ("A-E, nothing else"), Management still has its own full
+// tier/slab tables untouched -- see renderExec()'s commercialRegionHtml/
+// exposure content, which this change does not touch.
 
-// ---- Fixed slab summary -- derived from the engine, not hardcoded ----
-const fixedSlabsAsc = COMMERCIAL_2026_FIXED_SLABS.slice().reverse();
-const fixedSummaryRows = fixedSlabsAsc.map((f, idx) => {
-const recs = kpis.records.filter(r => r.commercial_structure==='fixed' && r.achieved_slab===f.key);
-const total = recs.reduce((s,r) => s+(r.cashback_amount||0), 0);
-return `<tr><td>Fixed Slab ${idx+1}</td><td>&ge; ${f.threshold.toLocaleString('en-US')} EGP</td><td>${f.cash.toLocaleString('en-US')} EGP</td><td>${recs.length.toLocaleString('en-US')}</td><td>${fmtBig(total)} EGP</td></tr>`;
-});
-const fixedTotalN = kpis.records.filter(r => r.commercial_structure==='fixed' && r.target_achieved).length;
-const fixedTotalCashback = kpis.records.filter(r => r.commercial_structure==='fixed' && r.target_achieved).reduce((s,r)=>s+(r.cashback_amount||0),0);
-const fixedSummaryHtml = `
-<div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('dollar')}Fixed Slab Summary</h2><span class="section-sub">Q3 2025 Dist_Value ≤ 5,000 EGP — derived live from the commercial engine</span></div>
-<div class="panel">
-<div style="overflow-x:auto;">
-<table class="slab-table">
-<thead><tr><th>Slab</th><th>Q3 2026 Threshold</th><th>Cashback</th><th>Pharmacies</th><th>Total Cashback</th></tr></thead>
-<tbody>${fixedSummaryRows.join('')}
-<tr style="font-weight:700;border-top:2px solid var(--border);"><td colspan="3">Total</td><td>${fixedTotalN.toLocaleString('en-US')} pharmacies</td><td>${fmtBig(fixedTotalCashback)} EGP</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>`;
-
-section.innerHTML = filterBarHtml('execDash', 'Executive') + dataUpdatedHtml + kpiHtml
-+ eligibleTableHtml + variableSummaryHtml + fixedSummaryHtml;
+section.innerHTML = filterBarHtml('execDash', 'Executive') + dataUpdatedHtml
++ heroIdentityHtml + compositionHtml + eligibleTableHtml;
 
 wireFilterBar('execDash');
 section.querySelectorAll('[data-open-pharmacy]').forEach(el => {
@@ -6687,6 +6915,30 @@ const prevBtn = document.getElementById('execTablePrevBtn');
 if(prevBtn) prevBtn.addEventListener('click', () => { if(execTablePage > 1){ execTablePage--; renderExecDash(); } });
 const nextBtn = document.getElementById('execTableNextBtn');
 if(nextBtn) nextBtn.addEventListener('click', () => { execTablePage++; renderExecDash(); });
+
+// ---- Cashback Composition wiring: click Fixed/Variable or a tier to filter ----
+section.querySelectorAll('[data-comp-structure]').forEach(el => {
+el.addEventListener('click', () => {
+const s = el.dataset.compStructure;
+if(execCompositionFilter.structure === s && !execCompositionFilter.tier){ execCompositionFilter.structure = null; }
+else { execCompositionFilter.structure = s; execCompositionFilter.tier = null; }
+execTablePage = 1;
+renderExecDash();
+});
+el.addEventListener('keydown', (e) => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); el.click(); } });
+});
+section.querySelectorAll('[data-comp-tier]').forEach(el => {
+el.addEventListener('click', () => {
+const t = el.dataset.compTier;
+if(execCompositionFilter.tier === t){ execCompositionFilter.tier = null; execCompositionFilter.structure = null; }
+else { execCompositionFilter.tier = t; execCompositionFilter.structure = null; }
+execTablePage = 1;
+renderExecDash();
+});
+el.addEventListener('keydown', (e) => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); el.click(); } });
+});
+const compClearBtn = document.getElementById('execCompClearBtn');
+if(compClearBtn) compClearBtn.addEventListener('click', () => { execCompositionFilter = { structure: null, tier: null }; execTablePage = 1; renderExecDash(); });
 }
 
 
