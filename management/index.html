@@ -10,14 +10,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
---primary:#F59E0B;
---primary-dark:#B45309;
---primary-light:#FFF7EA;
+--primary:#FFA400;
+--primary-dark:#9E6600;
+--primary-light:#FFF6E6;
 --accent:#FCD34D;
---bg:#F7F8FB;
+--bg:#FFFBF7;
 --card:#ffffff;
---border:#E6E8F0;
---text:#1E2233;
+--border:#EDE7DE;
+--text:#242220;
 --muted:#667085;
 --slab1:#FCD34D;
 --slab2:#F59E0B;
@@ -33,7 +33,7 @@
 --banner-warn-border:#FCE29B;
 --banner-warn-text:#92650A;
 --time-gray:#98A2B3;
---variable-blue:#3B82F6;
+--variable-blue:#63656A;
 --radius-lg:18px;
 --radius-md:12px;
 --radius-sm:8px;
@@ -95,7 +95,7 @@ position:absolute;
 top:50%;right:14px;
 transform:translateY(-50%);
 font-size:17px;
-color:var(--muted);
+color:var(--pharco-orange-dark);
 pointer-events:none;
 }
 .clear-btn{
@@ -613,47 +613,49 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
    --primary (amber) palette used inside the untouched modules.
    =================================================================== */
 :root{
---shell-navy:#1E2233;
-/* Unified brand accent, 2026-09-23: the new shell now reuses the tool's
-   existing orange (--primary) instead of a separate red, so the whole
-   app -- old tabs and new platform pages alike -- share one look. */
+--shell-navy:#242220;
+/* PHARCO corporate visual system, final pass 2026-09-26: sidebar/topbar
+   are now WHITE + PHARCO ORANGE + charcoal text (previously a dark-navy
+   sidebar). --shell-red/-dark/-light still alias the shared --primary
+   tokens (kept in lockstep with --pharco-orange below) so old tabs and
+   new platform pages continue to share one brand accent. */
 --shell-red:var(--primary);
 --shell-red-dark:var(--primary-dark);
 --shell-red-light:var(--primary-light);
---shell-sidebar-bg:#151A30;
---shell-sidebar-bg-hover:#1F2540;
---shell-sidebar-text:#B7BCD4;
+--shell-sidebar-bg:#FFFFFF;
+--shell-sidebar-bg-hover:#FFF6E6;
+--shell-sidebar-text:#242220;
 --shell-sidebar-text-active:#FFFFFF;
 --shell-topbar-h:64px;
 --shell-sidebar-w:248px;
 }
 *{box-sizing:border-box;}
 .app-shell{display:flex;min-height:100vh;align-items:stretch;}
-.app-sidebar{position:fixed;top:0;bottom:0;inset-inline-start:0;width:var(--shell-sidebar-w);background:var(--shell-sidebar-bg);display:flex;flex-direction:column;z-index:160;transition:transform .22s ease;}
-.app-sidebar-brand{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
-.app-sidebar-brand .app-logo-chip{background:#fff;border-radius:10px;padding:5px 8px;display:flex;align-items:center;}
+.app-sidebar{position:fixed;top:0;bottom:0;inset-inline-start:0;width:var(--shell-sidebar-w);background:var(--shell-sidebar-bg);border-inline-end:1px solid var(--pharco-border);display:flex;flex-direction:column;z-index:160;transition:transform .22s ease;}
+.app-sidebar-brand{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid var(--pharco-border);}
+.app-sidebar-brand .app-logo-chip{background:transparent;border-radius:10px;padding:5px 8px 5px 0;display:flex;align-items:center;}
 .app-sidebar-brand .app-logo-chip img{height:26px;width:auto;display:block;}
-.app-sidebar-brand .app-brand-text{color:#fff;font-weight:700;font-size:14px;line-height:1.25;}
-.app-sidebar-brand .app-brand-text small{display:block;font-weight:500;font-size:10.5px;color:var(--shell-sidebar-text);letter-spacing:.02em;}
+.app-sidebar-brand .app-brand-text{color:var(--shell-navy);font-weight:700;font-size:14px;line-height:1.25;}
+.app-sidebar-brand .app-brand-text small{display:block;font-weight:500;font-size:10.5px;color:var(--pharco-charcoal);letter-spacing:.02em;}
 .app-nav{list-style:none;margin:0;padding:10px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
 .app-nav-btn{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:var(--shell-sidebar-text);font-size:13.5px;font-weight:600;cursor:pointer;border-inline-start:3px solid transparent;user-select:none;}
 .app-nav-btn .app-nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
-.app-nav-btn:hover{background:var(--shell-sidebar-bg-hover);color:var(--shell-sidebar-text-active);}
-.app-nav-btn.active{background:var(--shell-sidebar-bg-hover);color:var(--shell-sidebar-text-active);border-inline-start-color:var(--shell-red);}
-.app-sidebar-foot{margin-top:auto;padding:14px 18px;font-size:10.5px;color:#6E7392;border-top:1px solid rgba(255,255,255,.08);}
+.app-nav-btn:hover{background:var(--shell-sidebar-bg-hover);color:var(--pharco-orange-dark);}
+.app-nav-btn.active{background:var(--pharco-orange);color:var(--shell-sidebar-text-active);border-inline-start-color:var(--pharco-orange-dark);}
+.app-sidebar-foot{margin-top:auto;padding:14px 18px;font-size:10.5px;color:var(--pharco-charcoal);border-top:1px solid var(--pharco-border);}
 .app-sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(10,12,24,.45);z-index:55;}
 .app-main{flex:1;min-width:0;margin-left:var(--shell-sidebar-w);display:flex;flex-direction:column;min-height:100vh;}
 .app-topbar{display:flex;align-items:center;gap:14px;padding:0 22px;height:var(--shell-topbar-h);flex-shrink:0;border-bottom:1px solid var(--border);background:var(--card);position:sticky;top:0;z-index:40;}
 .app-hamburger{display:none;background:none;border:1px solid var(--border);border-radius:8px;width:34px;height:34px;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--shell-navy);flex-shrink:0;}
 .app-page-head{flex:1;min-width:0;}
-.app-breadcrumb{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.app-breadcrumb{font-size:11.5px;color:var(--pharco-orange-dark);font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
 .app-page-title{font-size:17px;font-weight:800;color:var(--shell-navy);margin:1px 0 0;line-height:1.3;}
 .app-page-subtitle{font-size:12px;color:var(--muted);margin-top:1px;}
 @media (max-width:560px){.app-page-subtitle{display:none;}}
 .app-topbar-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-inline-start:auto;}
-.app-alert-bell{position:relative;background:none;border:1px solid var(--border);border-radius:9px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;}
+.app-alert-bell{position:relative;background:none;border:1px solid var(--border);border-radius:9px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--pharco-orange-dark);}
 .app-alert-badge{position:absolute;top:-5px;inset-inline-end:-5px;background:var(--shell-red);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
-.app-user-chip{width:34px;height:34px;border-radius:50%;background:var(--shell-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.app-user-chip{width:34px;height:34px;border-radius:50%;background:var(--pharco-orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
 .app-content{flex:1;padding:20px 22px 40px;min-width:0;overflow-x:hidden;}
 @media (max-width:1080px){
 .app-sidebar{transform:translateX(-100%);}
@@ -681,9 +683,9 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
    new rules and (further down) narrows a couple of Phase 1 selectors.
    =================================================================== */
 :root{
---shell-quality:#475467;
---shell-quality-bg:#EEF1F5;
---shell-quality-border:#D8DDE6;
+--shell-quality:#63656A;
+--shell-quality-bg:#F1EFEB;
+--shell-quality-border:#DEDAD0;
 }
 /* ===================================================================
    PHARCO CHC brand tokens -- sampled directly from the supplied PHARCO
@@ -718,10 +720,11 @@ box-shadow:0 4px 14px rgba(16,24,40,.18);display:none;align-items:center;justify
 .platform-filterbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:14px;}
 .filter-field{display:flex;flex-direction:column;gap:3px;min-width:0;}
 .filter-field label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}
-.filter-field-icon{color:var(--muted);width:15px;height:15px;display:flex;align-items:center;}
+.filter-field-icon{color:var(--pharco-orange-dark);width:15px;height:15px;display:flex;align-items:center;}
 .filter-select,.filter-input{border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-size:12.5px;font-family:inherit;color:var(--text);background:var(--bg);min-width:120px;}
 .filter-select:disabled{color:var(--muted);background:var(--border);cursor:not-allowed;}
 .filter-input{min-width:170px;}
+.filter-select:focus,.filter-input:focus{border-color:var(--pharco-orange);outline:none;}
 .filter-field:first-child{flex-direction:row;align-items:center;gap:6px;}
 .filter-chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-inline-start:auto;padding-top:14px;}
 .filter-chip{display:inline-flex;align-items:center;gap:5px;background:var(--primary-light);color:var(--primary-dark);border:1px solid var(--primary);border-radius:20px;padding:4px 8px 4px 10px;font-size:11.5px;font-weight:700;cursor:pointer;}
@@ -771,8 +774,8 @@ table tr.row-clickable:hover .row-drill-icon{color:var(--primary-dark);}
 #execDashView .alert-item.sev-quality, #alertsPageView .alert-item.sev-quality, #execView .alert-item.sev-quality{background:var(--shell-quality-bg);border-color:var(--shell-quality-border);}
 #execDashView .alert-icon, #alertsPageView .alert-icon, #execView .alert-icon{color:var(--muted);}
 #execDashView .alert-item.sev-critical .alert-icon, #alertsPageView .alert-item.sev-critical .alert-icon, #execView .alert-item.sev-critical .alert-icon{color:var(--danger);}
-#execDashView .alert-item.sev-warning .alert-icon, #alertsPageView .alert-item.sev-warning .alert-icon, #execView .alert-item.sev-warning .alert-icon{color:#B45309;}
-#execDashView .alert-item.sev-info .alert-icon, #alertsPageView .alert-item.sev-info .alert-icon, #execView .alert-item.sev-info .alert-icon{color:#2563EB;}
+#execDashView .alert-item.sev-warning .alert-icon, #alertsPageView .alert-item.sev-warning .alert-icon, #execView .alert-item.sev-warning .alert-icon{color:var(--pharco-orange-dark);}
+#execDashView .alert-item.sev-info .alert-icon, #alertsPageView .alert-item.sev-info .alert-icon, #execView .alert-item.sev-info .alert-icon{color:var(--pharco-charcoal);}
 #execDashView .alert-item.sev-quality .alert-icon, #alertsPageView .alert-item.sev-quality .alert-icon, #execView .alert-item.sev-quality .alert-icon{color:var(--shell-quality);}
 .alert-group-heading{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;}
 .alert-group-heading:first-child{margin-top:0;}
@@ -798,7 +801,7 @@ table tr.row-clickable:hover .row-drill-icon{color:var(--primary-dark);}
    failure, distinct from the two amber "needs action" items. ---- */
 .mgmt-overview-stat.is-clickable{cursor:pointer;transition:background .15s ease;}
 .mgmt-overview-stat.is-clickable:hover,.mgmt-overview-stat.is-clickable:focus-visible{background:var(--primary-light);outline:none;}
-.mgmt-overview-stat.tone-warning .v{color:#B45309;}
+.mgmt-overview-stat.tone-warning .v{color:var(--pharco-orange-dark);}
 .mgmt-overview-stat.tone-quality .v{color:var(--shell-quality);}
 
 /* ---- Slab performance: compact table with inline progress bars (replaces boxy card grid) ---- */
@@ -846,7 +849,7 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 .p360-header-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
 .p360-status-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:3px 10px;border-radius:20px;margin-inline-start:10px;vertical-align:middle;}
 .p360-status-achieved{background:#DCFCE7;color:#166534;}
-.p360-status-in_progress{background:#DBEAFE;color:#1E40AF;}
+.p360-status-in_progress{background:var(--pharco-orange-light);color:var(--pharco-orange-dark);}
 .p360-status-at_risk{background:#FEE2E2;color:#991B1B;}
 .p360-status-not_started{background:var(--shell-quality-bg);color:var(--shell-quality);}
 .p360-status-no_agreement{background:var(--shell-quality-bg);color:var(--shell-quality);}
@@ -2642,7 +2645,7 @@ detailSection.innerHTML = `
 <div style="display:flex;gap:20px;flex-wrap:wrap;">
 <div style="flex:1 1 260px;min-width:240px;">
 <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">${L.regionH2}</div>
-${renderHBarChart(regionChartItems, {color:'#4a90d9', valueFmt: v => `${v.toLocaleString('en-US')} ${L.ph}`})}
+${renderHBarChart(regionChartItems, {color:'var(--primary)', valueFmt: v => `${v.toLocaleString('en-US')} ${L.ph}`})}
 </div>
 <div style="flex:1 1 260px;min-width:240px;">
 <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">${L.tierH2}</div>
@@ -5309,7 +5312,7 @@ const q4Items = rows.slice()
 .filter(r => r.q4_2026_projected_invoice_value !== null && r.q4_2026_projected_invoice_value !== undefined)
 .sort((a,b) => b.q4_2026_projected_invoice_value - a.q4_2026_projected_invoice_value)
 .map(r => ({ label: r.group, value: r.q4_2026_projected_invoice_value }));
-const q4ChartHtml = renderHBarChart(q4Items, { valueFmt: v => fmt(v) + ' ج.م', color: '#8e5fd9' });
+const q4ChartHtml = renderHBarChart(q4Items, { valueFmt: v => fmt(v) + ' ج.م', color: 'var(--primary)' });
 
 // ---- Target vs Achievement vs Growth combo (all-chains overview) ----
 const comboItems = rows.map(r => ({
@@ -9041,7 +9044,7 @@ ${renderHBarChart(slabChartItems, {color:'var(--primary)', valueFmt: v => `${v} 
 </div>
 <div style="flex:1 1 260px;min-width:240px;">
 <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">${DL.regionDistH2}</div>
-${renderHBarChart(regionChartItems, {color:'#4a90d9', valueFmt: v => `${v} ${DL.pharmacyWord(v)}`})}
+${renderHBarChart(regionChartItems, {color:'var(--primary)', valueFmt: v => `${v} ${DL.pharmacyWord(v)}`})}
 </div>
 </div>
 </div>
