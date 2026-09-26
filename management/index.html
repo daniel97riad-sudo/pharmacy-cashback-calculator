@@ -1179,14 +1179,79 @@ background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;text-a
 /* Explore the Business -- five navigation cards, not KPI tiles: an icon,
    a title, and the question it answers. */
 #execDashView .exec-explore-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;}
-#execDashView .exec-explore-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;cursor:pointer;text-align:start;font-family:inherit;box-shadow:var(--shadow-card);transition:border-color .15s ease,transform .08s ease;}
-#execDashView .exec-explore-card:hover{border-color:var(--pharco-orange);transform:translateY(-1px);}
+#execDashView .exec-explore-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 40px 16px 18px;cursor:pointer;text-align:start;font-family:inherit;box-shadow:var(--shadow-card);transition:border-color .15s ease,transform .15s ease,box-shadow .15s ease;}
+#execDashView .exec-explore-card:hover{border-color:var(--pharco-orange);transform:translateY(-1px);box-shadow:var(--shadow-header);}
 #execDashView .exec-explore-card:active{transform:translateY(0);}
 #execDashView .exec-explore-card:focus-visible{outline:2px solid var(--pharco-orange-dark);outline-offset:2px;}
-#execDashView .exec-explore-icon{width:34px;height:34px;border-radius:9px;background:var(--pharco-orange-light);color:var(--pharco-orange-dark);display:flex;align-items:center;justify-content:center;}
+#execDashView .exec-explore-icon{width:34px;height:34px;border-radius:9px;background:var(--pharco-orange-light);color:var(--pharco-orange-dark);display:flex;align-items:center;justify-content:center;transition:transform .15s ease;}
+#execDashView .exec-explore-card:hover .exec-explore-icon{transform:translateX(2px);}
 #execDashView .exec-explore-icon .icon{width:18px;height:18px;}
 #execDashView .exec-explore-title{font-size:14px;font-weight:800;color:var(--pharco-charcoal);}
 #execDashView .exec-explore-q{font-size:12px;color:var(--muted);line-height:1.4;}
+#execDashView .exec-explore-arrow{position:absolute;top:16px;inset-inline-end:16px;color:var(--pharco-orange-dark);opacity:0;transform:translateX(-4px);transition:opacity .15s ease,transform .15s ease;}
+#execDashView .exec-explore-arrow .icon{width:16px;height:16px;}
+#execDashView .exec-explore-card:hover .exec-explore-arrow,
+#execDashView .exec-explore-card:focus-visible .exec-explore-arrow{opacity:1;transform:translateX(0);}
+
+/* ===================================================================
+   Phase 4.2 (2026-09-26): interaction polish -- no structure, section,
+   or calculation changes. Hover/focus affordances (orange border/accent,
+   a small arrow that appears, ~150ms transitions -- never bouncy or
+   large) on the Cashback legend rows, the Visibility money tiles and
+   shelf-commitment nav tiles, and the Pharmacy Explorer's table rows;
+   plus the new Explorer quick-filter bar (search + pills) and its
+   "Showing: ..." state strip above the table. ---- */
+#execDashView .exec-cb-legend-item{position:relative;padding-inline-end:34px;}
+#execDashView .exec-vis-posm-metric{position:relative;padding-inline-end:30px;}
+#execDashView .exec-row-arrow{position:absolute;top:50%;inset-inline-end:12px;transform:translate(-4px,-50%);color:var(--pharco-orange-dark);opacity:0;transition:opacity .15s ease,transform .15s ease;display:flex;}
+#execDashView .exec-row-arrow .icon{width:14px;height:14px;}
+#execDashView .exec-cb-legend-item:hover .exec-row-arrow,
+#execDashView .exec-cb-legend-item:focus-visible .exec-row-arrow,
+#execDashView .exec-vis-posm-metric:hover .exec-row-arrow,
+#execDashView .exec-vis-posm-metric:focus-visible .exec-row-arrow{opacity:1;transform:translate(0,-50%);}
+#execDashView .exec-vis-posm-metric--money:hover .exec-row-arrow{color:#fff;}
+#execDashView .exec-posm-tile-arrow{transition:transform .15s ease;}
+#execDashView .exec-posm-tile--nav:hover .exec-posm-tile-arrow{transform:translateX(3px);}
+
+/* Pharmacy Explorer quick-filter bar: a search box + five mutually-
+   exclusive pills, sitting directly on the existing execTableSort /
+   execCompositionFilter state (see renderExecDash) -- not a new filter
+   engine, just a faster way to reach states the page can already reach. */
+#execDashView .exec-explorer-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px;}
+#execDashView .exec-explorer-search{display:flex;align-items:center;gap:8px;background:var(--pharco-surface);border:1px solid var(--pharco-border);border-radius:var(--radius-sm);padding:8px 12px;flex:1 1 200px;min-width:160px;color:var(--muted);transition:border-color .15s ease;}
+#execDashView .exec-explorer-search:focus-within{border-color:var(--pharco-orange);}
+#execDashView .exec-explorer-search .icon{width:14px;height:14px;flex-shrink:0;}
+#execDashView .exec-explorer-search input{border:none;background:none;outline:none;font:inherit;font-size:13px;color:var(--pharco-charcoal);width:100%;}
+#execDashView .exec-explorer-pills{display:flex;flex-wrap:wrap;gap:6px;}
+#execDashView .exec-explorer-pill{background:var(--pharco-surface);border:1px solid var(--pharco-border);border-radius:999px;padding:7px 13px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;white-space:nowrap;transition:border-color .15s ease,background .15s ease,color .15s ease;}
+#execDashView .exec-explorer-pill:hover{border-color:var(--pharco-orange);color:var(--pharco-orange-dark);}
+#execDashView .exec-explorer-pill.active{border-color:var(--pharco-orange);background:var(--pharco-orange-light);color:var(--pharco-orange-dark);}
+#execDashView .exec-explorer-pill:focus-visible{outline:2px solid var(--pharco-orange-dark);outline-offset:1px;}
+#execDashView .exec-explorer-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--pharco-orange-light);border:1px solid var(--pharco-orange);border-radius:var(--radius-sm);padding:8px 12px;font-size:12.5px;font-weight:700;color:var(--pharco-orange-dark);margin-bottom:14px;}
+#execDashView .exec-explorer-banner--default{background:var(--pharco-surface);border-color:var(--pharco-border);color:var(--muted);font-weight:600;}
+#execDashView .exec-explorer-clear{display:flex;align-items:center;gap:4px;background:none;border:none;font:inherit;font-size:12px;font-weight:700;color:var(--pharco-orange-dark);cursor:pointer;padding:2px 4px;}
+#execDashView .exec-explorer-clear .icon{width:12px;height:12px;}
+#execDashView .exec-explorer-clear:hover{text-decoration:underline;}
+
+/* Explorer table rows: the → is a hover reveal (a hint you can drill in),
+   not a permanent fixture, so the row reads as "exploration" rather than
+   a static report -- scoped to the desktop table only, since the mobile
+   card list has no hover state and already shows its own chevron. */
+#execPharmacyTable .table-desktop-only table tr.row-clickable{transition:background .15s ease;}
+#execPharmacyTable .table-desktop-only table tr.row-clickable:hover{background:var(--pharco-orange-light);}
+#execPharmacyTable .table-desktop-only table tr.row-clickable:hover td.name-cell{color:var(--pharco-orange-dark);font-weight:800;}
+#execPharmacyTable .table-desktop-only .row-drill-icon{opacity:0;transform:translateX(-3px);transition:opacity .15s ease,transform .15s ease;}
+#execPharmacyTable .table-desktop-only table tr.row-clickable:hover .row-drill-icon{opacity:1;transform:translateX(0);color:var(--pharco-orange-dark);}
+
+@media (max-width:760px){
+/* Quick-filter pills become a horizontally-scrollable strip rather than
+   wrapping into many rows -- keeps the explorer bar compact and avoids
+   ever pushing the page itself wider than the viewport. */
+#execDashView .exec-explorer-bar{flex-direction:column;align-items:stretch;}
+#execDashView .exec-explorer-search{flex:none;width:100%;}
+#execDashView .exec-explorer-pills{flex:none;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;scrollbar-width:thin;}
+#execDashView .exec-explorer-pill{flex-shrink:0;}
+}
 
 /* ---- Intelligence Drawer: one reusable panel, desktop side-drawer /
    mobile bottom-sheet. Deliberately no full-dark backdrop -- a soft tint
@@ -6920,6 +6985,20 @@ let execVisibilityCodeFilter = null;
 let execVisibilityCodeFilterLabel = '';
 function execVisibilityFilterActive(){ return execVisibilityCodeFilter !== null; }
 function execVisibilityFilterMatches(r){ return !execVisibilityCodeFilter || execVisibilityCodeFilter.has(r.p.c); }
+// Phase 4.2: the Pharmacy Explorer's own quick-search box (above the
+// table) -- a lightweight name/code substring match over the already-
+// eligible dataset. Deliberately separate from platformFilters.code (the
+// Global filter bar's pharmacy field, which narrows the whole page's
+// underlying commercial universe): this one only narrows which rows show
+// in the table below, same "Explorer filter" tier as the five quick-filter
+// pills, and Home/the pills' own "All" clears it without touching the
+// Global filter bar.
+let execExplorerSearchTerm = '';
+function execExplorerSearchMatches(r){
+const q = execExplorerSearchTerm.trim().toLowerCase();
+if(!q) return true;
+return (r.p.n||'').toLowerCase().includes(q) || (r.p.c||'').toLowerCase().includes(q);
+}
 function execEligibleSortValue(r, field){
 switch(field){
 case 'cashback': return r.cashback_amount || 0;
@@ -7536,23 +7615,25 @@ const heroStoryHtml = `
 <button class="exec-hero-stat exec-hero-stat--eligible" type="button" data-drawer='{"type":"eligible"}' title="${kpis.targetAchieved.toLocaleString('en-US')} pharmacies qualify for cashback (Fixed + Variable) · click for detail">
 <div class="exec-hero-value">${fmtExec(kpis.targetAchieved)}</div>
 <div class="exec-hero-label">${iconSvg('check-circle')}Cashback Eligible</div>
+<span class="exec-stat-hint">${iconSvg('arrow-right')}Explore pharmacies</span>
 </button>
 <div class="exec-hero-divider" aria-hidden="true"></div>
 <button class="exec-hero-stat" type="button" data-drawer='{"type":"salesPoint","point":"q326"}' title="${Math.round(sumQ32026Eligible).toLocaleString('en-US')} EGP · click for detail">
 <div class="exec-hero-value">${fmtExec(sumQ32026Eligible)} EGP</div>
 <div class="exec-hero-label">${iconSvg('trending-up')}Eligible Sales</div>
+<span class="exec-stat-hint">${iconSvg('arrow-right')}View sales performance</span>
 </button>
 <div class="exec-hero-divider" aria-hidden="true"></div>
 <button class="exec-hero-stat" type="button" data-drawer='{"type":"salesPoint","point":"growth"}' title="Q3 2026 vs Q3 2025, cashback-eligible pharmacies · click for detail">
 <div class="exec-hero-value ${growthClass}">${growthLabel}</div>
 <div class="exec-hero-label">${iconSvg('activity')}Growth vs Q3'25</div>
-<span class="exec-stat-hint">${iconSvg('arrow-right')}Eligible population</span>
+<span class="exec-stat-hint">${iconSvg('arrow-right')}Explore growth leaders</span>
 </button>
 <div class="exec-hero-divider" aria-hidden="true"></div>
 <button class="exec-hero-stat exec-hero-stat--money" type="button" data-drawer='{"type":"cashbackTotal"}' title="${Math.round(kpis.totalCashback).toLocaleString('en-US')} EGP (Fixed + Variable) · click for detail">
 <div class="exec-hero-value">${fmtExec(kpis.totalCashback)} EGP</div>
 <div class="exec-hero-label">${iconSvg('dollar')}Total Cashback</div>
-<span class="exec-stat-hint">${iconSvg('arrow-right')}Variable / Fixed</span>
+<span class="exec-stat-hint">${iconSvg('arrow-right')}See where cashback goes</span>
 </button>
 </div>
 <div class="exec-story-sentence">${narrativeSentence}</div>
@@ -7673,11 +7754,13 @@ ${donutSvgHtml}
 <span class="exec-cb-swatch exec-cb-swatch--variable" aria-hidden="true"></span>
 <span class="exec-cb-legend-text"><span class="exec-cb-legend-label">Variable</span><span class="exec-cb-legend-sub">${variableRecords.length.toLocaleString('en-US')} pharmacies</span></span>
 <span class="exec-cb-legend-value">${fmtExec(variableTotalCashbackTop)} EGP</span>
+<span class="exec-row-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span>
 </button>
 <button class="exec-cb-legend-item${isStructureActive('fixed')?' active':''}" type="button" data-comp-structure="fixed">
 <span class="exec-cb-swatch exec-cb-swatch--fixed" aria-hidden="true"></span>
 <span class="exec-cb-legend-text"><span class="exec-cb-legend-label">Fixed</span><span class="exec-cb-legend-sub">${fixedRecords.length.toLocaleString('en-US')} pharmacies</span></span>
 <span class="exec-cb-legend-value">${fmtExec(fixedTotalCashbackTop)} EGP</span>
+<span class="exec-row-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span>
 </button>
 <button class="exec-cb-ratio" type="button" data-drawer='{"type":"cashbackRatio"}' title="Total cashback ÷ Q3 2026 Dist_Value of cashback-eligible pharmacies · click for detail">
 <span class="exec-cb-ratio-value">${cashbackSalesPct!==null ? cashbackSalesPct.toFixed(2)+'%' : 'N/A'}</span>
@@ -7741,8 +7824,8 @@ const visibilityModuleHtml = `
 <span class="exec-stat-hint exec-stat-hint--vis">${iconSvg('arrow-right')}POSM / Shelf</span>
 </button>
 <div class="exec-vis-posm-row exec-vis-posm-row--money">
-<button class="exec-vis-posm-metric exec-vis-posm-metric--money" type="button" data-drawer='{"type":"visibility","focus":"posmInvestment"}'><div class="exec-vis-posm-metric-label">POSM Investment</div><div class="exec-vis-posm-metric-value">${fmtExec(posmM.investmentEgp)} EGP</div></button>
-<button class="exec-vis-posm-metric exec-vis-posm-metric--money" type="button" data-drawer='{"type":"visibility","focus":"shelfBonus"}'><div class="exec-vis-posm-metric-label">Shelf Bonus</div><div class="exec-vis-posm-metric-value">${fmtExec(posmM.shelfBonusEgp)} EGP</div></button>
+<button class="exec-vis-posm-metric exec-vis-posm-metric--money" type="button" data-drawer='{"type":"visibility","focus":"posmInvestment"}'><div class="exec-vis-posm-metric-label">POSM Investment</div><div class="exec-vis-posm-metric-value">${fmtExec(posmM.investmentEgp)} EGP</div><span class="exec-row-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span></button>
+<button class="exec-vis-posm-metric exec-vis-posm-metric--money" type="button" data-drawer='{"type":"visibility","focus":"shelfBonus"}'><div class="exec-vis-posm-metric-label">Shelf Bonus</div><div class="exec-vis-posm-metric-value">${fmtExec(posmM.shelfBonusEgp)} EGP</div><span class="exec-row-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span></button>
 </div>
 <div class="exec-vis-group-label">Shelf commitment -- click to explore those pharmacies</div>
 <div class="exec-vis-posm-grid">${shelfModuleTilesHtml}</div>
@@ -7780,33 +7863,38 @@ const exploreHtml = `
 <div class="exec-explore-icon">${iconSvg('dollar')}</div>
 <div class="exec-explore-title">Cashback Insights</div>
 <div class="exec-explore-q">Where is the cashback going?</div>
+<span class="exec-explore-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span>
 </button>
 <button class="exec-explore-card" type="button" data-explore="growthLeaders">
 <div class="exec-explore-icon">${iconSvg('trending-up')}</div>
 <div class="exec-explore-title">Growth Leaders</div>
 <div class="exec-explore-q">Which pharmacies are driving the growth?</div>
+<span class="exec-explore-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span>
 </button>
 <button class="exec-explore-card" type="button" data-explore="visibilityFocus">
 <div class="exec-explore-icon">${iconSvg('eye')}</div>
 <div class="exec-explore-title">Visibility Focus</div>
 <div class="exec-explore-q">Where are we investing and what is the impact?</div>
+<span class="exec-explore-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span>
 </button>
 <button class="exec-explore-card" type="button" data-explore="topPerformers">
 <div class="exec-explore-icon">${iconSvg('activity')}</div>
 <div class="exec-explore-title">Top Performers</div>
 <div class="exec-explore-q">Highest cashback, highest growth, and more.</div>
+<span class="exec-explore-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span>
 </button>
 <button class="exec-explore-card" type="button" data-explore="searchPharmacy">
 <div class="exec-explore-icon">${iconSvg('search')}</div>
 <div class="exec-explore-title">Search Pharmacy</div>
 <div class="exec-explore-q">Find any pharmacy and view its full profile.</div>
+<span class="exec-explore-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span>
 </button>
 </div>
 </div>`;
 
 // ---- E. Pharmacy Explorer: Cashback Eligible Pharmacies -- sortable, paginated, composition- and/or visibility-filtered ----
 const visibilityFilterActive = execVisibilityFilterActive();
-const compositionFiltered = eligibleRecords.filter(execCompositionMatches).filter(execVisibilityFilterMatches);
+const compositionFiltered = eligibleRecords.filter(execCompositionMatches).filter(execVisibilityFilterMatches).filter(execExplorerSearchMatches);
 const eligibleAll = compositionFiltered.slice().sort((a,b) => {
 const av = execEligibleSortValue(a, execTableSort.field);
 const bv = execEligibleSortValue(b, execTableSort.field);
@@ -7880,11 +7968,64 @@ const paginationHtml = `<div class="table-pagination" style="display:flex;align-
 </div>
 </div>`;
 
-const activeFilterDescription = compositionActive ? `match ${compositionActiveLabel}` : (visibilityFilterActive ? `match Visibility · ${execVisibilityCodeFilterLabel}` : 'currently qualify');
+// ---- Phase 4.2: Pharmacy Explorer -- a compact quick-filter bar (search +
+// 5 pills) sits above the table, operating only on this already-eligible,
+// already-composition/visibility-filtered dataset (never a new business
+// rule -- Top Cashback/Highest Growth just set the existing execTableSort,
+// Variable/Fixed just set the existing execCompositionFilter, exactly what
+// the Cashback legend and Explore cards above already do). A single
+// "Showing: ..." strip states plainly which of the three filter layers
+// (Global / Explorer / Drawer-drilldown) is currently narrowing the table,
+// with one "Clear" that resets only the Explorer-layer state -- so Home's
+// own reset and this Clear button never fight over what they each own. ----
+const isBaselineExecSort = execTableSort.field==='cashback' && execTableSort.dir==='desc';
+const hasTierFilter = !!execCompositionFilter.tier;
+const hasStructureFilter = !!execCompositionFilter.structure && !hasTierFilter;
+const hasExplorerSearch = !!execExplorerSearchTerm.trim();
+const qfAllActive = !hasTierFilter && !hasStructureFilter && !visibilityFilterActive && !hasExplorerSearch && isBaselineExecSort;
+const qfVariableActive = execCompositionFilter.structure === 'variable' && !hasTierFilter;
+const qfFixedActive = execCompositionFilter.structure === 'fixed' && !hasTierFilter;
+const qfGrowthActive = !hasTierFilter && !hasStructureFilter && !visibilityFilterActive && execTableSort.field==='growth' && execTableSort.dir==='desc';
+const qfCashbackActive = !hasTierFilter && !hasStructureFilter && !visibilityFilterActive && isBaselineExecSort;
+const EXEC_SORT_FIELD_LABELS = {region:'Region', q32026:'Q3 2026 Dist_Value', growth:'Growth %', tier:'Slab / Tier', cashback:'Cashback Amount'};
+const explorerBannerText = (() => {
+if(hasTierFilter) return `Showing: ${compositionActiveLabel} pharmacies · ${totalEligible.toLocaleString('en-US')} results`;
+if(hasStructureFilter){
+const lbl = execCompositionFilter.structure === 'fixed' ? 'Fixed' : 'Variable';
+return `Showing: ${lbl} pharmacies · ${totalEligible.toLocaleString('en-US')} results`;
+}
+if(visibilityFilterActive) return `Showing: ${execVisibilityCodeFilterLabel} · ${totalEligible.toLocaleString('en-US')} results`;
+if(hasExplorerSearch) return `Showing: "${execExplorerSearchTerm.trim()}" · ${totalEligible.toLocaleString('en-US')} results`;
+if(execTableSort.field==='growth' && execTableSort.dir==='desc') return `Showing: Highest Growth · sorted descending`;
+if(!isBaselineExecSort){
+const lbl = EXEC_SORT_FIELD_LABELS[execTableSort.field] || execTableSort.field;
+return `Showing: sorted by ${lbl} ${execTableSort.dir==='desc'?'descending':'ascending'}`;
+}
+return null;
+})();
+const explorerBarHtml = `
+<div class="exec-explorer-bar">
+<div class="exec-explorer-search">
+${iconSvg('search')}
+<input type="text" id="execExplorerSearchInput" placeholder="Search pharmacy..." value="${(execExplorerSearchTerm||'').replace(/"/g,'&quot;')}" />
+</div>
+<div class="exec-explorer-pills">
+<button class="exec-explorer-pill${qfAllActive?' active':''}" type="button" data-explorer-filter="all">All</button>
+<button class="exec-explorer-pill${qfCashbackActive?' active':''}" type="button" data-explorer-filter="topCashback">Top Cashback</button>
+<button class="exec-explorer-pill${qfGrowthActive?' active':''}" type="button" data-explorer-filter="highestGrowth">Highest Growth</button>
+<button class="exec-explorer-pill${qfVariableActive?' active':''}" type="button" data-explorer-filter="variable">Variable</button>
+<button class="exec-explorer-pill${qfFixedActive?' active':''}" type="button" data-explorer-filter="fixed">Fixed</button>
+</div>
+</div>`;
+const explorerBannerHtml = explorerBannerText
+? `<div class="exec-explorer-banner"><span>${explorerBannerText}</span><button class="exec-explorer-clear" type="button" id="execExplorerClearBtn">Clear${iconSvg('x')}</button></div>`
+: `<div class="exec-explorer-banner exec-explorer-banner--default"><span>Showing all ${totalEligible.toLocaleString('en-US')} eligible pharmacies</span></div>`;
 const eligibleTableHtml = `
 <div class="section flow-tables" id="execPharmacyTable">
-<div class="section-head"><h2>${iconSvg('store')}Cashback Eligible Pharmacies</h2><span class="section-sub">Q3 2026 — through September Week 3 · ${totalEligible.toLocaleString('en-US')} pharmacies ${activeFilterDescription}${visibilityFilterActive ? ` · <span class="exec-comp-active-chip" id="execVisClearBtn">Clear${iconSvg('x')}</span>` : ''} · click a row to open Pharmacy 360</span></div>
+<div class="section-head"><h2>${iconSvg('store')}Explore ${kpis.targetAchieved.toLocaleString('en-US')} Cashback-Eligible Pharmacies</h2><span class="section-sub">Find the pharmacies behind the commercial result.</span></div>
 <div class="panel">
+${explorerBarHtml}
+${explorerBannerHtml}
 <div class="table-desktop-only" style="overflow-x:auto;">
 <table>
 <thead>${tableHeadHtml}</thead>
@@ -7967,8 +8108,68 @@ const compClearBtn = document.getElementById('execCompClearBtn');
 // looks like a UI glitch. preventDefault stops the native toggle; the
 // re-render below already decides open/closed correctly on its own.
 if(compClearBtn) compClearBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); execCompositionFilter = { structure: null, tier: null }; execTablePage = 1; renderExecDash(); });
-const visClearBtn = document.getElementById('execVisClearBtn');
-if(visClearBtn) visClearBtn.addEventListener('click', () => { execVisibilityCodeFilter = null; execVisibilityCodeFilterLabel = ''; execTablePage = 1; renderExecDash(); });
+
+// ---- Phase 4.2: Pharmacy Explorer quick-filter bar. The five pills and
+// the search box only ever set state this file already had (execTableSort,
+// execCompositionFilter, the new execExplorerSearchTerm) -- no new
+// business logic, same pattern as the Explore cards above. Applying any
+// one of these clears the others so the "Showing: ..." strip is never
+// ambiguous about which single thing is currently narrowing the table. ----
+const explorerSearchInput = document.getElementById('execExplorerSearchInput');
+if(explorerSearchInput){
+explorerSearchInput.addEventListener('input', () => {
+execExplorerSearchTerm = explorerSearchInput.value;
+// Typing a search term is its own explorer filter -- clear the pill-driven
+// composition/visibility filters so it never silently combines with a
+// leftover Variable/Fixed/shelf filter (same mutual-exclusivity a pill
+// click already enforces on the search box, just the other direction).
+execCompositionFilter = { structure: null, tier: null };
+execVisibilityCodeFilter = null; execVisibilityCodeFilterLabel = '';
+execTablePage = 1;
+renderExecDash();
+// renderExecDash() rebuilds this input from scratch -- restore focus
+// and caret position so typing feels continuous, not like the field
+// keeps losing focus on every keystroke.
+const fresh = document.getElementById('execExplorerSearchInput');
+if(fresh){ fresh.focus(); const pos = fresh.value.length; fresh.setSelectionRange(pos, pos); }
+});
+}
+section.querySelectorAll('[data-explorer-filter]').forEach(el => {
+el.addEventListener('click', () => {
+const key = el.dataset.explorerFilter;
+if(key === 'all'){
+execCompositionFilter = { structure: null, tier: null };
+execTableSort = { field: 'cashback', dir: 'desc' };
+}
+else if(key === 'topCashback'){
+execCompositionFilter = { structure: null, tier: null };
+execTableSort = { field: 'cashback', dir: 'desc' };
+}
+else if(key === 'highestGrowth'){
+execCompositionFilter = { structure: null, tier: null };
+execTableSort = { field: 'growth', dir: 'desc' };
+}
+else if(key === 'variable'){
+execCompositionFilter = { structure: 'variable', tier: null };
+}
+else if(key === 'fixed'){
+execCompositionFilter = { structure: 'fixed', tier: null };
+}
+execVisibilityCodeFilter = null; execVisibilityCodeFilterLabel = '';
+execExplorerSearchTerm = '';
+execTablePage = 1;
+renderExecDash();
+});
+});
+const explorerClearBtn = document.getElementById('execExplorerClearBtn');
+if(explorerClearBtn) explorerClearBtn.addEventListener('click', () => {
+execCompositionFilter = { structure: null, tier: null };
+execVisibilityCodeFilter = null; execVisibilityCodeFilterLabel = '';
+execExplorerSearchTerm = '';
+execTableSort = { field: 'cashback', dir: 'desc' };
+execTablePage = 1;
+renderExecDash();
+});
 
 // ---- Explore the Business: five navigation actions onto the *existing*
 // mechanisms -- the Intelligence Drawer, the explorer table's own sort
@@ -7999,8 +8200,8 @@ renderExecDash();
 scrollToExecEl('execPharmacyTable');
 }
 else if(action === 'searchPharmacy'){
-scrollToExecEl('execDashFilterBar');
-const input = document.querySelector('#execDashFilterBar .filter-input[data-filter-key="code"]');
+scrollToExecEl('execPharmacyTable');
+const input = document.getElementById('execExplorerSearchInput');
 if(input) setTimeout(() => input.focus(), 350);
 }
 });
@@ -8021,6 +8222,7 @@ function execDashGoHome(){
 closeExecDrawer();
 execCompositionFilter = { structure: null, tier: null };
 execVisibilityCodeFilter = null; execVisibilityCodeFilterLabel = '';
+execExplorerSearchTerm = '';
 execTableSort = { field: 'cashback', dir: 'desc' };
 execTablePage = 1;
 platformFilters = { region: null, dm: null, territory: null, code: '' };
