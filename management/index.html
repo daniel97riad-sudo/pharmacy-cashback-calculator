@@ -768,12 +768,12 @@ table tr.row-clickable:hover .row-drill-icon{color:var(--primary-dark);}
 .alert-action-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:none;border:none;color:var(--shell-red-dark);font-size:12px;font-weight:700;cursor:pointer;padding:0;}
 .alert-action-btn .icon{width:13px;height:13px;}
 .alert-action-btn:hover{text-decoration:underline;}
-#execDashView .alert-item.sev-quality, #alertsPageView .alert-item.sev-quality{background:var(--shell-quality-bg);border-color:var(--shell-quality-border);}
-#execDashView .alert-icon, #alertsPageView .alert-icon{color:var(--muted);}
-#execDashView .alert-item.sev-critical .alert-icon, #alertsPageView .alert-item.sev-critical .alert-icon{color:var(--danger);}
-#execDashView .alert-item.sev-warning .alert-icon, #alertsPageView .alert-item.sev-warning .alert-icon{color:#B45309;}
-#execDashView .alert-item.sev-info .alert-icon, #alertsPageView .alert-item.sev-info .alert-icon{color:#2563EB;}
-#execDashView .alert-item.sev-quality .alert-icon, #alertsPageView .alert-item.sev-quality .alert-icon{color:var(--shell-quality);}
+#execDashView .alert-item.sev-quality, #alertsPageView .alert-item.sev-quality, #execView .alert-item.sev-quality{background:var(--shell-quality-bg);border-color:var(--shell-quality-border);}
+#execDashView .alert-icon, #alertsPageView .alert-icon, #execView .alert-icon{color:var(--muted);}
+#execDashView .alert-item.sev-critical .alert-icon, #alertsPageView .alert-item.sev-critical .alert-icon, #execView .alert-item.sev-critical .alert-icon{color:var(--danger);}
+#execDashView .alert-item.sev-warning .alert-icon, #alertsPageView .alert-item.sev-warning .alert-icon, #execView .alert-item.sev-warning .alert-icon{color:#B45309;}
+#execDashView .alert-item.sev-info .alert-icon, #alertsPageView .alert-item.sev-info .alert-icon, #execView .alert-item.sev-info .alert-icon{color:#2563EB;}
+#execDashView .alert-item.sev-quality .alert-icon, #alertsPageView .alert-item.sev-quality .alert-icon, #execView .alert-item.sev-quality .alert-icon{color:var(--shell-quality);}
 .alert-group-heading{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;}
 .alert-group-heading:first-child{margin-top:0;}
 .alert-group-count{font-weight:700;color:var(--text);margin-inline-start:6px;}
@@ -790,7 +790,16 @@ table tr.row-clickable:hover .row-drill-icon{color:var(--primary-dark);}
 .mgmt-overview-stat:last-child{border-inline-end:none;}
 .mgmt-overview-stat .v{font-size:21px;font-weight:800;color:var(--shell-navy);}
 .mgmt-overview-stat .v .sub{font-size:12px;font-weight:700;color:var(--muted);margin-inline-start:6px;}
-.mgmt-overview-stat .t{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.mgmt-overview-stat .t{font-size:11.5px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:5px;}
+
+/* ---- Management redesign (2026-09-26): exception strip is clickable
+   (a lateral jump, not a hierarchy drill -- see jumpToPharmaciesException())
+   and tone-coded so "No Baseline" reads as a data gap, never a commercial
+   failure, distinct from the two amber "needs action" items. ---- */
+.mgmt-overview-stat.is-clickable{cursor:pointer;transition:background .15s ease;}
+.mgmt-overview-stat.is-clickable:hover,.mgmt-overview-stat.is-clickable:focus-visible{background:var(--primary-light);outline:none;}
+.mgmt-overview-stat.tone-warning .v{color:#B45309;}
+.mgmt-overview-stat.tone-quality .v{color:var(--shell-quality);}
 
 /* ---- Slab performance: compact table with inline progress bars (replaces boxy card grid) ---- */
 .slab-table-wrap{overflow-x:auto;}
@@ -1335,21 +1344,26 @@ button.xdw-tier-row:hover{background:var(--pharco-orange-light);}
 #execDashView .chart-month-label, #pharmacy360View .chart-month-label{font-size:12px;color:var(--muted);font-weight:700;margin-top:10px;}
 #execDashView .region-name{font-weight:700;color:var(--shell-navy);}
 #execDashView .region-flag{display:inline-block;margin-inline-start:6px;font-size:11px;color:var(--danger);font-weight:700;}
-#execDashView .exposure-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;min-width:0;}
-#execDashView .exposure-box{min-width:0;}
-#execDashView .exposure-box{border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;background:var(--bg);}
-#execDashView .exposure-box .t{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
-#execDashView .exposure-box .v{font-size:19px;font-weight:800;color:var(--shell-navy);margin-top:5px;font-variant-numeric:tabular-nums;}
-#execDashView .exposure-box .sub{font-size:11px;color:var(--muted);margin-top:3px;}
-#execDashView .exposure-budget-note{margin-top:12px;font-size:11.5px;color:var(--muted);background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:8px 10px;}
-#execDashView .alert-list{display:flex;flex-direction:column;gap:10px;}
-#execDashView .alert-item{display:flex;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);}
-#execDashView .alert-item.sev-critical{border-color:var(--danger-border);background:var(--danger-bg);}
-#execDashView .alert-item.sev-warning{border-color:var(--banner-warn-border);background:var(--banner-warn-bg);}
-#execDashView .alert-icon{font-size:17px;line-height:1.3;flex-shrink:0;}
-#execDashView .alert-title{font-weight:700;color:var(--shell-navy);font-size:13.5px;}
-#execDashView .alert-detail{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
-#execDashView .alert-empty{font-size:13px;color:var(--muted);padding:8px 2px;}
+#execDashView .exposure-grid, #execView .exposure-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;min-width:0;}
+#execDashView .exposure-box, #execView .exposure-box{min-width:0;}
+#execDashView .exposure-box, #execView .exposure-box{border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;background:var(--bg);}
+#execDashView .exposure-box .t, #execView .exposure-box .t{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
+#execDashView .exposure-box .v, #execView .exposure-box .v{font-size:19px;font-weight:800;color:var(--shell-navy);margin-top:5px;font-variant-numeric:tabular-nums;}
+#execDashView .exposure-box .sub, #execView .exposure-box .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+#execDashView .exposure-budget-note, #execView .exposure-budget-note{margin-top:12px;font-size:11.5px;color:var(--muted);background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:8px 10px;}
+/* Management (#execView) added 2026-09-26 to these existing rule sets --
+   its Needs Attention section reused .alert-list/.alert-item markup from
+   day one, but no CSS ever targeted #execView so it rendered unstyled.
+   Same declarations Executive already uses, just one more matching
+   container -- nothing about Executive's own rendering changes. */
+#execDashView .alert-list, #execView .alert-list{display:flex;flex-direction:column;gap:10px;}
+#execDashView .alert-item, #execView .alert-item{display:flex;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);}
+#execDashView .alert-item.sev-critical, #execView .alert-item.sev-critical{border-color:var(--danger-border);background:var(--danger-bg);}
+#execDashView .alert-item.sev-warning, #execView .alert-item.sev-warning{border-color:var(--banner-warn-border);background:var(--banner-warn-bg);}
+#execDashView .alert-icon, #execView .alert-icon{font-size:17px;line-height:1.3;flex-shrink:0;}
+#execDashView .alert-title, #execView .alert-title{font-weight:700;color:var(--shell-navy);font-size:13.5px;}
+#execDashView .alert-detail, #execView .alert-detail{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+#execDashView .alert-empty, #execView .alert-empty{font-size:13px;color:var(--muted);padding:8px 2px;}
 #execDashView .view-all-link{display:inline-block;margin-top:12px;font-size:12.5px;font-weight:700;color:var(--shell-red);cursor:pointer;}
 #alertsPageView .alert-list{display:flex;flex-direction:column;gap:12px;}
 #alertsPageView .alert-item{display:flex;gap:14px;padding:14px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg);}
@@ -5854,19 +5868,28 @@ return sign + Math.round(abs).toLocaleString('en-US');
 // ===================================================================
 let platformFilters = { region: null, dm: null, territory: null, code: '' };
 
+// Option lists for the shared global filter bar (Executive, Management,
+// Pharmacies, Visibility all render it via filterBarHtml/wireFilterBar).
+// Sourced from the WHOLE PHARMACIES universe, not AGREED_DEALS -- fixed
+// 2026-09-26 as part of the Management redesign. Reason: a region/DM/
+// territory/pharmacy with zero registered deals must still be selectable,
+// otherwise a manager can never filter down to exactly the registration
+// leakage (achieved-with-no-deal) population Management exists to surface.
+// Preserves the exact same option shape/sort/"Unassigned" handling as
+// before, just a different source array.
 function filterRegionOptions(){
 const set = new Set();
-AGREED_DEALS.forEach(d => set.add(d.region || ''));
+PHARMACIES.forEach(p => set.add(p.rg || ''));
 return [...set].sort((a,b) => (a===''?1:0) - (b===''?1:0) || a.localeCompare(b));
 }
 function filterDMOptions(){
 const set = new Set();
-AGREED_DEALS.forEach(d => set.add(d.dm || ''));
+PHARMACIES.forEach(p => set.add(p.dm || ''));
 return [...set].sort((a,b) => (a===''?1:0) - (b===''?1:0) || a.localeCompare(b));
 }
 function filterTerritoryOptions(){
 const set = new Set();
-AGREED_DEALS.forEach(d => set.add(d.territory || ''));
+PHARMACIES.forEach(p => set.add(p.tr || ''));
 return [...set].sort((a,b) => (a===''?1:0) - (b===''?1:0) || a.localeCompare(b));
 }
 function filteredAgreedDeals(){
@@ -5892,8 +5915,11 @@ if(platformFilters.region !== null) chips.push({k:'region', label: platformFilte
 if(platformFilters.dm !== null) chips.push({k:'dm', label: platformFilters.dm === '' ? 'DM: Unassigned' : ('DM: ' + platformFilters.dm)});
 if(platformFilters.territory !== null) chips.push({k:'territory', label: platformFilters.territory === '' ? 'Territory: Unassigned' : ('Territory: ' + platformFilters.territory)});
 if(platformFilters.code){
-const d = AGREED_DEALS.find(x => x.code === platformFilters.code);
-chips.push({k:'code', label: 'Pharmacy: ' + (d ? `${d.name} (${d.code})` : platformFilters.code)});
+// Whole-universe lookup (not AGREED_DEALS-only) -- see filterRegionOptions()
+// comment: a pharmacy with no registered deal must still show its real name
+// here instead of falling back to a bare code.
+const p = pharmaciesByCode().get(platformFilters.code);
+chips.push({k:'code', label: 'Pharmacy: ' + (p ? `${p.n} (${p.c})` : platformFilters.code)});
 }
 return chips;
 }
@@ -5936,6 +5962,21 @@ if(view) switchView(view); else rerenderCurrentShellView();
 function drillToPharmacy(code){
 platformFilters.code = code;
 switchView('pharmacy360');
+}
+
+// Lateral "jump to a problem population" action (Management's exception
+// strip, 2026-09-26) -- deliberately different from drillToRegion/DM/
+// Territory (a hierarchy drill): this always lands on the existing
+// Pharmacies table with a single, freshly-reset LOCAL table filter, and
+// never touches the shared platformFilters/breadcrumb hierarchy state.
+// See the Management redesign's interaction principle: hierarchical drill
+// and exception jump are two different gestures, never mixed.
+function jumpToPharmaciesException(kind){
+pharmTableFilters = { classification: null, status: null, agreement: null, structure: null, gap: null };
+pharmTableSearch = '';
+if(kind === 'no_baseline') pharmTableFilters.structure = 'no_baseline';
+else pharmTableFilters.gap = kind; // 'achieved_no_deal' | 'registered_not_achieved'
+switchView('pharmaciesTable');
 }
 function rerenderCurrentShellView(){
 const viewIds = {
@@ -6021,8 +6062,8 @@ ${territoryOpts}
 </div>
 <div class="filter-field filter-field-pharmacy">
 <label>Pharmacy</label>
-<input class="filter-input" list="${idPrefix}PharmacyList" data-filter-key="code" placeholder="Search name or code…" value="${(() => { const d = AGREED_DEALS.find(x=>x.code===platformFilters.code); return d ? `${d.name} (${d.code})` : ''; })()}" />
-<datalist id="${idPrefix}PharmacyList">${AGREED_DEALS.map(d => `<option value="${d.name} (${d.code})">`).join('')}</datalist>
+<input class="filter-input" list="${idPrefix}PharmacyList" data-filter-key="code" placeholder="Search name or code…" value="${(() => { if(!platformFilters.code) return ''; const p = pharmaciesByCode().get(platformFilters.code); return p ? `${p.n} (${p.c})` : ''; })()}" />
+<datalist id="${idPrefix}PharmacyList">${PHARMACIES.map(p => `<option value="${p.n} (${p.c})">`).join('')}</datalist>
 </div>
 ${chipsHtml}
 </div>`;
@@ -6049,8 +6090,15 @@ if(phInput){
 phInput.addEventListener('change', () => {
 const val = phInput.value.trim();
 if(!val){ platformFilters.code = ''; rerenderCurrentShellView(); return; }
-const match = AGREED_DEALS.find(d => `${d.name} (${d.code})` === val || d.code === val);
-platformFilters.code = match ? match.code : '';
+// Whole-universe match (not AGREED_DEALS-only) -- O(1) via pharmaciesByCode(),
+// trying a raw code first, then the datalist's "Name (code)" format.
+const byCode = pharmaciesByCode();
+let match = byCode.get(val) || null;
+if(!match){
+const m = val.match(/\(([^()]+)\)\s*$/);
+if(m) match = byCode.get(m[1].trim());
+}
+platformFilters.code = match ? match.c : '';
 rerenderCurrentShellView();
 });
 }
@@ -6218,17 +6266,23 @@ if(cr.visibility_status === 'pending') g.visibilityPending++;
 return Object.values(groups).map(g => Object.assign(g, { totalCashback: g.fixedCashback + g.variableCashback })).sort((a,b) => b.n - a.n);
 }
 function commercialRollupTableHtml(rows, labelHeader){
+// Visibility Pending is deliberately NOT rendered here (removed 2026-09-26,
+// pre-deployment polish pass) -- Visibility has its own dedicated workspace
+// and this commercial hierarchy should stay focused on population/baseline/
+// achievement/cashback/registration. The underlying count is still computed
+// by computeCommercialGroupRollup() (r.visibilityPending) untouched -- only
+// this table's display drops the column, so nothing recalculates and no
+// other caller of computeCommercialGroupRollup() is affected.
 const rowHtml = (r, labelHtml) => `<td class="name-cell">${labelHtml}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
 <td>${r.n.toLocaleString('en-US')}</td>
 <td>${r.withBaseline.toLocaleString('en-US')}</td>
 <td>${r.targetAchieved.toLocaleString('en-US')}</td>
 <td>${fmtBig(r.totalCashback)} EGP</td>
 <td>${r.dealRegistered.toLocaleString('en-US')}</td>
-<td>${r.achievedNoDeal.toLocaleString('en-US')}</td>
-<td>${r.visibilityPending.toLocaleString('en-US')}</td>`;
+<td>${r.achievedNoDeal.toLocaleString('en-US')}</td>`;
 return `<table>
-<thead><tr><th>${labelHeader}</th><th>Pharmacies</th><th>With Baseline</th><th>Target Achieved</th><th>Total Cashback</th><th>Deal Registered</th><th>Achieved, No Deal</th><th>Visibility Pending</th></tr></thead>
-<tbody>${rows.map(r => `<tr class="row-clickable" data-commercial-drill="${r.has ? r.key : ''}">${rowHtml(r, r.has ? r.key : '<span class="dq-badge">'+iconSvg('database')+'Unassigned</span>')}</tr>`).join('') || `<tr><td colspan="8" class="alert-empty">No pharmacies match the current filters.</td></tr>`}</tbody>
+<thead><tr><th>${labelHeader}</th><th>Pharmacies</th><th>With Baseline</th><th>Target Achieved</th><th>Total Cashback</th><th>Deal Registered</th><th>Achieved, No Deal</th></tr></thead>
+<tbody>${rows.map(r => `<tr class="row-clickable" data-commercial-drill="${r.has ? r.key : ''}">${rowHtml(r, r.has ? r.key : '<span class="dq-badge">'+iconSvg('database')+'Unassigned</span>')}</tr>`).join('') || `<tr><td colspan="7" class="alert-empty">No pharmacies match the current filters.</td></tr>`}</tbody>
 </table>`;
 }
 
@@ -6274,294 +6328,175 @@ ${execBarHtml(targetPct, color)}
 function renderExec(){
 const section = document.getElementById('execSection');
 if(!section) return;
-const s = computeExecSnapshot();
 
-const overviewStripHtml = `
-<div class="mgmt-overview-strip">
-<div class="mgmt-overview-stat"><div class="v">${s.totalPharmacies.toLocaleString('en-US')}</div><div class="t">Pharmacies in view</div></div>
-<div class="mgmt-overview-stat"><div class="v">${s.anyAchieved.toLocaleString('en-US')}<span class="sub">${s.totalPharmacies ? (s.anyAchieved/s.totalPharmacies*100).toFixed(1) : '0.0'}%</span></div><div class="t">Achieved ≥1 slab</div></div>
-<div class="mgmt-overview-stat"><div class="v">${s.achievedDealsN.toLocaleString('en-US')}<span class="sub">of ${s.totalDeals.toLocaleString('en-US')}</span></div><div class="t">Agreed deals achieved</div></div>
-<div class="mgmt-overview-stat"><div class="v">${fmtBig(s.totalPayoutAchieved)}<span class="sub">EGP</span></div><div class="t">Payout owed now</div></div>
-</div>`;
-
-const dmRowsHtml = s.dmRows.map(r => {
-const hasDM = r.dm !== '(No DM)';
-const achPct = r.target ? (r.achievedSales / r.target * 100) : 0;
-const dealPct = r.n ? (r.achievedDeals / r.n * 100) : 0;
-return `<tr class="row-clickable" data-drill-dm="${hasDM ? r.dm : ''}">
-<td class="name-cell">${r.dm}${hasDM ? '' : '<span class="dq-badge">'+iconSvg('database')+'Data quality</span><button class="dq-investigate-btn" data-investigate-dm type="button">Investigate →</button>'}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
-<td>${r.n}</td>
-<td>${fmtBig(r.target)} EGP</td>
-<td class="${hasDM && achPct>=50?'growth-pos':''}">${hasDM ? achPct.toFixed(0)+'%' : '<span class="dq-na" title="Achievement % is not meaningful without a District Manager assignment">—</span>'}</td>
-<td><bdi dir="ltr">${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</bdi></td>
-</tr>`;
-}).join('');
-
-const dmMobileCardsHtml = s.dmRows.map(r => {
-const hasDM = r.dm !== '(No DM)';
-const achPct = r.target ? (r.achievedSales / r.target * 100) : 0;
-const dealPct = r.n ? (r.achievedDeals / r.n * 100) : 0;
-return `<div class="mobile-card row-clickable" data-drill-dm="${hasDM ? r.dm : ''}">
-<div class="mobile-card-head">${r.dm}${hasDM ? '' : '<span class="dq-badge">'+iconSvg('database')+'Data quality</span>'}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Deals</span><span class="mobile-card-value">${r.n}</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Target Sales</span><span class="mobile-card-value">${fmtBig(r.target)} EGP</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Achievement %</span><span class="mobile-card-value">${hasDM ? achPct.toFixed(0)+'%' : '<span class=\'dq-na\'>—</span>'}</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Deals Achieved</span><span class="mobile-card-value"><bdi dir="ltr">${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</bdi></span></div>
-${hasDM ? '' : '<button class="dq-investigate-btn mobile-card-investigate" data-investigate-dm type="button">Investigate →</button>'}
-</div>`;
-}).join('');
-
-const dmHtml = `
-<div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('users')}Performance by District Manager</h2><span class="section-sub">Click a row to filter the whole page to that DM</span></div>
-<div class="panel">
-<div class="note" style="margin-top:0;margin-bottom:12px;"><bdi dir="ltr">"Target Achieved" = actual sales booked so far (Jul+Aug+Sep) as a share of the total agreed target across that DM's deals.</bdi></div>
-<div class="table-desktop-only" style="overflow-x:auto;">
-<table>
-<thead><tr><th>District Manager</th><th>Deals</th><th>Target Sales</th><th>Target Achieved</th><th>Deals Achieved</th></tr></thead>
-<tbody>${dmRowsHtml || '<tr><td colspan="5" class="alert-empty">No agreed deals match the current filters.</td></tr>'}</tbody>
-</table>
-</div>
-<div class="mobile-card-list">${dmMobileCardsHtml || '<div class="alert-empty">No agreed deals match the current filters.</div>'}</div>
-</div>
-</div>`;
-
-// Only shown once a DM is selected -- Region -> DM -> Territory is the
-// requested drill order, and an unfiltered "all territories, all DMs"
-// table would just be a noisier restatement of the Region table above.
-const territoryGroups = platformFilters.dm !== null ? (() => {
-const byT = {};
-filteredAgreedDeals().forEach(d => {
-const hasTerritory = !!d.territory;
-const key = hasTerritory ? d.territory : '(No Territory)';
-if(!byT[key]) byT[key] = { territory:key, hasTerritory, n:0, target:0, achievedSales:0, achievedDeals:0, deals:[] };
-const b = byT[key];
-const achieved = (d.month7_sales||0) + (d.month8_sales||0) + (d.month9_sales||0);
-b.n++; b.target += d.target_sales || 0; b.achievedSales += achieved; b.deals.push(d);
-if(achieved >= (d.target_sales||0)) b.achievedDeals++;
-});
-return Object.values(byT).sort((a,b) => b.n - a.n);
-})() : null;
-
-const territoryRowHtml = (r, mobile) => {
-const achPct = r.target ? (r.achievedSales / r.target * 100) : 0;
-const dealPct = r.n ? (r.achievedDeals / r.n * 100) : 0;
-const naSpan = '<span class="dq-na">—</span>';
-const dqBadge = '<span class="dq-badge">'+iconSvg('database')+'Data quality</span>';
-const investigateBtn = (cls) => `<button class="dq-investigate-btn ${cls}" data-investigate-territory type="button">Investigate →</button>`;
-if(mobile){
-return `<div class="mobile-card row-clickable" data-drill-territory="${r.hasTerritory ? r.territory : ''}">
-<div class="mobile-card-head">${r.territory}${r.hasTerritory ? '' : dqBadge}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Deals</span><span class="mobile-card-value">${r.n}</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Target Sales</span><span class="mobile-card-value">${fmtBig(r.target)} EGP</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Achievement %</span><span class="mobile-card-value">${r.hasTerritory ? achPct.toFixed(0)+'%' : naSpan}</span></div>
-<div class="mobile-card-row"><span class="mobile-card-label">Deals Achieved</span><span class="mobile-card-value"><bdi dir="ltr">${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</bdi></span></div>
-${r.hasTerritory ? '' : investigateBtn('mobile-card-investigate')}
-</div>`;
-}
-return `<tr class="row-clickable" data-drill-territory="${r.hasTerritory ? r.territory : ''}">
-<td class="name-cell">${r.territory}${r.hasTerritory ? '' : dqBadge + investigateBtn('')}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
-<td>${r.n}</td>
-<td>${fmtBig(r.target)} EGP</td>
-<td class="${r.hasTerritory && achPct>=50?'growth-pos':''}">${r.hasTerritory ? achPct.toFixed(0)+'%' : naSpan}</td>
-<td><bdi dir="ltr">${r.achievedDeals} / ${r.n} (${dealPct.toFixed(0)}%)</bdi></td>
-</tr>`;
-};
-
-const territoryHtml = territoryGroups ? `
-<div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('flag')}Performance by Territory</h2><span class="section-sub">Within ${platformFilters.dm === '' ? 'Unassigned DM' : platformFilters.dm} — click a territory to view its pharmacies</span></div>
-<div class="panel">
-<div class="table-desktop-only" style="overflow-x:auto;">
-<table>
-<thead><tr><th>Territory</th><th>Deals</th><th>Target Sales</th><th>Target Achieved</th><th>Deals Achieved</th></tr></thead>
-<tbody>${territoryGroups.map(r => territoryRowHtml(r, false)).join('') || '<tr><td colspan="5" class="alert-empty">No agreed deals match the current filters.</td></tr>'}</tbody>
-</table>
-</div>
-<div class="mobile-card-list">${territoryGroups.map(r => territoryRowHtml(r, true)).join('') || '<div class="alert-empty">No agreed deals match the current filters.</div>'}</div>
-</div>
-</div>` : '';
-
-const slabMixHtml = `
-<div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('layers')}Deal Performance by Slab</h2><span class="section-sub">Tap a slab to view its deals</span></div>
-<div class="panel slab-table-wrap">
-<div class="slab-group-tag">Fixed-value deals (target pinned at a flat EGP figure)</div>
-<table class="slab-table table-desktop-only">
-<thead><tr><th>Slab</th><th>Deals</th><th>Achieved</th><th>Target value</th><th>Value achieved</th><th>Achievement %</th></tr></thead>
-<tbody>${slabTableRowsHtml(s.fixedBands, 'var(--primary)', 'fixed')}</tbody>
-</table>
-<div class="mobile-card-list">${slabMobileCardsHtml(s.fixedBands, 'var(--primary)', 'fixed')}</div>
-<div class="slab-group-tag" style="margin-top:18px;">Variable deals (target computed from growth %)</div>
-<table class="slab-table table-desktop-only">
-<thead><tr><th>Slab</th><th>Deals</th><th>Achieved</th><th>Target value</th><th>Value achieved</th><th>Achievement %</th></tr></thead>
-<tbody>${slabTableRowsHtml(s.varBands, 'var(--variable-blue)', 'variable')}</tbody>
-</table>
-<div class="mobile-card-list">${slabMobileCardsHtml(s.varBands, 'var(--variable-blue)', 'variable')}</div>
-</div>
-</div>`;
-
-const exposureHtml = `
-<div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('dollar')}Cashback Exposure</h2></div>
-<div class="panel">
-<div class="totals-grid">
-<div class="sales-box"><div class="t">Payout owed now</div><div class="v">${fmtBig(s.totalPayoutAchieved)} EGP</div><div class="sub">achieved deals only</div></div>
-<div class="sales-box"><div class="t">Total potential payout</div><div class="v">${fmtBig(s.totalPayoutAll)} EGP</div><div class="sub">if every agreed deal hits target</div></div>
-<div class="sales-box"><div class="t">Growth so far</div><div class="v ${s.yoy.growthSoFarTotal>=0?'growth-pos':'growth-neg'}">${signedPct(s.yoy.growthSoFarTotal)}</div><div class="sub">Jul+Aug 2026 vs Jul+Aug 2025</div></div>
-<div class="sales-box"><div class="t">Growth if targets hit</div><div class="v ${s.yoy.growthIfAchievedTotal>=0?'growth-pos':'growth-neg'}">${signedPct(s.yoy.growthIfAchievedTotal)}</div><div class="sub">full Q3 2026 target vs Q3 2025</div></div>
-</div>
-<div class="note" style="margin-bottom:0;"><bdi dir="ltr">POSM on shelf: ${s.posmN.toLocaleString('en-US')} / ${s.totalDeals.toLocaleString('en-US')} agreed deals (${s.totalDeals ? (s.posmN/s.totalDeals*100).toFixed(1) : '0.0'}%)</bdi> · Agreed Deals data as of: ${DEALS_SNAPSHOT_DATE}</div>
-</div>
-</div>`;
-
-const dqIssues = [];
-if(s.noRegionN > 0) dqIssues.push({label:`${s.noRegionN} agreed deal${s.noRegionN===1?'':'s'} missing a region tag`, deals: s.noRegionDeals, title:'Deals missing a region'});
-if(s.noDMN > 0) dqIssues.push({label:`${s.noDMN} agreed deal${s.noDMN===1?'':'s'} missing a District Manager`, deals: s.noDMDeals, title:'Deals missing a District Manager'});
-const dataQualityHtml = `
-<div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('database')}Data Quality</h2><span class="section-sub">Agreed Deals records only, for now</span></div>
-<div class="panel">
-${dqIssues.length ? dqIssues.map((iss,i) => `<div style="${i>0?'margin-top:10px;padding-top:10px;border-top:1px solid var(--border);':''}display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"><span><span class="dq-badge">${iconSvg('database')}Data quality</span> ${iss.label}</span><button class="dq-investigate-btn" data-dq-idx="${i}">Investigate →</button></div>`).join('') : `<div class="alert-empty">No missing-region or missing-DM records in the current filter.</div>`}
-</div>
-</div>`;
-
-// 2026 commercial-truth roll-up -- the whole PHARMACIES universe in the
-// current drill filter, grouped one level deeper each time a DM/territory
-// is picked (Region -> DM -> Territory), independent of deal registration.
-const commercialPool = filteredPharmacies();
-const commercialGroupField = platformFilters.dm !== null ? 'tr' : 'dm';
-const commercialGroupLabel = platformFilters.dm !== null ? 'Territory' : 'District Manager';
-const commercialRollupRows = computeCommercialGroupRollup(commercialPool, commercialGroupField);
-const commercialRollupHtml = `
-<div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('layers')}2026 Commercial Truth by ${commercialGroupLabel}</h2><span class="section-sub">Whole pharmacy universe, actual Q3 2026 Dist_Value × tier rate — independent of deal registration. Click a row to drill in.</span></div>
-<div class="panel" style="overflow-x:auto;">
-${commercialRollupTableHtml(commercialRollupRows, commercialGroupLabel)}
-</div>
-</div>`;
-
-// ---- 2026 Commercial Truth operations block (moved here from Executive,
-// 2026-09-24, per Daniel's information-architecture correction: Executive
-// answers "what did we achieve and what are we paying", Management answers
-// "why did we get this result and what needs action" -- Region performance,
-// Cashback Exposure and the alert/Needs-Attention list all belong here, not
-// on Executive. Same computeCommercialKPIs()/computeCommercialAlerts()
-// engine as everywhere else -- nothing recomputed differently. ----
+// ===================================================================
+// MANAGEMENT REDESIGN (2026-09-26, approved architecture) --
+// "What needs attention -> where is it -> who owns it -> which
+// pharmacies are involved?" Replaces the old computeExecSnapshot()-driven
+// page (Q3'25-vs-Q4'25 calcSlabs tier counts + deal-registration-only DM/
+// Territory tables + a second, older Cashback Exposure block), which
+// duplicated and sometimes contradicted the 2026 Commercial Truth
+// sections that already lived further down this same page. See the
+// approved audit for the full before/after reasoning.
+//
+// computeExecSnapshot() itself is left defined but no longer called from
+// here -- cleanup of now-dead helpers is an explicit separate task, not
+// part of this pass. Its Q3'25->Q4'25 growth-slab logic (calcSlabs/SLABS)
+// remains legitimately in use elsewhere (Calculator, Pharmacy 360, chain
+// tracking) -- this redesign only removes it from whole-portfolio
+// Management reporting, where it never belonged.
+//
+// Everything below reads from the one shared 2026 Commercial Truth
+// engine every other current view already uses -- computeCommercialKPIs()/
+// commercialRecordFor()/computeCommercial2026()/computeCommercialAlerts()/
+// computeCommercialGroupRollup() -- and from the WHOLE PHARMACIES
+// universe (via filteredPharmacies()), never AGREED_DEALS alone, so
+// registered-deal pharmacies, achieved-with-no-deal pharmacies and
+// no-baseline pharmacies are all visible in the same picture.
+// ===================================================================
 const mgmtKpis = computeCommercialKPIs();
 const mgmtAlerts = computeCommercialAlerts(mgmtKpis);
-const commercialOpsKpiHtml = `
-<div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('activity')}2026 Commercial Truth — Operations</h2><span class="section-sub">Q3 2026 — through September Week 3 · whole pharmacy universe, TOTAL Dist_Value</span></div>
-<div class="panel">
-<div class="kpi-row">
-<div class="kpi-card"><div class="kpi-label">${iconSvg('check-circle')}With Valid Baseline</div><div class="kpi-value">${mgmtKpis.withBaseline.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Q3 2025 Dist_Value &gt; 0</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('alert-triangle')}Target Not Achieved</div><div class="kpi-value">${mgmtKpis.targetNotAchieved.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Has baseline, below tier</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('alert-octagon')}Achieved, No Registered Deal</div><div class="kpi-value">${mgmtKpis.achievedNoDeal.toLocaleString('en-US')}</div><div class="kpi-trend warning">Registration gap</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('users')}Registered, Not Achieved</div><div class="kpi-value">${mgmtKpis.dealNoAchieve.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Deal on file, tier not reached</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('database')}No Baseline</div><div class="kpi-value">${mgmtKpis.noBaselineList.length.toLocaleString('en-US')}</div><div class="kpi-trend neutral">No Q3 2025 Dist_Value</div></div>
-<div class="kpi-card"><div class="kpi-label">${iconSvg('eye')}Visibility Pending Audit</div><div class="kpi-value">${mgmtKpis.visibilityPending.toLocaleString('en-US')}</div><div class="kpi-trend neutral">Full detail on the Visibility tab</div></div>
+
+// ---- 1. Exception strip -- the three "needs a human" populations.
+// Deliberately NOT Executive-style totals: no pharmacy count, no cashback
+// total here (those live on Executive). Clicking one is a lateral jump
+// straight into the existing Pharmacies table via jumpToPharmaciesException()
+// -- never a hierarchy drill, never a new page (interaction principle,
+// section 10 of the brief). "No Baseline" is visually toned as a data-
+// quality gap (shell-quality, not warning/danger) so it never reads as a
+// commercial failure -- see section 7. ----
+const exceptionStripHtml = `
+<div class="mgmt-overview-strip">
+<div class="mgmt-overview-stat is-clickable tone-warning" data-mgmt-exception="achieved_no_deal" role="button" tabindex="0">
+<div class="v">${mgmtKpis.achievedNoDeal.toLocaleString('en-US')}</div>
+<div class="t">${iconSvg('alert-triangle')}Achieved, No Registered Deal</div>
 </div>
+<div class="mgmt-overview-stat is-clickable tone-warning" data-mgmt-exception="registered_not_achieved" role="button" tabindex="0">
+<div class="v">${mgmtKpis.dealNoAchieve.toLocaleString('en-US')}</div>
+<div class="t">${iconSvg('alert-octagon')}Registered, Not Achieved</div>
+</div>
+<div class="mgmt-overview-stat is-clickable tone-quality" data-mgmt-exception="no_baseline" role="button" tabindex="0">
+<div class="v">${mgmtKpis.noBaselineList.length.toLocaleString('en-US')}</div>
+<div class="t">${iconSvg('database')}No Q3 2025 Baseline</div>
 </div>
 </div>`;
 
-const mgmtRegionRowsHtml = mgmtKpis.regionRows.map(r => `<tr class="row-clickable" data-drill-region="${r.hasRegion ? r.region : ''}">
-<td class="region-name">${r.hasRegion ? r.region : '(Unassigned)'}${r.hasRegion ? '' : '<span class="dq-badge">'+iconSvg('database')+'Data quality</span>'}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
-<td>${r.n.toLocaleString('en-US')}</td>
-<td>${r.targetAchieved.toLocaleString('en-US')}</td>
-<td>${fmtBig(r.fixedCashback + r.variableCashback)} EGP</td>
-<td>${r.dealRegistered.toLocaleString('en-US')}</td>
-<td>${r.achievedNoDeal.toLocaleString('en-US')}</td>
-</tr>`).join('');
-const commercialRegionHtml = `
+// ---- 2. Commercial Performance -- ONE Region -> DM -> Territory
+// hierarchy, whole pharmacy universe, single source of truth (no second
+// "by DM"/"by Territory" table built from a different, deal-only
+// population). The grouping field cascades with the existing global
+// drill filters: no region picked yet -> group by Region; a region is
+// picked but no DM yet -> group by DM within it; a DM is picked -> group
+// by Territory within it. Clicking a row uses the SAME drill functions
+// as the rest of the app (drillToRegion/drillToDM/drillToTerritory) --
+// no parallel navigation system. ----
+const rollupField = platformFilters.region === null ? 'rg' : (platformFilters.dm === null ? 'dm' : 'tr');
+const rollupLabel = rollupField === 'rg' ? 'Region' : (rollupField === 'dm' ? 'District Manager' : 'Territory');
+const commercialPool = filteredPharmacies();
+const commercialRollupRows = computeCommercialGroupRollup(commercialPool, rollupField);
+const commercialRollupHtml = `
 <div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('grid')}Regional Performance — 2026 Commercial Truth</h2><span class="section-sub">Click a region to drill in</span></div>
-<div class="panel">
-<div style="overflow-x:auto;">
-<table>
-<thead><tr><th>Region</th><th>Pharmacies</th><th>Cashback Eligible</th><th>Cashback Earned</th><th>Deal Registered</th><th>Achieved, No Deal</th></tr></thead>
-<tbody>${mgmtRegionRowsHtml}</tbody>
-</table>
-</div>
+<div class="section-head"><h2>${iconSvg('layers')}Commercial Performance by ${rollupLabel}</h2><span class="section-sub">Whole pharmacy universe (${commercialPool.length.toLocaleString('en-US')} pharmacies in view), actual Q3 2026 Dist_Value × tier rate — independent of deal registration. Click a row to drill in.</span></div>
+<div class="panel" style="overflow-x:auto;">
+${commercialRollupTableHtml(commercialRollupRows, rollupLabel)}
 </div>
 </div>`;
 
+// ---- 3. Cashback Exposure -- ONE section (the old deal-registration-
+// basis "Payout owed now / Total potential payout" block is retired; it
+// measured a different, narrower population than every other number on
+// this page). Same 2026 Commercial Truth basis as the KPIs above. ----
 const commercialExposureHtml = `
 <div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('dollar')}Cashback Exposure — Q3 2026 (through Sep Wk3)</h2><span class="section-sub">Based on actual Q3 2026 Total Dist_Value through September Week 3</span></div>
+<div class="section-head"><h2>${iconSvg('dollar')}Cashback Exposure — Q3 2026 (through Sep Wk3)</h2><span class="section-sub">Based on actual Q3 2026 Total Dist_Value through September Week 3, whole pharmacy universe</span></div>
 <div class="panel">
 <div class="exposure-grid">
 <div class="exposure-box"><div class="t">Fixed</div><div class="v">${fmtBig(mgmtKpis.fixedCashback)} EGP</div><div class="sub">${mgmtKpis.records.filter(r=>r.commercial_structure==='fixed'&&r.target_achieved).length.toLocaleString('en-US')} pharmacies</div></div>
 <div class="exposure-box"><div class="t">Variable</div><div class="v">${fmtBig(mgmtKpis.variableCashback)} EGP</div><div class="sub">${mgmtKpis.records.filter(r=>r.commercial_structure==='variable'&&r.target_achieved).length.toLocaleString('en-US')} pharmacies</div></div>
 <div class="exposure-box"><div class="t">Total</div><div class="v">${fmtBig(mgmtKpis.totalCashback)} EGP</div><div class="sub">${(mgmtKpis.targetAchieved).toLocaleString('en-US')} qualifying pharmacies</div></div>
 </div>
-<div class="exposure-budget-note">Based on ACTUAL Q3 2026 Dist_Value through September Week 3 × the achieved tier's rate — never target × rate. September is partial and not extrapolated, so this total will keep moving until the quarter closes.</div>
+<div class="exposure-budget-note">Based on ACTUAL Q3 2026 Dist_Value through September Week 3 × the achieved tier's rate — never target × rate. September is partial and not extrapolated, so this total will keep moving until the quarter closes. Exposure by Region/DM/Territory is broken out in Commercial Performance above.</div>
 </div>
 </div>`;
 
-const mgmtAlertsListHtml = mgmtAlerts.length
-? mgmtAlerts.map((a,i) => `<div class="alert-item sev-${a.sev}"><div class="alert-icon">${iconSvg(a.icon)}</div><div><div class="alert-title">${a.title}</div><div class="alert-detail">${a.detail}</div>${a.actionLabel ? `<button class="alert-action-btn" data-mgmt-alert-idx="${i}" type="button">${a.actionLabel}${iconSvg('arrow-right')}</button>` : ''}</div></div>`).join('')
+// ---- 4. Needs Attention -- a compact, actionable subset of the shared
+// alert engine, NOT a second alert workspace. Visibility-pending is
+// deliberately excluded here (it has its own dedicated Visibility page --
+// see section 6 of the brief) by filtering out the one alert that carries
+// the 'eye' icon, which computeCommercialAlerts() only ever uses for that
+// alert. "View all alerts" navigates to the real, full Alerts page
+// (renderAlertsPage(), unchanged) instead of duplicating it here. ----
+const mgmtAlertsCompact = mgmtAlerts.filter(a => a.icon !== 'eye');
+const mgmtAlertsListHtml = mgmtAlertsCompact.length
+? mgmtAlertsCompact.map((a,i) => `<div class="alert-item sev-${a.sev}"><div class="alert-icon">${iconSvg(a.icon)}</div><div><div class="alert-title">${a.title}</div><div class="alert-detail">${a.detail}</div>${a.actionLabel ? `<button class="alert-action-btn" data-mgmt-alert-idx="${i}" type="button">${a.actionLabel}${iconSvg('arrow-right')}</button>` : ''}</div></div>`).join('')
 : `<div class="alert-empty">No alerts right now.</div>`;
 const commercialNeedsAttentionHtml = `
 <div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('alert-triangle')}Needs Attention — 2026 Commercial Truth</h2><span class="section-sub">Achieved/no-deal, registered/not-achieved, no-baseline and high-exposure signals — everything operational, in one place</span></div>
+<div class="section-head"><h2>${iconSvg('alert-triangle')}Needs Attention</h2><span class="section-sub">Achieved/no-deal, registered/not-achieved, no-baseline and high-exposure signals. Visibility items live on the Visibility page.</span></div>
 <div class="panel">
 <div class="alert-list">${mgmtAlertsListHtml}</div>
+<button class="alert-action-btn" id="mgmtViewAllAlertsBtn" type="button" style="margin-top:12px;">View all alerts${iconSvg('arrow-right')}</button>
 </div>
 </div>`;
 
-section.innerHTML = filterBarHtml('mgmt', 'Management') + overviewStripHtml + dmHtml + territoryHtml + commercialRollupHtml + commercialOpsKpiHtml + commercialRegionHtml + commercialExposureHtml + commercialNeedsAttentionHtml + slabMixHtml + exposureHtml + dataQualityHtml;
+// ---- 5. Data Quality -- real data gaps in the WHOLE pharmacy universe
+// (not just Agreed Deals records, as before): no region, no DM, no
+// territory, no baseline. Reuses mgmtKpis.records (already computed by
+// the shared engine above) as a plain filter, never a new formula, and
+// never conflates "no baseline" with "target not achieved" (section 7). ----
+const dqNoRegionList = mgmtKpis.records.filter(r => !r.p.rg);
+const dqNoDMList = mgmtKpis.records.filter(r => !r.p.dm);
+const dqNoTerritoryList = mgmtKpis.records.filter(r => !r.p.tr);
+const dqIssues = [];
+if(dqNoRegionList.length) dqIssues.push({label:`${dqNoRegionList.length.toLocaleString('en-US')} pharmac${dqNoRegionList.length===1?'y has':'ies have'} no Region tag`, records: dqNoRegionList, title:'Pharmacies missing a Region'});
+if(dqNoDMList.length) dqIssues.push({label:`${dqNoDMList.length.toLocaleString('en-US')} pharmac${dqNoDMList.length===1?'y has':'ies have'} no District Manager`, records: dqNoDMList, title:'Pharmacies missing a District Manager'});
+if(dqNoTerritoryList.length) dqIssues.push({label:`${dqNoTerritoryList.length.toLocaleString('en-US')} pharmac${dqNoTerritoryList.length===1?'y has':'ies have'} no Territory`, records: dqNoTerritoryList, title:'Pharmacies missing a Territory'});
+if(mgmtKpis.noBaselineList.length) dqIssues.push({label:`${mgmtKpis.noBaselineList.length.toLocaleString('en-US')} pharmac${mgmtKpis.noBaselineList.length===1?'y has':'ies have'} no Q3 2025 baseline`, records: mgmtKpis.noBaselineList, title:'Pharmacies with no Q3 2025 baseline'});
+const dataQualityHtml = `
+<div class="section flow-tables">
+<div class="section-head"><h2>${iconSvg('database')}Data Quality</h2><span class="section-sub">Whole pharmacy universe — a data gap, not a commercial failure</span></div>
+<div class="panel">
+${dqIssues.length ? dqIssues.map((iss,i) => `<div style="${i>0?'margin-top:10px;padding-top:10px;border-top:1px solid var(--border);':''}display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"><span><span class="dq-badge">${iconSvg('database')}Data quality</span> ${iss.label}</span><button class="dq-investigate-btn" data-dq-idx="${i}">Investigate →</button></div>`).join('') : `<div class="alert-empty">No missing-region, missing-DM, missing-territory or missing-baseline records in the current filter.</div>`}
+</div>
+</div>`;
+
+section.innerHTML = filterBarHtml('mgmt', 'Management') + exceptionStripHtml + commercialRollupHtml + commercialExposureHtml + commercialNeedsAttentionHtml + dataQualityHtml;
 wireFilterBar('mgmt');
-section.querySelectorAll('tr[data-drill-region]').forEach(row => {
-row.addEventListener('click', () => { if(row.dataset.drillRegion) drillToRegion(row.dataset.drillRegion, 'exec'); });
+
+// Exception strip -- lateral jump, not a hierarchy drill (section 10).
+section.querySelectorAll('[data-mgmt-exception]').forEach(el => {
+el.addEventListener('click', () => jumpToPharmaciesException(el.dataset.mgmtException));
+el.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); jumpToPharmaciesException(el.dataset.mgmtException); } });
 });
-section.querySelectorAll('.alert-action-btn[data-mgmt-alert-idx]').forEach(btn => {
-btn.addEventListener('click', () => {
-const a = mgmtAlerts[Number(btn.dataset.mgmtAlertIdx)];
-if(a && a.records) openFilteredPharmaciesModal(a.title, a.records);
-});
-});
+
+// Commercial Performance hierarchy -- same drill functions used everywhere
+// else in the app (drillToRegion/drillToDM/drillToTerritory), branching
+// on which level this render is currently showing.
 section.querySelectorAll('[data-commercial-drill]').forEach(row => {
 row.addEventListener('click', () => {
 const val = row.dataset.commercialDrill;
-if(commercialGroupField === 'dm') drillToDM(val);
+if(rollupField === 'rg') drillToRegion(val);
+else if(rollupField === 'dm') drillToDM(val);
 else drillToTerritory(val, 'pharmaciesTable');
 });
 });
-section.querySelectorAll('tr[data-drill-dm], .mobile-card[data-drill-dm]').forEach(row => {
-row.addEventListener('click', (e) => {
-if(e.target.closest('[data-investigate-dm]')) return;
-if(row.dataset.drillDm) drillToDM(row.dataset.drillDm);
+
+// Needs Attention -- same "quick look" modal the rest of the app uses,
+// indexed against the compact (visibility-excluded) list actually shown.
+section.querySelectorAll('.alert-action-btn[data-mgmt-alert-idx]').forEach(btn => {
+btn.addEventListener('click', () => {
+const a = mgmtAlertsCompact[Number(btn.dataset.mgmtAlertIdx)];
+if(a && a.records) openFilteredPharmaciesModal(a.title, a.records);
 });
 });
-section.querySelectorAll('[data-investigate-dm]').forEach(btn => {
-btn.addEventListener('click', (e) => { e.stopPropagation(); openFilteredDealsModal('Deals missing a District Manager', s.noDMDeals); });
-});
-section.querySelectorAll('tr[data-drill-territory], .mobile-card[data-drill-territory]').forEach(row => {
-row.addEventListener('click', (e) => {
-if(e.target.closest('[data-investigate-territory]')) return;
-if(row.dataset.drillTerritory) drillToTerritory(row.dataset.drillTerritory, 'pharmaciesTable');
-});
-});
-section.querySelectorAll('[data-investigate-territory]').forEach(btn => {
-btn.addEventListener('click', (e) => {
-e.stopPropagation();
-const noTerritory = (territoryGroups || []).find(r => !r.hasTerritory);
-openFilteredDealsModal('Deals missing a territory', noTerritory ? noTerritory.deals : []);
-});
-});
-section.querySelectorAll('[data-slab-band]').forEach(el => {
-el.addEventListener('click', () => {
-const [group, idx] = el.dataset.slabBand.split(':');
-const bands = group === 'fixed' ? s.fixedBands : s.varBands;
-const band = bands[Number(idx)];
-if(band) openFilteredDealsModal(`${group === 'fixed' ? 'Fixed-value' : 'Variable'} slab deals — ${band.label}`, band.deals || []);
-});
-});
+const viewAllBtn = document.getElementById('mgmtViewAllAlertsBtn');
+if(viewAllBtn) viewAllBtn.addEventListener('click', () => switchView('alertsPage'));
+
+// Data Quality -- same modal, fed the whole-universe records computed above.
 section.querySelectorAll('.dq-investigate-btn[data-dq-idx]').forEach(btn => {
 btn.addEventListener('click', () => {
 const iss = dqIssues[Number(btn.dataset.dqIdx)];
-if(iss) openFilteredDealsModal(iss.title, iss.deals);
+if(iss) openFilteredPharmaciesModal(iss.title, iss.records);
 });
 });
 }
@@ -8322,7 +8257,11 @@ switchView('search');
 // STEP 3: Pharmacies -- real searchable/filterable management table.
 // ---------------------------------------------------------------------
 let pharmTableSearch = '';
-let pharmTableFilters = { classification: null, status: null, agreement: null, structure: null };
+// gap: 'achieved_no_deal' | 'registered_not_achieved' | null -- added
+// 2026-09-26 for Management's exception-strip jump (jumpToPharmaciesException()).
+// Reuses the exact same commercialRecordFor() fields the shared alert
+// engine already computes; not a new formula.
+let pharmTableFilters = { classification: null, status: null, agreement: null, structure: null, gap: null };
 
 function renderPharmaciesTable(){
 const section = document.getElementById('pharmaciesTableSection');
@@ -8339,6 +8278,14 @@ pool = pool.filter(p => pharmTableFilters.agreement === 'agreed' ? dealsByCode.h
 }
 if(pharmTableFilters.structure !== null){
 pool = pool.filter(p => commercialRecordFor(p, dealsByCode).commercial_structure === pharmTableFilters.structure);
+}
+if(pharmTableFilters.gap !== null){
+pool = pool.filter(p => {
+const cr = commercialRecordFor(p, dealsByCode);
+if(pharmTableFilters.gap === 'achieved_no_deal') return cr.target_achieved && !cr.deal_registered;
+if(pharmTableFilters.gap === 'registered_not_achieved') return cr.deal_registered && !cr.target_achieved;
+return true;
+});
 }
 
 const rows = pool.map(p => ({ p, deal: dealsByCode.get(p.c), sales: pharmacyQ3Sales(p), cr: commercialRecordFor(p, dealsByCode) }))
@@ -8423,6 +8370,14 @@ ${statuses.map(s => `<option value="${s}" ${pharmTableFilters.status===s?'select
 <option value="none" ${pharmTableFilters.agreement==='none'?'selected':''}>No agreement</option>
 </select>
 </div>
+<div class="filter-field">
+<label>Attention Type</label>
+<select class="filter-select" id="pharmTableGapFilter">
+<option value="__all__" ${pharmTableFilters.gap===null?'selected':''}>All</option>
+<option value="achieved_no_deal" ${pharmTableFilters.gap==='achieved_no_deal'?'selected':''}>Achieved, No Deal</option>
+<option value="registered_not_achieved" ${pharmTableFilters.gap==='registered_not_achieved'?'selected':''}>Registered, Not Achieved</option>
+</select>
+</div>
 </div>
 <div class="note" style="margin-bottom:12px;"><bdi dir="ltr">${totalMatches.toLocaleString('en-US')}</bdi> pharmacies match${totalMatches>RENDER_CAP ? ` — showing top ${RENDER_CAP.toLocaleString('en-US')} by Q3 2026 Dist_Value; narrow with search or filters to see more` : ''}.</div>
 <div class="table-desktop-only" style="overflow-x:auto;">
@@ -8452,6 +8407,8 @@ const structureSel = document.getElementById('pharmTableStructureFilter');
 if(structureSel) structureSel.addEventListener('change', () => { pharmTableFilters.structure = structureSel.value === '__all__' ? null : structureSel.value; renderPharmaciesTable(); });
 const agreementSel = document.getElementById('pharmTableAgreementFilter');
 if(agreementSel) agreementSel.addEventListener('change', () => { pharmTableFilters.agreement = agreementSel.value === '__all__' ? null : agreementSel.value; renderPharmaciesTable(); });
+const gapSel = document.getElementById('pharmTableGapFilter');
+if(gapSel) gapSel.addEventListener('change', () => { pharmTableFilters.gap = gapSel.value === '__all__' ? null : gapSel.value; renderPharmaciesTable(); });
 }
 
 let pharmacy360SearchQuery = '';
