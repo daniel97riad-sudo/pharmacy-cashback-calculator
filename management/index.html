@@ -861,12 +861,13 @@ table.slab-table td.slab-name{font-weight:700;color:var(--shell-navy);white-spac
 #execDashView{display:flex;flex-direction:column;}
 #execDashView .platform-filterbar{order:1;}
 #execDashView .flow-updated{order:2;}
-#execDashView .flow-hero-identity{order:3;}
-#execDashView .flow-sales{order:4;}
-#execDashView .flow-cashback{order:5;}
-#execDashView .flow-visibility{order:6;}
-#execDashView .flow-explore{order:7;}
-#execDashView .flow-tables{order:8;}
+#execDashView .exec-pop-strip{order:3;}
+#execDashView .flow-hero-identity{order:4;}
+#execDashView .flow-sales{order:5;}
+#execDashView .flow-cashback{order:6;}
+#execDashView .flow-visibility{order:7;}
+#execDashView .flow-explore{order:8;}
+#execDashView .flow-tables{order:9;}
 .platform-filterbar{gap:8px;}
 .filter-select,.filter-input{min-width:0;flex:1;}
 .filter-field{flex:1 1 130px;}
@@ -1036,7 +1037,7 @@ background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;text-a
    population strip, four-number hero + sentence, Sales Performance bars,
    Cashback donut + collapsed tiers, Visibility hero/nav tiles, Explore the
    Business. All scoped to #execDashView; no other view's CSS is touched. ---- */
-#execDashView .exec-pop-strip{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;padding:10px 0 4px;font-size:12px;color:var(--muted);}
+#execDashView .exec-pop-strip{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:6px 14px;padding:0;margin:-8px 0 18px;font-size:11.5px;color:var(--muted);}
 #execDashView .exec-pop-chip{background:none;border:none;font:inherit;color:var(--muted);cursor:pointer;padding:2px 4px;border-radius:6px;transition:color .15s ease,background .15s ease;}
 #execDashView .exec-pop-chip b{color:var(--pharco-charcoal);font-weight:700;font-variant-numeric:tabular-nums;}
 #execDashView .exec-pop-chip:hover{background:var(--pharco-orange-light);color:var(--pharco-orange-dark);}
@@ -1050,6 +1051,43 @@ background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;text-a
 #execDashView .exec-story-sentence b.down{color:var(--danger);}
 @media (max-width:640px){
 #execDashView .exec-story-sentence{font-size:13px;padding:2px 4px 14px;}
+}
+
+/* ===================================================================
+   Phase 4.1 (2026-09-26): UX polish pass -- no structure/calculation
+   changes. (a) a subtle hover/focus hint + arrow on the three "major
+   story numbers" the brief calls out (Growth, Total Cashback, Total
+   Visibility Investment), pointing at what's one click away; (b) a
+   compact mobile hero (2x2 grid instead of 4 stacked full-width rows)
+   so the headline no longer dominates the screen on a phone. ---- */
+#execDashView .exec-hero-stat{position:relative;}
+#execDashView .exec-vis-hero{position:relative;}
+#execDashView .exec-stat-hint{position:absolute;left:50%;top:100%;transform:translate(-50%,-3px);opacity:0;pointer-events:none;background:var(--pharco-charcoal);color:#fff;font-size:10px;font-weight:700;white-space:nowrap;line-height:1;padding:5px 8px;border-radius:6px;display:flex;align-items:center;gap:4px;transition:opacity .12s ease,transform .12s ease;z-index:5;}
+#execDashView .exec-stat-hint .icon{width:10px;height:10px;}
+#execDashView .exec-hero-stat:hover .exec-stat-hint,
+#execDashView .exec-hero-stat:focus-visible .exec-stat-hint{opacity:1;transform:translate(-50%,3px);}
+#execDashView .exec-stat-hint--vis{top:auto;bottom:100%;transform:translate(-50%,3px);margin-bottom:0;}
+#execDashView .exec-vis-hero:hover .exec-stat-hint--vis,
+#execDashView .exec-vis-hero:focus-visible .exec-stat-hint--vis{opacity:1;transform:translate(-50%,-3px);}
+@media (max-width:640px){
+/* Compact 2x2 hero: same four numbers, half the vertical footprint of a
+   4-row stack. Natural DOM order (Eligible, Sales, Growth, Cashback)
+   fills the grid left-to-right/top-to-bottom, so reading order is
+   unchanged -- only the layout is denser. */
+#execDashView .exec-story-hero4{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;padding:8px 0 4px;}
+#execDashView .exec-story-hero4 .exec-hero-divider{display:none;}
+#execDashView .exec-story-hero4 .exec-hero-stat{flex:none;min-width:0;align-items:center;text-align:center;gap:2px;padding:9px 4px;border-bottom:1px solid var(--border);}
+#execDashView .exec-story-hero4 .exec-hero-value{font-size:19px;}
+#execDashView .exec-story-hero4 .exec-hero-label{font-size:9.5px;justify-content:center;text-align:center;}
+#execDashView .exec-story-hero4 .exec-hero-stat--eligible{grid-column:1/2;background:var(--pharco-orange-light);border-radius:var(--radius-sm);margin:0;padding:9px 4px;border-bottom:none;}
+#execDashView .exec-story-hero4 .exec-hero-stat--eligible .exec-hero-value{font-size:22px;}
+#execDashView .exec-story-hero4 .exec-hero-stat--money{border-bottom:none;}
+#execDashView .exec-story-hero4 .exec-hero-stat--money .exec-hero-value{font-size:20px;}
+#execDashView .exec-story-panel{padding:6px 14px;}
+/* Hints are a pointer/hover affordance; on touch there's no hover state
+   to speak of, and a tap already opens the drawer directly, so hide
+   them on mobile rather than have them flash oddly on tap. */
+#execDashView .exec-stat-hint{display:none;}
 }
 
 /* Sales Performance -- two proportional bars + a growth badge, magnitude
@@ -1106,6 +1144,17 @@ background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;text-a
 #execDashView .exec-cb-tiers-details summary::before{content:'▸';font-size:10px;color:var(--muted);transition:transform .15s ease;}
 #execDashView .exec-cb-tiers-details[open] summary::before{transform:rotate(90deg);}
 #execDashView .exec-cb-tiers-details .exec-comp-detail{margin-top:14px;}
+/* Phase 4.1: same collapsed-disclosure pattern, reused for Visibility's
+   methodology note + POSM Available/Deployed/Coverage + audit-status
+   counts -- real data, still one click (the tap that opens <details>)
+   away, just no longer competing with the three numbers Daniel wants
+   headlined (Total Investment, POSM Investment, Shelf Bonus). */
+#execDashView .exec-vis-details-disclosure{margin-top:16px;border-top:1px solid var(--pharco-border);padding-top:12px;}
+#execDashView .exec-vis-details-disclosure summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--muted);list-style:none;display:flex;align-items:center;gap:6px;}
+#execDashView .exec-vis-details-disclosure summary::-webkit-details-marker{display:none;}
+#execDashView .exec-vis-details-disclosure summary::before{content:'▸';font-size:10px;color:var(--muted);transition:transform .15s ease;}
+#execDashView .exec-vis-details-disclosure[open] summary::before{transform:rotate(90deg);}
+#execDashView .exec-vis-details-disclosure .exec-vis-posm-row{margin-top:14px;}
 @media (max-width:760px){
 #execDashView .exec-cb-donut-row{flex-direction:column;align-items:center;text-align:center;}
 #execDashView .exec-cb-legend{width:100%;}
@@ -7483,7 +7532,6 @@ const narrativeSentence = `${kpis.targetAchieved.toLocaleString('en-US')} pharma
 const heroStoryHtml = `
 <div class="section flow-hero-identity">
 <div class="panel exec-story-panel">
-${populationStripHtml}
 <div class="exec-story-row exec-story-hero4">
 <button class="exec-hero-stat exec-hero-stat--eligible" type="button" data-drawer='{"type":"eligible"}' title="${kpis.targetAchieved.toLocaleString('en-US')} pharmacies qualify for cashback (Fixed + Variable) · click for detail">
 <div class="exec-hero-value">${fmtExec(kpis.targetAchieved)}</div>
@@ -7498,11 +7546,13 @@ ${populationStripHtml}
 <button class="exec-hero-stat" type="button" data-drawer='{"type":"salesPoint","point":"growth"}' title="Q3 2026 vs Q3 2025, cashback-eligible pharmacies · click for detail">
 <div class="exec-hero-value ${growthClass}">${growthLabel}</div>
 <div class="exec-hero-label">${iconSvg('activity')}Growth vs Q3'25</div>
+<span class="exec-stat-hint">${iconSvg('arrow-right')}Eligible population</span>
 </button>
 <div class="exec-hero-divider" aria-hidden="true"></div>
 <button class="exec-hero-stat exec-hero-stat--money" type="button" data-drawer='{"type":"cashbackTotal"}' title="${Math.round(kpis.totalCashback).toLocaleString('en-US')} EGP (Fixed + Variable) · click for detail">
 <div class="exec-hero-value">${fmtExec(kpis.totalCashback)} EGP</div>
 <div class="exec-hero-label">${iconSvg('dollar')}Total Cashback</div>
+<span class="exec-stat-hint">${iconSvg('arrow-right')}Variable / Fixed</span>
 </button>
 </div>
 <div class="exec-story-sentence">${narrativeSentence}</div>
@@ -7688,25 +7738,29 @@ const visibilityModuleHtml = `
 <button class="exec-vis-hero" type="button" data-drawer='{"type":"visibility","focus":"totalInvestment"}'>
 <div class="exec-vis-hero-value">${fmtExec(posmM.totalInvestmentEgp)} EGP</div>
 <div class="exec-vis-hero-label">Total Visibility Investment</div>
+<span class="exec-stat-hint exec-stat-hint--vis">${iconSvg('arrow-right')}POSM / Shelf</span>
 </button>
 <div class="exec-vis-posm-row exec-vis-posm-row--money">
 <button class="exec-vis-posm-metric exec-vis-posm-metric--money" type="button" data-drawer='{"type":"visibility","focus":"posmInvestment"}'><div class="exec-vis-posm-metric-label">POSM Investment</div><div class="exec-vis-posm-metric-value">${fmtExec(posmM.investmentEgp)} EGP</div></button>
 <button class="exec-vis-posm-metric exec-vis-posm-metric--money" type="button" data-drawer='{"type":"visibility","focus":"shelfBonus"}'><div class="exec-vis-posm-metric-label">Shelf Bonus</div><div class="exec-vis-posm-metric-value">${fmtExec(posmM.shelfBonusEgp)} EGP</div></button>
 </div>
+<div class="exec-vis-group-label">Shelf commitment -- click to explore those pharmacies</div>
+<div class="exec-vis-posm-grid">${shelfModuleTilesHtml}</div>
+<details class="exec-vis-details-disclosure">
+<summary>Visibility methodology / details</summary>
 <div class="exec-vis-posm-row">
 <button class="exec-vis-posm-metric" type="button" data-drawer='{"type":"visibility","focus":"posmAvailable"}'><div class="exec-vis-posm-metric-label">POSM Available</div><div class="exec-vis-posm-metric-value">${posmM.availableCount.toLocaleString('en-US')}</div></button>
 <button class="exec-vis-posm-metric" type="button" data-drawer='{"type":"visibility","focus":"posmDeployed"}'><div class="exec-vis-posm-metric-label">POSM Deployed</div><div class="exec-vis-posm-metric-value">${posmM.deployedCount.toLocaleString('en-US')}</div></button>
 <button class="exec-vis-posm-metric" type="button" data-drawer='{"type":"visibility","focus":"coverage"}'><div class="exec-vis-posm-metric-label">Visibility Coverage</div><div class="exec-vis-posm-metric-value">${posmM.coveragePct!==null ? posmM.coveragePct.toFixed(1)+'%' : 'N/A'}</div></button>
 </div>
 <div class="exec-vis-note">${iconSvg('info')}Sourced from Agreed Deals: POSM Available = agreed deals (the only pharmacies with logged shelf/POSM terms); Deployed = deals with posm=true; Investment = sum(target_sales × POSM_RATE) over those deals; Coverage = Deployed ÷ Available. Same underlying facts as Management's "POSM on shelf" note and the Deals page's POSM table -- reused here, not recalculated.</div>
-<div class="exec-vis-group-label">Shelf commitment -- click to explore those pharmacies</div>
-<div class="exec-vis-posm-grid">${shelfModuleTilesHtml}</div>
 <div class="exec-vis-audit-row exec-vis-audit-row--closing">
 <button class="exec-vis-audit-stat" type="button" data-drawer='{"type":"visibility"}'><div class="exec-vis-audit-value">${visModule.audited.toLocaleString('en-US')}</div><div class="exec-vis-audit-label">Audited</div></button>
 <button class="exec-vis-audit-stat" type="button" data-drawer='{"type":"visibility"}'><div class="exec-vis-audit-value">${visModule.pending.toLocaleString('en-US')}</div><div class="exec-vis-audit-label">Pending / Not Audited</div></button>
 <button class="exec-vis-audit-stat" type="button" data-drawer='{"type":"visibility"}'><div class="exec-vis-audit-value">${visModule.eligible.toLocaleString('en-US')}</div><div class="exec-vis-audit-label">Eligible</div></button>
 <button class="exec-vis-audit-stat" type="button" data-drawer='{"type":"visibility"}'><div class="exec-vis-audit-value">${visModule.notEligible.toLocaleString('en-US')}</div><div class="exec-vis-audit-label">Not Eligible</div></button>
 </div>
+</details>
 </div>
 </div>`;
 
@@ -7853,6 +7907,7 @@ ${paginationHtml}
 // PERFORMANCE -> CASHBACK -> VISIBILITY -> EXPLORE -> the full pharmacy
 // table underneath, reachable directly or via an Explore action.
 section.innerHTML = filterBarHtml('execDash', 'Executive') + dataUpdatedHtml
++ populationStripHtml
 + heroStoryHtml + salesPerformanceHtml + cashbackHtml + visibilityModuleHtml + exploreHtml + eligibleTableHtml;
 
 wireFilterBar('execDash');
