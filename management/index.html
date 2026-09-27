@@ -1140,7 +1140,7 @@ background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;text-a
 #execDashView .exec-cb-donut-wrap{position:relative;flex-shrink:0;width:120px;height:120px;}
 #execDashView .exec-cb-donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;}
 #execDashView .exec-cb-donut-total{font-size:15px;font-weight:800;color:var(--pharco-orange-dark);line-height:1.2;}
-#execDashView .exec-cb-donut-total-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;font-weight:700;margin-top:2px;}
+#execDashView .exec-cb-donut-total-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;font-weight:700;margin-top:2px;max-width:80px;line-height:1.3;}
 #execDashView .exec-cb-legend{flex:1;min-width:240px;display:flex;flex-direction:column;gap:8px;}
 #execDashView .exec-cb-legend-item{display:flex;align-items:center;gap:10px;background:var(--pharco-surface);border:1px solid var(--pharco-border);border-radius:var(--radius-sm);padding:10px 12px;cursor:pointer;font-family:inherit;text-align:start;transition:border-color .15s ease,background .15s ease;}
 #execDashView .exec-cb-legend-item:hover{border-color:var(--pharco-orange);background:var(--pharco-orange-light);}
@@ -1360,6 +1360,15 @@ button.xdw-tier-row:hover{background:var(--pharco-orange-light);}
 #execDashView .exposure-box .t, #execView .exposure-box .t{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
 #execDashView .exposure-box .v, #execView .exposure-box .v{font-size:19px;font-weight:800;color:var(--shell-navy);margin-top:5px;font-variant-numeric:tabular-nums;}
 #execDashView .exposure-box .sub, #execView .exposure-box .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+/* .exposure-box as a clickable <button> (Commercial Investment hierarchy,
+   Master Implementation Run correction, 2026-09-27) -- same box, just a
+   button-element reset so it looks identical to the plain-<div> usage
+   above (no browser button chrome, full-width, start-aligned, inherits
+   the app font) and gains the same hover/focus affordance already used
+   elsewhere for clickable stat tiles (see .exec-vis-audit-stat). */
+#execDashView button.exposure-box, #execView button.exposure-box{display:block;width:100%;font:inherit;color:inherit;transition:border-color .15s ease,background .15s ease;}
+#execDashView button.exposure-box:hover, #execView button.exposure-box:hover{border-color:var(--pharco-orange);background:var(--pharco-orange-light);}
+#execDashView button.exposure-box:focus-visible, #execView button.exposure-box:focus-visible{outline:2px solid var(--pharco-orange-dark);outline-offset:2px;}
 #execDashView .exposure-budget-note, #execView .exposure-budget-note{margin-top:12px;font-size:11.5px;color:var(--muted);background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:8px 10px;}
 /* Management (#execView) added 2026-09-26 to these existing rule sets --
    its Needs Attention section reused .alert-list/.alert-item markup from
@@ -4261,6 +4270,29 @@ const cash = r.t.commercial_structure === 'fixed' ? tiers[0].potential_cashback 
 return s + cash;
 }, 0);
 
+// Q4 2026 Growth (Master Implementation Run correction, 2026-09-27) --
+// Q4 2026 TARGET vs Q4 2025 ACTUAL, never Q3 2026 vs Q4 2026 and never
+// Q4 2026 vs Q3 2025. Uses each pharmacy's lowest qualifying tier (the
+// same "minimum required" tier already labeled per-row in the table below
+// -- fixed1 / Tier 1 15% -- and the same convention computeCommercial2026's
+// own applicable_target uses for an unachieved Q3 pharmacy) so every
+// pharmacy with a baseline contributes exactly one target figure. This
+// aggregate necessarily blends two different mechanics -- a flat EGP floor
+// for Fixed-structure pharmacies and a %-growth threshold for Variable --
+// exactly like Q3's own Commercial Performance section deliberately does
+// NOT blend fixed EGP thresholds with variable growth rates into one pace
+// number; unlike that case, here the blend is unavoidable because the
+// user-facing ask is a single company-wide % against a single company-wide
+// EGP baseline, so this number is reported plainly with that caveat rather
+// than hidden.
+const sumQ4_2025Baseline = withBaseline.reduce((s,r) => s + (r.p.q4d||0), 0);
+const sumQ4_2026LowestTarget = withBaseline.reduce((s,r) => {
+const tiers = r.t.targets;
+if(!tiers.length) return s;
+return s + tiers[tiers.length-1].target_sales;
+}, 0);
+const q4TargetGrowthPct = sumQ4_2025Baseline ? (sumQ4_2026LowestTarget - sumQ4_2025Baseline) / sumQ4_2025Baseline * 100 : null;
+
 const sorted = [...rows].sort((a,b) => (b.p.q4d||0) - (a.p.q4d||0));
 
 const rowsHtml = sorted.map(({p,t}) => {
@@ -4294,6 +4326,10 @@ These are <b>targets only</b> — no Q4 2026 actual sales exist yet, so there is
 <div class="sales-box"><div class="t">Fixed-Structure Pharmacies</div><div class="v">${fixedCount.toLocaleString('en-US')}</div><div class="sub">Q4'25 baseline ≤ 5,000 EGP</div></div>
 <div class="sales-box"><div class="t">Variable-Structure Pharmacies</div><div class="v">${variableCount.toLocaleString('en-US')}</div><div class="sub">Q4'25 baseline &gt; 5,000 EGP</div></div>
 <div class="sales-box"><div class="t">Potential Exposure Range</div><div class="v"><bdi dir="ltr">${fmt(minExposure)} – ${fmt(maxExposure)} EGP</bdi></div><div class="sub">if every eligible pharmacy landed on its lowest, resp. highest, tier — a planning range, not a forecast</div></div>
+<div class="sales-box"><div class="t">Q4 2026 Growth (TARGET, minimum tier)</div><div class="v ${q4TargetGrowthPct===null?'':(q4TargetGrowthPct>=0?'growth-pos':'growth-neg')}">${q4TargetGrowthPct===null?'—':ltrWrap((q4TargetGrowthPct>=0?'+':'')+q4TargetGrowthPct.toFixed(1)+'%')}</div><div class="sub">Q4 2026 TARGET vs Q4 2025 ACTUAL — never Q3 2026 vs Q4 2026, never Q4 2026 vs Q3 2025</div></div>
+</div>
+<div class="note">
+Q4 2026 Growth blends two different mechanics into one company-wide %: Fixed-structure pharmacies (Q4'25 baseline ≤ 5,000 EGP) target a flat EGP floor, not a growth rate, while Variable-structure pharmacies target a real % growth rate over their own Q4'25 baseline. Both are reduced here to "lowest qualifying tier" EGP targets and summed against the same population's Q4'25 actual total — a real number, but read it as a blended planning figure, not a rate any single pharmacy is actually asked to hit.
 </div>
 </div>
 <div class="card">
@@ -6825,16 +6861,36 @@ ${commercialRollupTableHtml(commercialRollupRows, rollupLabel)}
 // basis "Payout owed now / Total potential payout" block is retired; it
 // measured a different, narrower population than every other number on
 // this page). Same 2026 Commercial Truth basis as the KPIs above. ----
+// Commercial Investment hierarchy (Master Implementation Run correction,
+// 2026-09-27) -- same formulas/fields as Executive's version: Total
+// Commercial Investment = Loyalty Program Cashback (mgmtKpis.totalCashback)
+// + Visibility Investment (POSM Investment + Shelf Bonus, via the same
+// getExecVisibilityIntelligence() helper Executive uses). Denominator for
+// the % is eligible-pharmacy Q3 2026 sales only, never the whole
+// pharmacy-universe total shown just above in Commercial Performance.
+const mgmtEligibleRecords = mgmtKpis.records.filter(r => r.target_achieved);
+const mgmtEligibleQ32026Sales = mgmtEligibleRecords.reduce((s,r) => s + (r.q3_2026_dv||0), 0);
+const mgmtVisibility = getExecVisibilityIntelligence(filteredPharmacies(), filteredAgreedDeals());
+const mgmtVisibilityInvestment = mgmtVisibility.posm.totalInvestmentEgp;
+const mgmtTotalCommercialInvestment = mgmtKpis.totalCashback + mgmtVisibilityInvestment;
+const mgmtCommercialInvestmentPct = mgmtEligibleQ32026Sales ? (mgmtTotalCommercialInvestment / mgmtEligibleQ32026Sales * 100) : null;
 const commercialExposureHtml = `
 <div class="section flow-tables">
-<div class="section-head"><h2>${iconSvg('dollar')}Cashback Exposure — Q3 2026 (Jul–Sep, complete)</h2><span class="section-sub">Based on actual Q3 2026 Total Dist_Value, all three months final, whole pharmacy universe</span></div>
+<div class="section-head"><h2>${iconSvg('dollar')}Commercial Investment — Q3 2026 (Jul–Sep, complete)</h2><span class="section-sub">Total Commercial Investment = Loyalty Program Cashback + Visibility Investment · whole pharmacy universe</span></div>
 <div class="panel">
 <div class="exposure-grid">
+<div class="exposure-box"><div class="t">Total Commercial Investment</div><div class="v">${fmtBig(mgmtTotalCommercialInvestment)} EGP</div><div class="sub">Loyalty Program Cashback + Visibility Investment</div></div>
+<div class="exposure-box"><div class="t">Loyalty Program Cashback</div><div class="v">${fmtBig(mgmtKpis.totalCashback)} EGP</div><div class="sub">${(mgmtKpis.targetAchieved).toLocaleString('en-US')} qualifying pharmacies</div></div>
+<div class="exposure-box"><div class="t">Visibility Investment</div><div class="v">${fmtBig(mgmtVisibilityInvestment)} EGP</div><div class="sub">POSM Investment + Shelf Bonus</div></div>
+<div class="exposure-box"><div class="t">Eligible Pharmacy Sales</div><div class="v">${fmtBig(mgmtEligibleQ32026Sales)} EGP</div><div class="sub">Q3 2026, cashback-eligible pharmacies only</div></div>
+<div class="exposure-box"><div class="t">Commercial Investment / Eligible Sales</div><div class="v">${mgmtCommercialInvestmentPct!==null?mgmtCommercialInvestmentPct.toFixed(2)+'%':'N/A'}</div><div class="sub">Total Commercial Investment ÷ Eligible Pharmacy Sales</div></div>
+</div>
+<div class="slab-group-tag">LOYALTY PROGRAM CASHBACK BY STRUCTURE</div>
+<div class="exposure-grid" style="margin-bottom:0;">
 <div class="exposure-box"><div class="t">Fixed</div><div class="v">${fmtBig(mgmtKpis.fixedCashback)} EGP</div><div class="sub">${mgmtKpis.records.filter(r=>r.commercial_structure==='fixed'&&r.target_achieved).length.toLocaleString('en-US')} pharmacies</div></div>
 <div class="exposure-box"><div class="t">Variable</div><div class="v">${fmtBig(mgmtKpis.variableCashback)} EGP</div><div class="sub">${mgmtKpis.records.filter(r=>r.commercial_structure==='variable'&&r.target_achieved).length.toLocaleString('en-US')} pharmacies</div></div>
-<div class="exposure-box"><div class="t">Total</div><div class="v">${fmtBig(mgmtKpis.totalCashback)} EGP</div><div class="sub">${(mgmtKpis.targetAchieved).toLocaleString('en-US')} qualifying pharmacies</div></div>
 </div>
-<div class="exposure-budget-note">Based on ACTUAL Q3 2026 Dist_Value (July, August, and September all final) × the achieved tier's rate — never target × rate. The quarter is closed, so this total is final and will not move further. Exposure by Region/DM/Territory is broken out in Commercial Performance above.</div>
+<div class="exposure-budget-note">Loyalty Program Cashback is based on ACTUAL Q3 2026 Dist_Value (July, August, and September all final) × the achieved tier's rate — never target × rate. The quarter is closed, so this total is final and will not move further. Exposure by Region/DM/Territory is broken out in Commercial Performance above.</div>
 </div>
 </div>`;
 
@@ -7523,7 +7579,25 @@ const variableRecords = kpis.records.filter(r => r.commercial_structure==='varia
 const fixedTotalCashback = fixedRecords.reduce((s,r)=>s+(r.cashback_amount||0),0);
 const variableTotalCashback = variableRecords.reduce((s,r)=>s+(r.cashback_amount||0),0);
 const visibility = getExecVisibilityIntelligence(filteredPharmacies(), filteredAgreedDeals());
-return { kpis, eligibleRecords, sumQ32025Eligible, sumQ32026Eligible, eligibleGrowthPct, cashbackSalesPct, agreedPharmaciesCount, fixedRecords, variableRecords, fixedTotalCashback, variableTotalCashback, visibility };
+// ===================================================================
+// COMMERCIAL INVESTMENT HIERARCHY (Master Implementation Run correction,
+// 2026-09-27, "FINAL LOGIC + DASHBOARD CORRECTION") -- the investment
+// story starts with the TOTAL, never with cashback alone:
+//   Total Commercial Investment = Loyalty Program Cashback (kpis.totalCashback,
+//   the same validated Q3 2026 commercial-truth cashback total already used
+//   everywhere else on this page) + Visibility Investment (visibility.posm.
+//   totalInvestmentEgp, the same POSM + Shelf Bonus total already shown in
+//   the Visibility Investment section below -- no new formula, just summed).
+// The denominator for the % is ELIGIBLE-PHARMACY Q3 2026 sales only
+// (sumQ32026Eligible, the same figure the Q3 Story hero already headlines
+// as "Eligible Sales") -- never the whole 7,215-pharmacy book, per Daniel's
+// explicit instruction that mixing in non-eligible sales understates the
+// real investment ratio.
+// ===================================================================
+const visibilityInvestmentEgp = visibility.posm.totalInvestmentEgp;
+const totalCommercialInvestment = kpis.totalCashback + visibilityInvestmentEgp;
+const commercialInvestmentPct = sumQ32026Eligible ? (totalCommercialInvestment / sumQ32026Eligible * 100) : null;
+return { kpis, eligibleRecords, sumQ32025Eligible, sumQ32026Eligible, eligibleGrowthPct, cashbackSalesPct, agreedPharmaciesCount, fixedRecords, variableRecords, fixedTotalCashback, variableTotalCashback, visibility, visibilityInvestmentEgp, totalCommercialInvestment, commercialInvestmentPct };
 }
 
 // Groups a set of eligible records by region and sums a chosen numeric
@@ -7553,8 +7627,9 @@ case 'eligible': return 'Cashback Eligible';
 case 'visibility': return 'Visibility';
 case 'shelfBucket': return (EXEC_SHELF_BUCKETS.find(t=>t.key===entry.key)||{}).label || 'Shelf';
 case 'salesPoint': return entry.point==='q325' ? 'Q3 2025' : entry.point==='q326' ? 'Q3 2026' : 'Growth';
-case 'cashbackTotal': return 'Total Cashback';
-case 'cashbackRatio': return 'Cashback / Sales';
+case 'cashbackTotal': return 'Loyalty Program Cashback';
+case 'cashbackRatio': return 'Commercial Investment / Eligible Sales';
+case 'totalInvestment': return 'Total Commercial Investment';
 case 'compStructure': return entry.structure === 'fixed' ? 'Fixed' : 'Variable';
 case 'compTier': {
 const vt = COMMERCIAL_2026_VARIABLE_TIERS.find(t=>t.key===entry.tierKey);
@@ -7727,9 +7802,31 @@ bodyHtml: `${regionRowsHtml(bd, v => Math.round(v).toLocaleString('en-US') + ' E
 </div>`
 };
 }
+case 'totalInvestment': {
+const loyaltyPct = ctx.totalCommercialInvestment ? (ctx.kpis.totalCashback/ctx.totalCommercialInvestment*100) : null;
+const visPct = ctx.totalCommercialInvestment ? (ctx.visibilityInvestmentEgp/ctx.totalCommercialInvestment*100) : null;
+return {
+eyebrow: 'Commercial Investment',
+title: `${Math.round(ctx.totalCommercialInvestment).toLocaleString('en-US')} EGP`,
+subtitle: 'Loyalty Program Cashback + Visibility Investment -- the full real EGP commercial spend, an exact sum of the two figures below (never rounded-then-added).',
+bodyHtml: `
+<div class="xdw-split-row">
+<button class="xdw-split-tile" data-push='{"type":"cashbackTotal"}'><div class="xdw-split-label">Loyalty Program Cashback</div><div class="xdw-split-value">${fmtExec(ctx.kpis.totalCashback)} EGP</div><div class="xdw-split-n">${loyaltyPct!==null?loyaltyPct.toFixed(1)+'% of total':''}</div></button>
+<button class="xdw-split-tile" data-push='{"type":"visibility","focus":"totalInvestment"}'><div class="xdw-split-label">Visibility Investment</div><div class="xdw-split-value">${fmtExec(ctx.visibilityInvestmentEgp)} EGP</div><div class="xdw-split-n">${visPct!==null?visPct.toFixed(1)+'% of total':''}</div></button>
+</div>
+<div class="xdw-metric-list">
+<div class="xdw-metric-row"><span>Eligible Pharmacy Sales (Q3 2026)</span><b>${fmtExec(ctx.sumQ32026Eligible)} EGP</b></div>
+<div class="xdw-metric-row"><span>Commercial Investment / Eligible Sales</span><b>${ctx.commercialInvestmentPct!==null?ctx.commercialInvestmentPct.toFixed(2)+'%':'N/A'}</b></div>
+</div>
+<div class="xdw-actions">
+<button class="xdw-action-btn" data-push='{"type":"cashbackTotal"}'>Explore Loyalty Program Cashback${iconSvg('arrow-right')}</button>
+<button class="xdw-action-btn" data-push='{"type":"visibility","focus":"totalInvestment"}'>Explore Visibility Investment${iconSvg('arrow-right')}</button>
+</div>`
+};
+}
 case 'cashbackTotal': {
 return {
-eyebrow: 'Cashback',
+eyebrow: 'Loyalty Program Cashback',
 title: `${Math.round(ctx.kpis.totalCashback).toLocaleString('en-US')} EGP`,
 subtitle: 'Fixed + Variable cashback earned by the current eligible population.',
 bodyHtml: `
@@ -7744,16 +7841,16 @@ bodyHtml: `
 };
 }
 case 'cashbackRatio': {
-const fixedPct = ctx.sumQ32026Eligible ? (ctx.fixedTotalCashback/ctx.sumQ32026Eligible*100) : null;
-const varPct = ctx.sumQ32026Eligible ? (ctx.variableTotalCashback/ctx.sumQ32026Eligible*100) : null;
+const loyaltyPct = ctx.sumQ32026Eligible ? (ctx.kpis.totalCashback/ctx.sumQ32026Eligible*100) : null;
+const visPct2 = ctx.sumQ32026Eligible ? (ctx.visibilityInvestmentEgp/ctx.sumQ32026Eligible*100) : null;
 return {
-eyebrow: 'Cashback',
-title: ctx.cashbackSalesPct!==null ? ctx.cashbackSalesPct.toFixed(2)+'%' : 'N/A',
-subtitle: 'Total Cashback ÷ Q3 2026 Dist_Value of cashback-eligible pharmacies × 100 -- recalculated live from the current filter, never hardcoded.',
+eyebrow: 'Commercial Investment',
+title: ctx.commercialInvestmentPct!==null ? ctx.commercialInvestmentPct.toFixed(2)+'%' : 'N/A',
+subtitle: 'Total Commercial Investment (Loyalty Program Cashback + Visibility Investment) ÷ Q3 2026 Dist_Value of cashback-eligible pharmacies only × 100 -- never the whole 7,215-pharmacy book -- recalculated live from the current filter, never hardcoded.',
 bodyHtml: `
 <div class="xdw-metric-list">
-<div class="xdw-metric-row"><span>From Fixed cashback</span><b>${fixedPct!==null ? fixedPct.toFixed(2)+'%' : 'N/A'}</b></div>
-<div class="xdw-metric-row"><span>From Variable cashback</span><b>${varPct!==null ? varPct.toFixed(2)+'%' : 'N/A'}</b></div>
+<div class="xdw-metric-row"><span>From Loyalty Program Cashback</span><b>${loyaltyPct!==null ? loyaltyPct.toFixed(2)+'%' : 'N/A'}</b></div>
+<div class="xdw-metric-row"><span>From Visibility Investment</span><b>${visPct2!==null ? visPct2.toFixed(2)+'%' : 'N/A'}</b></div>
 </div>`
 };
 }
@@ -7935,6 +8032,19 @@ const growthLabel = eligibleGrowthPct===null ? '—' : (eligibleGrowthPct>=0?'+'
 // Agreed Deals source as always (see getExecVisibilityIntelligence above).
 const visModule = getExecVisibilityIntelligence(filteredPharmacies(), filteredAgreedDeals());
 const posmM = visModule.posm;
+// ===================================================================
+// COMMERCIAL INVESTMENT HIERARCHY (Master Implementation Run correction,
+// 2026-09-27) -- the investment story leads with the TOTAL, never with
+// cashback alone: Total Commercial Investment = Loyalty Program Cashback
+// (kpis.totalCashback) + Visibility Investment (posmM.totalInvestmentEgp,
+// the same POSM + Shelf Bonus figure the Visibility Investment section
+// below already shows -- summed exactly, never rounded-then-added). The
+// % denominator is eligible-pharmacy Q3 2026 sales only (sumQ32026Eligible),
+// never the whole 7,215-pharmacy book. Replaces the old cashback-only
+// "Cashback / Sales" ratio, which is now a strict subset of this figure.
+// ===================================================================
+const totalCommercialInvestment = kpis.totalCashback + posmM.totalInvestmentEgp;
+const commercialInvestmentPct = sumQ32026Eligible ? (totalCommercialInvestment / sumQ32026Eligible * 100) : null;
 
 // ---- Phase 4 (2026-09-26): "WHAT HAPPENED -> CASHBACK -> VISIBILITY ->
 // EXPLORE" restructure per Daniel's Command Center brief. Nothing below
@@ -7966,7 +8076,7 @@ const populationStripHtml = `
 // four separate cards. Every number keeps its original data-drawer entry
 // (eligible / salesPoint:q326 / salesPoint:growth / cashbackTotal), so the
 // Intelligence Drawer content is byte-for-byte the same as before. ----
-const narrativeSentence = `${kpis.targetAchieved.toLocaleString('en-US')} cashback-eligible pharmacies generated <b>${fmtExec(sumQ32026Eligible)} EGP</b> in Q3 sales, growing <b class="${growthClass}">${growthLabel}</b> vs Q3'25 (eligible pharmacies only, not company-wide), with <b>${fmtExec(kpis.totalCashback)} EGP</b> paid as cashback.`;
+const narrativeSentence = `${kpis.targetAchieved.toLocaleString('en-US')} cashback-eligible pharmacies generated <b>${fmtExec(sumQ32026Eligible)} EGP</b> in Q3 sales, growing <b class="${growthClass}">${growthLabel}</b> vs Q3'25 (eligible pharmacies only, not company-wide), with <b>${fmtExec(kpis.totalCashback)} EGP</b> paid as Loyalty Program Cashback.`;
 // Hero tile order (Master Implementation Run, 2026-09-27, approved change
 // B): Total Cashback -> Growth -> Cashback Eligible -> Eligible Sales.
 // Same four numbers, same data-drawer entries, same formulas -- only the
@@ -7982,7 +8092,7 @@ const heroStoryHtml = `
 <div class="exec-story-row exec-story-hero4">
 <button class="exec-hero-stat exec-hero-stat--money" type="button" data-drawer='{"type":"cashbackTotal"}' title="${Math.round(kpis.totalCashback).toLocaleString('en-US')} EGP (Fixed + Variable) · click for detail">
 <div class="exec-hero-value">${fmtExec(kpis.totalCashback)} EGP</div>
-<div class="exec-hero-label">${iconSvg('dollar')}Total Cashback</div>
+<div class="exec-hero-label">${iconSvg('dollar')}Loyalty Program Cashback</div>
 <span class="exec-stat-hint">${iconSvg('arrow-right')}See where cashback goes</span>
 </button>
 <div class="exec-hero-divider" aria-hidden="true"></div>
@@ -8108,14 +8218,31 @@ const donutSvgHtml = `
 const cashbackHtml = `
 <div class="section flow-cashback" id="execCashback">
 <div class="section-head">
-<h2>${iconSvg('dollar')}Cashback</h2>
-<span class="section-sub">Fixed + Variable, cashback-eligible population · click a segment for detail</span>
+<h2>${iconSvg('dollar')}Commercial Investment</h2>
+<span class="section-sub">Total Commercial Investment = Loyalty Program Cashback + Visibility Investment · click a number for detail</span>
 </div>
 <div class="panel">
+<div class="exposure-grid" style="margin-bottom:18px;">
+<button class="exposure-box" type="button" data-drawer='{"type":"totalInvestment"}'>
+<div class="t">Total Commercial Investment</div><div class="v">${fmtExec(totalCommercialInvestment)} EGP</div><div class="sub">Loyalty Program Cashback + Visibility Investment</div>
+</button>
+<button class="exposure-box" type="button" data-drawer='{"type":"cashbackTotal"}'>
+<div class="t">Loyalty Program Cashback</div><div class="v">${fmtExec(kpis.totalCashback)} EGP</div><div class="sub">Fixed + Variable, cashback-eligible population</div>
+</button>
+<button class="exposure-box" type="button" data-drawer='{"type":"visibility","focus":"totalInvestment"}'>
+<div class="t">Visibility Investment</div><div class="v">${fmtExec(posmM.totalInvestmentEgp)} EGP</div><div class="sub">POSM Investment + Shelf Bonus</div>
+</button>
+<button class="exposure-box" type="button" data-drawer='{"type":"salesPoint","point":"q326"}'>
+<div class="t">Eligible Pharmacy Sales</div><div class="v">${fmtExec(sumQ32026Eligible)} EGP</div><div class="sub">Q3 2026, cashback-eligible pharmacies only</div>
+</button>
+<button class="exposure-box" type="button" data-drawer='{"type":"cashbackRatio"}'>
+<div class="t">Commercial Investment / Eligible Sales</div><div class="v">${commercialInvestmentPct!==null ? commercialInvestmentPct.toFixed(2)+'%' : 'N/A'}</div><div class="sub">Total Commercial Investment ÷ Eligible Pharmacy Sales</div>
+</button>
+</div>
 <div class="exec-cb-donut-row">
 <div class="exec-cb-donut-wrap">
 ${donutSvgHtml}
-<div class="exec-cb-donut-center"><div class="exec-cb-donut-total">${fmtExec(kpis.totalCashback)} EGP</div><div class="exec-cb-donut-total-label">Total Cashback</div></div>
+<div class="exec-cb-donut-center"><div class="exec-cb-donut-total">${fmtExec(kpis.totalCashback)} EGP</div><div class="exec-cb-donut-total-label">Loyalty Program Cashback</div></div>
 </div>
 <div class="exec-cb-legend">
 <button class="exec-cb-legend-item${isStructureActive('variable')?' active':''}" type="button" data-comp-structure="variable">
@@ -8130,9 +8257,9 @@ ${donutSvgHtml}
 <span class="exec-cb-legend-value">${fmtExec(fixedTotalCashbackTop)} EGP</span>
 <span class="exec-row-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span>
 </button>
-<button class="exec-cb-ratio" type="button" data-drawer='{"type":"cashbackRatio"}' title="Total cashback ÷ Q3 2026 Dist_Value of cashback-eligible pharmacies · click for detail">
-<span class="exec-cb-ratio-value">${cashbackSalesPct!==null ? cashbackSalesPct.toFixed(2)+'%' : 'N/A'}</span>
-<span class="exec-cb-ratio-label">${iconSvg('activity')}Cashback / Sales</span>
+<button class="exec-cb-ratio" type="button" data-drawer='{"type":"cashbackRatio"}' title="Commercial Investment ÷ Q3 2026 Dist_Value of cashback-eligible pharmacies · click for detail">
+<span class="exec-cb-ratio-value">${commercialInvestmentPct!==null ? commercialInvestmentPct.toFixed(2)+'%' : 'N/A'}</span>
+<span class="exec-cb-ratio-label">${iconSvg('activity')}Commercial Investment / Eligible Sales</span>
 </button>
 </div>
 </div>
