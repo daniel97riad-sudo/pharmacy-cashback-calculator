@@ -2893,7 +2893,6 @@ return `
 </div>
 <div class="pli-stats">
 <div class="pli-sales">${fmt(p.q4d)} ${curr()}</div>
-<div class="pli-growth ${gClass}">${gText}</div>
 </div>
 </div>`;
 }).join('');
@@ -2920,7 +2919,6 @@ totalsSection.innerHTML = `
 <div class="sales-box"><div class="t">${T.count}</div><div class="v">${count.toLocaleString('en-US')}</div></div>
 <div class="sales-box"><div class="t">${T.q3}</div><div class="v">${fmt(sumQ3)} ${curr()}</div></div>
 <div class="sales-box"><div class="t">${T.q4}</div><div class="v">${fmt(sumQ4)} ${curr()}</div></div>
-<div class="sales-box"><div class="t">${T.growth}</div><div class="v ${growthClass}">${growthText}</div></div>
 ${SUPPLEMENT_LABEL ? `<div class="sales-box"><div class="t">${SUPPLEMENT_LABEL}</div><div class="v">${fmt(sumWk)} ${curr()}</div><div class="sub">${T.wkSub}</div></div>` : ''}
 </div>
 <div style="overflow-x:auto;">
@@ -3585,9 +3583,7 @@ section.innerHTML = `
 <div class="totals-grid">
 <div class="sales-box"><div class="t">${MP.q3Total}</div><div class="v">${fmt(sumQ3)} ${curr()}</div></div>
 <div class="sales-box"><div class="t">${MP.q4Total}</div><div class="v">${fmt(sumQ4)} ${curr()}</div></div>
-<div class="sales-box"><div class="t">${MP.yourGrowthQ}</div><div class="v ${growthClass}">${growthText}</div></div>
 </div>
-<div class="note">${MP.companyWideNote(companyGrowth===null?'—':signedPct(companyGrowth), growth!==null && companyGrowth!==null ? (growth > companyGrowth ? MP.outperform : MP.behind) : '')}</div>
 </div>
 <div class="card">
 <h2>${MP.trendH2(curRange, priorRange)}</h2>
@@ -3611,7 +3607,6 @@ ${MP.startHereNote(count, `${fmt(priorityRecoverable)} ${curr()}`, gapPct)}
 <h2>${MP.rankingH2(totalMRs)}</h2>
 <div class="totals-grid">
 <div class="sales-box"><div class="t">${MP.byRevenue}</div><div class="v">#${q4Rank}</div></div>
-<div class="sales-box"><div class="t">${MP.byGrowthPct}</div><div class="v">${growthRank ? '#'+growthRank+' '+MP.ofWord+' '+byGrowthRank.length : MP.na}</div></div>
 <div class="sales-box"><div class="t">${MP.byYearGrowthPct}</div><div class="v">${yoyGrowthRank ? '#'+yoyGrowthRank+' '+MP.ofWord+' '+byYoYGrowthRank.length : MP.na}</div></div>
 </div>
 </div>
@@ -5349,7 +5344,6 @@ chainSection.innerHTML = `
 <div class="sales-box"><div class="t">عدد الصيدليات في السلسلة</div><div class="v">${chainMembers.length}</div></div>
 <div class="sales-box"><div class="t">إجمالي الربع الثالث</div><div class="v">${fmt(sumQ3)} ج.م</div></div>
 <div class="sales-box"><div class="t">إجمالي الربع الرابع</div><div class="v">${fmt(sumQ4)} ج.م</div></div>
-<div class="sales-box"><div class="t">نسبة نمو السلسلة</div><div class="v ${growthClass}">${growthText}</div></div>
 </div>
 <div style="overflow-x:auto;">
 <table>
@@ -5643,7 +5637,6 @@ return `<div class="card">
 <div class="totals-grid" style="margin-bottom:12px;">
 <div class="sales-box"><div class="t">إجمالي الربع الثالث 2025</div><div class="v">${fmt(sumQ3)} ج.م</div></div>
 <div class="sales-box"><div class="t">إجمالي الربع الرابع 2025</div><div class="v">${fmt(sumQ4)} ج.م</div></div>
-<div class="sales-box"><div class="t">نسبة النمو</div><div class="v ${growthClass}">${signedPct(growth)}</div></div>
 </div>
 <div class="badge-row" style="margin-bottom:8px;">${statusBadge}</div>
 <div style="overflow-x:auto;">
@@ -10076,7 +10069,6 @@ ${compareRowHtml(CT.rep, p.mr||'—', c.mr||'—')}
 ${compareRowHtml(CT.dm, p.dm||'—', c.dm||'—')}
 ${compareRowHtml(CT.q3, fmt(p.q3d)+' '+curr(), fmt(c.q3d)+' '+curr())}
 ${compareRowHtml(CT.q4, fmt(p.q4d)+' '+curr(), fmt(c.q4d)+' '+curr())}
-${compareRowHtml(CT.growth, gA===null?'—':signedPct(gA), gB===null?'—':signedPct(gB))}
 ${compareRowHtml(CT.slabStatus, sA.state==='max' ? CT.win : sA.state==='remaining' ? `${fmt(sA.remaining)} ${curr()}${forLbl}${slabLabelFor(sA.nextKey)}` : '—', sB.state==='max' ? CT.win : sB.state==='remaining' ? `${fmt(sB.remaining)} ${curr()}${forLbl}${slabLabelFor(sB.nextKey)}` : '—')}
 ${compareRowHtml(CT.topCashback, fmt(topA.cashback)+' '+curr(), fmt(topB.cashback)+' '+curr())}
 </tbody>
@@ -10340,11 +10332,6 @@ ${commercial2026CalculatorCardHtml(p)}
 <div class="t">${D.q4}</div>
 <div class="v">${fmt(p.q4d)} ${curr()}</div>
 <div class="sub">${D.actualSales}${fmt(p.q4a)} ${curr()}</div>
-</div>
-<div class="sales-box">
-<div class="t">${D.growthLbl}</div>
-<div class="v ${growthClass}">${growthText}</div>
-<div class="sub">${D.totalBoth}${fmt(p.q3d+p.q4d)} ${curr()}</div>
 </div>
 ${SUPPLEMENT_LABEL ? `
 <div class="sales-box">
