@@ -1186,6 +1186,15 @@ background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;text-a
 #execDashView .exec-vis-hero-label{font-size:12px;color:var(--pharco-orange-dark);font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-top:4px;}
 #execDashView .exec-vis-hero:hover{background:var(--pharco-orange);}
 #execDashView .exec-vis-hero:hover .exec-vis-hero-value, #execDashView .exec-vis-hero:hover .exec-vis-hero-label{color:#fff;}
+/* Management (#execView) reuses the exact same "hero" box style -- added
+   for the Commercial Investment section's Total figure (Master
+   Implementation Run micro-correction, 2026-09-28) so Total Commercial
+   Investment reads as the primary/highlighted number on BOTH dashboards,
+   same locked PHARCO look, no new colors or components. Management's box
+   is a plain (non-clickable) div, so no cursor/hover rules are added here. */
+#execView .exec-vis-hero{display:block;width:100%;background:var(--pharco-orange-light);border:1px solid var(--pharco-orange);border-radius:var(--radius-md);padding:16px 18px;text-align:center;font-family:inherit;margin-bottom:14px;}
+#execView .exec-vis-hero-value{font-size:30px;font-weight:800;color:var(--pharco-orange-dark);font-variant-numeric:tabular-nums;line-height:1.15;}
+#execView .exec-vis-hero-label{font-size:12px;color:var(--pharco-orange-dark);font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-top:4px;}
 #execDashView .exec-vis-group-label{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:800;margin:16px 0 9px;}
 #execDashView .exec-posm-tile--nav{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 #execDashView .exec-posm-tile-arrow{color:var(--muted);flex-shrink:0;display:flex;}
@@ -6878,8 +6887,11 @@ const commercialExposureHtml = `
 <div class="section flow-tables">
 <div class="section-head"><h2>${iconSvg('dollar')}Commercial Investment — Q3 2026 (Jul–Sep, complete)</h2><span class="section-sub">Total Commercial Investment = Loyalty Program Cashback + Visibility Investment · whole pharmacy universe</span></div>
 <div class="panel">
+<div class="exec-vis-hero">
+<div class="exec-vis-hero-value">${fmtBig(mgmtTotalCommercialInvestment)} EGP</div>
+<div class="exec-vis-hero-label">Total Commercial Investment</div>
+</div>
 <div class="exposure-grid">
-<div class="exposure-box"><div class="t">Total Commercial Investment</div><div class="v">${fmtBig(mgmtTotalCommercialInvestment)} EGP</div><div class="sub">Loyalty Program Cashback + Visibility Investment</div></div>
 <div class="exposure-box"><div class="t">Loyalty Program Cashback</div><div class="v">${fmtBig(mgmtKpis.totalCashback)} EGP</div><div class="sub">${(mgmtKpis.targetAchieved).toLocaleString('en-US')} qualifying pharmacies</div></div>
 <div class="exposure-box"><div class="t">Visibility Investment</div><div class="v">${fmtBig(mgmtVisibilityInvestment)} EGP</div><div class="sub">POSM Investment + Shelf Bonus</div></div>
 <div class="exposure-box"><div class="t">Eligible Pharmacy Sales</div><div class="v">${fmtBig(mgmtEligibleQ32026Sales)} EGP</div><div class="sub">Q3 2026, cashback-eligible pharmacies only</div></div>
@@ -8222,10 +8234,11 @@ const cashbackHtml = `
 <span class="section-sub">Total Commercial Investment = Loyalty Program Cashback + Visibility Investment · click a number for detail</span>
 </div>
 <div class="panel">
-<div class="exposure-grid" style="margin-bottom:18px;">
-<button class="exposure-box" type="button" data-drawer='{"type":"totalInvestment"}'>
-<div class="t">Total Commercial Investment</div><div class="v">${fmtExec(totalCommercialInvestment)} EGP</div><div class="sub">Loyalty Program Cashback + Visibility Investment</div>
+<button class="exec-vis-hero" type="button" data-drawer='{"type":"totalInvestment"}'>
+<div class="exec-vis-hero-value">${fmtExec(totalCommercialInvestment)} EGP</div>
+<div class="exec-vis-hero-label">Total Commercial Investment</div>
 </button>
+<div class="exposure-grid" style="margin-bottom:18px;">
 <button class="exposure-box" type="button" data-drawer='{"type":"cashbackTotal"}'>
 <div class="t">Loyalty Program Cashback</div><div class="v">${fmtExec(kpis.totalCashback)} EGP</div><div class="sub">Fixed + Variable, cashback-eligible population</div>
 </button>
