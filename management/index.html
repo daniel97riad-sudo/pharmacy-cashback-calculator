@@ -8081,30 +8081,28 @@ const populationStripHtml = `
 // four separate cards. Every number keeps its original data-drawer entry
 // (eligible / salesPoint:q326 / salesPoint:growth / cashbackTotal), so the
 // Intelligence Drawer content is byte-for-byte the same as before. ----
-const narrativeSentence = `${kpis.targetAchieved.toLocaleString('en-US')} cashback-eligible pharmacies generated <b>${fmtExec(sumQ32026Eligible)} EGP</b> in Q3 sales, growing <b class="${growthClass}">${growthLabel}</b> vs Q3'25 (eligible pharmacies only, not company-wide), with <b>${fmtExec(kpis.totalCashback)} EGP</b> paid as Loyalty Program Cashback.`;
+const narrativeSentence = `${kpis.targetAchieved.toLocaleString('en-US')} cashback-eligible pharmacies generated <b>${fmtExec(sumQ32026Eligible)} EGP</b> in Q3 sales, growing <b class="${growthClass}">${growthLabel}</b> vs Q3'25 (eligible pharmacies only, not company-wide), with <b>${fmtExec(totalCommercialInvestment)} EGP</b> invested through the Loyalty Program and Visibility.`;
 // Hero tile order (Master Implementation Run, 2026-09-27, approved change
-// B): Total Cashback -> Growth -> Cashback Eligible -> Eligible Sales.
-// Same four numbers, same data-drawer entries, same formulas -- only the
-// left-to-right order changed, per Daniel's "TOTAL CASHBACK -> GROWTH ->
-// VISIBILITY MONEY" instruction (Visibility Investment is its own section,
-// reordered further down to sit right after this hero -- see the
-// section.innerHTML assembly below). The Growth tile's visible label now
-// states its population inline ("Eligible pharmacies") rather than only in
-// the hover title, so it can never be misread as a company-wide figure.
+// B). Reordered again (Executive Hero Story Order brief, 2026-09-28) to
+// SALES -> SCALE -> GROWTH -> INVESTMENT: Eligible Q3'26 Sales -> Cashback
+// Eligible -> Growth vs Q3'25 -> Total Commercial Investment. The fourth
+// tile now shows Total Commercial Investment (kpis.totalCashback +
+// posmM.totalInvestmentEgp, same value/drawer as the Commercial Investment
+// section's own hero below) in place of Loyalty Program Cashback alone, so
+// the top-of-page headline matches the money figure Daniel actually leads
+// with. Same four data-drawer entries as before (eligible / salesPoint:q326
+// / salesPoint:growth / totalInvestment) -- no calc changes, only which
+// value is headlined and in what order. The Growth tile's visible label
+// still states its population inline ("Eligible pharmacies") so it can
+// never be misread as a company-wide figure.
 const heroStoryHtml = `
 <div class="section flow-hero-identity">
 <div class="panel exec-story-panel">
 <div class="exec-story-row exec-story-hero4">
-<button class="exec-hero-stat exec-hero-stat--money" type="button" data-drawer='{"type":"cashbackTotal"}' title="${Math.round(kpis.totalCashback).toLocaleString('en-US')} EGP (Fixed + Variable) · click for detail">
-<div class="exec-hero-value">${fmtExec(kpis.totalCashback)} EGP</div>
-<div class="exec-hero-label">${iconSvg('dollar')}Loyalty Program Cashback</div>
-<span class="exec-stat-hint">${iconSvg('arrow-right')}See where cashback goes</span>
-</button>
-<div class="exec-hero-divider" aria-hidden="true"></div>
-<button class="exec-hero-stat" type="button" data-drawer='{"type":"salesPoint","point":"growth"}' title="Q3 2026 vs Q3 2025, cashback-eligible pharmacies only -- not a company-wide figure · click for detail">
-<div class="exec-hero-value ${growthClass}">${growthLabel}</div>
-<div class="exec-hero-label">${iconSvg('activity')}Growth vs Q3'25 · Eligible pharmacies</div>
-<span class="exec-stat-hint">${iconSvg('arrow-right')}Explore growth leaders</span>
+<button class="exec-hero-stat" type="button" data-drawer='{"type":"salesPoint","point":"q326"}' title="${Math.round(sumQ32026Eligible).toLocaleString('en-US')} EGP · click for detail">
+<div class="exec-hero-value">${fmtExec(sumQ32026Eligible)} EGP</div>
+<div class="exec-hero-label">${iconSvg('trending-up')}Eligible Q3'26 Sales</div>
+<span class="exec-stat-hint">${iconSvg('arrow-right')}View sales performance</span>
 </button>
 <div class="exec-hero-divider" aria-hidden="true"></div>
 <button class="exec-hero-stat exec-hero-stat--eligible" type="button" data-drawer='{"type":"eligible"}' title="${kpis.targetAchieved.toLocaleString('en-US')} pharmacies qualify for cashback (Fixed + Variable) · click for detail">
@@ -8113,10 +8111,16 @@ const heroStoryHtml = `
 <span class="exec-stat-hint">${iconSvg('arrow-right')}Explore pharmacies</span>
 </button>
 <div class="exec-hero-divider" aria-hidden="true"></div>
-<button class="exec-hero-stat" type="button" data-drawer='{"type":"salesPoint","point":"q326"}' title="${Math.round(sumQ32026Eligible).toLocaleString('en-US')} EGP · click for detail">
-<div class="exec-hero-value">${fmtExec(sumQ32026Eligible)} EGP</div>
-<div class="exec-hero-label">${iconSvg('trending-up')}Eligible Sales</div>
-<span class="exec-stat-hint">${iconSvg('arrow-right')}View sales performance</span>
+<button class="exec-hero-stat" type="button" data-drawer='{"type":"salesPoint","point":"growth"}' title="Q3 2026 vs Q3 2025, cashback-eligible pharmacies only -- not a company-wide figure · click for detail">
+<div class="exec-hero-value ${growthClass}">${growthLabel}</div>
+<div class="exec-hero-label">${iconSvg('activity')}Growth vs Q3'25 · Eligible pharmacies</div>
+<span class="exec-stat-hint">${iconSvg('arrow-right')}Explore growth leaders</span>
+</button>
+<div class="exec-hero-divider" aria-hidden="true"></div>
+<button class="exec-hero-stat exec-hero-stat--money" type="button" data-drawer='{"type":"totalInvestment"}' title="${Math.round(totalCommercialInvestment).toLocaleString('en-US')} EGP (Loyalty Program Cashback + Visibility Investment) · click for detail">
+<div class="exec-hero-value">${fmtExec(totalCommercialInvestment)} EGP</div>
+<div class="exec-hero-label">${iconSvg('dollar')}Total Commercial Investment</div>
+<span class="exec-stat-hint">${iconSvg('arrow-right')}See investment breakdown</span>
 </button>
 </div>
 <div class="exec-story-sentence">${narrativeSentence}</div>
