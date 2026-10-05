@@ -9627,7 +9627,7 @@ const em = k => emCols.includes(k) ? ' class="em"' : '';
 const slabLabel = cr => { const d = [...COMMERCIAL_2026_FIXED_SLABS, ...COMMERCIAL_2026_VARIABLE_TIERS].find(s => s.key === cr.achieved_slab); return d ? d.label : (cr.achieved_slab || '—'); };
 const rateLabel = cr => cr.commercial_structure === 'variable' && cr.cashback_rate ? (cr.cashback_rate*100).toFixed(2) + '%' : (cr.commercial_structure === 'fixed' ? 'Fixed amount' : '—');
 const th = (k, text) => `<th data-cdl-sort="${k}"${cdlState.sort === k ? ' class="on"' : ''}>${text}${cdlState.sort === k ? (cdlState.dir === 'asc' ? ' ▲' : ' ▼') : ''}</th>`;
-const bodyHtml = rows.map(r => `<tr><td class="cdl-name">${cdlEsc(r.name)}<small>${cdlEsc(r.code)}</small></td><td>${cdlEsc(r.terr || '—')}</td><td${em('q325')}>${m(r.q325)}</td><td${em('q326')}>${m(r.q326)}</td><td${em('growth')}>${pct(r.growth)}</td><td>${cdlEsc(slabLabel(r.x.cr))}</td><td>${rateLabel(r.x.cr)}</td><td${em('cashback')}>${m(r.cashback)}</td><td${em('inc')}>${r.inc >= 0 ? '' : '−'}${m(Math.abs(r.inc))}</td></tr>`).join('');
+const rowHtmls = rows.map(r => `<tr><td class="cdl-name">${cdlEsc(r.name)}<small>${cdlEsc(r.code)}</small></td><td>${cdlEsc(r.terr || '—')}</td><td${em('q325')}>${m(r.q325)}</td><td${em('q326')}>${m(r.q326)}</td><td${em('growth')}>${pct(r.growth)}</td><td>${cdlEsc(slabLabel(r.x.cr))}</td><td>${rateLabel(r.x.cr)}</td><td${em('cashback')}>${m(r.cashback)}</td><td${em('inc')}>${r.inc >= 0 ? '' : '−'}${m(Math.abs(r.inc))}</td></tr>`);
 const filtered = rows.length !== opts.records.length;
 const chip = (k, lbl, val) => `<div class="cdl-chip${(emCols.includes(k) || (k==='n' && metric==='n') || (k==='contribution' && metric==='contribution')) ? ' on' : ''}"><span>${lbl}</span><b>${val}</b></div>`;
 if(full){
@@ -9664,7 +9664,21 @@ ov.querySelector('[data-cdl-sortsel]').addEventListener('change', e => { cdlStat
 ov.querySelector('[data-cdl-dir]').addEventListener('click', () => { cdlState.dir = cdlState.dir === 'asc' ? 'desc' : 'asc'; cdlRender(false); });
 }
 ov.querySelector('.cdl-table thead').innerHTML = `<tr>${th('name','Pharmacy')}<th>Territory</th>${th('q325','Q3’25 Sales')}${th('q326','Q3’26 Sales')}${th('growth','Growth %')}<th>Slab / Tier</th><th>Cashback Rate</th>${th('cashback','Cashback')}${th('inc','Incremental Sales')}</tr>`;
-ov.querySelector('.cdl-table tbody').innerHTML = bodyHtml || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:18px;">No pharmacies match the search.</td></tr>';
+// Progressive render: first rows paint immediately, the rest append in
+// small batches so large groups (e.g. all 1,496) open without a stall.
+// Totals/footer always come from the full set, never from what is painted.
+const tbodyEl = ov.querySelector('.cdl-table tbody');
+const token = cdlState.renderToken = (cdlState.renderToken || 0) + 1;
+const FIRST = 120, CHUNK = 250;
+tbodyEl.innerHTML = rowHtmls.slice(0, FIRST).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:18px;">No pharmacies match the search.</td></tr>';
+let at = FIRST;
+const pump = () => {
+if(!cdlState || cdlState.renderToken !== token || at >= rowHtmls.length) return;
+tbodyEl.insertAdjacentHTML('beforeend', rowHtmls.slice(at, at + CHUNK).join(''));
+at += CHUNK;
+setTimeout(pump, 0);
+};
+setTimeout(pump, 0);
 ov.querySelector('.cdl-table tfoot').innerHTML = `<tr><td class="cdl-name">${filtered ? 'Shown (filtered)' : 'Total'} — ${vis.n.toLocaleString('en-US')} pharmacies</td><td></td><td${em('q325')}>${m(vis.q325)}</td><td${em('q326')}>${m(vis.q326)}</td><td${em('growth')}>${pct(vis.growth)}</td><td></td><td></td><td${em('cashback')}>${m(vis.cashback)}</td><td${em('inc')}>${vis.inc < 0 ? '−' : ''}${m(Math.abs(vis.inc))}</td></tr>`;
 ov.querySelector('[data-cdl-count]').textContent = filtered ? `${rows.length.toLocaleString('en-US')} of ${opts.records.length.toLocaleString('en-US')} shown` : `${rows.length.toLocaleString('en-US')} pharmacies`;
 ov.querySelector('[data-cdl-dir]').textContent = cdlState.dir === 'asc' ? 'Ascending ▲' : 'Descending ▼';
