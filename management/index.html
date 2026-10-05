@@ -9362,6 +9362,61 @@ ${filtersHtml}
 </div>`;
 }
 
+// ===================================================================
+// Cashback-Eligible Analysis (added 2026-10-05) -- REPORTING ONLY.
+// Population = the same cashback-eligible pharmacies Executive uses: every
+// PHARMACIES record whose existing commercialRecordFor()/computeCommercial2026()
+// result has an achieved slab/tier and cashback > 0. Nothing is recalculated
+// here: slab, Q3 2025/Q3 2026 Dist_Value and cashback are read straight from
+// the engine's pharmacy-level output. Group growth = SUM(Q3'26)/SUM(Q3'25)-1
+// (never an average of pharmacy growth %). Whole universe, so these tables are
+// deliberately NOT affected by the Cashback Summary filters above.
+// ===================================================================
+function computeCashbackEligibleAnalysis(){
+const dealsByCode = agreedDealsByCode();
+const eligible = PHARMACIES
+.map(p => ({ p, cr: commercialRecordFor(p, dealsByCode) }))
+.filter(x => x.cr.target_achieved && x.cr.achieved_slab && (x.cr.cashback_amount || 0) > 0);
+const blank = () => ({ n:0, q325:0, q326:0, cashback:0 });
+const add = (o, x) => { o.n++; o.q325 += x.cr.q3_2025_dv || 0; o.q326 += x.cr.q3_2026_dv || 0; o.cashback += x.cr.cashback_amount || 0; };
+const total = blank();
+const bySlab = {};
+const byTerritory = {};
+eligible.forEach(x => {
+add(total, x);
+const sk = x.cr.achieved_slab;
+add(bySlab[sk] = bySlab[sk] || blank(), x);
+const tk = x.p.tr || '(No territory)';
+add(byTerritory[tk] = byTerritory[tk] || blank(), x);
+});
+const growth = o => o.q325 > 0 ? (o.q326 / o.q325 - 1) : null;
+const slabOrder = [...COMMERCIAL_2026_FIXED_SLABS].reverse().concat([...COMMERCIAL_2026_VARIABLE_TIERS].reverse());
+const slabRows = slabOrder.map(s => Object.assign({ key:s.key, label:s.label }, bySlab[s.key] || blank()))
+.map(r => Object.assign(r, { growth: growth(r) }));
+const territoryRows = Object.entries(byTerritory)
+.map(([k,o]) => Object.assign({ key:k, label:k }, o, { growth: growth(o) }))
+.sort((a,b) => b.cashback - a.cashback || a.label.localeCompare(b.label));
+total.growth = growth(total);
+return { eligibleCodes: eligible.map(x => x.p.c), total, slabRows, territoryRows };
+}
+
+function renderCashbackEligibleAnalysisHtml(){
+const a = computeCashbackEligibleAnalysis();
+const m = v => (v || 0).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+const g = v => v === null ? '<span class="dq-na">N/A</span>' : `<bdi dir="ltr">${v >= 0 ? '+' : ''}${(v*100).toFixed(2)}%</bdi>`;
+const row = (r, isTotal) => `<tr${isTotal ? ' style="font-weight:800;"' : ''}><td class="slab-name">${isTotal ? 'Total' : r.label}</td><td>${r.n.toLocaleString('en-US')}</td><td>${m(r.q325)} EGP</td><td>${m(r.q326)} EGP</td><td>${g(r.growth)}</td><td>${m(r.cashback)} EGP</td></tr>`;
+const head = first => `<thead><tr><th>${first}</th><th>Eligible Pharmacies</th><th>Q3’25 Sales</th><th>Q3’26 Sales</th><th>Growth %</th><th>Cashback</th></tr></thead>`;
+return `<div class="section" dir="ltr" id="cashbackEligibleAnalysis">
+<div class="section-head"><h2>${iconSvg('trending-up')}Cashback-Eligible Analysis</h2><span class="section-sub">The ${a.total.n.toLocaleString('en-US')} cashback-eligible pharmacies only (achieved a Fixed Slab or Variable Tier) — whole universe, not affected by the filters above. Growth = SUM Q3’26 ÷ SUM Q3’25 − 1, TOTAL Dist_Value.</span></div>
+<div class="panel">
+<div class="slab-group-tag">Performance by Slab / Tier</div>
+<div class="slab-table-wrap"><table class="slab-table" id="cbEligSlabTable" style="margin-bottom:16px;">${head('Slab / Tier')}<tbody>${a.slabRows.map(r => row(r,false)).join('')}${row(a.total,true)}</tbody></table></div>
+<div class="slab-group-tag">Performance by Territory</div>
+<div class="slab-table-wrap"><table class="slab-table" id="cbEligTerritoryTable">${head('Territory')}<tbody>${a.territoryRows.map(r => row(r,false)).join('')}${row(a.total,true)}</tbody></table></div>
+</div>
+</div>`;
+}
+
 function wireCommercialCashbackSummary(section){
 const bind = (id, applyFn) => {
 const el = section.querySelector('#'+id);
@@ -9472,7 +9527,7 @@ searchPh:'ابحث عن صيدلية بالاسم أو الكود...'
 };
 
 if(!AGREED_DEALS.length){
-section.innerHTML = renderCommercialCashbackSummaryHtml() + `<div class="card"><div class="placeholder"><div class="big">💰</div>${DL.noDeals}</div></div>`;
+section.innerHTML = renderCommercialCashbackSummaryHtml() + renderCashbackEligibleAnalysisHtml() + `<div class="card"><div class="placeholder"><div class="big">💰</div>${DL.noDeals}</div></div>`;
 wireCommercialCashbackSummary(section);
 return;
 }
@@ -9590,7 +9645,7 @@ dealsActiveDM ? `${DL.dmLabel}: <b>${dealsActiveDM}</b>` : '',
 dealsActiveMR ? `${DL.mrLabel}: <b>${dealsActiveMR}</b>` : ''
 ].filter(Boolean).join(' — ');
 
-section.innerHTML = renderCommercialCashbackSummaryHtml() + `
+section.innerHTML = renderCommercialCashbackSummaryHtml() + renderCashbackEligibleAnalysisHtml() + `
 <div class="card">
 <h2>${DL.overviewH2}</h2>
 <div class="note" style="margin-top:0;margin-bottom:14px;">Snapshot as of ${DEALS_SNAPSHOT_DATE}${filterNote ? ` — ${filterNote}` : ''}.</div>
