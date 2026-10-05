@@ -1406,6 +1406,54 @@ button.xdw-tier-row:hover{background:var(--pharco-orange-light);}
 #settingsPageView .settings-sub{font-size:12px;color:var(--muted);margin-top:2px;}
 #settingsPageView .settings-soon{font-size:12.5px;color:var(--muted);background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-top:6px;}
 </style>
+<style id="cdlStyles">
+/* ---- Commercial numeric drill-down (2026-10-05) -- one shared drawer used by
+   the Cashback-Eligible Analysis, Executive composition and Management
+   commercial roll-up. Presentation only; reads existing commercial records. ---- */
+.cdl-num{cursor:pointer;border-bottom:1px dotted rgba(255,164,0,.75);border-radius:3px;padding:0 2px;margin:0 -2px;transition:background .12s,color .12s;}
+.cdl-num:hover{background:var(--primary-light);color:var(--primary-dark);border-bottom-color:var(--primary);}
+.cdl-num:focus-visible{outline:2px solid var(--primary);outline-offset:1px;}
+.cdl-overlay{position:fixed;inset:0;z-index:9000;background:rgba(36,34,32,.18);display:flex;justify-content:flex-end;direction:ltr;}
+.cdl-panel{background:#fff;width:min(1320px,97vw);height:100%;display:flex;flex-direction:column;box-shadow:-10px 0 34px rgba(36,34,32,.16);border-left:3px solid var(--primary);color:var(--text);font-family:inherit;}
+.cdl-head{background:var(--bg);padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start;}
+.cdl-head-main{flex:1;min-width:0;}
+.cdl-eyebrow{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-dark);}
+.cdl-title{font-size:17px;font-weight:800;margin:3px 0 2px;color:var(--text);}
+.cdl-value{font-size:26px;font-weight:800;color:var(--text);line-height:1.15;}
+.cdl-value small{font-size:13px;font-weight:700;color:var(--muted);margin-inline-start:8px;}
+.cdl-close{border:1px solid var(--border);background:#fff;border-radius:8px;width:34px;height:34px;font-size:18px;line-height:1;cursor:pointer;color:var(--text);flex-shrink:0;}
+.cdl-close:hover{border-color:var(--primary);background:var(--primary-light);}
+.cdl-chips{display:flex;flex-wrap:wrap;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border);}
+.cdl-chip{background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11.5px;}
+.cdl-chip b{display:block;font-size:13px;color:var(--text);}
+.cdl-chip span{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.03em;}
+.cdl-chip.on{border-color:var(--primary);background:var(--primary-light);}
+.cdl-note{padding:6px 20px 0;font-size:11.5px;color:var(--muted);}
+.cdl-controls{display:flex;flex-wrap:wrap;gap:8px;padding:10px 20px;align-items:center;}
+.cdl-controls input,.cdl-controls select{border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-size:12.5px;font-family:inherit;color:var(--text);background:var(--bg);}
+.cdl-controls input{min-width:180px;flex:1 1 180px;}
+.cdl-controls input:focus,.cdl-controls select:focus{border-color:var(--primary);outline:none;}
+.cdl-controls button{border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit;}
+.cdl-controls button:hover{border-color:var(--primary);}
+.cdl-count{font-size:12px;color:var(--muted);margin-inline-start:auto;}
+.cdl-body{flex:1;overflow:auto;padding:0 20px;-webkit-overflow-scrolling:touch;}
+table.cdl-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:980px;}
+table.cdl-table th{position:sticky;top:0;background:#fff;text-align:start;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);padding:8px;border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;}
+table.cdl-table th.on{color:var(--primary-dark);}
+table.cdl-table td{padding:7px 8px;border-bottom:1px solid var(--border);white-space:nowrap;text-align:start;}
+table.cdl-table td.cdl-name{white-space:normal;min-width:200px;max-width:280px;font-weight:700;}
+table.cdl-table td.cdl-name small{display:block;font-weight:400;color:var(--muted);}
+table.cdl-table td.em{background:var(--primary-light);font-weight:800;}
+table.cdl-table tfoot td{font-weight:800;background:var(--bg);border-top:2px solid var(--border);position:sticky;bottom:0;}
+@media (max-width:760px){
+.cdl-overlay{align-items:flex-end;}
+.cdl-panel{width:100vw;height:92vh;border-left:none;border-top:3px solid var(--primary);border-radius:14px 14px 0 0;}
+.cdl-head{padding:14px 14px 10px;}
+.cdl-chips,.cdl-controls,.cdl-note{padding-left:14px;padding-right:14px;}
+.cdl-body{padding:0 14px;}
+.cdl-value{font-size:22px;}
+}
+</style>
 </head>
 <body>
 <aside class="app-sidebar" id="appSidebar" dir="ltr">
@@ -6729,7 +6777,7 @@ if(cr.visibility_status === 'pending') g.visibilityPending++;
 });
 return Object.values(groups).map(g => Object.assign(g, { totalCashback: g.fixedCashback + g.variableCashback })).sort((a,b) => b.n - a.n);
 }
-function commercialRollupTableHtml(rows, labelHeader){
+function commercialRollupTableHtml(rows, labelHeader, fieldKey){
 // Visibility Pending is deliberately NOT rendered here (removed 2026-09-26,
 // pre-deployment polish pass) -- Visibility has its own dedicated workspace
 // and this commercial hierarchy should stay focused on population/baseline/
@@ -6740,8 +6788,8 @@ function commercialRollupTableHtml(rows, labelHeader){
 const rowHtml = (r, labelHtml) => `<td class="name-cell">${labelHtml}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></td>
 <td>${r.n.toLocaleString('en-US')}</td>
 <td>${r.withBaseline.toLocaleString('en-US')}</td>
-<td>${r.targetAchieved.toLocaleString('en-US')}</td>
-<td>${fmtBig(r.totalCashback)} EGP</td>
+<td>${fieldKey && r.targetAchieved ? cdlWrap(r.targetAchieved.toLocaleString('en-US'), 'mgmt', fieldKey + '|' + r.key, 'n') : r.targetAchieved.toLocaleString('en-US')}</td>
+<td>${fieldKey && r.targetAchieved ? cdlWrap(fmtBig(r.totalCashback) + ' EGP', 'mgmt', fieldKey + '|' + r.key, 'cashback') : fmtBig(r.totalCashback) + ' EGP'}</td>
 <td>${r.dealRegistered.toLocaleString('en-US')}</td>
 <td>${r.achievedNoDeal.toLocaleString('en-US')}</td>`;
 return `<table>
@@ -6862,7 +6910,7 @@ const commercialRollupHtml = `
 <div class="section flow-tables">
 <div class="section-head"><h2>${iconSvg('layers')}Commercial Performance by ${rollupLabel}</h2><span class="section-sub">Whole pharmacy universe (${commercialPool.length.toLocaleString('en-US')} pharmacies in view), actual Q3 2026 Dist_Value × tier rate — independent of deal registration. Click a row to drill in.</span></div>
 <div class="panel" style="overflow-x:auto;">
-${commercialRollupTableHtml(commercialRollupRows, rollupLabel)}
+${commercialRollupTableHtml(commercialRollupRows, rollupLabel, rollupField)}
 </div>
 </div>`;
 
@@ -8183,7 +8231,7 @@ const active = execCompositionFilter.tier === t.key;
 return `<div class="exec-comp-tier${active?' active':''}" data-comp-tier="${t.key}" tabindex="0" role="button">
 <div class="exec-comp-tier-rate">${(t.rate*100).toFixed(2)}%</div>
 <div class="exec-comp-tier-range">${growthLabelTier} growth</div>
-<div class="exec-comp-tier-n">${recs.length.toLocaleString('en-US')} pharmacies</div>
+<div class="exec-comp-tier-n">${cdlWrap(recs.length.toLocaleString('en-US') + ' pharmacies', 'exec', 'slab|' + t.key, 'n', false)}</div>
 </div>`;
 }).join('');
 
@@ -8194,7 +8242,7 @@ const active = execCompositionFilter.tier === f.key;
 return `<div class="exec-comp-tier${active?' active':''}" data-comp-tier="${f.key}" tabindex="0" role="button">
 <div class="exec-comp-tier-rate">${f.cash.toLocaleString('en-US')} EGP</div>
 <div class="exec-comp-tier-range">&ge; ${f.threshold.toLocaleString('en-US')} EGP</div>
-<div class="exec-comp-tier-n">${recs.length.toLocaleString('en-US')} pharmacies</div>
+<div class="exec-comp-tier-n">${cdlWrap(recs.length.toLocaleString('en-US') + ' pharmacies', 'exec', 'slab|' + f.key, 'n', false)}</div>
 </div>`;
 }).join('');
 
@@ -8264,14 +8312,14 @@ ${donutSvgHtml}
 <div class="exec-cb-legend">
 <button class="exec-cb-legend-item${isStructureActive('variable')?' active':''}" type="button" data-comp-structure="variable">
 <span class="exec-cb-swatch exec-cb-swatch--variable" aria-hidden="true"></span>
-<span class="exec-cb-legend-text"><span class="exec-cb-legend-label">Variable</span><span class="exec-cb-legend-sub">${variableRecords.length.toLocaleString('en-US')} pharmacies</span></span>
-<span class="exec-cb-legend-value">${fmtExec(variableTotalCashbackTop)} EGP</span>
+<span class="exec-cb-legend-text"><span class="exec-cb-legend-label">Variable</span><span class="exec-cb-legend-sub">${cdlWrap(variableRecords.length.toLocaleString('en-US') + ' pharmacies', 'exec', 'structure|variable', 'n', false)}</span></span>
+<span class="exec-cb-legend-value">${cdlWrap(fmtExec(variableTotalCashbackTop) + ' EGP', 'exec', 'structure|variable', 'cashback', false)}</span>
 <span class="exec-row-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span>
 </button>
 <button class="exec-cb-legend-item${isStructureActive('fixed')?' active':''}" type="button" data-comp-structure="fixed">
 <span class="exec-cb-swatch exec-cb-swatch--fixed" aria-hidden="true"></span>
-<span class="exec-cb-legend-text"><span class="exec-cb-legend-label">Fixed</span><span class="exec-cb-legend-sub">${fixedRecords.length.toLocaleString('en-US')} pharmacies</span></span>
-<span class="exec-cb-legend-value">${fmtExec(fixedTotalCashbackTop)} EGP</span>
+<span class="exec-cb-legend-text"><span class="exec-cb-legend-label">Fixed</span><span class="exec-cb-legend-sub">${cdlWrap(fixedRecords.length.toLocaleString('en-US') + ' pharmacies', 'exec', 'structure|fixed', 'n', false)}</span></span>
+<span class="exec-cb-legend-value">${cdlWrap(fmtExec(fixedTotalCashbackTop) + ' EGP', 'exec', 'structure|fixed', 'cashback', false)}</span>
 <span class="exec-row-arrow" aria-hidden="true">${iconSvg('arrow-right')}</span>
 </button>
 <button class="exec-cb-ratio" type="button" data-drawer='{"type":"cashbackRatio"}' title="Commercial Investment ÷ Q3 2026 Dist_Value of cashback-eligible pharmacies · click for detail">
@@ -9381,8 +9429,8 @@ const dealsByCode = agreedDealsByCode();
 const eligible = PHARMACIES
 .map(p => ({ p, cr: commercialRecordFor(p, dealsByCode) }))
 .filter(x => x.cr.target_achieved && x.cr.achieved_slab && (x.cr.cashback_amount || 0) > 0);
-const blank = () => ({ n:0, q325:0, q326:0, cashback:0 });
-const add = (o, x) => { o.n++; o.q325 += x.cr.q3_2025_dv || 0; o.q326 += x.cr.q3_2026_dv || 0; o.cashback += x.cr.cashback_amount || 0; };
+const blank = () => ({ n:0, q325:0, q326:0, cashback:0, members:[] });
+const add = (o, x) => { o.n++; o.q325 += x.cr.q3_2025_dv || 0; o.q326 += x.cr.q3_2026_dv || 0; o.cashback += x.cr.cashback_amount || 0; o.members.push(x); };
 const total = blank();
 const byStructure = {};
 const bySlab = {};
@@ -9409,7 +9457,7 @@ const territoryRows = Object.entries(byTerritory)
 .map(([k,o]) => finish(Object.assign({ key:k, label:k }, o)))
 .sort((a,b) => b.q326 - a.q326 || a.label.localeCompare(b.label));
 finish(total);
-return { eligibleCodes: eligible.map(x => x.p.c), total, totalIncrease, structureRows, slabRows, territoryRows };
+return { eligibleCodes: eligible.map(x => x.p.c), eligible, total, totalIncrease, structureRows, slabRows, territoryRows };
 }
 
 function setCbEligTerritorySort(key){
@@ -9425,7 +9473,13 @@ const a = computeCashbackEligibleAnalysis();
 const m = v => (v || 0).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
 const g = v => v === null ? '<span class="dq-na">N/A</span>' : `<bdi dir="ltr">${v >= 0 ? '+' : ''}${(v*100).toFixed(2)}%</bdi>`;
 const c = v => v === null ? '<span class="dq-na">N/A</span>' : `<bdi dir="ltr">${(v*100).toFixed(2)}%</bdi>`;
-const row = (r, isTotal, rank) => `<tr${isTotal ? ' style="font-weight:800;"' : ''}><td class="slab-name">${isTotal ? 'Total' : (rank ? rank + '. ' : '') + r.label}</td><td>${r.n.toLocaleString('en-US')}</td><td style="white-space:nowrap;">${m(r.q325)} EGP</td><td style="white-space:nowrap;">${m(r.q326)} EGP</td><td style="white-space:nowrap;">${g(r.growth)}</td><td style="white-space:nowrap;">${m(r.cashback)} EGP</td><td style="white-space:nowrap;">${c(r.contribution)}</td></tr>`;
+// Every number is a drill-down target (cdlWrap): same group key resolves
+// back to this row's own member records in cdlResolve('elig', ...).
+const row = (r, isTotal, rank, kind) => {
+const gk = isTotal ? 'total' : kind + '|' + r.key;
+const d = (html, metric) => cdlWrap(html, 'elig', gk, metric);
+return `<tr${isTotal ? ' style="font-weight:800;"' : ''}><td class="slab-name">${isTotal ? 'Total' : (rank ? rank + '. ' : '') + r.label}</td><td>${d(r.n.toLocaleString('en-US'),'n')}</td><td style="white-space:nowrap;">${d(m(r.q325) + ' EGP','q325')}</td><td style="white-space:nowrap;">${d(m(r.q326) + ' EGP','q326')}</td><td style="white-space:nowrap;">${d(g(r.growth),'growth')}</td><td style="white-space:nowrap;">${d(m(r.cashback) + ' EGP','cashback')}</td><td style="white-space:nowrap;">${d(c(r.contribution),'contribution')}</td></tr>`;
+};
 const sortTh = (key, text) => {
 const active = cbEligTerritorySort === key;
 return `<th style="cursor:pointer;white-space:nowrap;${active ? 'color:var(--shell-navy);' : ''}" onclick="setCbEligTerritorySort('${key}')" title="Sort territories by ${text}">${text}${active ? ' ▼' : ' ⇅'}</th>`;
@@ -9436,17 +9490,207 @@ const territoryRows = cbEligTerritorySort === 'contribution'
 ? [...a.territoryRows].sort((x,y) => (y.q326 - y.q325) - (x.q326 - x.q325) || x.label.localeCompare(y.label))
 : a.territoryRows;
 return `<div class="section" dir="ltr" id="cashbackEligibleAnalysis">
-<div class="section-head"><h2>${iconSvg('trending-up')}Cashback-Eligible Analysis</h2><span class="section-sub">The ${a.total.n.toLocaleString('en-US')} cashback-eligible pharmacies only (achieved a Fixed Slab or Variable Tier) — whole universe, not affected by the filters above. Growth = SUM Q3’26 ÷ SUM Q3’25 − 1. Contribution = group increase ÷ total eligible increase (${m(a.totalIncrease)} EGP). TOTAL Dist_Value.</span></div>
+<div class="section-head"><h2>${iconSvg('trending-up')}Cashback-Eligible Analysis</h2><span class="section-sub">The ${a.total.n.toLocaleString('en-US')} cashback-eligible pharmacies only (achieved a Fixed Slab or Variable Tier) — whole universe, not affected by the filters above. Growth = SUM Q3’26 ÷ SUM Q3’25 − 1. Contribution = group increase ÷ total eligible increase (${m(a.totalIncrease)} EGP). TOTAL Dist_Value. Click any number to see the pharmacies behind it.</span></div>
 <div class="panel">
 <div class="slab-group-tag">Commercial Structure Performance</div>
-<div class="slab-table-wrap"><table class="slab-table" id="cbEligStructureTable" style="margin-bottom:16px;">${head('Structure')}<tbody>${a.structureRows.map(r => row(r,false)).join('')}${row(a.total,true)}</tbody></table></div>
+<div class="slab-table-wrap"><table class="slab-table" id="cbEligStructureTable" style="margin-bottom:16px;">${head('Structure')}<tbody>${a.structureRows.map(r => row(r,false,0,'structure')).join('')}${row(a.total,true)}</tbody></table></div>
 <div class="slab-group-tag">Performance by Slab / Tier</div>
-<div class="slab-table-wrap"><table class="slab-table" id="cbEligSlabTable" style="margin-bottom:16px;">${head('Slab / Tier')}<tbody>${a.slabRows.map(r => row(r,false)).join('')}${row(a.total,true)}</tbody></table></div>
+<div class="slab-table-wrap"><table class="slab-table" id="cbEligSlabTable" style="margin-bottom:16px;">${head('Slab / Tier')}<tbody>${a.slabRows.map(r => row(r,false,0,'slab')).join('')}${row(a.total,true)}</tbody></table></div>
 <div class="slab-group-tag">Performance by Territory — sorted by ${cbEligTerritorySort === 'contribution' ? 'contribution to Q3’26 growth' : 'Q3’26 sales'} (click a ⇅ column header to switch)</div>
-<div class="slab-table-wrap"><table class="slab-table" id="cbEligTerritoryTable">${territoryHead}<tbody>${territoryRows.map((r,i) => row(r,false,i+1)).join('')}${row(a.total,true)}</tbody></table></div>
+<div class="slab-table-wrap"><table class="slab-table" id="cbEligTerritoryTable">${territoryHead}<tbody>${territoryRows.map((r,i) => row(r,false,i+1,'territory')).join('')}${row(a.total,true)}</tbody></table></div>
 </div>
 </div>`;
 }
+
+// ===================================================================
+// Commercial numeric drill-down (added 2026-10-05) -- ONE reusable drawer.
+// Every clickable number (.cdl-num) carries a source + group + metric; the
+// resolver below returns the exact {p, cr} records that produced that
+// number from the SAME functions that render it (computeCashbackEligible-
+// Analysis(), computeCommercialKPIs(), filteredPharmacies() +
+// commercialRecordFor()). No group membership is rebuilt by hand and no
+// cashback is recalculated: the drawer only lists and sums the engine's
+// own pharmacy-level q3_2025_dv / q3_2026_dv / cashback_amount.
+// ===================================================================
+const CDL_METRICS = {
+n:{label:'Eligible Pharmacies', sort:'q326'},
+q325:{label:'Q3’25 Sales', sort:'q325'},
+q326:{label:'Q3’26 Sales', sort:'q326'},
+growth:{label:'Growth', sort:'growth'},
+cashback:{label:'Cashback', sort:'cashback'},
+contribution:{label:'Growth Contribution', sort:'inc'}
+};
+let cdlState = null;
+
+function cdlEsc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function cdlAttr(src, group, metric, extraAttrs){
+return `class="cdl-num" data-cdl-src="${src}" data-cdl-group="${cdlEsc(group)}" data-cdl-metric="${metric}"${extraAttrs || ''} title="Click to see the pharmacies behind this number"`;
+}
+function cdlWrap(html, src, group, metric, focusable){
+return `<span ${cdlAttr(src, group, metric, focusable === false ? '' : ' tabindex="0" role="button"')}>${html}</span>`;
+}
+
+// Returns { label, population, records:[{p,cr}], parentIncrease }
+function cdlResolve(src, group){
+const parts = String(group).split('|');
+const kind = parts[0], key = parts.slice(1).join('|');
+if(src === 'elig'){
+const a = computeCashbackEligibleAnalysis();
+const base = { population: 'Cashback-Eligible Analysis · whole universe', parentIncrease: a.totalIncrease };
+if(kind === 'total') return Object.assign(base, { label:'All cashback-eligible pharmacies', records: a.eligible });
+const rows = kind === 'structure' ? a.structureRows : (kind === 'slab' ? a.slabRows : a.territoryRows);
+const row = rows.find(r => r.key === key);
+const section = kind === 'structure' ? 'Commercial Structure' : (kind === 'slab' ? 'Slab / Tier' : 'Territory');
+return row ? Object.assign(base, { label: row.label, population: base.population + ' · ' + section, records: row.members }) : null;
+}
+if(src === 'exec'){
+const kpis = computeCommercialKPIs();
+const eligible = kpis.records.filter(r => r.target_achieved).map(r => ({ p: r.p, cr: r }));
+const inc = eligible.reduce((s,x) => s + (x.cr.q3_2026_dv||0) - (x.cr.q3_2025_dv||0), 0);
+const base = { population: 'Executive · cashback-eligible pharmacies in view', parentIncrease: inc };
+if(kind === 'total') return Object.assign(base, { label:'All cashback-eligible pharmacies', records: eligible });
+if(kind === 'structure') return Object.assign(base, { label: key === 'fixed' ? 'Fixed' : 'Variable', records: eligible.filter(x => x.cr.commercial_structure === key) });
+if(kind === 'slab'){
+const def = [...COMMERCIAL_2026_FIXED_SLABS, ...COMMERCIAL_2026_VARIABLE_TIERS].find(s => s.key === key);
+return Object.assign(base, { label: def ? def.label : key, records: eligible.filter(x => x.cr.achieved_slab === key) });
+}
+return null;
+}
+if(src === 'mgmt'){
+// kind = PHARMACIES field used by the Management roll-up (rg / dm / tr)
+const dealsByCode = agreedDealsByCode();
+const pool = filteredPharmacies();
+const eligibleAll = pool.map(p => ({ p, cr: commercialRecordFor(p, dealsByCode) })).filter(x => x.cr.target_achieved);
+const inc = eligibleAll.reduce((s,x) => s + (x.cr.q3_2026_dv||0) - (x.cr.q3_2025_dv||0), 0);
+const fieldLabel = kind === 'rg' ? 'Region' : (kind === 'dm' ? 'District Manager' : 'Territory');
+return { label: key || 'Unassigned', population: 'Management · Commercial Performance by ' + fieldLabel + ' · cashback-eligible pharmacies in view', parentIncrease: inc, records: eligibleAll.filter(x => (x.p[kind] || '') === key) };
+}
+return null;
+}
+
+function cdlSummarize(records){
+const s = { n: records.length, q325:0, q326:0, cashback:0 };
+records.forEach(x => { s.q325 += x.cr.q3_2025_dv || 0; s.q326 += x.cr.q3_2026_dv || 0; s.cashback += x.cr.cashback_amount || 0; });
+s.inc = s.q326 - s.q325;
+s.growth = s.q325 > 0 ? (s.q326 / s.q325 - 1) : null;
+return s;
+}
+
+function openCommercialDrill(opts){
+// opts: { label, metric, population, records:[{p,cr}], parentIncrease }
+const metric = CDL_METRICS[opts.metric] ? opts.metric : 'q326';
+cdlState = { opts, metric, sort: CDL_METRICS[metric].sort, dir: 'desc', qName:'', qTerr:'' };
+let ov = document.getElementById('cdlOverlay');
+if(!ov){
+ov = document.createElement('div');
+ov.id = 'cdlOverlay';
+ov.className = 'cdl-overlay';
+ov.setAttribute('role','dialog');
+ov.setAttribute('aria-modal','true');
+document.body.appendChild(ov);
+ov.addEventListener('click', e => { if(e.target === ov) closeCommercialDrill(); });
+}
+ov.style.display = 'flex';
+cdlRender(true);
+}
+
+function closeCommercialDrill(){
+const ov = document.getElementById('cdlOverlay');
+if(ov){ ov.style.display = 'none'; ov.innerHTML = ''; }
+cdlState = null;
+}
+
+function cdlRender(full){
+const ov = document.getElementById('cdlOverlay');
+if(!ov || !cdlState) return;
+const { opts, metric } = cdlState;
+const m = v => (v || 0).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+const pct = v => v === null || v === undefined || !isFinite(v) ? 'N/A' : `${v >= 0 ? '+' : ''}${(v*100).toFixed(2)}%`;
+const all = cdlSummarize(opts.records);
+const contribution = opts.parentIncrease ? all.inc / opts.parentIncrease : null;
+const headline = { n: all.n.toLocaleString('en-US') + ' pharmacies', q325: m(all.q325) + ' EGP', q326: m(all.q326) + ' EGP', growth: pct(all.growth), cashback: m(all.cashback) + ' EGP', contribution: contribution === null ? 'N/A' : (contribution*100).toFixed(2) + '%' }[metric];
+const nameQ = cdlState.qName.trim().toLowerCase();
+const terrQ = cdlState.qTerr.trim().toLowerCase();
+const rows = opts.records.map(x => {
+const q325 = x.cr.q3_2025_dv || 0, q326 = x.cr.q3_2026_dv || 0;
+return { x, q325, q326, inc: q326 - q325, growth: q325 > 0 ? (q326 / q325 - 1) : null, cashback: x.cr.cashback_amount || 0, name: x.p.n || '', code: x.p.c || '', terr: x.p.tr || '' };
+}).filter(r => (!nameQ || r.name.toLowerCase().includes(nameQ) || String(r.code).toLowerCase().includes(nameQ)) && (!terrQ || r.terr.toLowerCase().includes(terrQ)));
+const sk = cdlState.sort, dir = cdlState.dir === 'asc' ? 1 : -1;
+rows.sort((a,b) => {
+if(sk === 'name') return dir * a.name.localeCompare(b.name);
+const av = a[sk] === null ? -Infinity : a[sk], bv = b[sk] === null ? -Infinity : b[sk];
+return dir * (av - bv) || a.name.localeCompare(b.name);
+});
+const vis = cdlSummarize(rows.map(r => r.x));
+const emCols = { n:[], q325:['q325'], q326:['q326'], growth:['q325','q326','growth'], cashback:['cashback'], contribution:['inc'] }[metric];
+const em = k => emCols.includes(k) ? ' class="em"' : '';
+const slabLabel = cr => { const d = [...COMMERCIAL_2026_FIXED_SLABS, ...COMMERCIAL_2026_VARIABLE_TIERS].find(s => s.key === cr.achieved_slab); return d ? d.label : (cr.achieved_slab || '—'); };
+const rateLabel = cr => cr.commercial_structure === 'variable' && cr.cashback_rate ? (cr.cashback_rate*100).toFixed(2) + '%' : (cr.commercial_structure === 'fixed' ? 'Fixed amount' : '—');
+const th = (k, text) => `<th data-cdl-sort="${k}"${cdlState.sort === k ? ' class="on"' : ''}>${text}${cdlState.sort === k ? (cdlState.dir === 'asc' ? ' ▲' : ' ▼') : ''}</th>`;
+const bodyHtml = rows.map(r => `<tr><td class="cdl-name">${cdlEsc(r.name)}<small>${cdlEsc(r.code)}</small></td><td>${cdlEsc(r.terr || '—')}</td><td${em('q325')}>${m(r.q325)}</td><td${em('q326')}>${m(r.q326)}</td><td${em('growth')}>${pct(r.growth)}</td><td>${cdlEsc(slabLabel(r.x.cr))}</td><td>${rateLabel(r.x.cr)}</td><td${em('cashback')}>${m(r.cashback)}</td><td${em('inc')}>${r.inc >= 0 ? '' : '−'}${m(Math.abs(r.inc))}</td></tr>`).join('');
+const filtered = rows.length !== opts.records.length;
+const chip = (k, lbl, val) => `<div class="cdl-chip${(emCols.includes(k) || (k==='n' && metric==='n') || (k==='contribution' && metric==='contribution')) ? ' on' : ''}"><span>${lbl}</span><b>${val}</b></div>`;
+if(full){
+ov.innerHTML = `<div class="cdl-panel" dir="ltr">
+<div class="cdl-head"><div class="cdl-head-main">
+<div class="cdl-eyebrow">${cdlEsc(opts.population)}</div>
+<div class="cdl-title">${cdlEsc(opts.label)} — ${CDL_METRICS[metric].label}</div>
+<div class="cdl-value">${headline}${metric === 'n' ? '' : `<small>${all.n.toLocaleString('en-US')} pharmacies</small>`}</div>
+</div><button class="cdl-close" type="button" aria-label="Close" data-cdl-close>×</button></div>
+<div class="cdl-chips">
+${chip('n','Pharmacies', all.n.toLocaleString('en-US'))}
+${chip('q325','Q3’25 Sales', m(all.q325) + ' EGP')}
+${chip('q326','Q3’26 Sales', m(all.q326) + ' EGP')}
+${chip('growth','Growth', pct(all.growth))}
+${chip('cashback','Cashback', m(all.cashback) + ' EGP')}
+${chip('inc','Incremental Sales', (all.inc < 0 ? '−' : '') + m(Math.abs(all.inc)) + ' EGP')}
+${chip('contribution','Growth Contribution', contribution === null ? 'N/A' : (contribution*100).toFixed(2) + '%')}
+</div>
+<div class="cdl-note">Growth = SUM Q3’26 ÷ SUM Q3’25 − 1 for these pharmacies. Contribution = their incremental sales ÷ the parent population’s incremental sales (${m(opts.parentIncrease)} EGP). Every row below is the engine’s own pharmacy-level result; the footer sums them.</div>
+<div class="cdl-controls">
+<input type="search" data-cdl-q="name" placeholder="Search pharmacy name or code…" value="${cdlEsc(cdlState.qName)}">
+<input type="search" data-cdl-q="terr" placeholder="Search territory…" value="${cdlEsc(cdlState.qTerr)}">
+<select data-cdl-sortsel aria-label="Sort by">
+${[['q325','Q3’25 Sales'],['q326','Q3’26 Sales'],['growth','Growth %'],['cashback','Cashback'],['inc','Incremental Sales'],['name','Pharmacy name']].map(([k,l]) => `<option value="${k}"${cdlState.sort===k?' selected':''}>Sort: ${l}</option>`).join('')}
+</select>
+<button type="button" data-cdl-dir>${cdlState.dir === 'asc' ? 'Ascending ▲' : 'Descending ▼'}</button>
+<span class="cdl-count" data-cdl-count></span>
+</div>
+<div class="cdl-body"><table class="cdl-table"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+</div>`;
+ov.querySelector('[data-cdl-close]').addEventListener('click', closeCommercialDrill);
+ov.querySelectorAll('[data-cdl-q]').forEach(inp => inp.addEventListener('input', () => { if(inp.dataset.cdlQ === 'name') cdlState.qName = inp.value; else cdlState.qTerr = inp.value; cdlRender(false); }));
+ov.querySelector('[data-cdl-sortsel]').addEventListener('change', e => { cdlState.sort = e.target.value; cdlState.dir = e.target.value === 'name' ? 'asc' : 'desc'; cdlRender(false); });
+ov.querySelector('[data-cdl-dir]').addEventListener('click', () => { cdlState.dir = cdlState.dir === 'asc' ? 'desc' : 'asc'; cdlRender(false); });
+}
+ov.querySelector('.cdl-table thead').innerHTML = `<tr>${th('name','Pharmacy')}<th>Territory</th>${th('q325','Q3’25 Sales')}${th('q326','Q3’26 Sales')}${th('growth','Growth %')}<th>Slab / Tier</th><th>Cashback Rate</th>${th('cashback','Cashback')}${th('inc','Incremental Sales')}</tr>`;
+ov.querySelector('.cdl-table tbody').innerHTML = bodyHtml || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:18px;">No pharmacies match the search.</td></tr>';
+ov.querySelector('.cdl-table tfoot').innerHTML = `<tr><td class="cdl-name">${filtered ? 'Shown (filtered)' : 'Total'} — ${vis.n.toLocaleString('en-US')} pharmacies</td><td></td><td${em('q325')}>${m(vis.q325)}</td><td${em('q326')}>${m(vis.q326)}</td><td${em('growth')}>${pct(vis.growth)}</td><td></td><td></td><td${em('cashback')}>${m(vis.cashback)}</td><td${em('inc')}>${vis.inc < 0 ? '−' : ''}${m(Math.abs(vis.inc))}</td></tr>`;
+ov.querySelector('[data-cdl-count]').textContent = filtered ? `${rows.length.toLocaleString('en-US')} of ${opts.records.length.toLocaleString('en-US')} shown` : `${rows.length.toLocaleString('en-US')} pharmacies`;
+ov.querySelector('[data-cdl-dir]').textContent = cdlState.dir === 'asc' ? 'Ascending ▲' : 'Descending ▼';
+ov.querySelector('[data-cdl-sortsel]').value = cdlState.sort;
+ov.querySelectorAll('.cdl-table thead [data-cdl-sort]').forEach(h => h.addEventListener('click', () => { const k = h.dataset.cdlSort; if(cdlState.sort === k) cdlState.dir = cdlState.dir === 'asc' ? 'desc' : 'asc'; else { cdlState.sort = k; cdlState.dir = k === 'name' ? 'asc' : 'desc'; } cdlRender(false); }));
+}
+
+function cdlOpenFromEl(el){
+const res = cdlResolve(el.dataset.cdlSrc, el.dataset.cdlGroup);
+if(!res) return;
+openCommercialDrill(Object.assign({ metric: el.dataset.cdlMetric }, res));
+}
+// Capture phase so a number inside an existing clickable row/tile opens the
+// drill-down instead of (not in addition to) that row's own action; clicks
+// anywhere else on the row keep their existing behaviour untouched.
+document.addEventListener('click', e => {
+const el = e.target && e.target.closest ? e.target.closest('.cdl-num') : null;
+if(!el) return;
+e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+cdlOpenFromEl(el);
+}, true);
+document.addEventListener('keydown', e => {
+if(e.key === 'Escape' && cdlState){ closeCommercialDrill(); return; }
+const el = e.target && e.target.classList && e.target.classList.contains('cdl-num') ? e.target : null;
+if(el && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); cdlOpenFromEl(el); }
+}, true);
 
 function wireCommercialCashbackSummary(section){
 const bind = (id, applyFn) => {
