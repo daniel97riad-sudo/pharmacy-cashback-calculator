@@ -1454,6 +1454,75 @@ table.cdl-table tfoot td{font-weight:800;background:var(--bg);border-top:2px sol
 .cdl-value{font-size:22px;}
 }
 </style>
+<style id="hierStyles">
+/* ---- Executive Commercial Hierarchy (2026-10-05) -- PHARCO palette only ---- */
+.hier-section{direction:ltr;text-align:left;}
+.hier-crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:2px 0 12px;}
+.hier-crumb{border:1px solid var(--border);background:#fff;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--text);cursor:pointer;font-family:inherit;}
+.hier-crumb:hover{border-color:var(--primary);}
+.hier-crumb.on{background:var(--primary);border-color:var(--primary);color:#242220;}
+.hier-sep{color:var(--muted);font-weight:800;}
+.hier-blocks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.hier-block{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;min-width:0;}
+.hier-block.inv{background:#fff;border-top:3px solid var(--primary);}
+.hier-block-h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-dark);margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;}
+.hier-block-h span{color:var(--muted);font-weight:700;text-transform:none;letter-spacing:0;}
+.hier-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
+.hier-tile{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;min-width:0;}
+.hier-tile-l{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);}
+.hier-tile-v{font-size:16px;font-weight:800;color:var(--text);margin-top:2px;word-break:break-word;}
+.hier-tile-s{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.35;}
+.hier-tile.key{background:var(--primary-light);border-color:#FFD58A;}
+.hier-tile.strong .hier-tile-v{color:var(--primary-dark);}
+.hier-tile.neg .hier-tile-v{color:var(--danger);}
+.hier-tile.pos .hier-tile-v{color:var(--success);}
+.hier-level-h{font-size:13px;font-weight:800;color:var(--text);margin:6px 0 8px;}
+.hier-level-h span{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-top:2px;}
+.hier-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:var(--radius-md);background:#fff;max-width:100%;}
+.hier-table-wrap:has(table.ph){max-height:70vh;overflow-y:auto;}
+table.hier-table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;min-width:1500px;}
+table.hier-table.ph{min-width:2000px;}
+table.hier-table th{background:#fff;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);padding:7px 8px;border-bottom:2px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:1;}
+table.hier-table tr.hier-grp th{background:var(--bg);color:var(--primary-dark);font-weight:800;border-bottom:1px solid var(--border);top:0;}
+table.hier-table.ph thead tr:nth-child(2) th{top:27px;}
+table.hier-table td{padding:7px 8px;border-bottom:1px solid var(--border);white-space:nowrap;text-align:left;}
+table.hier-table .hier-sticky{position:sticky;left:0;background:#fff;z-index:2;min-width:190px;max-width:260px;white-space:normal;box-shadow:1px 0 0 var(--border);}
+table.hier-table th.hier-sticky{z-index:3;}
+table.hier-table tr.hier-grp th.hier-sticky{background:var(--bg);}
+table.hier-table .inv-start{border-left:2px solid var(--primary);}
+table.hier-table td.neg{color:var(--danger);font-weight:700;}
+table.hier-table td.pos{color:var(--success);font-weight:700;}
+table.hier-table td.strong{font-weight:800;color:var(--primary-dark);}
+table.hier-table tr.unassigned td{background:#FFFBF2;}
+table.hier-table tr.unassigned td.hier-sticky{background:#FFFBF2;}
+table.hier-table tbody tr:hover td{background:var(--primary-light);}
+table.hier-table tfoot td{font-weight:800;background:var(--bg);border-top:2px solid var(--border);position:sticky;bottom:0;}
+table.hier-table tfoot td.hier-sticky{background:var(--bg);z-index:3;}
+.hier-open{border:none;background:none;padding:0;font:inherit;font-weight:800;color:var(--text);cursor:pointer;text-align:left;}
+.hier-open span{color:var(--primary);font-weight:800;}
+.hier-open:hover{color:var(--primary-dark);text-decoration:underline;}
+.hier-ph b{display:block;font-weight:700;}
+.hier-ph small{display:block;color:var(--muted);font-size:10.5px;}
+th.hier-sortable{cursor:pointer;}
+th.hier-sortable.on{color:var(--primary-dark);}
+.hier-na{color:var(--time-gray);font-weight:700;}
+.hier-deal{display:inline-block;border-radius:999px;padding:2px 8px;font-size:10.5px;font-weight:800;border:1px solid var(--border);background:#fff;}
+.hier-deal.new{background:var(--primary-light);border-color:#FFD58A;color:var(--primary-dark);}
+.hier-deal.existing{background:#F3EFE9;border-color:#DCD3C6;color:#242220;}
+.hier-deal.none{color:var(--muted);}
+.hier-yes{color:var(--success);font-weight:800;}
+.hier-no{color:var(--danger);font-weight:800;}
+.hier-ph-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;}
+.hier-ph-controls input{border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-size:12.5px;font-family:inherit;background:var(--bg);flex:1 1 220px;max-width:360px;}
+.hier-ph-controls input:focus{border-color:var(--primary);outline:none;}
+.hier-ph-controls span{font-size:12px;color:var(--muted);}
+@media (max-width:900px){ .hier-blocks{grid-template-columns:1fr;} }
+@media (max-width:480px){
+.hier-tiles{grid-template-columns:1fr 1fr;}
+.hier-tile-v{font-size:14px;}
+table.hier-table .hier-sticky{min-width:130px;max-width:150px;}
+}
+</style>
 </head>
 <body>
 <aside class="app-sidebar" id="appSidebar" dir="ltr">
@@ -8614,9 +8683,10 @@ ${paginationHtml}
 // page reads Total Cashback -> Growth -> Visibility Money underneath the
 // reordered hero above, per Daniel's instruction. No section's own content
 // changed here, only the order they're concatenated in.
+const execHierarchyHtml = renderExecHierarchyHtml();
 section.innerHTML = filterBarHtml('execDash', 'Executive') + dataUpdatedHtml
 + populationStripHtml
-+ heroStoryHtml + cashbackHtml + salesPerformanceHtml + visibilityModuleHtml + exploreHtml + eligibleTableHtml;
++ heroStoryHtml + execHierarchyHtml + cashbackHtml + salesPerformanceHtml + visibilityModuleHtml + exploreHtml + eligibleTableHtml;
 
 wireFilterBar('execDash');
 section.querySelectorAll('[data-open-pharmacy]').forEach(el => {
@@ -8792,6 +8862,7 @@ execVisibilityCodeFilter = null; execVisibilityCodeFilterLabel = '';
 execExplorerSearchTerm = '';
 execTableSort = { field: 'cashback', dir: 'desc' };
 execTablePage = 1;
+execHier = { dm: null, mr: null, phSort: 'q326', phDir: 'desc', phQ: '' };
 platformFilters = { region: null, dm: null, territory: null, code: '' };
 switchView('execDash');
 }
@@ -9565,6 +9636,7 @@ const inc = eligibleAll.reduce((s,x) => s + (x.cr.q3_2026_dv||0) - (x.cr.q3_2025
 const fieldLabel = kind === 'rg' ? 'Region' : (kind === 'dm' ? 'District Manager' : 'Territory');
 return { label: key || 'Unassigned', population: 'Management · Commercial Performance by ' + fieldLabel + ' · cashback-eligible pharmacies in view', parentIncrease: inc, records: eligibleAll.filter(x => (x.p[kind] || '') === key) };
 }
+if(src === 'hier') return hierResolve(group);
 return null;
 }
 
@@ -9578,8 +9650,9 @@ return s;
 
 function openCommercialDrill(opts){
 // opts: { label, metric, population, records:[{p,cr}], parentIncrease }
-const metric = CDL_METRICS[opts.metric] ? opts.metric : 'q326';
-cdlState = { opts, metric, sort: CDL_METRICS[metric].sort, dir: 'desc', qName:'', qTerr:'' };
+const metricMap = opts.mode === 'inv' ? CDL_INV_METRICS : CDL_METRICS;
+const metric = metricMap[opts.metric] ? opts.metric : 'q326';
+cdlState = { opts, metric, sort: metricMap[metric].sort, dir: 'desc', qName:'', qTerr:'' };
 let ov = document.getElementById('cdlOverlay');
 if(!ov){
 ov = document.createElement('div');
@@ -9603,6 +9676,7 @@ cdlState = null;
 function cdlRender(full){
 const ov = document.getElementById('cdlOverlay');
 if(!ov || !cdlState) return;
+if(cdlState.opts && cdlState.opts.mode === 'inv') return cdlRenderInv(full);
 const { opts, metric } = cdlState;
 const m = v => (v || 0).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
 const pct = v => v === null || v === undefined || !isFinite(v) ? 'N/A' : `${v >= 0 ? '+' : ''}${(v*100).toFixed(2)}%`;
@@ -9705,6 +9779,487 @@ if(e.key === 'Escape' && cdlState){ closeCommercialDrill(); return; }
 const el = e.target && e.target.classList && e.target.classList.contains('cdl-num') ? e.target : null;
 if(el && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); cdlOpenFromEl(el); }
 }, true);
+
+// ===================================================================
+// EXECUTIVE COMMERCIAL HIERARCHY (2026-10-05)
+// TOTAL EGYPT -> District Manager -> Medical Representative -> Pharmacy.
+// Presentation/aggregation layer ONLY. Every pharmacy's loyalty cashback is
+// the existing engine's own output (commercialRecordFor -> computeCommercial2026,
+// unchanged); deal facts come from AGREED_DEALS (agreedDealsByCode, unchanged);
+// visibility rates are the existing SHELF_RATES / POSM_RATE constants; the
+// semester incentive rate is the existing SLABS[].rebateRate. Aggregates are
+// always re-summed from pharmacy-level records -- never hardcoded and never an
+// average of pharmacy-level percentages.
+//
+// Definitions (Daniel, 2026-10-05):
+//  - Q3'26 Target          = Q3'25 baseline x 1.15 (baseline pharmacies only)
+//  - Growth (aggregate)    = SUM(Q3'26 achieved) / SUM(Q3'25 baseline) - 1
+//  - Achievement (aggr.)   = SUM(Q3'26 of the baseline population) / SUM(target)
+//  - No-baseline pharmacies stay in the universe and in total Q3'26 achieved;
+//    their own Target / Growth / Achievement are N/A.
+//  - Deal type comes from the deal itself: target_sales of 6,500 / 7,500 / 9,500
+//    = New Customer Deal; every other agreed deal = Existing Customer Deal;
+//    no agreed deal = No Deal.
+//  - Visibility commitment = posm true OR shelf_option 2/3/4. Visibility cashback
+//    is payable only when Q3'26 >= Q3'25 x 1.15; it is then
+//    target_sales x (SHELF_RATES[shelf] + POSM_RATE if posm). Otherwise 0
+//    (the commitment is still shown).
+//  - Semester Incentive Accrued = Q3'26 ACTUAL x SLABS rebateRate of the deal
+//    slab (0.25% / 0.50% / 0.75%), Existing Customer Deals only; New Customer = 0.
+//    It is an accrual, not an earned/paid amount.
+//  - Current Cashback = Loyalty + Visibility; Total Investment = Current +
+//    Semester Incentive Accrued.
+//  - Ownership (DM / MR) comes from the PHARMACY record; blanks are grouped as
+//    "Unassigned DM" / "Unassigned MR" -- never re-assigned.
+// ===================================================================
+const HIER_UNASSIGNED_DM = 'Unassigned DM';
+const HIER_UNASSIGNED_MR = 'Unassigned MR';
+const HIER_VIS_GROWTH_GATE = 0.15;
+const HIER_TARGET_UPLIFT = 1.15;
+
+function hierDealType(deal){
+if(!deal) return 'none';
+return FIXED_SLABS.some(f => f.value === deal.target_sales) ? 'new' : 'existing';
+}
+function hierDealTypeLabel(type){
+return type === 'new' ? 'New Customer Deal' : (type === 'existing' ? 'Existing Customer Deal' : 'No Deal');
+}
+function hierDealSlabLabel(deal, type){
+if(!deal) return '—';
+if(type === 'new'){
+const idx = FIXED_SLABS.findIndex(f => f.value === deal.target_sales);
+return `Slab ${idx + 1} · ${deal.target_sales.toLocaleString('en-US')} EGP`;
+}
+return SLAB_LABELS_EN[deal.slab_key] || deal.slab_key || '—';
+}
+function hierVisibilityLabel(deal){
+if(!deal) return '—';
+const parts = [];
+const shelf = deal.shelf_option || 'none';
+if(shelf !== 'none') parts.push('Shelf ' + shelf);
+if(deal.posm) parts.push('POSM');
+return parts.length ? parts.join(' + ') : '—';
+}
+
+// One pharmacy's full hierarchy record. cr = the engine's own commercial record.
+function hierRecordFor(p, cr, deal){
+const hasBaseline = cr.commercial_structure !== 'no_baseline';
+const q325 = hasBaseline ? (cr.q3_2025_dv || 0) : 0;
+const q326 = cr.q3_2026_dv || 0;
+// Target is kept unrounded so every level's target is exactly its own
+// SUM(Q3'25) x 1.15 (Egypt = 66,231,962.51 x 1.15).
+const target = hasBaseline ? q325 * HIER_TARGET_UPLIFT : 0;
+const type = hierDealType(deal);
+const shelf = deal ? (deal.shelf_option || 'none') : 'none';
+const visCommit = !!deal && (!!deal.posm || shelf !== 'none');
+const visEligible = visCommit && hasBaseline && q326 >= q325 * (1 + HIER_VIS_GROWTH_GATE);
+const visRate = deal ? ((SHELF_RATES[shelf] || 0) + (deal.posm ? POSM_RATE : 0)) : 0;
+// Pharmacy-level payable amounts are rounded to cents exactly like the
+// engine rounds loyalty cashback (Math.round(x*100)/100), so every level
+// reconciles to the cent.
+const visCashback = visEligible ? Math.round((deal.target_sales || 0) * visRate * 100) / 100 : 0;
+const slabDef = deal ? SLABS.find(s => s.key === deal.slab_key) : null;
+const semRate = type === 'existing' ? (slabDef ? slabDef.rebateRate : 0) : (type === 'new' ? 0 : null);
+const semAccrued = type === 'existing' ? Math.round(q326 * (semRate || 0) * 100) / 100 : 0;
+const loyalty = cr.cashback_amount || 0;
+const current = loyalty + visCashback;
+return {
+p, cr, deal,
+code: p.c, name: p.n || '', territory: p.tr || '',
+dm: p.dm || '', mr: p.mr || '',
+dmKey: p.dm || HIER_UNASSIGNED_DM, mrKey: p.mr || HIER_UNASSIGNED_MR,
+hasBaseline, q325, q326, target,
+growth: hasBaseline && q325 > 0 ? q326 / q325 - 1 : null,
+achievement: hasBaseline && target > 0 ? q326 / target : null,
+dealType: type, dealTypeLabel: hierDealTypeLabel(type), dealSlabLabel: hierDealSlabLabel(deal, type),
+loyalty,
+visCommit, visLabel: hierVisibilityLabel(deal), visEligible, visRate, visCashback,
+semRate, semAccrued,
+current, total: current + semAccrued
+};
+}
+
+// Aggregate a list of hierarchy records. Ratios are computed from sums only.
+// Money is accumulated as integer micro-EGP and rounded half-up to cents once,
+// so every total is identical whatever order/subset the rows are in (tile,
+// table footer and drill-down footer always agree to the cent).
+const HIER_MONEY_KEYS = ['q325','target','q326','q326Base','q326NoBase','loyalty','loyaltyDeal','visCashback','semAccrued','current','total'];
+function hierSummarize(recs){
+const s = { n: recs.length, withBaseline:0, noBaseline:0, deals:0, newDeals:0, existingDeals:0, visCommit:0, visEligible:0 };
+const u = {}; HIER_MONEY_KEYS.forEach(k => u[k] = 0);
+const add = (k, v) => { u[k] += Math.round((v || 0) * 1e6); };
+recs.forEach(r => {
+if(r.hasBaseline){ s.withBaseline++; add('q325', r.q325); add('target', r.target); add('q326Base', r.q326); }
+else { s.noBaseline++; add('q326NoBase', r.q326); }
+add('q326', r.q326);
+if(r.deal){ s.deals++; add('loyaltyDeal', r.loyalty); }
+if(r.dealType === 'new') s.newDeals++;
+if(r.dealType === 'existing') s.existingDeals++;
+add('loyalty', r.loyalty);
+if(r.visCommit) s.visCommit++;
+if(r.visEligible) s.visEligible++;
+add('visCashback', r.visCashback);
+add('semAccrued', r.semAccrued);
+add('current', r.current);
+add('total', r.total);
+});
+HIER_MONEY_KEYS.forEach(k => { s[k] = Math.round(u[k] / 1e4) / 100; });
+s.growth = s.q325 > 0 ? s.q326 / s.q325 - 1 : null;
+s.lflGrowth = s.q325 > 0 ? s.q326Base / s.q325 - 1 : null;
+s.achievement = s.target > 0 ? s.q326Base / s.target : null;
+return s;
+}
+
+let _hierCache = null;
+function computeCommercialHierarchy(){
+const pool = filteredPharmacies();
+if(_hierCache && _hierCache.pool === pool && _hierCache.n === pool.length) return _hierCache.data;
+const dealsByCode = agreedDealsByCode();
+const records = pool.map(p => hierRecordFor(p, commercialRecordFor(p, dealsByCode), dealsByCode.get(p.c)));
+const dmMap = new Map();
+records.forEach(r => {
+if(!dmMap.has(r.dmKey)) dmMap.set(r.dmKey, { key: r.dmKey, unassigned: !r.dm, records: [], mrMap: new Map() });
+const dm = dmMap.get(r.dmKey);
+dm.records.push(r);
+if(!dm.mrMap.has(r.mrKey)) dm.mrMap.set(r.mrKey, { key: r.mrKey, unassigned: !r.mr, records: [] });
+dm.mrMap.get(r.mrKey).records.push(r);
+});
+const byQ326 = (a,b) => (a.unassigned - b.unassigned) || (b.summary.q326 - a.summary.q326) || a.key.localeCompare(b.key);
+const dms = [...dmMap.values()].map(dm => {
+const mrs = [...dm.mrMap.values()].map(mr => Object.assign(mr, { summary: hierSummarize(mr.records) })).sort(byQ326);
+return { key: dm.key, unassigned: dm.unassigned, records: dm.records, summary: hierSummarize(dm.records), mrs };
+}).sort(byQ326);
+const data = { records, summary: hierSummarize(records), dms, filtered: pool !== PHARMACIES };
+_hierCache = { pool, n: pool.length, data };
+return data;
+}
+
+// Presentation state for the hierarchy (never touches any commercial figure).
+let execHier = { dm: null, mr: null, phSort: 'q326', phDir: 'desc', phQ: '' };
+
+function hierScopeKey(dmKey, mrKey){
+if(dmKey === null || dmKey === undefined) return 'egypt';
+if(mrKey === null || mrKey === undefined) return 'dm::' + dmKey;
+return 'mr::' + dmKey + '::' + mrKey;
+}
+function hierScopeRecords(h, scope){
+if(scope === 'egypt') return { label: h.filtered ? 'Filtered scope' : 'Total Egypt', records: h.records };
+const parts = scope.split('::');
+const dm = h.dms.find(d => d.key === parts[1]);
+if(!dm) return null;
+if(parts[0] === 'dm') return { label: dm.key, records: dm.records };
+const mr = dm.mrs.find(m => m.key === parts.slice(2).join('::'));
+return mr ? { label: dm.key + ' › ' + mr.key, records: mr.records } : null;
+}
+const HIER_FILTERS = {
+all: { label: 'All pharmacies', fn: () => true },
+base: { label: 'With baseline', fn: r => r.hasBaseline },
+nobase: { label: 'No baseline', fn: r => !r.hasBaseline },
+deal: { label: 'Agreed deals', fn: r => !!r.deal },
+new: { label: 'New Customer Deals', fn: r => r.dealType === 'new' },
+existing: { label: 'Existing Customer Deals', fn: r => r.dealType === 'existing' },
+loyalty: { label: 'Loyalty cashback earners', fn: r => r.loyalty > 0 },
+loyaltyDeal: { label: 'Loyalty cashback · agreed-deal pharmacies', fn: r => !!r.deal && r.loyalty > 0 },
+vis: { label: 'Visibility commitments', fn: r => r.visCommit },
+visEligible: { label: 'Visibility cashback payable (≥ +15%)', fn: r => r.visEligible },
+sem: { label: 'Semester Incentive Accrued (Existing Customer Deals)', fn: r => r.dealType === 'existing' },
+current: { label: 'Current Cashback > 0', fn: r => r.current > 0 },
+total: { label: 'Total Investment > 0', fn: r => r.total > 0 }
+};
+// Drill-down resolver for src 'hier'. group = "<filter>|<scope>".
+function hierResolve(group){
+const i = String(group).indexOf('|');
+const filter = i < 0 ? 'all' : group.slice(0, i);
+const scope = i < 0 ? group : group.slice(i + 1);
+const h = computeCommercialHierarchy();
+const sc = hierScopeRecords(h, scope);
+const f = HIER_FILTERS[filter] || HIER_FILTERS.all;
+if(!sc) return null;
+return {
+mode: 'inv',
+label: sc.label + ' · ' + f.label,
+population: 'Executive · Commercial Hierarchy',
+parentIncrease: null,
+records: sc.records.filter(f.fn).map(r => ({ p: r.p, cr: r.cr, inv: r }))
+};
+}
+
+const CDL_INV_METRICS = {
+n:{label:'Pharmacies', sort:'q326'},
+base:{label:'With Baseline', sort:'q325'},
+q325:{label:'Q3’25 Baseline', sort:'q325'},
+target:{label:'Q3’26 Target', sort:'target'},
+q326:{label:'Q3’26 Achieved', sort:'q326'},
+growth:{label:'Growth', sort:'growth'},
+ach:{label:'Achievement', sort:'ach'},
+deals:{label:'Agreed Deals', sort:'q326'},
+loyalty:{label:'Loyalty Cashback', sort:'loyalty'},
+visibility:{label:'Visibility Cashback', sort:'vis'},
+semester:{label:'Semester Incentive Accrued', sort:'sem'},
+current:{label:'Current Cashback', sort:'current'},
+investment:{label:'Total Investment', sort:'total'}
+};
+
+// Investment-mode renderer for the SAME shared drill-down drawer (#cdlOverlay,
+// cdlState, openCommercialDrill/closeCommercialDrill, same CSS & progressive
+// rendering). Totals in the footer are re-summed with hierSummarize.
+function cdlRenderInv(full){
+const ov = document.getElementById('cdlOverlay');
+if(!ov || !cdlState) return;
+const { opts, metric } = cdlState;
+const m = v => (v || 0).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+const pct = v => v === null || v === undefined || !isFinite(v) ? 'N/A' : `${v >= 0 ? '+' : ''}${(v*100).toFixed(2)}%`;
+const ach = v => v === null || v === undefined || !isFinite(v) ? 'N/A' : `${(v*100).toFixed(2)}%`;
+const invs = opts.records.map(x => x.inv);
+const all = hierSummarize(invs);
+const headline = {
+n: all.n.toLocaleString('en-US') + ' pharmacies', base: all.withBaseline.toLocaleString('en-US') + ' pharmacies',
+q325: m(all.q325) + ' EGP', target: m(all.target) + ' EGP', q326: m(all.q326) + ' EGP', growth: pct(all.growth), ach: ach(all.achievement),
+deals: all.deals.toLocaleString('en-US') + ' deals', loyalty: m(all.loyalty) + ' EGP', visibility: m(all.visCashback) + ' EGP',
+semester: m(all.semAccrued) + ' EGP', current: m(all.current) + ' EGP', investment: m(all.total) + ' EGP'
+}[metric];
+const nameQ = cdlState.qName.trim().toLowerCase();
+const terrQ = cdlState.qTerr.trim().toLowerCase();
+const rows = invs.map(r => ({ r, name: r.name, code: r.code, q325: r.hasBaseline ? r.q325 : null, target: r.hasBaseline ? r.target : null, q326: r.q326, growth: r.growth, ach: r.achievement, loyalty: r.loyalty, vis: r.visCashback, sem: r.semAccrued, current: r.current, total: r.total }))
+.filter(x => (!nameQ || x.name.toLowerCase().includes(nameQ) || String(x.code).toLowerCase().includes(nameQ)) && (!terrQ || (x.r.mrKey + ' ' + x.r.dmKey + ' ' + x.r.territory).toLowerCase().includes(terrQ)));
+const sk = cdlState.sort, dir = cdlState.dir === 'asc' ? 1 : -1;
+rows.sort((a,b) => {
+if(sk === 'name') return dir * a.name.localeCompare(b.name);
+const av = a[sk] === null || a[sk] === undefined ? -Infinity : a[sk], bv = b[sk] === null || b[sk] === undefined ? -Infinity : b[sk];
+return dir * (av - bv) || a.name.localeCompare(b.name);
+});
+const vis = hierSummarize(rows.map(x => x.r));
+const emCols = { n:[], base:[], deals:[], q325:['q325'], target:['target'], q326:['q326'], growth:['q325','q326','growth'], ach:['target','q326','ach'], loyalty:['loyalty'], visibility:['vis'], semester:['sem'], current:['current'], investment:['total'] }[metric] || [];
+const em = k => emCols.includes(k) ? ' class="em"' : '';
+const th = (k, text) => `<th data-cdl-sort="${k}"${cdlState.sort === k ? ' class="on"' : ''}>${text}${cdlState.sort === k ? (cdlState.dir === 'asc' ? ' ▲' : ' ▼') : ''}</th>`;
+const na = '<span class="hier-na">N/A</span>';
+const rowHtmls = rows.map(x => { const r = x.r; return `<tr><td class="cdl-name">${cdlEsc(r.name)}<small>${cdlEsc(r.code)}</small></td><td>${cdlEsc(r.dmKey)}<small style="display:block;color:var(--muted);font-size:10.5px;">${cdlEsc(r.mrKey)}</small></td><td${em('q325')}>${r.hasBaseline ? m(r.q325) : na}</td><td${em('target')}>${r.hasBaseline ? m(r.target) : na}</td><td${em('q326')}>${m(r.q326)}</td><td${em('growth')}>${pct(r.growth)}</td><td${em('ach')}>${ach(r.achievement)}</td><td>${cdlEsc(r.dealTypeLabel)}<small style="display:block;color:var(--muted);font-size:10.5px;">${cdlEsc(r.dealSlabLabel)}</small></td><td${em('loyalty')}>${m(r.loyalty)}</td><td${em('vis')}>${m(r.visCashback)}<small style="display:block;color:var(--muted);font-size:10.5px;">${r.visCommit ? cdlEsc(r.visLabel) + (r.visEligible ? ' · payable' : ' · not payable') : '—'}</small></td><td${em('sem')}>${m(r.semAccrued)}<small style="display:block;color:var(--muted);font-size:10.5px;">${r.semRate === null ? '—' : (r.semRate*100).toFixed(2) + '%'}</small></td><td${em('current')}>${m(r.current)}</td><td${em('total')}>${m(r.total)}</td></tr>`; });
+const filtered = rows.length !== opts.records.length;
+const chip = (keys, lbl, val) => `<div class="cdl-chip${keys.some(k => emCols.includes(k)) || keys.includes(metric) ? ' on' : ''}"><span>${lbl}</span><b>${val}</b></div>`;
+if(full){
+ov.innerHTML = `<div class="cdl-panel" dir="ltr">
+<div class="cdl-head"><div class="cdl-head-main">
+<div class="cdl-eyebrow">${cdlEsc(opts.population)}</div>
+<div class="cdl-title">${cdlEsc(opts.label)} — ${CDL_INV_METRICS[metric].label}</div>
+<div class="cdl-value">${headline}${metric === 'n' ? '' : `<small>${all.n.toLocaleString('en-US')} pharmacies</small>`}</div>
+</div><button class="cdl-close" type="button" aria-label="Close" data-cdl-close>×</button></div>
+<div class="cdl-chips">
+${chip(['n'],'Pharmacies', all.n.toLocaleString('en-US'))}
+${chip(['base'],'With Baseline', all.withBaseline.toLocaleString('en-US') + ' · no baseline ' + all.noBaseline.toLocaleString('en-US'))}
+${chip(['q325'],'Q3’25 Baseline', m(all.q325))}
+${chip(['target'],'Q3’26 Target', m(all.target))}
+${chip(['q326'],'Q3’26 Achieved', m(all.q326))}
+${chip(['growth'],'Growth', pct(all.growth))}
+${chip(['ach'],'Achievement', ach(all.achievement))}
+${chip(['deals'],'Agreed Deals', all.deals.toLocaleString('en-US') + ' · New ' + all.newDeals.toLocaleString('en-US') + ' · Existing ' + all.existingDeals.toLocaleString('en-US'))}
+${chip(['loyalty'],'Loyalty Cashback', m(all.loyalty))}
+${chip(['vis'],'Visibility Cashback', m(all.visCashback))}
+${chip(['sem'],'Semester Incentive Accrued', m(all.semAccrued))}
+${chip(['current'],'Current Cashback', m(all.current))}
+${chip(['total'],'Total Investment', m(all.total))}
+</div>
+<div class="cdl-note">Target = Q3’25 × 1.15. Growth = SUM Q3’26 ÷ SUM Q3’25 − 1; Achievement = SUM Q3’26 of baseline pharmacies ÷ SUM Target (both from sums, never averaged). No-baseline pharmacies show N/A. Visibility cashback is payable only at Q3’26 ≥ Q3’25 × 1.15. Semester Incentive is accrued on Q3’26 actual (Existing Customer Deals only). Current = Loyalty + Visibility; Total Investment = Current + Semester Accrued.</div>
+<div class="cdl-controls">
+<input type="search" data-cdl-q="name" placeholder="Search pharmacy name or code…" value="${cdlEsc(cdlState.qName)}">
+<input type="search" data-cdl-q="terr" placeholder="Search DM / MR / territory…" value="${cdlEsc(cdlState.qTerr)}">
+<select data-cdl-sortsel aria-label="Sort by">
+${[['q326','Q3’26 Achieved'],['q325','Q3’25 Baseline'],['target','Q3’26 Target'],['growth','Growth %'],['ach','Achievement %'],['loyalty','Loyalty Cashback'],['vis','Visibility Cashback'],['sem','Semester Accrued'],['current','Current Cashback'],['total','Total Investment'],['name','Pharmacy name']].map(([k,l]) => `<option value="${k}"${cdlState.sort===k?' selected':''}>Sort: ${l}</option>`).join('')}
+</select>
+<button type="button" data-cdl-dir>${cdlState.dir === 'asc' ? 'Ascending ▲' : 'Descending ▼'}</button>
+<span class="cdl-count" data-cdl-count></span>
+</div>
+<div class="cdl-body"><table class="cdl-table hier-inv-table"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+</div>`;
+ov.querySelector('[data-cdl-close]').addEventListener('click', closeCommercialDrill);
+ov.querySelectorAll('[data-cdl-q]').forEach(inp => inp.addEventListener('input', () => { if(inp.dataset.cdlQ === 'name') cdlState.qName = inp.value; else cdlState.qTerr = inp.value; cdlRender(false); }));
+ov.querySelector('[data-cdl-sortsel]').addEventListener('change', e => { cdlState.sort = e.target.value; cdlState.dir = e.target.value === 'name' ? 'asc' : 'desc'; cdlRender(false); });
+ov.querySelector('[data-cdl-dir]').addEventListener('click', () => { cdlState.dir = cdlState.dir === 'asc' ? 'desc' : 'asc'; cdlRender(false); });
+}
+ov.querySelector('.cdl-table thead').innerHTML = `<tr>${th('name','Pharmacy')}<th>DM / MR</th>${th('q325','Q3’25')}${th('target','Q3’26 Target')}${th('q326','Q3’26 Achieved')}${th('growth','Growth')}${th('ach','Achievement')}<th>Deal Type / Slab</th>${th('loyalty','Loyalty')}${th('vis','Visibility')}${th('sem','Semester Accrued')}${th('current','Current Cashback')}${th('total','Total Investment')}</tr>`;
+const tbodyEl = ov.querySelector('.cdl-table tbody');
+const token = cdlState.renderToken = (cdlState.renderToken || 0) + 1;
+const FIRST = 120, CHUNK = 250;
+tbodyEl.innerHTML = rowHtmls.slice(0, FIRST).join('') || '<tr><td colspan="13" style="text-align:center;color:var(--muted);padding:18px;">No pharmacies match the search.</td></tr>';
+let at = FIRST;
+const pump = () => {
+if(!cdlState || cdlState.renderToken !== token || at >= rowHtmls.length) return;
+tbodyEl.insertAdjacentHTML('beforeend', rowHtmls.slice(at, at + CHUNK).join(''));
+at += CHUNK;
+setTimeout(pump, 0);
+};
+setTimeout(pump, 0);
+ov.querySelector('.cdl-table tfoot').innerHTML = `<tr><td class="cdl-name">${filtered ? 'Shown (filtered)' : 'Total'} — ${vis.n.toLocaleString('en-US')} pharmacies</td><td>${vis.withBaseline.toLocaleString('en-US')} with baseline</td><td${em('q325')}>${m(vis.q325)}</td><td${em('target')}>${m(vis.target)}</td><td${em('q326')}>${m(vis.q326)}</td><td${em('growth')}>${pct(vis.growth)}</td><td${em('ach')}>${ach(vis.achievement)}</td><td>${vis.deals.toLocaleString('en-US')} deals</td><td${em('loyalty')}>${m(vis.loyalty)}</td><td${em('vis')}>${m(vis.visCashback)}</td><td${em('sem')}>${m(vis.semAccrued)}</td><td${em('current')}>${m(vis.current)}</td><td${em('total')}>${m(vis.total)}</td></tr>`;
+ov.querySelector('[data-cdl-count]').textContent = filtered ? `${rows.length.toLocaleString('en-US')} of ${opts.records.length.toLocaleString('en-US')} shown` : `${rows.length.toLocaleString('en-US')} pharmacies`;
+ov.querySelector('[data-cdl-dir]').textContent = cdlState.dir === 'asc' ? 'Ascending ▲' : 'Descending ▼';
+ov.querySelector('[data-cdl-sortsel]').value = cdlState.sort;
+ov.querySelectorAll('.cdl-table thead [data-cdl-sort]').forEach(h => h.addEventListener('click', () => { const k = h.dataset.cdlSort; if(cdlState.sort === k) cdlState.dir = cdlState.dir === 'asc' ? 'desc' : 'asc'; else { cdlState.sort = k; cdlState.dir = k === 'name' ? 'asc' : 'desc'; } cdlRender(false); }));
+}
+
+// ---- Rendering of the Executive hierarchy section ----
+function hierFmtM(v){ return (v || 0).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+function hierFmtPct(v, signed){ return v === null || v === undefined || !isFinite(v) ? 'N/A' : `${signed && v >= 0 ? '+' : ''}${(v*100).toFixed(2)}%`; }
+function hierNum(html, filter, scope, metric){ return cdlWrap(html, 'hier', filter + '|' + scope, metric); }
+
+function hierSummaryBlocksHtml(s, scope, label){
+const tile = (lbl, valHtml, sub, cls) => `<div class="hier-tile${cls ? ' ' + cls : ''}"><div class="hier-tile-l">${lbl}</div><div class="hier-tile-v">${valHtml}</div>${sub ? `<div class="hier-tile-s">${sub}</div>` : ''}</div>`;
+const N = v => v.toLocaleString('en-US');
+return `<div class="hier-blocks">
+<div class="hier-block">
+<div class="hier-block-h">Business Performance <span>${cdlEsc(label)}</span></div>
+<div class="hier-tiles">
+${tile('Pharmacies', hierNum(N(s.n), 'all', scope, 'n'))}
+${tile('With Baseline', hierNum(N(s.withBaseline), 'base', scope, 'base'), `No baseline: ${hierNum(N(s.noBaseline), 'nobase', scope, 'n')}`)}
+${tile('Q3’25 Baseline', hierNum(hierFmtM(s.q325), 'base', scope, 'q325'), 'EGP · baseline pharmacies')}
+${tile('Q3’26 Target', hierNum(hierFmtM(s.target), 'base', scope, 'target'), 'EGP · Q3’25 × 1.15')}
+${tile('Q3’26 Achieved', hierNum(hierFmtM(s.q326), 'all', scope, 'q326'), `Total Business Sales · incl. no-baseline ${hierNum(hierFmtM(s.q326NoBase), 'nobase', scope, 'q326')}`)}
+${tile('Growth', hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth'), 'SUM Q3’26 ÷ SUM Q3’25 − 1', s.growth !== null && s.growth < 0 ? 'neg' : 'pos')}
+${tile('Achievement', hierNum(hierFmtPct(s.achievement, false), 'base', scope, 'ach'), `Baseline-Based Target Performance · Q3’26 of baseline pharmacies ${hierNum(hierFmtM(s.q326Base), 'base', scope, 'q326')}`)}
+</div></div>
+<div class="hier-block inv">
+<div class="hier-block-h">Commercial Investment <span>EGP</span></div>
+<div class="hier-tiles">
+${tile('Agreed Deals', hierNum(N(s.deals), 'deal', scope, 'deals'), `New Customer ${hierNum(N(s.newDeals), 'new', scope, 'deals')} · Existing Customer ${hierNum(N(s.existingDeals), 'existing', scope, 'deals')}`)}
+${tile('New Customer Deals', hierNum(N(s.newDeals), 'new', scope, 'deals'), 'Fixed-value targets 6,500 / 7,500 / 9,500')}
+${tile('Existing Customer Deals', hierNum(N(s.existingDeals), 'existing', scope, 'deals'), 'All other agreed deals')}
+${tile('Loyalty Cashback', hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty'), `Of which Agreed Deal Pharmacies ${hierNum(hierFmtM(s.loyaltyDeal), 'loyaltyDeal', scope, 'loyalty')}`)}
+${tile('Visibility Cashback', hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility'), `Payable ${hierNum(N(s.visEligible), 'visEligible', scope, 'n')} of ${hierNum(N(s.visCommit), 'vis', scope, 'n')} commitments (needs ≥ +15%)`)}
+${tile('Semester Incentive Accrued', hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester'), 'Accrued, not earned · Q3’26 actual × 0.25 / 0.50 / 0.75%')}
+${tile('Current Cashback', hierNum(hierFmtM(s.current), 'current', scope, 'current'), 'Loyalty + Visibility', 'key')}
+${tile('Total Investment', hierNum(hierFmtM(s.total), 'total', scope, 'investment'), 'Current Cashback + Semester Accrued', 'key strong')}
+</div></div>
+</div>`;
+}
+
+// Roll-up table used at Egypt (rows = DMs) and DM (rows = MRs) levels.
+function hierRollupTableHtml(rows, totalSummary, totalScope, rowKind, firstColLabel){
+const th = '<th class="hier-sticky">' + firstColLabel + '</th><th>Pharmacies</th><th>With Baseline</th><th>Q3’25</th><th>Q3’26 Target</th><th>Q3’26 Achieved</th><th>Growth</th><th>Achievement</th>'
++ '<th class="inv-start">Agreed Deals</th><th>New Customer</th><th>Existing Customer</th><th>Loyalty Cashback</th><th>Visibility Cashback</th><th>Semester Accrued</th><th>Current Cashback</th><th>Total Investment</th>';
+const cells = (s, scope) => `<td>${hierNum(s.n.toLocaleString('en-US'), 'all', scope, 'n')}</td><td>${hierNum(s.withBaseline.toLocaleString('en-US'), 'base', scope, 'base')}</td><td>${hierNum(hierFmtM(s.q325), 'base', scope, 'q325')}</td><td>${hierNum(hierFmtM(s.target), 'base', scope, 'target')}</td><td>${hierNum(hierFmtM(s.q326), 'all', scope, 'q326')}</td><td class="${s.growth !== null && s.growth < 0 ? 'neg' : 'pos'}">${hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth')}</td><td>${hierNum(hierFmtPct(s.achievement, false), 'base', scope, 'ach')}</td>`
++ `<td class="inv-start">${hierNum(s.deals.toLocaleString('en-US'), 'deal', scope, 'deals')}</td><td>${hierNum(s.newDeals.toLocaleString('en-US'), 'new', scope, 'deals')}</td><td>${hierNum(s.existingDeals.toLocaleString('en-US'), 'existing', scope, 'deals')}</td><td>${hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty')}</td><td>${hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility')}</td><td>${hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester')}</td><td>${hierNum(hierFmtM(s.current), 'current', scope, 'current')}</td><td class="strong">${hierNum(hierFmtM(s.total), 'total', scope, 'investment')}</td>`;
+const body = rows.map(r => `<tr${r.unassigned ? ' class="unassigned"' : ''}><td class="hier-sticky"><button type="button" class="hier-open" data-hier-${rowKind}="${cdlEsc(r.key)}">${cdlEsc(r.key)} <span aria-hidden="true">›</span></button></td>${cells(r.summary, r.scope)}</tr>`).join('');
+return `<div class="hier-table-wrap"><table class="hier-table">
+<thead><tr class="hier-grp"><th class="hier-sticky"></th><th colspan="7">Business Performance</th><th colspan="8" class="inv-start">Commercial Investment (EGP)</th></tr><tr>${th}</tr></thead>
+<tbody>${body}</tbody>
+<tfoot><tr><td class="hier-sticky">Total — ${rows.length} ${rowKind === 'dm' ? 'DM groups' : 'MR groups'}</td>${cells(totalSummary, totalScope)}</tr></tfoot>
+</table></div>`;
+}
+
+function hierPharmacyTableHtml(recs, scope){
+const k = execHier.phSort, dir = execHier.phDir === 'asc' ? 1 : -1;
+const q = execHier.phQ.trim().toLowerCase();
+const val = (r, key) => ({ name: r.name, q325: r.hasBaseline ? r.q325 : null, target: r.hasBaseline ? r.target : null, q326: r.q326, growth: r.growth, ach: r.achievement, loyalty: r.loyalty, vis: r.visCashback, sem: r.semAccrued, current: r.current, total: r.total })[key];
+const rows = recs.filter(r => !q || r.name.toLowerCase().includes(q) || String(r.code).toLowerCase().includes(q)).sort((a,b) => {
+if(k === 'name') return dir * a.name.localeCompare(b.name);
+const av = val(a,k), bv = val(b,k);
+return dir * ((av === null ? -Infinity : av) - (bv === null ? -Infinity : bv)) || a.name.localeCompare(b.name);
+});
+const s = hierSummarize(rows);
+const na = '<span class="hier-na">N/A</span>';
+const sth = (key, lbl, cls) => `<th class="hier-sortable${cls ? ' ' + cls : ''}${k === key ? ' on' : ''}" data-hier-sort="${key}">${lbl}${k === key ? (execHier.phDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>`;
+const head = `${sth('name','Pharmacy','hier-sticky')}<th>DM</th><th>MR</th>${sth('q325','Q3’25')}${sth('target','Q3’26 Target')}${sth('q326','Q3’26 Achieved')}${sth('growth','Growth')}${sth('ach','Achievement')}`
++ `<th class="inv-start">Deal Type</th><th>Deal Slab</th>${sth('loyalty','Loyalty Cashback')}<th>Visibility</th><th>Visibility Eligible</th>${sth('vis','Visibility Cashback')}<th>Semester %</th>${sth('sem','Semester Accrued')}${sth('current','Current Cashback')}${sth('total','Total Investment')}`;
+const body = rows.map(r => `<tr><td class="hier-sticky hier-ph"><b>${cdlEsc(r.name)}</b><small>${cdlEsc(r.code)}${r.territory ? ' · ' + cdlEsc(r.territory) : ''}</small></td><td>${cdlEsc(r.dm || HIER_UNASSIGNED_DM)}</td><td>${cdlEsc(r.mr || HIER_UNASSIGNED_MR)}</td>`
++ `<td>${r.hasBaseline ? hierFmtM(r.q325) : na}</td><td>${r.hasBaseline ? hierFmtM(r.target) : na}</td><td>${hierFmtM(r.q326)}</td><td class="${r.growth !== null && r.growth < 0 ? 'neg' : (r.growth !== null ? 'pos' : '')}">${r.growth === null ? na : hierFmtPct(r.growth, true)}</td><td>${r.achievement === null ? na : hierFmtPct(r.achievement, false)}</td>`
++ `<td class="inv-start"><span class="hier-deal ${r.dealType}">${cdlEsc(r.dealTypeLabel)}</span></td><td>${cdlEsc(r.dealSlabLabel)}</td><td>${hierFmtM(r.loyalty)}</td><td>${cdlEsc(r.visLabel)}</td><td>${r.visCommit ? (r.visEligible ? '<span class="hier-yes">Yes</span>' : '<span class="hier-no">No</span>') : '—'}</td><td>${hierFmtM(r.visCashback)}</td><td>${r.semRate === null ? '—' : (r.semRate*100).toFixed(2) + '%'}</td><td>${hierFmtM(r.semAccrued)}</td><td>${hierFmtM(r.current)}</td><td class="strong">${hierFmtM(r.total)}</td></tr>`).join('')
+|| '<tr><td colspan="18" style="text-align:center;color:var(--muted);padding:16px;">No pharmacies match the search.</td></tr>';
+const filt = rows.length !== recs.length;
+const foot = `<tr><td class="hier-sticky">${filt ? 'Shown (search)' : 'Total'} — ${s.n.toLocaleString('en-US')} pharmacies</td><td></td><td></td>`
++ `<td>${hierNum(hierFmtM(s.q325), 'base', scope, 'q325')}</td><td>${hierNum(hierFmtM(s.target), 'base', scope, 'target')}</td><td>${hierNum(hierFmtM(s.q326), 'all', scope, 'q326')}</td><td>${hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth')}</td><td>${hierNum(hierFmtPct(s.achievement, false), 'base', scope, 'ach')}</td>`
++ `<td class="inv-start">${hierNum(s.deals.toLocaleString('en-US'), 'deal', scope, 'deals')} deals</td><td>New ${s.newDeals} · Existing ${s.existingDeals}</td><td>${hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty')}</td><td>${s.visCommit} commitments</td><td>${s.visEligible} payable</td><td>${hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility')}</td><td></td><td>${hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester')}</td><td>${hierNum(hierFmtM(s.current), 'current', scope, 'current')}</td><td class="strong">${hierNum(hierFmtM(s.total), 'total', scope, 'investment')}</td></tr>`;
+return `<div class="hier-ph-controls"><input type="search" id="hierPhSearch" placeholder="Search pharmacy name or code…" value="${cdlEsc(execHier.phQ)}"><span>${filt ? `${rows.length.toLocaleString('en-US')} of ${recs.length.toLocaleString('en-US')} shown` : `${recs.length.toLocaleString('en-US')} pharmacies`}</span></div>
+<div class="hier-table-wrap"><table class="hier-table ph">
+<thead><tr class="hier-grp"><th class="hier-sticky"></th><th colspan="7">Business Performance</th><th colspan="10" class="inv-start">Commercial Investment (EGP)</th></tr><tr>${head}</tr></thead>
+<tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`;
+}
+
+function renderExecHierarchyHtml(){
+const h = computeCommercialHierarchy();
+const rootLabel = h.filtered ? 'Filtered Scope' : 'Total Egypt';
+let dm = execHier.dm !== null ? h.dms.find(d => d.key === execHier.dm) : null;
+if(execHier.dm !== null && !dm){ execHier.dm = null; execHier.mr = null; }
+let mr = dm && execHier.mr !== null ? dm.mrs.find(x => x.key === execHier.mr) : null;
+if(dm && execHier.mr !== null && !mr) execHier.mr = null;
+const crumbs = [`<button type="button" class="hier-crumb${!dm ? ' on' : ''}" data-hier-crumb="egypt">${rootLabel} · ${h.summary.n.toLocaleString('en-US')}</button>`];
+if(dm) crumbs.push(`<button type="button" class="hier-crumb${!mr ? ' on' : ''}" data-hier-crumb="dm">DM: ${cdlEsc(dm.key)}</button>`);
+if(mr) crumbs.push(`<button type="button" class="hier-crumb on" data-hier-crumb="mr">MR: ${cdlEsc(mr.key)}</button>`);
+let level, body;
+if(!dm){
+level = 'District Managers';
+const rows = h.dms.map(d => Object.assign({}, d, { scope: hierScopeKey(d.key) }));
+const dmSum = rows.reduce((a, d) => a + d.summary.n, 0);
+body = hierSummaryBlocksHtml(h.summary, 'egypt', rootLabel)
++ `<div class="hier-level-h">District Managers <span>${rows.length} groups · ${dmSum.toLocaleString('en-US')} pharmacies (reconciles to ${h.summary.n.toLocaleString('en-US')}) · ownership from the pharmacy record · click a DM to open its MRs</span></div>`
++ hierRollupTableHtml(rows, h.summary, 'egypt', 'dm', 'District Manager');
+} else if(!mr){
+level = 'Medical Representatives';
+const scope = hierScopeKey(dm.key);
+const rows = dm.mrs.map(x => Object.assign({}, x, { scope: hierScopeKey(dm.key, x.key) }));
+const mrSum = rows.reduce((a, x) => a + x.summary.n, 0);
+body = hierSummaryBlocksHtml(dm.summary, scope, 'DM: ' + dm.key)
++ `<div class="hier-level-h">Medical Representatives under ${cdlEsc(dm.key)} <span>${rows.length} groups · ${mrSum.toLocaleString('en-US')} pharmacies (reconciles to ${dm.summary.n.toLocaleString('en-US')}) · click an MR to open its pharmacies</span></div>`
++ hierRollupTableHtml(rows, dm.summary, scope, 'mr', 'Medical Representative');
+} else {
+level = 'Pharmacies';
+const scope = hierScopeKey(dm.key, mr.key);
+body = hierSummaryBlocksHtml(mr.summary, scope, 'MR: ' + mr.key)
++ `<div class="hier-level-h">Pharmacies of ${cdlEsc(mr.key)} <span>under ${cdlEsc(dm.key)} · click a column header to sort</span></div>`
++ hierPharmacyTableHtml(mr.records, scope);
+}
+return `<div class="section hier-section" id="execHier" dir="ltr">
+<div class="section-head">
+<h2>${iconSvg('layers')}Commercial Hierarchy</h2>
+<span class="section-sub">${rootLabel} → District Manager → Medical Representative → Pharmacy · ${level}</span>
+</div>
+<nav class="hier-crumbs" aria-label="Hierarchy level">${crumbs.join('<span class="hier-sep" aria-hidden="true">›</span>')}</nav>
+${body}
+</div>`;
+}
+
+function refreshExecHierarchy(keepScroll){
+const el = document.getElementById('execHier');
+if(!el) return;
+const wrapScroll = keepScroll ? el.querySelector('.hier-table-wrap') : null;
+const sl = wrapScroll ? wrapScroll.scrollLeft : 0;
+el.outerHTML = renderExecHierarchyHtml();
+const nw = document.querySelector('#execHier .hier-table-wrap');
+if(nw && sl) nw.scrollLeft = sl;
+}
+function hierScrollIntoView(){
+const el = document.getElementById('execHier');
+if(el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+}
+// One delegated listener (bubble phase, so the shared .cdl-num capture
+// handler keeps priority for numeric drill-downs).
+document.addEventListener('click', e => {
+const t = e.target && e.target.closest ? e.target.closest('#execHier [data-hier-dm], #execHier [data-hier-mr], #execHier [data-hier-crumb], #execHier [data-hier-sort]') : null;
+if(!t) return;
+if(t.dataset.hierDm !== undefined){ execHier.dm = t.dataset.hierDm; execHier.mr = null; execHier.phQ = ''; refreshExecHierarchy(); hierScrollIntoView(); return; }
+if(t.dataset.hierMr !== undefined){ execHier.mr = t.dataset.hierMr; execHier.phQ = ''; execHier.phSort = 'q326'; execHier.phDir = 'desc'; refreshExecHierarchy(); hierScrollIntoView(); return; }
+if(t.dataset.hierCrumb !== undefined){
+const c = t.dataset.hierCrumb;
+if(c === 'egypt'){ execHier.dm = null; execHier.mr = null; }
+else if(c === 'dm'){ execHier.mr = null; }
+execHier.phQ = '';
+refreshExecHierarchy();
+return;
+}
+if(t.dataset.hierSort !== undefined){
+const k = t.dataset.hierSort;
+if(execHier.phSort === k) execHier.phDir = execHier.phDir === 'asc' ? 'desc' : 'asc';
+else { execHier.phSort = k; execHier.phDir = k === 'name' ? 'asc' : 'desc'; }
+refreshExecHierarchy(true);
+}
+});
+document.addEventListener('input', e => {
+if(e.target && e.target.id === 'hierPhSearch'){
+execHier.phQ = e.target.value;
+const pos = e.target.selectionStart;
+refreshExecHierarchy(true);
+const inp = document.getElementById('hierPhSearch');
+if(inp){ inp.focus(); try { inp.setSelectionRange(pos, pos); } catch(_){} }
+}
+});
+
 
 function wireCommercialCashbackSummary(section){
 const bind = (id, applyFn) => {
