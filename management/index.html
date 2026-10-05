@@ -1522,6 +1522,30 @@ th.hier-sortable.on{color:var(--primary-dark);}
 .hier-tile-v{font-size:14px;}
 table.hier-table .hier-sticky{min-width:130px;max-width:150px;}
 }
+.hier-flow{display:flex;flex-direction:column;gap:6px;margin:4px 0 14px;}
+.hier-pop{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 16px;background:#fff;}
+.hier-pop.deals{background:var(--bg);}
+.hier-pop.elig{border:1px solid #FFD58A;border-left:5px solid var(--primary);background:var(--primary-light);}
+.hier-pop-main{min-width:180px;}
+.hier-pop-l{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-dark);}
+.hier-pop-v{font-size:28px;font-weight:800;line-height:1.1;color:var(--text);}
+.hier-pop-s{font-size:11px;color:var(--muted);margin-top:2px;}
+.hier-pop-split{display:flex;flex-wrap:wrap;gap:8px;}
+.hier-pop-split>div{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;min-width:120px;}
+.hier-pop-split>div>span{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);}
+.hier-pop-split b{font-size:15px;color:var(--text);}
+.hier-flow-step{display:flex;align-items:center;gap:10px;padding:0 6px 0 22px;font-size:12px;color:var(--muted);font-weight:600;}
+.hier-flow-arrow{font-size:20px;font-weight:800;color:var(--primary);line-height:1;}
+.hier-recon{border:1px solid var(--border);border-radius:var(--radius-md);background:#fff;padding:10px 12px;margin:0 0 14px;}
+.hier-recon-h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-dark);margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.hier-recon-h span{color:var(--muted);font-weight:700;text-transform:none;letter-spacing:0;}
+.hier-recon-grid{overflow-x:auto;}
+.hier-recon-row{display:grid;grid-template-columns:minmax(150px,1.3fr) repeat(3,minmax(105px,1fr));gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;min-width:480px;}
+.hier-recon-row>span:not(:first-child){text-align:right;}
+.hier-recon-row.hdr{font-size:10px;font-weight:800;text-transform:uppercase;color:var(--muted);}
+.hier-recon-row.strong{font-weight:800;color:var(--primary-dark);border-bottom:none;}
+.hier-recon-note{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;}
+@media (max-width:480px){ .hier-pop-v{font-size:24px;} .hier-pop-split>div{min-width:0;flex:1 1 40%;} .hier-flow-step{padding-left:8px;} }
 </style>
 </head>
 <body>
@@ -9782,7 +9806,9 @@ if(el && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); e.stopPropag
 
 // ===================================================================
 // EXECUTIVE COMMERCIAL HIERARCHY (2026-10-05)
-// TOTAL EGYPT -> District Manager -> Medical Representative -> Pharmacy.
+// AGREED DEALS (1,825, coverage) -> CASHBACK ELIGIBLE (engine population,
+// the hierarchy population) -> District Manager -> Medical Rep -> Pharmacy.
+// (2026-10-05 refinement: the DM/MR hierarchy holds only the eligible pharmacies.)
 // Presentation/aggregation layer ONLY. Every pharmacy's loyalty cashback is
 // the existing engine's own output (commercialRecordFor -> computeCommercial2026,
 // unchanged); deal facts come from AGREED_DEALS (agreedDealsByCode, unchanged);
@@ -9915,7 +9941,13 @@ function computeCommercialHierarchy(){
 const pool = filteredPharmacies();
 if(_hierCache && _hierCache.pool === pool && _hierCache.n === pool.length) return _hierCache.data;
 const dealsByCode = agreedDealsByCode();
-const records = pool.map(p => hierRecordFor(p, commercialRecordFor(p, dealsByCode), dealsByCode.get(p.c)));
+// Every pharmacy gets its (unchanged) record; the DM/MR hierarchy itself is
+// built ONLY from the cashback-eligible population -- exactly the engine's own
+// target_achieved flag (no re-definition of eligibility).
+const allRecords = pool.map(p => hierRecordFor(p, commercialRecordFor(p, dealsByCode), dealsByCode.get(p.c)));
+const records = allRecords.filter(r => r.cr.target_achieved);
+const dealRecords = allRecords.filter(r => !!r.deal);
+const outsideRecords = allRecords.filter(r => !r.cr.target_achieved);
 const dmMap = new Map();
 records.forEach(r => {
 if(!dmMap.has(r.dmKey)) dmMap.set(r.dmKey, { key: r.dmKey, unassigned: !r.dm, records: [], mrMap: new Map() });
@@ -9929,7 +9961,7 @@ const dms = [...dmMap.values()].map(dm => {
 const mrs = [...dm.mrMap.values()].map(mr => Object.assign(mr, { summary: hierSummarize(mr.records) })).sort(byQ326);
 return { key: dm.key, unassigned: dm.unassigned, records: dm.records, summary: hierSummarize(dm.records), mrs };
 }).sort(byQ326);
-const data = { records, summary: hierSummarize(records), dms, filtered: pool !== PHARMACIES };
+const data = { allRecords, records, dealRecords, outsideRecords, summary: hierSummarize(records), dealsSummary: hierSummarize(dealRecords), outsideSummary: hierSummarize(outsideRecords), programmeSummary: hierSummarize(allRecords), dms, filtered: pool !== PHARMACIES };
 _hierCache = { pool, n: pool.length, data };
 return data;
 }
@@ -9943,7 +9975,10 @@ if(mrKey === null || mrKey === undefined) return 'dm::' + dmKey;
 return 'mr::' + dmKey + '::' + mrKey;
 }
 function hierScopeRecords(h, scope){
-if(scope === 'egypt') return { label: h.filtered ? 'Filtered scope' : 'Total Egypt', records: h.records };
+if(scope === 'egypt') return { label: 'Cashback Eligible' + (h.filtered ? ' (filtered)' : ''), records: h.records };
+if(scope === 'deals') return { label: 'Agreed Deals' + (h.filtered ? ' (filtered)' : ''), records: h.dealRecords };
+if(scope === 'outside') return { label: 'Outside Cashback Eligible', records: h.outsideRecords };
+if(scope === 'programme') return { label: 'Whole programme (all pharmacies in view)', records: h.allRecords };
 const parts = scope.split('::');
 const dm = h.dms.find(d => d.key === parts[1]);
 if(!dm) return null;
@@ -9956,6 +9991,7 @@ all: { label: 'All pharmacies', fn: () => true },
 base: { label: 'With baseline', fn: r => r.hasBaseline },
 nobase: { label: 'No baseline', fn: r => !r.hasBaseline },
 deal: { label: 'Agreed deals', fn: r => !!r.deal },
+nodeal: { label: 'Without an agreed deal', fn: r => !r.deal },
 new: { label: 'New Customer Deals', fn: r => r.dealType === 'new' },
 existing: { label: 'Existing Customer Deals', fn: r => r.dealType === 'existing' },
 loyalty: { label: 'Loyalty cashback earners', fn: r => r.loyalty > 0 },
@@ -10107,20 +10143,19 @@ return `<div class="hier-blocks">
 <div class="hier-block">
 <div class="hier-block-h">Business Performance <span>${cdlEsc(label)}</span></div>
 <div class="hier-tiles">
-${tile('Pharmacies', hierNum(N(s.n), 'all', scope, 'n'))}
-${tile('With Baseline', hierNum(N(s.withBaseline), 'base', scope, 'base'), `No baseline: ${hierNum(N(s.noBaseline), 'nobase', scope, 'n')}`)}
-${tile('Q3’25 Baseline', hierNum(hierFmtM(s.q325), 'base', scope, 'q325'), 'EGP · baseline pharmacies')}
-${tile('Q3’26 Target', hierNum(hierFmtM(s.target), 'base', scope, 'target'), 'EGP · Q3’25 × 1.15')}
-${tile('Q3’26 Achieved', hierNum(hierFmtM(s.q326), 'all', scope, 'q326'), `Total Business Sales · incl. no-baseline ${hierNum(hierFmtM(s.q326NoBase), 'nobase', scope, 'q326')}`)}
+${tile('Pharmacies', hierNum(N(s.n), 'all', scope, 'n'), 'Cashback-eligible pharmacies')}
+${tile('Q3’25 Sales', hierNum(hierFmtM(s.q325), 'all', scope, 'q325'), 'EGP · baseline')}
+${tile('Q3’26 Target', hierNum(hierFmtM(s.target), 'all', scope, 'target'), 'EGP · Q3’25 × 1.15')}
+${tile('Q3’26 Achieved', hierNum(hierFmtM(s.q326), 'all', scope, 'q326'), 'EGP · actual')}
 ${tile('Growth', hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth'), 'SUM Q3’26 ÷ SUM Q3’25 − 1', s.growth !== null && s.growth < 0 ? 'neg' : 'pos')}
-${tile('Achievement', hierNum(hierFmtPct(s.achievement, false), 'base', scope, 'ach'), `Baseline-Based Target Performance · Q3’26 of baseline pharmacies ${hierNum(hierFmtM(s.q326Base), 'base', scope, 'q326')}`)}
+${tile('Target Achievement', hierNum(hierFmtPct(s.achievement, false), 'all', scope, 'ach'), 'SUM Q3’26 ÷ SUM Target')}
 </div></div>
 <div class="hier-block inv">
 <div class="hier-block-h">Commercial Investment <span>EGP</span></div>
 <div class="hier-tiles">
-${tile('Agreed Deals', hierNum(N(s.deals), 'deal', scope, 'deals'), `New Customer ${hierNum(N(s.newDeals), 'new', scope, 'deals')} · Existing Customer ${hierNum(N(s.existingDeals), 'existing', scope, 'deals')}`)}
-${tile('New Customer Deals', hierNum(N(s.newDeals), 'new', scope, 'deals'), 'Fixed-value targets 6,500 / 7,500 / 9,500')}
-${tile('Existing Customer Deals', hierNum(N(s.existingDeals), 'existing', scope, 'deals'), 'All other agreed deals')}
+${tile('Agreed Deals', hierNum(N(s.deals), 'deal', scope, 'deals'), 'Eligible pharmacies that have an agreed deal')}
+${tile('New Customer Deals', hierNum(N(s.newDeals), 'new', scope, 'deals'), 'Of those deals · fixed-value 6,500 / 7,500 / 9,500')}
+${tile('Existing Customer Deals', hierNum(N(s.existingDeals), 'existing', scope, 'deals'), 'Of those deals · all other agreed deals')}
 ${tile('Loyalty Cashback', hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty'), `Of which Agreed Deal Pharmacies ${hierNum(hierFmtM(s.loyaltyDeal), 'loyaltyDeal', scope, 'loyalty')}`)}
 ${tile('Visibility Cashback', hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility'), `Payable ${hierNum(N(s.visEligible), 'visEligible', scope, 'n')} of ${hierNum(N(s.visCommit), 'vis', scope, 'n')} commitments (needs ≥ +15%)`)}
 ${tile('Semester Incentive Accrued', hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester'), 'Accrued, not earned · Q3’26 actual × 0.25 / 0.50 / 0.75%')}
@@ -10130,15 +10165,15 @@ ${tile('Total Investment', hierNum(hierFmtM(s.total), 'total', scope, 'investmen
 </div>`;
 }
 
-// Roll-up table used at Egypt (rows = DMs) and DM (rows = MRs) levels.
+// Roll-up table used at the Cashback Eligible (rows = DMs) and DM (rows = MRs) levels.
 function hierRollupTableHtml(rows, totalSummary, totalScope, rowKind, firstColLabel){
-const th = '<th class="hier-sticky">' + firstColLabel + '</th><th>Pharmacies</th><th>With Baseline</th><th>Q3’25</th><th>Q3’26 Target</th><th>Q3’26 Achieved</th><th>Growth</th><th>Achievement</th>'
+const th = '<th class="hier-sticky">' + firstColLabel + '</th><th>Pharmacies</th><th>Q3’25 Sales</th><th>Q3’26 Target</th><th>Q3’26 Achieved</th><th>Growth</th><th>Target Achievement</th>'
 + '<th class="inv-start">Agreed Deals</th><th>New Customer</th><th>Existing Customer</th><th>Loyalty Cashback</th><th>Visibility Cashback</th><th>Semester Accrued</th><th>Current Cashback</th><th>Total Investment</th>';
-const cells = (s, scope) => `<td>${hierNum(s.n.toLocaleString('en-US'), 'all', scope, 'n')}</td><td>${hierNum(s.withBaseline.toLocaleString('en-US'), 'base', scope, 'base')}</td><td>${hierNum(hierFmtM(s.q325), 'base', scope, 'q325')}</td><td>${hierNum(hierFmtM(s.target), 'base', scope, 'target')}</td><td>${hierNum(hierFmtM(s.q326), 'all', scope, 'q326')}</td><td class="${s.growth !== null && s.growth < 0 ? 'neg' : 'pos'}">${hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth')}</td><td>${hierNum(hierFmtPct(s.achievement, false), 'base', scope, 'ach')}</td>`
+const cells = (s, scope) => `<td>${hierNum(s.n.toLocaleString('en-US'), 'all', scope, 'n')}</td><td>${hierNum(hierFmtM(s.q325), 'all', scope, 'q325')}</td><td>${hierNum(hierFmtM(s.target), 'all', scope, 'target')}</td><td>${hierNum(hierFmtM(s.q326), 'all', scope, 'q326')}</td><td class="${s.growth !== null && s.growth < 0 ? 'neg' : 'pos'}">${hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth')}</td><td>${hierNum(hierFmtPct(s.achievement, false), 'all', scope, 'ach')}</td>`
 + `<td class="inv-start">${hierNum(s.deals.toLocaleString('en-US'), 'deal', scope, 'deals')}</td><td>${hierNum(s.newDeals.toLocaleString('en-US'), 'new', scope, 'deals')}</td><td>${hierNum(s.existingDeals.toLocaleString('en-US'), 'existing', scope, 'deals')}</td><td>${hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty')}</td><td>${hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility')}</td><td>${hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester')}</td><td>${hierNum(hierFmtM(s.current), 'current', scope, 'current')}</td><td class="strong">${hierNum(hierFmtM(s.total), 'total', scope, 'investment')}</td>`;
 const body = rows.map(r => `<tr${r.unassigned ? ' class="unassigned"' : ''}><td class="hier-sticky"><button type="button" class="hier-open" data-hier-${rowKind}="${cdlEsc(r.key)}">${cdlEsc(r.key)} <span aria-hidden="true">›</span></button></td>${cells(r.summary, r.scope)}</tr>`).join('');
 return `<div class="hier-table-wrap"><table class="hier-table">
-<thead><tr class="hier-grp"><th class="hier-sticky"></th><th colspan="7">Business Performance</th><th colspan="8" class="inv-start">Commercial Investment (EGP)</th></tr><tr>${th}</tr></thead>
+<thead><tr class="hier-grp"><th class="hier-sticky"></th><th colspan="6">Business Performance</th><th colspan="8" class="inv-start">Commercial Investment (EGP)</th></tr><tr>${th}</tr></thead>
 <tbody>${body}</tbody>
 <tfoot><tr><td class="hier-sticky">Total — ${rows.length} ${rowKind === 'dm' ? 'DM groups' : 'MR groups'}</td>${cells(totalSummary, totalScope)}</tr></tfoot>
 </table></div>`;
@@ -10172,9 +10207,68 @@ return `<div class="hier-ph-controls"><input type="search" id="hierPhSearch" pla
 <tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`;
 }
 
+// Population flow shown above the hierarchy: two DISTINCT populations.
+// AGREED DEALS (commercial coverage, from the deal log) -> CASHBACK ELIGIBLE
+// (the engine's own target_achieved population, which is the hierarchy
+// population). The bridge counts make the overlap explicit so 1,825 is never
+// read as 1,496.
+function hierPopulationFlowHtml(h){
+const N = v => v.toLocaleString('en-US');
+const d = h.dealsSummary, e = h.summary;
+const dealsEligible = e.deals, dealsNotEligible = d.n - e.deals, eligibleNoDeal = e.n - e.deals;
+return `<div class="hier-flow">
+<div class="hier-pop deals">
+<div class="hier-pop-main">
+<div class="hier-pop-l">Agreed Deals</div>
+<div class="hier-pop-v">${hierNum(N(d.n), 'deal', 'deals', 'deals')}</div>
+<div class="hier-pop-s">Commercial coverage · deal type from the deal itself</div>
+</div>
+<div class="hier-pop-split">
+<div><span>New Customer Deals</span><b>${hierNum(N(d.newDeals), 'new', 'deals', 'deals')}</b></div>
+<div><span>Existing Customer Deals</span><b>${hierNum(N(d.existingDeals), 'existing', 'deals', 'deals')}</b></div>
+</div>
+</div>
+<div class="hier-flow-step"><span class="hier-flow-arrow" aria-hidden="true">↓</span><span>Of the ${N(d.n)} agreed deals, ${hierNum(N(dealsEligible), 'deal', 'egypt', 'deals')} are currently cashback eligible · ${hierNum(N(dealsNotEligible), 'deal', 'outside', 'deals')} are not yet eligible</span></div>
+<div class="hier-pop elig">
+<div class="hier-pop-main">
+<div class="hier-pop-l">Cashback Eligible</div>
+<div class="hier-pop-v">${hierNum(N(e.n), 'all', 'egypt', 'n')}</div>
+<div class="hier-pop-s">Eligible for loyalty cashback · validated engine population · hierarchy population</div>
+</div>
+<div class="hier-pop-split">
+<div><span>Loyalty Cashback</span><b>${hierNum(hierFmtM(e.loyalty), 'loyalty', 'egypt', 'loyalty')} EGP</b></div>
+<div><span>With an agreed deal</span><b>${hierNum(N(dealsEligible), 'deal', 'egypt', 'n')}</b></div>
+<div><span>Without an agreed deal</span><b>${hierNum(N(eligibleNoDeal), 'nodeal', 'egypt', 'n')}</b></div>
+</div>
+</div>
+<div class="hier-flow-step"><span class="hier-flow-arrow" aria-hidden="true">↓</span><span>District Manager → Medical Representative → Pharmacy · contains only the ${N(e.n)} cashback-eligible pharmacies</span></div>
+</div>`;
+}
+
+// Investment that sits OUTSIDE the eligible population (visibility payable /
+// semester accrued on pharmacies that are not loyalty-cashback eligible).
+// Shown so the whole-programme figures stay visible and reconcile.
+function hierProgrammeReconHtml(h){
+const N = v => v.toLocaleString('en-US');
+const e = h.summary, o = h.outsideSummary, p = h.programmeSummary;
+return `<div class="hier-recon">
+<div class="hier-recon-h">Whole-programme investment reconciliation <span>investment rules unchanged · EGP</span></div>
+<div class="hier-recon-grid">
+<div class="hier-recon-row hdr"><span></span><span>Cashback Eligible</span><span>Outside eligible</span><span>Whole programme</span></div>
+<div class="hier-recon-row"><span>Pharmacies</span><span>${hierNum(N(e.n), 'all', 'egypt', 'n')}</span><span>${hierNum(N(o.n), 'all', 'outside', 'n')}</span><span>${hierNum(N(p.n), 'all', 'programme', 'n')}</span></div>
+<div class="hier-recon-row"><span>Loyalty Cashback</span><span>${hierNum(hierFmtM(e.loyalty), 'loyalty', 'egypt', 'loyalty')}</span><span>${hierNum(hierFmtM(o.loyalty), 'loyalty', 'outside', 'loyalty')}</span><span>${hierNum(hierFmtM(p.loyalty), 'loyalty', 'programme', 'loyalty')}</span></div>
+<div class="hier-recon-row"><span>Visibility Cashback</span><span>${hierNum(hierFmtM(e.visCashback), 'visEligible', 'egypt', 'visibility')}</span><span>${hierNum(hierFmtM(o.visCashback), 'visEligible', 'outside', 'visibility')}</span><span>${hierNum(hierFmtM(p.visCashback), 'visEligible', 'programme', 'visibility')}</span></div>
+<div class="hier-recon-row"><span>Semester Incentive Accrued</span><span>${hierNum(hierFmtM(e.semAccrued), 'sem', 'egypt', 'semester')}</span><span>${hierNum(hierFmtM(o.semAccrued), 'sem', 'outside', 'semester')}</span><span>${hierNum(hierFmtM(p.semAccrued), 'sem', 'programme', 'semester')}</span></div>
+<div class="hier-recon-row"><span>Current Cashback</span><span>${hierNum(hierFmtM(e.current), 'current', 'egypt', 'current')}</span><span>${hierNum(hierFmtM(o.current), 'current', 'outside', 'current')}</span><span>${hierNum(hierFmtM(p.current), 'current', 'programme', 'current')}</span></div>
+<div class="hier-recon-row strong"><span>Total Investment</span><span>${hierNum(hierFmtM(e.total), 'total', 'egypt', 'investment')}</span><span>${hierNum(hierFmtM(o.total), 'total', 'outside', 'investment')}</span><span>${hierNum(hierFmtM(p.total), 'total', 'programme', 'investment')}</span></div>
+</div>
+<div class="hier-recon-note">Visibility cashback is payable on any visibility commitment at Q3’26 ≥ Q3’25 × 1.15, and the Semester Incentive accrues on every Existing Customer Deal, so part of both sits on pharmacies that are not loyalty-cashback eligible. They stay out of the DM / MR hierarchy and are shown here so the whole-programme totals are unchanged.</div>
+</div>`;
+}
+
 function renderExecHierarchyHtml(){
 const h = computeCommercialHierarchy();
-const rootLabel = h.filtered ? 'Filtered Scope' : 'Total Egypt';
+const rootLabel = 'Cashback Eligible' + (h.filtered ? ' (filtered)' : '');
 let dm = execHier.dm !== null ? h.dms.find(d => d.key === execHier.dm) : null;
 if(execHier.dm !== null && !dm){ execHier.dm = null; execHier.mr = null; }
 let mr = dm && execHier.mr !== null ? dm.mrs.find(x => x.key === execHier.mr) : null;
@@ -10188,7 +10282,8 @@ level = 'District Managers';
 const rows = h.dms.map(d => Object.assign({}, d, { scope: hierScopeKey(d.key) }));
 const dmSum = rows.reduce((a, d) => a + d.summary.n, 0);
 body = hierSummaryBlocksHtml(h.summary, 'egypt', rootLabel)
-+ `<div class="hier-level-h">District Managers <span>${rows.length} groups · ${dmSum.toLocaleString('en-US')} pharmacies (reconciles to ${h.summary.n.toLocaleString('en-US')}) · ownership from the pharmacy record · click a DM to open its MRs</span></div>`
++ hierProgrammeReconHtml(h)
++ `<div class="hier-level-h">District Managers <span>${rows.length} groups · ${dmSum.toLocaleString('en-US')} cashback-eligible pharmacies (reconciles to ${h.summary.n.toLocaleString('en-US')}) · ownership from the pharmacy record · click a DM to open its MRs</span></div>`
 + hierRollupTableHtml(rows, h.summary, 'egypt', 'dm', 'District Manager');
 } else if(!mr){
 level = 'Medical Representatives';
@@ -10196,20 +10291,21 @@ const scope = hierScopeKey(dm.key);
 const rows = dm.mrs.map(x => Object.assign({}, x, { scope: hierScopeKey(dm.key, x.key) }));
 const mrSum = rows.reduce((a, x) => a + x.summary.n, 0);
 body = hierSummaryBlocksHtml(dm.summary, scope, 'DM: ' + dm.key)
-+ `<div class="hier-level-h">Medical Representatives under ${cdlEsc(dm.key)} <span>${rows.length} groups · ${mrSum.toLocaleString('en-US')} pharmacies (reconciles to ${dm.summary.n.toLocaleString('en-US')}) · click an MR to open its pharmacies</span></div>`
++ `<div class="hier-level-h">Medical Representatives under ${cdlEsc(dm.key)} <span>${rows.length} groups · ${mrSum.toLocaleString('en-US')} cashback-eligible pharmacies (reconciles to ${dm.summary.n.toLocaleString('en-US')}) · click an MR to open its pharmacies</span></div>`
 + hierRollupTableHtml(rows, dm.summary, scope, 'mr', 'Medical Representative');
 } else {
 level = 'Pharmacies';
 const scope = hierScopeKey(dm.key, mr.key);
 body = hierSummaryBlocksHtml(mr.summary, scope, 'MR: ' + mr.key)
-+ `<div class="hier-level-h">Pharmacies of ${cdlEsc(mr.key)} <span>under ${cdlEsc(dm.key)} · click a column header to sort</span></div>`
++ `<div class="hier-level-h">Cashback-eligible pharmacies of ${cdlEsc(mr.key)} <span>under ${cdlEsc(dm.key)} · click a column header to sort</span></div>`
 + hierPharmacyTableHtml(mr.records, scope);
 }
 return `<div class="section hier-section" id="execHier" dir="ltr">
 <div class="section-head">
 <h2>${iconSvg('layers')}Commercial Hierarchy</h2>
-<span class="section-sub">${rootLabel} → District Manager → Medical Representative → Pharmacy · ${level}</span>
+<span class="section-sub">Agreed Deals → Cashback Eligible → District Manager → Medical Representative → Pharmacy · ${level}</span>
 </div>
+${hierPopulationFlowHtml(h)}
 <nav class="hier-crumbs" aria-label="Hierarchy level">${crumbs.join('<span class="hier-sep" aria-hidden="true">›</span>')}</nav>
 ${body}
 </div>`;
