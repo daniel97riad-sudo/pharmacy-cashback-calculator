@@ -9367,11 +9367,15 @@ ${filtersHtml}
 // Population = the same cashback-eligible pharmacies Executive uses: every
 // PHARMACIES record whose existing commercialRecordFor()/computeCommercial2026()
 // result has an achieved slab/tier and cashback > 0. Nothing is recalculated
-// here: slab, Q3 2025/Q3 2026 Dist_Value and cashback are read straight from
-// the engine's pharmacy-level output. Group growth = SUM(Q3'26)/SUM(Q3'25)-1
-// (never an average of pharmacy growth %). Whole universe, so these tables are
-// deliberately NOT affected by the Cashback Summary filters above.
+// here: structure, slab, Q3 2025/Q3 2026 Dist_Value and cashback are read
+// straight from the engine's pharmacy-level output. Group growth =
+// SUM(Q3'26)/SUM(Q3'25)-1 (never an average of pharmacy growth %).
+// Contribution to Q3'26 growth = (group Q3'26 - group Q3'25) /
+// (total eligible Q3'26 - total eligible Q3'25). Whole universe, so these
+// tables are deliberately NOT affected by the Cashback Summary filters above.
 // ===================================================================
+let cbEligTerritorySort = 'q326';
+
 function computeCashbackEligibleAnalysis(){
 const dealsByCode = agreedDealsByCode();
 const eligible = PHARMACIES
@@ -9380,39 +9384,66 @@ const eligible = PHARMACIES
 const blank = () => ({ n:0, q325:0, q326:0, cashback:0 });
 const add = (o, x) => { o.n++; o.q325 += x.cr.q3_2025_dv || 0; o.q326 += x.cr.q3_2026_dv || 0; o.cashback += x.cr.cashback_amount || 0; };
 const total = blank();
+const byStructure = {};
 const bySlab = {};
 const byTerritory = {};
 eligible.forEach(x => {
 add(total, x);
+const st = x.cr.commercial_structure;
+add(byStructure[st] = byStructure[st] || blank(), x);
 const sk = x.cr.achieved_slab;
 add(bySlab[sk] = bySlab[sk] || blank(), x);
 const tk = x.p.tr || '(No territory)';
 add(byTerritory[tk] = byTerritory[tk] || blank(), x);
 });
-const growth = o => o.q325 > 0 ? (o.q326 / o.q325 - 1) : null;
+const totalIncrease = total.q326 - total.q325;
+const finish = r => Object.assign(r, {
+growth: r.q325 > 0 ? (r.q326 / r.q325 - 1) : null,
+contribution: totalIncrease !== 0 ? (r.q326 - r.q325) / totalIncrease : null
+});
+const structureRows = [{key:'fixed', label:'Fixed'}, {key:'variable', label:'Variable'}]
+.map(s => finish(Object.assign({ key:s.key, label:s.label }, byStructure[s.key] || blank())));
 const slabOrder = [...COMMERCIAL_2026_FIXED_SLABS].reverse().concat([...COMMERCIAL_2026_VARIABLE_TIERS].reverse());
-const slabRows = slabOrder.map(s => Object.assign({ key:s.key, label:s.label }, bySlab[s.key] || blank()))
-.map(r => Object.assign(r, { growth: growth(r) }));
+const slabRows = slabOrder.map(s => finish(Object.assign({ key:s.key, label:s.label }, bySlab[s.key] || blank())));
 const territoryRows = Object.entries(byTerritory)
-.map(([k,o]) => Object.assign({ key:k, label:k }, o, { growth: growth(o) }))
-.sort((a,b) => b.cashback - a.cashback || a.label.localeCompare(b.label));
-total.growth = growth(total);
-return { eligibleCodes: eligible.map(x => x.p.c), total, slabRows, territoryRows };
+.map(([k,o]) => finish(Object.assign({ key:k, label:k }, o)))
+.sort((a,b) => b.q326 - a.q326 || a.label.localeCompare(b.label));
+finish(total);
+return { eligibleCodes: eligible.map(x => x.p.c), total, totalIncrease, structureRows, slabRows, territoryRows };
+}
+
+function setCbEligTerritorySort(key){
+cbEligTerritorySort = key === 'contribution' ? 'contribution' : 'q326';
+const el = document.getElementById('cashbackEligibleAnalysis');
+if(el) el.outerHTML = renderCashbackEligibleAnalysisHtml();
+const again = document.getElementById('cbEligTerritoryTable');
+if(again) again.scrollIntoView({ block:'nearest' });
 }
 
 function renderCashbackEligibleAnalysisHtml(){
 const a = computeCashbackEligibleAnalysis();
 const m = v => (v || 0).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
 const g = v => v === null ? '<span class="dq-na">N/A</span>' : `<bdi dir="ltr">${v >= 0 ? '+' : ''}${(v*100).toFixed(2)}%</bdi>`;
-const row = (r, isTotal) => `<tr${isTotal ? ' style="font-weight:800;"' : ''}><td class="slab-name">${isTotal ? 'Total' : r.label}</td><td>${r.n.toLocaleString('en-US')}</td><td>${m(r.q325)} EGP</td><td>${m(r.q326)} EGP</td><td>${g(r.growth)}</td><td>${m(r.cashback)} EGP</td></tr>`;
-const head = first => `<thead><tr><th>${first}</th><th>Eligible Pharmacies</th><th>Q3’25 Sales</th><th>Q3’26 Sales</th><th>Growth %</th><th>Cashback</th></tr></thead>`;
+const c = v => v === null ? '<span class="dq-na">N/A</span>' : `<bdi dir="ltr">${(v*100).toFixed(2)}%</bdi>`;
+const row = (r, isTotal, rank) => `<tr${isTotal ? ' style="font-weight:800;"' : ''}><td class="slab-name">${isTotal ? 'Total' : (rank ? rank + '. ' : '') + r.label}</td><td>${r.n.toLocaleString('en-US')}</td><td style="white-space:nowrap;">${m(r.q325)} EGP</td><td style="white-space:nowrap;">${m(r.q326)} EGP</td><td style="white-space:nowrap;">${g(r.growth)}</td><td style="white-space:nowrap;">${m(r.cashback)} EGP</td><td style="white-space:nowrap;">${c(r.contribution)}</td></tr>`;
+const sortTh = (key, text) => {
+const active = cbEligTerritorySort === key;
+return `<th style="cursor:pointer;white-space:nowrap;${active ? 'color:var(--shell-navy);' : ''}" onclick="setCbEligTerritorySort('${key}')" title="Sort territories by ${text}">${text}${active ? ' ▼' : ' ⇅'}</th>`;
+};
+const head = first => `<thead><tr><th>${first}</th><th>Eligible Pharmacies</th><th>Q3’25 Sales</th><th>Q3’26 Sales</th><th>Growth %</th><th>Cashback</th><th>Contribution to Q3’26 Growth</th></tr></thead>`;
+const territoryHead = `<thead><tr><th>Territory</th><th>Eligible Pharmacies</th><th>Q3’25 Sales</th>${sortTh('q326','Q3’26 Sales')}<th>Growth %</th><th>Cashback</th>${sortTh('contribution','Contribution to Q3’26 Growth')}</tr></thead>`;
+const territoryRows = cbEligTerritorySort === 'contribution'
+? [...a.territoryRows].sort((x,y) => (y.q326 - y.q325) - (x.q326 - x.q325) || x.label.localeCompare(y.label))
+: a.territoryRows;
 return `<div class="section" dir="ltr" id="cashbackEligibleAnalysis">
-<div class="section-head"><h2>${iconSvg('trending-up')}Cashback-Eligible Analysis</h2><span class="section-sub">The ${a.total.n.toLocaleString('en-US')} cashback-eligible pharmacies only (achieved a Fixed Slab or Variable Tier) — whole universe, not affected by the filters above. Growth = SUM Q3’26 ÷ SUM Q3’25 − 1, TOTAL Dist_Value.</span></div>
+<div class="section-head"><h2>${iconSvg('trending-up')}Cashback-Eligible Analysis</h2><span class="section-sub">The ${a.total.n.toLocaleString('en-US')} cashback-eligible pharmacies only (achieved a Fixed Slab or Variable Tier) — whole universe, not affected by the filters above. Growth = SUM Q3’26 ÷ SUM Q3’25 − 1. Contribution = group increase ÷ total eligible increase (${m(a.totalIncrease)} EGP). TOTAL Dist_Value.</span></div>
 <div class="panel">
+<div class="slab-group-tag">Commercial Structure Performance</div>
+<div class="slab-table-wrap"><table class="slab-table" id="cbEligStructureTable" style="margin-bottom:16px;">${head('Structure')}<tbody>${a.structureRows.map(r => row(r,false)).join('')}${row(a.total,true)}</tbody></table></div>
 <div class="slab-group-tag">Performance by Slab / Tier</div>
 <div class="slab-table-wrap"><table class="slab-table" id="cbEligSlabTable" style="margin-bottom:16px;">${head('Slab / Tier')}<tbody>${a.slabRows.map(r => row(r,false)).join('')}${row(a.total,true)}</tbody></table></div>
-<div class="slab-group-tag">Performance by Territory</div>
-<div class="slab-table-wrap"><table class="slab-table" id="cbEligTerritoryTable">${head('Territory')}<tbody>${a.territoryRows.map(r => row(r,false)).join('')}${row(a.total,true)}</tbody></table></div>
+<div class="slab-group-tag">Performance by Territory — sorted by ${cbEligTerritorySort === 'contribution' ? 'contribution to Q3’26 growth' : 'Q3’26 sales'} (click a ⇅ column header to switch)</div>
+<div class="slab-table-wrap"><table class="slab-table" id="cbEligTerritoryTable">${territoryHead}<tbody>${territoryRows.map((r,i) => row(r,false,i+1)).join('')}${row(a.total,true)}</tbody></table></div>
 </div>
 </div>`;
 }
