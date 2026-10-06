@@ -9985,7 +9985,6 @@ deal: { label: 'Agreed deals', fn: r => !!r.deal },
 new: { label: 'New Customer Deals', fn: r => r.dealType === 'new' },
 existing: { label: 'Existing Customer Deals', fn: r => r.dealType === 'existing' },
 loyalty: { label: 'Loyalty cashback earners', fn: r => r.loyalty > 0 },
-loyaltyDeal: { label: 'Loyalty cashback · agreed-deal pharmacies', fn: r => !!r.deal && r.loyalty > 0 },
 vis: { label: 'Visibility commitments', fn: r => r.visCommit },
 visEligible: { label: 'Visibility cashback payable (≥ +15%)', fn: r => r.visEligible },
 sem: { label: 'Semester Incentive Accrued (Existing Customer Deals)', fn: r => r.dealType === 'existing' },
@@ -10145,7 +10144,7 @@ ${tile('Target Achievement', hierNum(hierFmtPct(s.achievement, false), 'all', sc
 <div class="hier-tiles">
 ${tile('New Customer Deals', hierNum(N(s.newDeals), 'new', scope, 'deals'), 'Of those deals · fixed-value 6,500 / 7,500 / 9,500')}
 ${tile('Existing Customer Deals', hierNum(N(s.existingDeals), 'existing', scope, 'deals'), 'Of those deals · all other agreed deals')}
-${tile('Loyalty Cashback', hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty'), `Of which Agreed Deal Pharmacies ${hierNum(hierFmtM(s.loyaltyDeal), 'loyaltyDeal', scope, 'loyalty')}`)}
+${tile('Loyalty Cashback', hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty'))}
 ${tile('Visibility Cashback', hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility'), `Payable ${hierNum(N(s.visEligible), 'visEligible', scope, 'n')} of ${hierNum(N(s.visCommit), 'vis', scope, 'n')} commitments (needs ≥ +15%)`)}
 ${tile('Semester Incentive Accrued', hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester'), 'Accrued, not earned · Q3’26 actual × 0.25 / 0.50 / 0.75%')}
 ${tile('Current Cashback', hierNum(hierFmtM(s.current), 'current', scope, 'current'), 'Loyalty + Visibility', 'key')}
