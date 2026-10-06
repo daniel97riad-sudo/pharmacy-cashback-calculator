@@ -9991,7 +9991,6 @@ all: { label: 'All pharmacies', fn: () => true },
 base: { label: 'With baseline', fn: r => r.hasBaseline },
 nobase: { label: 'No baseline', fn: r => !r.hasBaseline },
 deal: { label: 'Agreed deals', fn: r => !!r.deal },
-nodeal: { label: 'Without an agreed deal', fn: r => !r.deal },
 new: { label: 'New Customer Deals', fn: r => r.dealType === 'new' },
 existing: { label: 'Existing Customer Deals', fn: r => r.dealType === 'existing' },
 loyalty: { label: 'Loyalty cashback earners', fn: r => r.loyalty > 0 },
@@ -10210,12 +10209,10 @@ return `<div class="hier-ph-controls"><input type="search" id="hierPhSearch" pla
 // Population flow shown above the hierarchy: two DISTINCT populations.
 // AGREED DEALS (commercial coverage, from the deal log) -> CASHBACK ELIGIBLE
 // (the engine's own target_achieved population, which is the hierarchy
-// population). The bridge counts make the overlap explicit so 1,825 is never
-// read as 1,496.
+// population).
 function hierPopulationFlowHtml(h){
 const N = v => v.toLocaleString('en-US');
 const d = h.dealsSummary, e = h.summary;
-const dealsEligible = e.deals, dealsNotEligible = d.n - e.deals, eligibleNoDeal = e.n - e.deals;
 return `<div class="hier-flow">
 <div class="hier-pop deals">
 <div class="hier-pop-main">
@@ -10228,7 +10225,7 @@ return `<div class="hier-flow">
 <div><span>Existing Customer Deals</span><b>${hierNum(N(d.existingDeals), 'existing', 'deals', 'deals')}</b></div>
 </div>
 </div>
-<div class="hier-flow-step"><span class="hier-flow-arrow" aria-hidden="true">↓</span><span>Of the ${N(d.n)} agreed deals, ${hierNum(N(dealsEligible), 'deal', 'egypt', 'deals')} are currently cashback eligible · ${hierNum(N(dealsNotEligible), 'deal', 'outside', 'deals')} are not yet eligible</span></div>
+<div class="hier-flow-step"><span class="hier-flow-arrow" aria-hidden="true">↓</span></div>
 <div class="hier-pop elig">
 <div class="hier-pop-main">
 <div class="hier-pop-l">Cashback Eligible</div>
@@ -10237,8 +10234,6 @@ return `<div class="hier-flow">
 </div>
 <div class="hier-pop-split">
 <div><span>Loyalty Cashback</span><b>${hierNum(hierFmtM(e.loyalty), 'loyalty', 'egypt', 'loyalty')} EGP</b></div>
-<div><span>With an agreed deal</span><b>${hierNum(N(dealsEligible), 'deal', 'egypt', 'n')}</b></div>
-<div><span>Without an agreed deal</span><b>${hierNum(N(eligibleNoDeal), 'nodeal', 'egypt', 'n')}</b></div>
 </div>
 </div>
 <div class="hier-flow-step"><span class="hier-flow-arrow" aria-hidden="true">↓</span><span>District Manager → Medical Representative → Pharmacy · contains only the ${N(e.n)} cashback-eligible pharmacies</span></div>
