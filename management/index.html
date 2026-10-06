@@ -1536,15 +1536,6 @@ table.hier-table .hier-sticky{min-width:130px;max-width:150px;}
 .hier-pop-split b{font-size:15px;color:var(--text);}
 .hier-flow-step{display:flex;align-items:center;gap:10px;padding:0 6px 0 22px;font-size:12px;color:var(--muted);font-weight:600;}
 .hier-flow-arrow{font-size:20px;font-weight:800;color:var(--primary);line-height:1;}
-.hier-recon{border:1px solid var(--border);border-radius:var(--radius-md);background:#fff;padding:10px 12px;margin:0 0 14px;}
-.hier-recon-h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-dark);margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
-.hier-recon-h span{color:var(--muted);font-weight:700;text-transform:none;letter-spacing:0;}
-.hier-recon-grid{overflow-x:auto;}
-.hier-recon-row{display:grid;grid-template-columns:minmax(150px,1.3fr) repeat(3,minmax(105px,1fr));gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;min-width:480px;}
-.hier-recon-row>span:not(:first-child){text-align:right;}
-.hier-recon-row.hdr{font-size:10px;font-weight:800;text-transform:uppercase;color:var(--muted);}
-.hier-recon-row.strong{font-weight:800;color:var(--primary-dark);border-bottom:none;}
-.hier-recon-note{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;}
 @media (max-width:480px){ .hier-pop-v{font-size:24px;} .hier-pop-split>div{min-width:0;flex:1 1 40%;} .hier-flow-step{padding-left:8px;} }
 </style>
 </head>
@@ -10240,27 +10231,6 @@ return `<div class="hier-flow">
 </div>`;
 }
 
-// Investment that sits OUTSIDE the eligible population (visibility payable /
-// semester accrued on pharmacies that are not loyalty-cashback eligible).
-// Shown so the whole-programme figures stay visible and reconcile.
-function hierProgrammeReconHtml(h){
-const N = v => v.toLocaleString('en-US');
-const e = h.summary, o = h.outsideSummary, p = h.programmeSummary;
-return `<div class="hier-recon">
-<div class="hier-recon-h">Whole-programme investment reconciliation <span>investment rules unchanged · EGP</span></div>
-<div class="hier-recon-grid">
-<div class="hier-recon-row hdr"><span></span><span>Cashback Eligible</span><span>Outside eligible</span><span>Whole programme</span></div>
-<div class="hier-recon-row"><span>Pharmacies</span><span>${hierNum(N(e.n), 'all', 'egypt', 'n')}</span><span>${hierNum(N(o.n), 'all', 'outside', 'n')}</span><span>${hierNum(N(p.n), 'all', 'programme', 'n')}</span></div>
-<div class="hier-recon-row"><span>Loyalty Cashback</span><span>${hierNum(hierFmtM(e.loyalty), 'loyalty', 'egypt', 'loyalty')}</span><span>${hierNum(hierFmtM(o.loyalty), 'loyalty', 'outside', 'loyalty')}</span><span>${hierNum(hierFmtM(p.loyalty), 'loyalty', 'programme', 'loyalty')}</span></div>
-<div class="hier-recon-row"><span>Visibility Cashback</span><span>${hierNum(hierFmtM(e.visCashback), 'visEligible', 'egypt', 'visibility')}</span><span>${hierNum(hierFmtM(o.visCashback), 'visEligible', 'outside', 'visibility')}</span><span>${hierNum(hierFmtM(p.visCashback), 'visEligible', 'programme', 'visibility')}</span></div>
-<div class="hier-recon-row"><span>Semester Incentive Accrued</span><span>${hierNum(hierFmtM(e.semAccrued), 'sem', 'egypt', 'semester')}</span><span>${hierNum(hierFmtM(o.semAccrued), 'sem', 'outside', 'semester')}</span><span>${hierNum(hierFmtM(p.semAccrued), 'sem', 'programme', 'semester')}</span></div>
-<div class="hier-recon-row"><span>Current Cashback</span><span>${hierNum(hierFmtM(e.current), 'current', 'egypt', 'current')}</span><span>${hierNum(hierFmtM(o.current), 'current', 'outside', 'current')}</span><span>${hierNum(hierFmtM(p.current), 'current', 'programme', 'current')}</span></div>
-<div class="hier-recon-row strong"><span>Total Investment</span><span>${hierNum(hierFmtM(e.total), 'total', 'egypt', 'investment')}</span><span>${hierNum(hierFmtM(o.total), 'total', 'outside', 'investment')}</span><span>${hierNum(hierFmtM(p.total), 'total', 'programme', 'investment')}</span></div>
-</div>
-<div class="hier-recon-note">Visibility cashback is payable on any visibility commitment at Q3’26 ≥ Q3’25 × 1.15, and the Semester Incentive accrues on every Existing Customer Deal, so part of both sits on pharmacies that are not loyalty-cashback eligible. They stay out of the DM / MR hierarchy and are shown here so the whole-programme totals are unchanged.</div>
-</div>`;
-}
-
 function renderExecHierarchyHtml(){
 const h = computeCommercialHierarchy();
 const rootLabel = 'Cashback Eligible' + (h.filtered ? ' (filtered)' : '');
@@ -10277,7 +10247,6 @@ level = 'District Managers';
 const rows = h.dms.map(d => Object.assign({}, d, { scope: hierScopeKey(d.key) }));
 const dmSum = rows.reduce((a, d) => a + d.summary.n, 0);
 body = hierSummaryBlocksHtml(h.summary, 'egypt', rootLabel)
-+ hierProgrammeReconHtml(h)
 + `<div class="hier-level-h">District Managers <span>${rows.length} groups · ${dmSum.toLocaleString('en-US')} cashback-eligible pharmacies (reconciles to ${h.summary.n.toLocaleString('en-US')}) · ownership from the pharmacy record · click a DM to open its MRs</span></div>`
 + hierRollupTableHtml(rows, h.summary, 'egypt', 'dm', 'District Manager');
 } else if(!mr){
