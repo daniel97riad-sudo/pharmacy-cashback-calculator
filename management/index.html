@@ -10077,7 +10077,7 @@ ${chip(['target'],'Q3’26 Target', m(all.target))}
 ${chip(['q326'],'Q3’26 Achieved', m(all.q326))}
 ${chip(['growth'],'Growth', pct(all.growth))}
 ${chip(['ach'],'Achievement', ach(all.achievement))}
-${chip(['deals'],'Agreed Deals', all.deals.toLocaleString('en-US') + ' · New ' + all.newDeals.toLocaleString('en-US') + ' · Existing ' + all.existingDeals.toLocaleString('en-US'))}
+${chip(['deals'],'New / Existing Customer Deals', 'New ' + all.newDeals.toLocaleString('en-US') + ' · Existing ' + all.existingDeals.toLocaleString('en-US'))}
 ${chip(['loyalty'],'Loyalty Cashback', m(all.loyalty))}
 ${chip(['vis'],'Visibility Cashback', m(all.visCashback))}
 ${chip(['sem'],'Semester Incentive Accrued', m(all.semAccrued))}
@@ -10114,7 +10114,7 @@ at += CHUNK;
 setTimeout(pump, 0);
 };
 setTimeout(pump, 0);
-ov.querySelector('.cdl-table tfoot').innerHTML = `<tr><td class="cdl-name">${filtered ? 'Shown (filtered)' : 'Total'} — ${vis.n.toLocaleString('en-US')} pharmacies</td><td>${vis.withBaseline.toLocaleString('en-US')} with baseline</td><td${em('q325')}>${m(vis.q325)}</td><td${em('target')}>${m(vis.target)}</td><td${em('q326')}>${m(vis.q326)}</td><td${em('growth')}>${pct(vis.growth)}</td><td${em('ach')}>${ach(vis.achievement)}</td><td>${vis.deals.toLocaleString('en-US')} deals</td><td${em('loyalty')}>${m(vis.loyalty)}</td><td${em('vis')}>${m(vis.visCashback)}</td><td${em('sem')}>${m(vis.semAccrued)}</td><td${em('current')}>${m(vis.current)}</td><td${em('total')}>${m(vis.total)}</td></tr>`;
+ov.querySelector('.cdl-table tfoot').innerHTML = `<tr><td class="cdl-name">${filtered ? 'Shown (filtered)' : 'Total'} — ${vis.n.toLocaleString('en-US')} pharmacies</td><td>${vis.withBaseline.toLocaleString('en-US')} with baseline</td><td${em('q325')}>${m(vis.q325)}</td><td${em('target')}>${m(vis.target)}</td><td${em('q326')}>${m(vis.q326)}</td><td${em('growth')}>${pct(vis.growth)}</td><td${em('ach')}>${ach(vis.achievement)}</td><td>New ${vis.newDeals.toLocaleString('en-US')} · Existing ${vis.existingDeals.toLocaleString('en-US')}</td><td${em('loyalty')}>${m(vis.loyalty)}</td><td${em('vis')}>${m(vis.visCashback)}</td><td${em('sem')}>${m(vis.semAccrued)}</td><td${em('current')}>${m(vis.current)}</td><td${em('total')}>${m(vis.total)}</td></tr>`;
 ov.querySelector('[data-cdl-count]').textContent = filtered ? `${rows.length.toLocaleString('en-US')} of ${opts.records.length.toLocaleString('en-US')} shown` : `${rows.length.toLocaleString('en-US')} pharmacies`;
 ov.querySelector('[data-cdl-dir]').textContent = cdlState.dir === 'asc' ? 'Ascending ▲' : 'Descending ▼';
 ov.querySelector('[data-cdl-sortsel]').value = cdlState.sort;
@@ -10143,7 +10143,6 @@ ${tile('Target Achievement', hierNum(hierFmtPct(s.achievement, false), 'all', sc
 <div class="hier-block inv">
 <div class="hier-block-h">Commercial Investment <span>EGP</span></div>
 <div class="hier-tiles">
-${tile('Agreed Deals', hierNum(N(s.deals), 'deal', scope, 'deals'), 'Eligible pharmacies that have an agreed deal')}
 ${tile('New Customer Deals', hierNum(N(s.newDeals), 'new', scope, 'deals'), 'Of those deals · fixed-value 6,500 / 7,500 / 9,500')}
 ${tile('Existing Customer Deals', hierNum(N(s.existingDeals), 'existing', scope, 'deals'), 'Of those deals · all other agreed deals')}
 ${tile('Loyalty Cashback', hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty'), `Of which Agreed Deal Pharmacies ${hierNum(hierFmtM(s.loyaltyDeal), 'loyaltyDeal', scope, 'loyalty')}`)}
@@ -10158,12 +10157,12 @@ ${tile('Total Investment', hierNum(hierFmtM(s.total), 'total', scope, 'investmen
 // Roll-up table used at the Cashback Eligible (rows = DMs) and DM (rows = MRs) levels.
 function hierRollupTableHtml(rows, totalSummary, totalScope, rowKind, firstColLabel){
 const th = '<th class="hier-sticky">' + firstColLabel + '</th><th>Pharmacies</th><th>Q3’25 Sales</th><th>Q3’26 Target</th><th>Q3’26 Achieved</th><th>Growth</th><th>Target Achievement</th>'
-+ '<th class="inv-start">Agreed Deals</th><th>New Customer</th><th>Existing Customer</th><th>Loyalty Cashback</th><th>Visibility Cashback</th><th>Semester Accrued</th><th>Current Cashback</th><th>Total Investment</th>';
++ '<th class="inv-start">New Customer</th><th>Existing Customer</th><th>Loyalty Cashback</th><th>Visibility Cashback</th><th>Semester Accrued</th><th>Current Cashback</th><th>Total Investment</th>';
 const cells = (s, scope) => `<td>${hierNum(s.n.toLocaleString('en-US'), 'all', scope, 'n')}</td><td>${hierNum(hierFmtM(s.q325), 'all', scope, 'q325')}</td><td>${hierNum(hierFmtM(s.target), 'all', scope, 'target')}</td><td>${hierNum(hierFmtM(s.q326), 'all', scope, 'q326')}</td><td class="${s.growth !== null && s.growth < 0 ? 'neg' : 'pos'}">${hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth')}</td><td>${hierNum(hierFmtPct(s.achievement, false), 'all', scope, 'ach')}</td>`
-+ `<td class="inv-start">${hierNum(s.deals.toLocaleString('en-US'), 'deal', scope, 'deals')}</td><td>${hierNum(s.newDeals.toLocaleString('en-US'), 'new', scope, 'deals')}</td><td>${hierNum(s.existingDeals.toLocaleString('en-US'), 'existing', scope, 'deals')}</td><td>${hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty')}</td><td>${hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility')}</td><td>${hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester')}</td><td>${hierNum(hierFmtM(s.current), 'current', scope, 'current')}</td><td class="strong">${hierNum(hierFmtM(s.total), 'total', scope, 'investment')}</td>`;
++ `<td class="inv-start">${hierNum(s.newDeals.toLocaleString('en-US'), 'new', scope, 'deals')}</td><td>${hierNum(s.existingDeals.toLocaleString('en-US'), 'existing', scope, 'deals')}</td><td>${hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty')}</td><td>${hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility')}</td><td>${hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester')}</td><td>${hierNum(hierFmtM(s.current), 'current', scope, 'current')}</td><td class="strong">${hierNum(hierFmtM(s.total), 'total', scope, 'investment')}</td>`;
 const body = rows.map(r => `<tr${r.unassigned ? ' class="unassigned"' : ''}><td class="hier-sticky"><button type="button" class="hier-open" data-hier-${rowKind}="${cdlEsc(r.key)}">${cdlEsc(r.key)} <span aria-hidden="true">›</span></button></td>${cells(r.summary, r.scope)}</tr>`).join('');
 return `<div class="hier-table-wrap"><table class="hier-table">
-<thead><tr class="hier-grp"><th class="hier-sticky"></th><th colspan="6">Business Performance</th><th colspan="8" class="inv-start">Commercial Investment (EGP)</th></tr><tr>${th}</tr></thead>
+<thead><tr class="hier-grp"><th class="hier-sticky"></th><th colspan="6">Business Performance</th><th colspan="7" class="inv-start">Commercial Investment (EGP)</th></tr><tr>${th}</tr></thead>
 <tbody>${body}</tbody>
 <tfoot><tr><td class="hier-sticky">Total — ${rows.length} ${rowKind === 'dm' ? 'DM groups' : 'MR groups'}</td>${cells(totalSummary, totalScope)}</tr></tfoot>
 </table></div>`;
@@ -10190,7 +10189,7 @@ const body = rows.map(r => `<tr><td class="hier-sticky hier-ph"><b>${cdlEsc(r.na
 const filt = rows.length !== recs.length;
 const foot = `<tr><td class="hier-sticky">${filt ? 'Shown (search)' : 'Total'} — ${s.n.toLocaleString('en-US')} pharmacies</td><td></td><td></td>`
 + `<td>${hierNum(hierFmtM(s.q325), 'base', scope, 'q325')}</td><td>${hierNum(hierFmtM(s.target), 'base', scope, 'target')}</td><td>${hierNum(hierFmtM(s.q326), 'all', scope, 'q326')}</td><td>${hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth')}</td><td>${hierNum(hierFmtPct(s.achievement, false), 'base', scope, 'ach')}</td>`
-+ `<td class="inv-start">${hierNum(s.deals.toLocaleString('en-US'), 'deal', scope, 'deals')} deals</td><td>New ${s.newDeals} · Existing ${s.existingDeals}</td><td>${hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty')}</td><td>${s.visCommit} commitments</td><td>${s.visEligible} payable</td><td>${hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility')}</td><td></td><td>${hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester')}</td><td>${hierNum(hierFmtM(s.current), 'current', scope, 'current')}</td><td class="strong">${hierNum(hierFmtM(s.total), 'total', scope, 'investment')}</td></tr>`;
++ `<td class="inv-start"></td><td>New ${s.newDeals} · Existing ${s.existingDeals}</td><td>${hierNum(hierFmtM(s.loyalty), 'loyalty', scope, 'loyalty')}</td><td>${s.visCommit} commitments</td><td>${s.visEligible} payable</td><td>${hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility')}</td><td></td><td>${hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester')}</td><td>${hierNum(hierFmtM(s.current), 'current', scope, 'current')}</td><td class="strong">${hierNum(hierFmtM(s.total), 'total', scope, 'investment')}</td></tr>`;
 return `<div class="hier-ph-controls"><input type="search" id="hierPhSearch" placeholder="Search pharmacy name or code…" value="${cdlEsc(execHier.phQ)}"><span>${filt ? `${rows.length.toLocaleString('en-US')} of ${recs.length.toLocaleString('en-US')} shown` : `${recs.length.toLocaleString('en-US')} pharmacies`}</span></div>
 <div class="hier-table-wrap"><table class="hier-table ph">
 <thead><tr class="hier-grp"><th class="hier-sticky"></th><th colspan="7">Business Performance</th><th colspan="10" class="inv-start">Commercial Investment (EGP)</th></tr><tr>${head}</tr></thead>
