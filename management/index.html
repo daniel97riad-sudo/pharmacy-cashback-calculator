@@ -10232,7 +10232,6 @@ ${chip('growth','Growth', pct(all.growth))}
 </div></div>
 <div class="cdl-sum-g"><div class="cdl-sum-h">2 · Contribution</div><div class="cdl-sum-row">
 ${chip('scontrib','Sales Contribution', share(all.q326, P.q326))}
-${chip('gcontrib','Growth Contribution', share(all.inc, P.inc))}
 ${chip('n','Pharmacies', all.n.toLocaleString('en-US') + ' · ' + share(all.n, P.n))}
 </div></div>
 <div class="cdl-sum-g"><div class="cdl-sum-h">3 · Incremental Sales</div><div class="cdl-sum-row">
@@ -10245,7 +10244,7 @@ ${chip('cbinc','Cashback / Incremental Sales', all.inc > 0 ? (all.cashback / all
 </div></div>
 <div class="cdl-sum-g cdl-sum-wide"><div class="cdl-sum-h">5 · Slab / Tier Structure</div>${groups.join('')}</div>
 </div>
-<div class="cdl-note">Parent: ${cdlEsc(P.label)} — ${P.n.toLocaleString('en-US')} pharmacies · Q3’26 ${m(P.q326)} EGP · incremental ${signed(P.inc)} · cashback ${m(P.cashback)} EGP. Sales Contribution = Q3’26 ÷ parent Q3’26; Growth Contribution = incremental ÷ parent incremental; Investment Share = cashback ÷ parent cashback; Cashback / Incremental is an efficiency indicator, not a causal ROI measure. All from aggregated sums of the engine’s pharmacy records.</div>`;
+<div class="cdl-note">Parent: ${cdlEsc(P.label)} — ${P.n.toLocaleString('en-US')} pharmacies · Q3’26 ${m(P.q326)} EGP · incremental ${signed(P.inc)} · cashback ${m(P.cashback)} EGP. Sales Contribution = Q3’26 ÷ parent Q3’26; Investment Share = cashback ÷ parent cashback; Cashback / Incremental is an efficiency indicator, not a causal ROI measure. All from aggregated sums of the engine’s pharmacy records.</div>`;
 }
 
 const CDL_INV_METRICS = {
@@ -10322,7 +10321,6 @@ ${chip(['growth'],'Growth', pct(all.growth))}
 </div></div>
 <div class="cdl-sum-g"><div class="cdl-sum-h">2 · Contribution</div><div class="cdl-sum-row">
 ${chip(['scontrib'],'Sales Contribution', opts.parent && opts.parent.q326 ? (all.q326 / opts.parent.q326 * 100).toFixed(2) + '%' : 'N/A')}
-${chip(['gcontrib'],'Growth Contribution', opts.parent && opts.parent.inc ? (all.inc / opts.parent.inc * 100).toFixed(2) + '%' : 'N/A')}
 ${chip(['n'],'Pharmacies', all.n.toLocaleString('en-US'))}
 </div><div class="cdl-sum-sub">vs ${cdlEsc(opts.parent ? opts.parent.label : '')}</div></div>
 <div class="cdl-sum-g"><div class="cdl-sum-h">3 · Incremental Sales</div><div class="cdl-sum-row">
@@ -10559,7 +10557,6 @@ ${exPair(g, type, 'egypt')}
 <div class="ex-support">
 ${exItem('Incremental Sales', hierNum(exS(g.inc), type, 'egypt', 'inc'))}
 ${exItem('Sales Contribution', hierNum(exShare(g.q326, e.q326), type, 'egypt', 'scontrib'), 'of Cashback Eligible')}
-${exItem('Growth Contribution', hierNum(exShare(g.inc, e.inc), type, 'egypt', 'gcontrib'), 'of eligible growth')}
 ${exItem('Cashback', hierNum(exC(g.loyalty), type, 'egypt', 'cashback'))}
 </div>
 <div class="ex-slabs">${rows}</div>
@@ -10602,7 +10599,6 @@ ${exPair(e, 'all', 'egypt')}
 <div class="ex-support">
 ${exItem('Incremental Sales', hierNum(exS(e.inc), 'all', 'egypt', 'inc'))}
 ${exItem('Sales Contribution', hierNum(exShare(e.q326, u.q326), 'all', 'egypt', 'scontrib'), 'of total Q3’26 sales')}
-${exItem('Growth Contribution', hierNum(exShare(e.inc, u.inc), 'all', 'egypt', 'gcontrib'), 'of total incremental sales')}
 ${exItem('Total Cashback', hierNum(exC(e.loyalty), 'all', 'egypt', 'cashback'))}
 ${exItem('Cashback / Incremental Sales', hierNum(hierFmtPct(e.cbInc, false), 'all', 'egypt', 'cbinc'), 'efficiency indicator')}
 </div>
@@ -10639,7 +10635,6 @@ ${exPair(s, 'all', scope)}
 <div class="ex-support">
 ${exItem('Incremental Sales', hierNum(exS(s.inc), 'all', scope, 'inc'))}
 ${exItem('Sales Contribution', hierNum(exShare(s.q326, ps.q326), 'all', scope, 'scontrib'), 'of ' + cdlEsc(plabel))}
-${exItem('Growth Contribution', hierNum(exShare(s.inc, ps.inc), 'all', scope, 'gcontrib'), 'of ' + cdlEsc(plabel) + ' growth')}
 ${exItem('Cashback', hierNum(exC(s.loyalty), 'all', scope, 'cashback'))}
 ${exItem('Efficiency', hierNum(hierFmtPct(s.cbInc, false), 'all', scope, 'cbinc'), 'cashback ÷ incremental')}
 </div>
@@ -10662,10 +10657,10 @@ ${exItem('Total Investment', hierNum(exC(s.total), 'total', scope, 'investment')
 function hierRollupTableHtml(rows, totalSummary, totalScope, rowKind, firstColLabel){
 const N = v => v.toLocaleString('en-US');
 const ps = totalSummary;
-const th = `<th class="hier-sticky">${firstColLabel}</th><th>Pharmacies</th><th>Q3’25 Sales</th><th>Q3’26 Sales</th><th>Growth</th><th>Incremental</th><th>Sales Contrib.</th><th>Growth Contrib.</th><th>Cashback</th><th>Efficiency</th><th>New Customer</th><th>Existing Customer</th>`
+const th = `<th class="hier-sticky">${firstColLabel}</th><th>Pharmacies</th><th>Q3’25 Sales</th><th>Q3’26 Sales</th><th>Growth</th><th>Incremental</th><th>Sales Contrib.</th><th>Cashback</th><th>Efficiency</th><th>New Customer</th><th>Existing Customer</th>`
 + `<th class="invd">Q3’26 Target</th><th class="invd">Target Ach.</th><th class="invd">Visibility</th><th class="invd">Semester</th><th class="invd">Current</th><th class="invd">Total Investment</th>`;
 const cells = (s, scope, isTotal) => `<td>${hierNum(N(s.n), 'all', scope, 'n')}</td><td>${hierNum(exC(s.q325), 'all', scope, 'q325')}</td><td class="ex-strong">${hierNum(exC(s.q326), 'all', scope, 'q326')}</td><td class="${s.growth !== null && s.growth < 0 ? 'neg' : 'pos'}">${hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth')}</td><td>${hierNum(exS(s.inc), 'all', scope, 'inc')}</td>`
-+ `<td>${isTotal ? '100.00%' : hierNum(exShare(s.q326, ps.q326), 'all', scope, 'scontrib')}</td><td>${isTotal ? '100.00%' : hierNum(exShare(s.inc, ps.inc), 'all', scope, 'gcontrib')}</td>`
++ `<td>${isTotal ? '100.00%' : hierNum(exShare(s.q326, ps.q326), 'all', scope, 'scontrib')}</td>`
 + `<td>${hierNum(exC(s.loyalty), 'all', scope, 'cashback')}</td><td>${hierNum(hierFmtPct(s.cbInc, false), 'all', scope, 'cbinc')}</td><td>${hierNum(N(s.fixedN), 'fixed', scope, 'n')}</td><td>${hierNum(N(s.variableN), 'variable', scope, 'n')}</td>`
 + `<td class="invd">${hierNum(exC(s.target), 'base', scope, 'target')}</td><td class="invd">${hierNum(hierFmtPct(s.achievement, false), 'base', scope, 'ach')}</td><td class="invd">${hierNum(exC(s.visCashback), 'visEligible', scope, 'visibility')}</td><td class="invd">${hierNum(exC(s.semAccrued), 'sem', scope, 'semester')}</td><td class="invd">${hierNum(exC(s.current), 'current', scope, 'current')}</td><td class="invd strong">${hierNum(exC(s.total), 'total', scope, 'investment')}</td>`;
 const body = rows.map(r => `<tr${r.unassigned ? ' class="unassigned"' : ''}><td class="hier-sticky"><button type="button" class="hier-open" data-hier-${rowKind}="${cdlEsc(r.key)}">${cdlEsc(r.key)} <span aria-hidden="true">›</span></button></td>${cells(r.summary, r.scope, false)}</tr>`).join('');
