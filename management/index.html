@@ -1454,6 +1454,106 @@ table.cdl-table tfoot td{font-weight:800;background:var(--bg);border-top:2px sol
 .cdl-value{font-size:22px;}
 }
 </style>
+<style id="execP2Styles">
+/* ---- Executive Phase 2 (2026-10-07): board-ready presentation. PHARCO palette:
+   orange #FFA400 for clickable values / active / growth highlights only. ---- */
+.ex-story{display:flex;flex-direction:column;gap:18px;margin:6px 0 22px;direction:ltr;text-align:left;}
+.ex-sec{background:#fff;border:1px solid #EFE8DE;border-radius:20px;padding:22px 24px;}
+.ex-hero{padding:26px 28px;}
+.ex-sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
+.ex-eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6B635A;}
+.ex-count{font-size:15px;font-weight:800;color:var(--text);}
+.ex-count small,.ex-type-n small,.ex-slab small{font-size:11px;font-weight:600;color:var(--muted);margin-inline-start:5px;}
+.ex-sec-sub{font-size:12px;color:var(--muted);margin:0 0 6px;}
+.ex-sec-sub.ex-inline{margin:0;}
+.ex-pair{display:flex;align-items:flex-end;gap:18px 26px;flex-wrap:wrap;margin:12px 0 16px;}
+.ex-pv{display:flex;flex-direction:column;}
+.ex-l{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+.ex-v{font-size:34px;font-weight:800;line-height:1.1;color:#8A847C;letter-spacing:-.01em;}
+.ex-now .ex-v{font-size:44px;color:var(--text);}
+.ex-hero .ex-v{font-size:40px;}
+.ex-hero .ex-now .ex-v{font-size:54px;}
+.ex-u{font-size:11px;color:var(--muted);font-weight:600;}
+.ex-arrow{font-size:26px;color:#C9C1B6;padding-bottom:14px;}
+.ex-growth{display:flex;flex-direction:column;margin-inline-start:6px;padding:8px 14px;border-radius:14px;background:var(--primary-light);}
+.ex-growth .ex-gv{font-size:26px;font-weight:800;color:var(--primary-dark);line-height:1.15;}
+.ex-growth.neg{background:var(--danger-bg);}
+.ex-growth.neg .ex-gv{color:var(--danger);}
+.ex-support{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 18px;padding-top:14px;border-top:1px solid #F2ECE4;}
+.ex-s{display:flex;flex-direction:column;min-width:0;}
+.ex-s > span{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);}
+.ex-s > b{font-size:18px;font-weight:800;color:var(--text);margin-top:2px;}
+.ex-s > em{font-style:normal;font-size:11px;color:var(--muted);}
+.ex-row2{display:grid;grid-template-columns:1fr;gap:18px;}
+.ex-types{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px;}
+.ex-type{background:var(--bg);border:1px solid #F0E9DF;border-radius:16px;padding:16px 18px;min-width:0;}
+.ex-type-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+.ex-type-n{font-size:22px;font-weight:800;color:var(--text);}
+.ex-type .ex-v{font-size:24px;}
+.ex-type .ex-now .ex-v{font-size:30px;}
+.ex-type .ex-growth .ex-gv{font-size:20px;}
+.ex-type .ex-support{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));}
+.ex-type .ex-s > b{font-size:16px;}
+.ex-slabs{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
+.ex-slab{display:grid;grid-template-columns:70px repeat(4,minmax(0,1fr));gap:8px;align-items:baseline;background:#fff;border:1px solid #F0E9DF;border-radius:10px;padding:8px 10px;font-size:13px;font-weight:800;color:var(--text);}
+.ex-slab small{display:block;margin:0;}
+.ex-slab-n{font-size:12px;font-weight:800;color:#6B635A;}
+.ex-invest .ex-inv-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:10px;}
+.ex-inv-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+.ex-inv-tiles .ex-s{background:var(--bg);border:1px solid #F0E9DF;border-radius:14px;padding:12px 14px;}
+.ex-inv-tiles .ex-s-total{background:var(--primary-light);border-color:#FFD58A;}
+.ex-eff{display:flex;flex-direction:column;gap:2px;border:1px solid #F0E9DF;border-radius:14px;padding:14px 16px;}
+.ex-eff-v{font-size:34px;font-weight:800;color:var(--text);}
+.ex-eff-t{font-size:13px;font-weight:800;color:var(--text);}
+.ex-eff-n{font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:4px;}
+.ex-hier{background:#fff;border:1px solid #EFE8DE;border-radius:20px;padding:22px 24px;}
+.ex-level{background:var(--bg);border:1px solid #F0E9DF;border-radius:16px;padding:16px 18px;margin-bottom:14px;}
+.ex-level .ex-v{font-size:26px;}
+.ex-level .ex-now .ex-v{font-size:32px;}
+.ex-level .ex-growth .ex-gv{font-size:20px;}
+.ex-level-types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.ex-lt{background:#fff;border:1px solid #F0E9DF;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;}
+.ex-lt > b{font-size:20px;font-weight:800;color:var(--text);}
+.ex-lt > em{font-style:normal;font-size:12px;color:var(--muted);}
+.ex-invd{margin-top:12px;}
+.ex-invd summary{cursor:pointer;font-size:12px;font-weight:800;color:#6B635A;list-style:none;}
+.ex-invd summary::before{content:'+ ';color:var(--primary-dark);}
+.ex-invd[open] summary::before{content:'− ';}
+.ex-invd .ex-support{margin-top:10px;}
+.ex-table-tools{display:flex;justify-content:flex-end;margin:0 0 8px;}
+.ex-invtoggle{border:1px solid #EFE8DE;background:#fff;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--text);cursor:pointer;font-family:inherit;}
+.ex-invtoggle:hover{border-color:var(--primary);}
+table.hier-table.ex-table{min-width:1100px;font-size:12.5px;}
+table.hier-table.ex-table td{padding:10px 10px;}
+table.hier-table.ex-table th{border-bottom:1px solid #EFE8DE;}
+table.hier-table.ex-table td.ex-strong{font-weight:800;}
+table.hier-table.ex-table td.pos{color:var(--primary-dark);}
+table.hier-table.ex-table .invd{display:none;}
+.hier-table-wrap.show-inv table.hier-table.ex-table{min-width:1700px;}
+.hier-table-wrap.show-inv table.hier-table.ex-table .invd{display:table-cell;}
+.ex-hier .hier-table-wrap{border-color:#EFE8DE;}
+.cdl-sum-wide{grid-column:1 / -1;}
+#execPharmacyTable .exec-explorer-pills{flex-wrap:wrap;}
+#execPharmacyTable .exec-explorer-bar{flex-wrap:wrap;}
+.cdl-chip i{display:block;font-style:normal;font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;}
+@media (max-width:900px){
+.ex-types,.ex-invest .ex-inv-grid,.ex-level-types{grid-template-columns:1fr;}
+}
+@media (max-width:560px){
+.ex-sec,.ex-hier{padding:16px 14px;border-radius:16px;}
+.ex-hero{padding:18px 14px;}
+.ex-v,.ex-hero .ex-v{font-size:24px;}
+.ex-now .ex-v,.ex-hero .ex-now .ex-v{font-size:30px;}
+.ex-arrow{font-size:20px;padding-bottom:8px;}
+.ex-pair{gap:10px 14px;}
+.ex-growth{margin-inline-start:0;}
+.ex-growth .ex-gv{font-size:20px;}
+.ex-support{grid-template-columns:1fr 1fr;}
+.ex-slab{grid-template-columns:1fr 1fr;}
+.ex-slab-n{grid-column:1 / -1;}
+.ex-type .ex-support{grid-template-columns:1fr 1fr;}
+}
+</style>
 <style id="hierStyles">
 /* ---- Executive Commercial Hierarchy (2026-10-05) -- PHARCO palette only ---- */
 .hier-section{direction:ltr;text-align:left;}
@@ -8344,11 +8444,11 @@ const compositionActive = execCompositionFilterActive();
 const compositionActiveLabel = (() => {
 if(execCompositionFilter.tier){
 const vt = COMMERCIAL_2026_VARIABLE_TIERS.find(t=>t.key===execCompositionFilter.tier);
-if(vt) return `Variable · ${(vt.rate*100).toFixed(2)}%`;
+if(vt) return `Existing Customer · ${hierSlabTierLabel(vt.key, false)}`;
 const ft = COMMERCIAL_2026_FIXED_SLABS.find(f=>f.key===execCompositionFilter.tier);
-if(ft) return `Fixed · ${ft.cash.toLocaleString('en-US')} EGP`;
+if(ft) return `New Customer · ${hierSlabTierLabel(ft.key, false)}`;
 }
-if(execCompositionFilter.structure) return execCompositionFilter.structure === 'fixed' ? 'Fixed' : 'Variable';
+if(execCompositionFilter.structure) return execCompositionFilter.structure === 'fixed' ? 'New Customer' : 'Existing Customer';
 return '';
 })();
 
@@ -8566,13 +8666,13 @@ if(execTablePage < 1) execTablePage = 1;
 const pageStart = (execTablePage - 1) * EXEC_TABLE_PAGE_SIZE;
 const pageRows = eligibleAll.slice(pageStart, pageStart + EXEC_TABLE_PAGE_SIZE);
 
-const tierLabelFor = (r) => r.achieved_slab ? (COMMERCIAL_2026_VARIABLE_TIERS.find(t=>t.key===r.achieved_slab)?.label || COMMERCIAL_2026_FIXED_SLABS.find(f=>f.key===r.achieved_slab)?.label || r.achieved_slab) : '—';
+const tierLabelFor = (r) => r.achieved_slab ? hierSlabTierLabel(r.achieved_slab, true) : '—';
 const rateLabelFor = (r) => r.commercial_structure === 'variable' ? `${(r.cashback_rate*100).toFixed(2)}%` : (r.commercial_structure === 'fixed' ? 'Flat' : '—');
 const growthLabelFor = (r) => r.growth_pct === null ? '—' : (r.growth_pct>=0?'+':'') + (r.growth_pct*100).toFixed(1) + '%';
 
 const eligibleRowHtml = (r, mobile) => {
 const p = r.p;
-const structLabel = r.commercial_structure === 'fixed' ? 'Fixed' : 'Variable';
+const structLabel = r.commercial_structure === 'fixed' ? 'New Customer' : 'Existing Customer';
 if(mobile){
 return `<div class="mobile-card row-clickable" data-open-pharmacy="${p.c}">
 <div class="mobile-card-head">${p.n}<span class="row-drill-icon">${iconSvg('chevron-right')}</span></div>
@@ -8647,7 +8747,7 @@ const EXEC_SORT_FIELD_LABELS = {region:'Region', q32026:'Q3 2026 Dist_Value', gr
 const explorerBannerText = (() => {
 if(hasTierFilter) return `Showing: ${compositionActiveLabel} pharmacies · ${totalEligible.toLocaleString('en-US')} results`;
 if(hasStructureFilter){
-const lbl = execCompositionFilter.structure === 'fixed' ? 'Fixed' : 'Variable';
+const lbl = execCompositionFilter.structure === 'fixed' ? 'New Customer' : 'Existing Customer';
 return `Showing: ${lbl} pharmacies · ${totalEligible.toLocaleString('en-US')} results`;
 }
 if(visibilityFilterActive) return `Showing: ${execVisibilityCodeFilterLabel} · ${totalEligible.toLocaleString('en-US')} results`;
@@ -8669,8 +8769,8 @@ ${iconSvg('search')}
 <button class="exec-explorer-pill${qfAllActive?' active':''}" type="button" data-explorer-filter="all">All</button>
 <button class="exec-explorer-pill${qfCashbackActive?' active':''}" type="button" data-explorer-filter="topCashback">Top Cashback</button>
 <button class="exec-explorer-pill${qfGrowthActive?' active':''}" type="button" data-explorer-filter="highestGrowth">Highest Growth</button>
-<button class="exec-explorer-pill${qfVariableActive?' active':''}" type="button" data-explorer-filter="variable">Variable</button>
-<button class="exec-explorer-pill${qfFixedActive?' active':''}" type="button" data-explorer-filter="fixed">Fixed</button>
+<button class="exec-explorer-pill${qfVariableActive?' active':''}" type="button" data-explorer-filter="variable">Existing Customer</button>
+<button class="exec-explorer-pill${qfFixedActive?' active':''}" type="button" data-explorer-filter="fixed">New Customer</button>
 </div>
 </div>`;
 const explorerBannerHtml = explorerBannerText
@@ -8678,7 +8778,7 @@ const explorerBannerHtml = explorerBannerText
 : `<div class="exec-explorer-banner exec-explorer-banner--default"><span>Showing all ${totalEligible.toLocaleString('en-US')} eligible pharmacies</span></div>`;
 const eligibleTableHtml = `
 <div class="section flow-tables" id="execPharmacyTable">
-<div class="section-head"><h2>${iconSvg('store')}Explore ${kpis.targetAchieved.toLocaleString('en-US')} Cashback-Eligible Pharmacies</h2><span class="section-sub">Find the pharmacies behind the commercial result.</span></div>
+<div class="section-head"><h2>${iconSvg('store')}Pharmacy Explorer</h2><span class="section-sub">${kpis.targetAchieved.toLocaleString('en-US')} cashback-eligible pharmacies · search, filter and sort</span></div>
 <div class="panel">
 ${explorerBarHtml}
 ${explorerBannerHtml}
@@ -8708,10 +8808,17 @@ ${paginationHtml}
 // page reads Total Cashback -> Growth -> Visibility Money underneath the
 // reordered hero above, per Daniel's instruction. No section's own content
 // changed here, only the order they're concatenated in.
+// Executive Phase 2 (2026-10-07): ACTUAL SALES -> GROWTH -> INVESTMENT ->
+// EFFICIENCY. Story sections (Universe, Agreed Deals, Cashback Eligible,
+// New/Existing Customer, Investment) -> DM -> MR -> Pharmacy hierarchy ->
+// Pharmacy Explorer. The old eligible-based hero, population strip, legacy
+// Commercial Investment / Sales Performance / Visibility Investment sections
+// and Explore shortcuts are no longer rendered on Executive (their code is
+// untouched and still used elsewhere where applicable).
+const execStoryHtml = renderExecStoryHtml();
 const execHierarchyHtml = renderExecHierarchyHtml();
 section.innerHTML = filterBarHtml('execDash', 'Executive') + dataUpdatedHtml
-+ populationStripHtml
-+ heroStoryHtml + execHierarchyHtml + cashbackHtml + salesPerformanceHtml + visibilityModuleHtml + exploreHtml + eligibleTableHtml;
++ execStoryHtml + execHierarchyHtml + eligibleTableHtml;
 
 wireFilterBar('execDash');
 section.querySelectorAll('[data-open-pharmacy]').forEach(el => {
@@ -9616,7 +9723,9 @@ growth:{label:'Growth', sort:'growth'},
 cashback:{label:'Cashback', sort:'cashback'},
 contribution:{label:'Growth Contribution', sort:'inc'},
 inc:{label:'Incremental Sales', sort:'inc'},
-cbinc:{label:'Cashback / Incremental Sales', sort:'cashback'}
+cbinc:{label:'Cashback / Incremental Sales', sort:'cashback'},
+scontrib:{label:'Sales Contribution', sort:'q326'},
+gcontrib:{label:'Growth Contribution', sort:'inc'}
 };
 let cdlState = null;
 
@@ -9709,7 +9818,7 @@ const m = v => (v || 0).toLocaleString('en-US', { minimumFractionDigits:2, maxim
 const pct = v => v === null || v === undefined || !isFinite(v) ? 'N/A' : `${v >= 0 ? '+' : ''}${(v*100).toFixed(2)}%`;
 const all = cdlSummarize(opts.records);
 const contribution = opts.parentIncrease ? all.inc / opts.parentIncrease : null;
-const headline = { n: all.n.toLocaleString('en-US') + ' pharmacies', q325: m(all.q325) + ' EGP', q326: m(all.q326) + ' EGP', growth: pct(all.growth), cashback: m(all.cashback) + ' EGP', contribution: contribution === null ? 'N/A' : (contribution*100).toFixed(2) + '%', inc: (all.inc < 0 ? '−' : '') + m(Math.abs(all.inc)) + ' EGP', cbinc: all.inc > 0 ? (all.cashback / all.inc * 100).toFixed(2) + '%' : 'N/A' }[metric];
+const headline = { n: all.n.toLocaleString('en-US') + ' pharmacies', q325: m(all.q325) + ' EGP', q326: m(all.q326) + ' EGP', growth: pct(all.growth), cashback: m(all.cashback) + ' EGP', contribution: contribution === null ? 'N/A' : (contribution*100).toFixed(2) + '%', inc: (all.inc < 0 ? '−' : '') + m(Math.abs(all.inc)) + ' EGP', cbinc: all.inc > 0 ? (all.cashback / all.inc * 100).toFixed(2) + '%' : 'N/A', scontrib: opts.parent && opts.parent.q326 ? (all.q326 / opts.parent.q326 * 100).toFixed(2) + '%' : 'N/A', gcontrib: opts.parent && opts.parent.inc ? (all.inc / opts.parent.inc * 100).toFixed(2) + '%' : 'N/A' }[metric];
 const nameQ = cdlState.qName.trim().toLowerCase();
 const terrQ = cdlState.qTerr.trim().toLowerCase();
 const rows = opts.records.map(x => {
@@ -9723,7 +9832,7 @@ const av = a[sk] === null ? -Infinity : a[sk], bv = b[sk] === null ? -Infinity :
 return dir * (av - bv) || a.name.localeCompare(b.name);
 });
 const vis = cdlSummarize(rows.map(r => r.x));
-const emCols = { n:[], q325:['q325'], q326:['q326'], growth:['q325','q326','growth'], cashback:['cashback'], contribution:['inc'], inc:['inc'], cbinc:['cashback','inc'] }[metric];
+const emCols = { n:[], q325:['q325'], q326:['q326'], growth:['q325','q326','growth'], cashback:['cashback'], contribution:['inc'], inc:['inc'], cbinc:['cashback','inc'], scontrib:['q326'], gcontrib:['inc'] }[metric];
 const em = k => emCols.includes(k) ? ' class="em"' : '';
 const slabLabel = cr => { if(opts.hierLabels) return hierSlabTierLabel(cr.achieved_slab, true); const d = [...COMMERCIAL_2026_FIXED_SLABS, ...COMMERCIAL_2026_VARIABLE_TIERS].find(s => s.key === cr.achieved_slab); return d ? d.label : (cr.achieved_slab || '—'); };
 const rateLabel = cr => cr.commercial_structure === 'variable' && cr.cashback_rate ? (cr.cashback_rate*100).toFixed(2) + '%' : (cr.commercial_structure === 'fixed' ? (opts.hierLabels ? 'Slab amount' : 'Fixed amount') : '—');
@@ -9747,7 +9856,7 @@ ${chip('cashback','Cashback', m(all.cashback) + ' EGP')}
 ${chip('inc','Incremental Sales', (all.inc < 0 ? '−' : '') + m(Math.abs(all.inc)) + ' EGP')}
 ${chip('contribution','Growth Contribution', contribution === null ? 'N/A' : (contribution*100).toFixed(2) + '%')}
 </div>`}
-<div class="cdl-note">Growth = SUM Q3’26 ÷ SUM Q3’25 − 1 for these pharmacies. Contribution = their incremental sales ÷ the parent population’s incremental sales (${m(opts.parentIncrease)} EGP). Every row below is the engine’s own pharmacy-level result; the footer sums them.</div>
+${opts.parent ? '' : `<div class="cdl-note">Growth = SUM Q3’26 ÷ SUM Q3’25 − 1 for these pharmacies. Contribution = their incremental sales ÷ the parent population’s incremental sales (${m(opts.parentIncrease)} EGP). Every row below is the engine’s own pharmacy-level result; the footer sums them.</div>`}
 <div class="cdl-controls">
 <input type="search" data-cdl-q="name" placeholder="Search pharmacy name or code…" value="${cdlEsc(cdlState.qName)}">
 <input type="search" data-cdl-q="terr" placeholder="Search territory…" value="${cdlEsc(cdlState.qTerr)}">
@@ -10042,13 +10151,15 @@ return 'egypt';
 // second cashback calculation, never averaged percentages.
 function hierSummaryResolve(h, filter, scope, sc){
 const typeName = { fixed: 'New Customer', variable: 'Existing Customer' };
-const P = (recs) => { const s = cdlSummarize(recs.map(r => ({ p: r.p, cr: r.cr }))); return { n: s.n, inc: s.inc, cashback: s.cashback }; };
+const P = (recs) => { const s = cdlSummarize(recs.map(r => ({ p: r.p, cr: r.cr }))); return { n: s.n, inc: s.inc, cashback: s.cashback, q326: s.q326 }; };
 const eligLabel = x => x.label === 'Cashback Eligible' ? 'Cashback Eligible' : x.label + ' · Cashback Eligible';
 let recs, label, parentRecs, parentLabel, structure;
 if(filter === 'all'){
-const ps = hierParentScope(scope), psc = hierScopeRecords(h, ps);
+// Parent: the 1,496 (Egypt) -> Total Pharmacy Universe; a DM -> Cashback
+// Eligible; an MR -> its DM (Phase 2 contribution rules).
 recs = sc.records; label = eligLabel(sc); structure = 'both';
-parentRecs = psc.records; parentLabel = eligLabel(psc);
+if(scope === 'egypt'){ const u = hierScopeRecords(h, 'programme'); parentRecs = u.records; parentLabel = h.filtered ? 'Filtered universe' : 'Total Pharmacy Universe'; }
+else { const psc = hierScopeRecords(h, hierParentScope(scope)); parentRecs = psc.records; parentLabel = eligLabel(psc); }
 } else if(filter === 'fixed' || filter === 'variable'){
 recs = sc.records.filter(r => r.cr.commercial_structure === filter); structure = filter;
 label = typeName[filter] + ' · ' + sc.label;
@@ -10081,8 +10192,13 @@ records: sc.records.filter(r => r.cr.commercial_structure === filter).map(r => (
 }
 const f = HIER_FILTERS[filter] || HIER_FILTERS.all;
 if(!sc) return null;
+// Contribution parent: Total Pharmacy Universe for universe / Agreed Deals
+// scopes; the scope's own Cashback Eligible population inside the hierarchy.
+const parentSc = hierIsEligibleScope(scope) ? sc : hierScopeRecords(h, 'programme');
+const ps = hierSummarize(parentSc.records);
 return {
 mode: 'inv',
+parent: { label: hierIsEligibleScope(scope) ? (sc.label === 'Cashback Eligible' ? 'Cashback Eligible' : sc.label + ' · Cashback Eligible') : (h.filtered ? 'Filtered universe' : 'Total Pharmacy Universe'), q326: ps.q326, inc: ps.inc, n: ps.n },
 dealSplit: scope === 'deals',
 achAllChip: scope === 'programme',
 label: sc.label + ' · ' + f.label,
@@ -10093,36 +10209,43 @@ records: sc.records.filter(f.fn).map(r => ({ p: r.p, cr: r.cr, inv: r }))
 }
 
 function hierDrawerSummaryHtml(opts, all, chip, m, pct){
+// Exact values (detail level). Order: Sales -> Contribution -> Incremental
+// -> Investment -> Slab/Tier structure -> pharmacy list (rendered below).
 const P = opts.parent;
 const share = (a, b) => b ? (a / b * 100).toFixed(2) + '%' : 'N/A';
-const signed = v => (v < 0 ? '−' : '') + m(Math.abs(v)) + ' EGP';
-const cnt = {}, cb = {};
-HIER_SLAB_KEYS.forEach(k => { cnt[k] = 0; cb[k] = 0; });
-opts.records.forEach(x => { const k = x.cr.achieved_slab; if(cnt[k] !== undefined){ cnt[k]++; cb[k] += x.cr.cashback_amount || 0; } });
-const row = k => `<div class="cdl-chip"><span>${HIER_SLAB_NAMES[k]}</span><b>${cnt[k].toLocaleString('en-US')} · ${m(cb[k])} EGP</b></div>`;
+const signed = v => (v < 0 ? '−' : '+') + m(Math.abs(v)) + ' EGP';
+const cnt = {}, cb = {}, q = {};
+HIER_SLAB_KEYS.forEach(k => { cnt[k] = 0; cb[k] = 0; q[k] = 0; });
+opts.records.forEach(x => { const k = x.cr.achieved_slab; if(cnt[k] !== undefined){ cnt[k]++; cb[k] += x.cr.cashback_amount || 0; q[k] += x.cr.q3_2026_dv || 0; } });
+const grp = keys => keys.reduce((a, k) => a + q[k], 0);
+const row = (k, gq) => `<div class="cdl-chip"><span>${HIER_SLAB_NAMES[k]}</span><b>${cnt[k].toLocaleString('en-US')} pharmacies</b><i>Q3’26 ${m(q[k])} EGP · ${share(q[k], gq)} of group · cashback ${m(cb[k])} EGP</i></div>`;
 const groups = [];
-if(opts.structure === 'fixed' || opts.structure === 'both') groups.push(`<div class="cdl-sum-sub">New Customer</div><div class="cdl-sum-row">${['fixed1','fixed2','fixed3'].map(row).join('')}</div>`);
-if(opts.structure === 'variable' || opts.structure === 'both') groups.push(`<div class="cdl-sum-sub">Existing Customer</div><div class="cdl-sum-row">${['s1','s2','s3'].map(row).join('')}</div>`);
+const FK = ['fixed1','fixed2','fixed3'], VK = ['s1','s2','s3'];
+const live = keys => keys.filter(k => cnt[k] > 0).length ? keys.filter(k => cnt[k] > 0) : keys;
+if(opts.structure === 'fixed' || opts.structure === 'both') groups.push(`<div class="cdl-sum-sub">New Customer</div><div class="cdl-sum-row">${live(FK).map(k => row(k, grp(FK))).join('')}</div>`);
+if(opts.structure === 'variable' || opts.structure === 'both') groups.push(`<div class="cdl-sum-sub">Existing Customer</div><div class="cdl-sum-row">${live(VK).map(k => row(k, grp(VK))).join('')}</div>`);
 return `<div class="cdl-sum">
-<div class="cdl-sum-g"><div class="cdl-sum-h">Population</div><div class="cdl-sum-row">
-${chip('n','Eligible Pharmacies', all.n.toLocaleString('en-US'))}
-<div class="cdl-chip"><span>% of ${cdlEsc(P.label)}</span><b>${share(all.n, P.n)}</b></div>
-</div></div>
-<div class="cdl-sum-g"><div class="cdl-sum-h">Sales Performance</div><div class="cdl-sum-row">
+<div class="cdl-sum-g cdl-sum-wide"><div class="cdl-sum-h">1 · Sales</div><div class="cdl-sum-row">
 ${chip('q325','Q3’25 Sales', m(all.q325) + ' EGP')}
 ${chip('q326','Q3’26 Sales', m(all.q326) + ' EGP')}
 ${chip('growth','Growth', pct(all.growth))}
-${chip('inc','Incremental Sales', signed(all.inc))}
-<div class="cdl-chip"><span>Incremental Sales Contribution</span><b>${share(all.inc, P.inc)}</b></div>
 </div></div>
-<div class="cdl-sum-g"><div class="cdl-sum-h">Investment</div><div class="cdl-sum-row">
+<div class="cdl-sum-g"><div class="cdl-sum-h">2 · Contribution</div><div class="cdl-sum-row">
+${chip('scontrib','Sales Contribution', share(all.q326, P.q326))}
+${chip('gcontrib','Growth Contribution', share(all.inc, P.inc))}
+${chip('n','Pharmacies', all.n.toLocaleString('en-US') + ' · ' + share(all.n, P.n))}
+</div></div>
+<div class="cdl-sum-g"><div class="cdl-sum-h">3 · Incremental Sales</div><div class="cdl-sum-row">
+${chip('inc','Incremental Sales', signed(all.inc))}
+</div></div>
+<div class="cdl-sum-g"><div class="cdl-sum-h">4 · Investment</div><div class="cdl-sum-row">
 ${chip('cashback','Total Cashback', m(all.cashback) + ' EGP')}
 <div class="cdl-chip"><span>Investment Share</span><b>${share(all.cashback, P.cashback)}</b></div>
 ${chip('cbinc','Cashback / Incremental Sales', all.inc > 0 ? (all.cashback / all.inc * 100).toFixed(2) + '%' : 'N/A')}
 </div></div>
-<div class="cdl-sum-g"><div class="cdl-sum-h">Cashback Structure</div>${groups.join('')}</div>
+<div class="cdl-sum-g cdl-sum-wide"><div class="cdl-sum-h">5 · Slab / Tier Structure</div>${groups.join('')}</div>
 </div>
-<div class="cdl-note">Parent population: ${cdlEsc(P.label)} — ${P.n.toLocaleString('en-US')} pharmacies, incremental sales ${signed(P.inc)}, cashback ${m(P.cashback)} EGP. Growth = SUM Q3’26 ÷ SUM Q3’25 − 1; Incremental = Q3’26 − Q3’25; Contribution = group incremental ÷ parent incremental; Investment Share = group cashback ÷ parent cashback; Cashback / Incremental = group cashback ÷ group incremental. Cashback is the engine’s own pharmacy-level amount.</div>`;
+<div class="cdl-note">Parent: ${cdlEsc(P.label)} — ${P.n.toLocaleString('en-US')} pharmacies · Q3’26 ${m(P.q326)} EGP · incremental ${signed(P.inc)} · cashback ${m(P.cashback)} EGP. Sales Contribution = Q3’26 ÷ parent Q3’26; Growth Contribution = incremental ÷ parent incremental; Investment Share = cashback ÷ parent cashback; Cashback / Incremental is an efficiency indicator, not a causal ROI measure. All from aggregated sums of the engine’s pharmacy records.</div>`;
 }
 
 const CDL_INV_METRICS = {
@@ -10141,6 +10264,8 @@ current:{label:'Current Cashback', sort:'current'},
 investment:{label:'Total Investment', sort:'total'},
 inc:{label:'Incremental Sales', sort:'q326'},
 achall:{label:'Target Achievement (total Q3’26 ÷ target)', sort:'q326'},
+scontrib:{label:'Sales Contribution', sort:'q326'},
+gcontrib:{label:'Growth Contribution', sort:'q326'},
 payout:{label:'Agreed Deal Payout', sort:'q326'}
 };
 
@@ -10161,7 +10286,8 @@ n: all.n.toLocaleString('en-US') + ' pharmacies', base: all.withBaseline.toLocal
 q325: m(all.q325) + ' EGP', target: m(all.target) + ' EGP', q326: m(all.q326) + ' EGP', growth: pct(all.growth), ach: ach(all.achievement),
 deals: all.deals.toLocaleString('en-US') + ' deals', loyalty: m(all.loyalty) + ' EGP', visibility: m(all.visCashback) + ' EGP',
 semester: m(all.semAccrued) + ' EGP', current: m(all.current) + ' EGP', investment: m(all.total) + ' EGP',
-inc: (all.inc < 0 ? '−' : '') + m(Math.abs(all.inc)) + ' EGP', achall: ach(all.achAll), payout: m(all.payout) + ' EGP'
+inc: (all.inc < 0 ? '−' : '') + m(Math.abs(all.inc)) + ' EGP', achall: ach(all.achAll), payout: m(all.payout) + ' EGP',
+scontrib: opts.parent && opts.parent.q326 ? (all.q326 / opts.parent.q326 * 100).toFixed(2) + '%' : 'N/A', gcontrib: opts.parent && opts.parent.inc ? (all.inc / opts.parent.inc * 100).toFixed(2) + '%' : 'N/A'
 }[metric];
 const nameQ = cdlState.qName.trim().toLowerCase();
 const terrQ = cdlState.qTerr.trim().toLowerCase();
@@ -10174,7 +10300,7 @@ const av = a[sk] === null || a[sk] === undefined ? -Infinity : a[sk], bv = b[sk]
 return dir * (av - bv) || a.name.localeCompare(b.name);
 });
 const vis = hierSummarize(rows.map(x => x.r));
-const emCols = { n:[], base:[], deals:[], q325:['q325'], target:['target'], q326:['q326'], growth:['q325','q326','growth'], ach:['target','q326','ach'], loyalty:['loyalty'], visibility:['vis'], semester:['sem'], current:['current'], investment:['total'], inc:['q325','q326'], achall:['target','q326'], payout:[] }[metric] || [];
+const emCols = { n:[], base:[], deals:[], q325:['q325'], target:['target'], q326:['q326'], growth:['q325','q326','growth'], ach:['target','q326','ach'], loyalty:['loyalty'], visibility:['vis'], semester:['sem'], current:['current'], investment:['total'], inc:['q325','q326'], achall:['target','q326'], payout:[], scontrib:['q326'], gcontrib:['q325','q326'] }[metric] || [];
 const em = k => emCols.includes(k) ? ' class="em"' : '';
 const th = (k, text) => `<th data-cdl-sort="${k}"${cdlState.sort === k ? ' class="on"' : ''}>${text}${cdlState.sort === k ? (cdlState.dir === 'asc' ? ' ▲' : ' ▼') : ''}</th>`;
 const na = '<span class="hier-na">N/A</span>';
@@ -10188,20 +10314,33 @@ ov.innerHTML = `<div class="cdl-panel" dir="ltr">
 <div class="cdl-title">${cdlEsc(opts.label)} — ${CDL_INV_METRICS[metric].label}</div>
 <div class="cdl-value">${headline}${metric === 'n' ? '' : `<small>${all.n.toLocaleString('en-US')} pharmacies</small>`}</div>
 </div><button class="cdl-close" type="button" aria-label="Close" data-cdl-close>×</button></div>
-<div class="cdl-chips">
-${chip(['n'],'Pharmacies', all.n.toLocaleString('en-US'))}
-${chip(['base'],'With Baseline', all.withBaseline.toLocaleString('en-US') + ' · no baseline ' + all.noBaseline.toLocaleString('en-US'))}
-${chip(['q325'],'Q3’25 Baseline', m(all.q325))}
-${chip(['target'],'Q3’26 Target', m(all.target))}
-${chip(['q326'],'Q3’26 Achieved', m(all.q326))}
+<div class="cdl-sum">
+<div class="cdl-sum-g cdl-sum-wide"><div class="cdl-sum-h">1 · Sales</div><div class="cdl-sum-row">
+${chip(['q325'],'Q3’25 Sales', m(all.q325) + ' EGP')}
+${chip(['q326'],'Q3’26 Sales', m(all.q326) + ' EGP')}
 ${chip(['growth'],'Growth', pct(all.growth))}
-${opts.achAllChip ? chip(['achall'],'Target Achievement (total)', ach(all.achAll)) : chip(['ach'],'Achievement', ach(all.achievement))}
-${chip(['deals'],'New / Existing Customer Deals', opts.dealSplit ? ('New ' + all.newDeals.toLocaleString('en-US') + ' · Existing ' + all.existingDeals.toLocaleString('en-US')) : ('New ' + all.fixedN.toLocaleString('en-US') + ' · Existing ' + all.variableN.toLocaleString('en-US')))}
-${chip(['loyalty'],'Loyalty Cashback', m(all.loyalty))}
+</div></div>
+<div class="cdl-sum-g"><div class="cdl-sum-h">2 · Contribution</div><div class="cdl-sum-row">
+${chip(['scontrib'],'Sales Contribution', opts.parent && opts.parent.q326 ? (all.q326 / opts.parent.q326 * 100).toFixed(2) + '%' : 'N/A')}
+${chip(['gcontrib'],'Growth Contribution', opts.parent && opts.parent.inc ? (all.inc / opts.parent.inc * 100).toFixed(2) + '%' : 'N/A')}
+${chip(['n'],'Pharmacies', all.n.toLocaleString('en-US'))}
+</div><div class="cdl-sum-sub">vs ${cdlEsc(opts.parent ? opts.parent.label : '')}</div></div>
+<div class="cdl-sum-g"><div class="cdl-sum-h">3 · Incremental Sales</div><div class="cdl-sum-row">
+${chip(['inc'],'Incremental Sales', (all.inc < 0 ? '−' : '+') + m(Math.abs(all.inc)) + ' EGP')}
+</div></div>
+<div class="cdl-sum-g"><div class="cdl-sum-h">4 · Investment</div><div class="cdl-sum-row">
+${opts.dealSplit ? chip(['payout'],'Agreed Deal Payout', m(all.payout) + ' EGP') : chip(['loyalty'],'Loyalty Cashback', m(all.loyalty))}
 ${chip(['vis'],'Visibility Cashback', m(all.visCashback))}
 ${chip(['sem'],'Semester Incentive Accrued', m(all.semAccrued))}
-${chip(['current'],'Current Cashback', m(all.current))}
-${chip(['total'],'Total Investment', m(all.total))}
+${opts.dealSplit ? '' : chip(['current'],'Current Cashback', m(all.current))}
+${opts.dealSplit ? '' : chip(['total'],'Total Investment', m(all.total))}
+</div></div>
+<div class="cdl-sum-g cdl-sum-wide"><div class="cdl-sum-h">Population detail</div><div class="cdl-sum-row">
+${chip(['base'],'With Baseline', all.withBaseline.toLocaleString('en-US') + ' · no baseline ' + all.noBaseline.toLocaleString('en-US'))}
+${chip(['target'],'Q3’26 Target', m(all.target))}
+${opts.achAllChip ? chip(['achall'],'Target Achievement (total)', ach(all.achAll)) : chip(['ach'],'Target Achievement', ach(all.achievement))}
+${chip(['deals'],'New / Existing Customer', opts.dealSplit ? ('New ' + all.newDeals.toLocaleString('en-US') + ' · Existing ' + all.existingDeals.toLocaleString('en-US')) : ('New ' + all.fixedN.toLocaleString('en-US') + ' · Existing ' + all.variableN.toLocaleString('en-US')))}
+</div></div>
 </div>
 <div class="cdl-note">Target = Q3’25 × 1.15. Growth = SUM Q3’26 ÷ SUM Q3’25 − 1; Achievement = SUM Q3’26 of baseline pharmacies ÷ SUM Target (both from sums, never averaged). No-baseline pharmacies show N/A. Visibility cashback is payable only at Q3’26 ≥ Q3’25 × 1.15. Semester Incentive is accrued on Q3’26 actual (Existing Customer Deals only). Current = Loyalty + Visibility; Total Investment = Current + Semester Accrued.</div>
 <div class="cdl-controls">
@@ -10275,20 +10414,6 @@ ${tile('Current Cashback', hierNum(hierFmtM(s.current), 'current', scope, 'curre
 ${tile('Total Investment', hierNum(hierFmtM(s.total), 'total', scope, 'investment'), 'Current Cashback + Semester Accrued', 'key strong')}
 </div></div>
 </div>`;
-}
-
-// Roll-up table used at the Cashback Eligible (rows = DMs) and DM (rows = MRs) levels.
-function hierRollupTableHtml(rows, totalSummary, totalScope, rowKind, firstColLabel){
-const th = '<th class="hier-sticky">' + firstColLabel + '</th><th>Pharmacies</th><th>Q3’25 Sales</th><th>Q3’26 Target</th><th>Q3’26 Achieved</th><th>Growth</th><th>Incremental Sales</th><th>Target Achievement</th>'
-+ '<th class="inv-start">New Customer</th><th>Existing Customer</th><th>Loyalty Cashback</th><th>Cashback / Incremental</th><th>Visibility Cashback</th><th>Semester Accrued</th><th>Current Cashback</th><th>Total Investment</th>';
-const cells = (s, scope) => `<td>${hierNum(s.n.toLocaleString('en-US'), 'all', scope, 'n')}</td><td>${hierNum(hierFmtM(s.q325), 'all', scope, 'q325')}</td><td>${hierNum(hierFmtM(s.target), 'base', scope, 'target')}</td><td>${hierNum(hierFmtM(s.q326), 'all', scope, 'q326')}</td><td class="${s.growth !== null && s.growth < 0 ? 'neg' : 'pos'}">${hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth')}</td><td>${hierNum(hierSignedM(s.inc), 'all', scope, 'inc')}</td><td>${hierNum(hierFmtPct(s.achievement, false), 'base', scope, 'ach')}</td>`
-+ `<td class="inv-start">${hierNum(s.fixedN.toLocaleString('en-US'), 'fixed', scope, 'n')}</td><td>${hierNum(s.variableN.toLocaleString('en-US'), 'variable', scope, 'n')}</td><td>${hierNum(hierFmtM(s.loyalty), 'all', scope, 'cashback')}</td><td>${hierNum(hierFmtPct(s.cbInc, false), 'all', scope, 'cbinc')}</td><td>${hierNum(hierFmtM(s.visCashback), 'visEligible', scope, 'visibility')}</td><td>${hierNum(hierFmtM(s.semAccrued), 'sem', scope, 'semester')}</td><td>${hierNum(hierFmtM(s.current), 'current', scope, 'current')}</td><td class="strong">${hierNum(hierFmtM(s.total), 'total', scope, 'investment')}</td>`;
-const body = rows.map(r => `<tr${r.unassigned ? ' class="unassigned"' : ''}><td class="hier-sticky"><button type="button" class="hier-open" data-hier-${rowKind}="${cdlEsc(r.key)}">${cdlEsc(r.key)} <span aria-hidden="true">›</span></button></td>${cells(r.summary, r.scope)}</tr>`).join('');
-return `<div class="hier-table-wrap"><table class="hier-table">
-<thead><tr class="hier-grp"><th class="hier-sticky"></th><th colspan="7">Business Performance</th><th colspan="8" class="inv-start">Commercial Investment (EGP)</th></tr><tr>${th}</tr></thead>
-<tbody>${body}</tbody>
-<tfoot><tr><td class="hier-sticky">Total — ${rows.length} ${rowKind === 'dm' ? 'DM groups' : 'MR groups'}</td>${cells(totalSummary, totalScope)}</tr></tfoot>
-</table></div>`;
 }
 
 function hierPharmacyTableHtml(recs, scope){
@@ -10384,6 +10509,174 @@ ${it('Cashback / Incremental Sales', hierNum(hierFmtPct(e.cbInc, false), 'all', 
 </div>`;
 }
 
+// ===================================================================
+// EXECUTIVE PHASE 2 (2026-10-07) -- presentation only.
+// Main view = rounded compact numbers (exC); every clickable value opens the
+// existing drill-down drawer with EXACT values. All figures come from
+// computeCommercialHierarchy() / hierSummarize() -- the validated Phase 1
+// aggregation over the engine's own pharmacy records. Contributions are
+// always ratios of aggregated sums (never averaged pharmacy percentages).
+// ===================================================================
+function exC(v){
+const a = Math.abs(v || 0), s = (v || 0) < 0 ? '−' : '';
+if(a >= 1e9) return s + (a / 1e9).toFixed(2) + 'B';
+if(a >= 1e6) return s + (a / 1e6).toFixed(2) + 'M';
+if(a >= 1e3) return s + (a / 1e3).toFixed(2) + 'K';
+return s + a.toFixed(0);
+}
+function exS(v){ return ((v || 0) < 0 ? '−' : '+') + exC(Math.abs(v || 0)); }
+function exShare(a, b){ return b ? (a / b * 100).toFixed(2) + '%' : 'N/A'; }
+function exPair(s, filter, scope){
+const neg = s.growth !== null && s.growth < 0;
+return `<div class="ex-pair">
+<div class="ex-pv"><span class="ex-l">Q3’25 Sales</span><span class="ex-v">${hierNum(exC(s.q325), filter, scope, 'q325')}</span><span class="ex-u">EGP</span></div>
+<div class="ex-arrow" aria-hidden="true">→</div>
+<div class="ex-pv ex-now"><span class="ex-l">Q3’26 Sales</span><span class="ex-v">${hierNum(exC(s.q326), filter, scope, 'q326')}</span><span class="ex-u">EGP</span></div>
+<div class="ex-growth${neg ? ' neg' : ''}"><span class="ex-l">Growth</span><span class="ex-gv">${hierNum(hierFmtPct(s.growth, true), filter, scope, 'growth')}</span><span class="ex-u">vs Q3’25</span></div>
+</div>`;
+}
+function exItem(label, val, note){ return `<div class="ex-s"><span>${label}</span><b>${val}</b>${note ? `<em>${note}</em>` : ''}</div>`; }
+function exTypeCard(h, type){
+const e = h.summary;
+const recs = h.records.filter(r => r.cr.commercial_structure === type);
+const g = hierSummarize(recs);
+const keys = type === 'fixed' ? ['fixed1','fixed2','fixed3'] : ['s1','s2','s3'];
+const title = type === 'fixed' ? 'New Customer' : 'Existing Customer';
+const rows = keys.map(k => {
+const rs = recs.filter(r => r.cr.achieved_slab === k);
+const sq = rs.reduce((a, r) => a + (r.cr.q3_2026_dv || 0), 0);
+const cb = rs.reduce((a, r) => a + (r.cr.cashback_amount || 0), 0);
+const f = 'slab.' + k;
+return `<div class="ex-slab"><span class="ex-slab-n">${HIER_SLAB_NAMES[k]}</span>
+<span class="ex-slab-c">${hierNum(rs.length.toLocaleString('en-US'), f, 'egypt', 'n')}<small>pharmacies</small></span>
+<span class="ex-slab-v">${hierNum(exC(sq), f, 'egypt', 'q326')}<small>Q3’26</small></span>
+<span class="ex-slab-v">${hierNum(exShare(sq, g.q326), f, 'egypt', 'scontrib')}<small>of ${title} sales</small></span>
+<span class="ex-slab-v">${hierNum(exC(cb), f, 'egypt', 'cashback')}<small>cashback</small></span></div>`;
+}).join('');
+return `<div class="ex-type">
+<div class="ex-type-h"><span class="ex-eyebrow">${title}</span><span class="ex-type-n">${hierNum(g.n.toLocaleString('en-US'), type, 'egypt', 'n')}<small>pharmacies</small></span></div>
+${exPair(g, type, 'egypt')}
+<div class="ex-support">
+${exItem('Incremental Sales', hierNum(exS(g.inc), type, 'egypt', 'inc'))}
+${exItem('Sales Contribution', hierNum(exShare(g.q326, e.q326), type, 'egypt', 'scontrib'), 'of Cashback Eligible')}
+${exItem('Growth Contribution', hierNum(exShare(g.inc, e.inc), type, 'egypt', 'gcontrib'), 'of eligible growth')}
+${exItem('Cashback', hierNum(exC(g.loyalty), type, 'egypt', 'cashback'))}
+</div>
+<div class="ex-slabs">${rows}</div>
+</div>`;
+}
+function renderExecStoryHtml(){
+const h = computeCommercialHierarchy();
+const u = h.programmeSummary, d = h.dealsSummary, e = h.summary;
+const N = v => v.toLocaleString('en-US');
+const uLabel = h.filtered ? 'Filtered Scope' : 'Total Pharmacy Universe';
+return `<div id="execStory" class="ex-story" dir="ltr">
+<section class="ex-sec ex-hero">
+<div class="ex-sec-h"><span class="ex-eyebrow">${uLabel}</span><span class="ex-count">${hierNum(N(u.n), 'all', 'programme', 'n')}<small>pharmacies</small></span></div>
+${exPair(u, 'all', 'programme')}
+<div class="ex-support">
+${exItem('Incremental Sales', hierNum(exS(u.inc), 'all', 'programme', 'inc'))}
+${exItem('+15% Target', hierNum(exC(u.target), 'all', 'programme', 'target'), 'Q3’25 × 1.15')}
+${exItem('Target Achievement', hierNum(hierFmtPct(u.achAll, false), 'all', 'programme', 'achall'), 'Q3’26 ÷ target')}
+${exItem('Sales Contribution', '100.00%', 'the whole business')}
+</div>
+</section>
+<div class="ex-row2">
+<section class="ex-sec ex-deals">
+<div class="ex-sec-h"><span class="ex-eyebrow">Agreed Deals</span><span class="ex-count">${hierNum(N(d.n), 'deal', 'deals', 'deals')}<small>deals</small></span></div>
+<div class="ex-sec-sub">Commercial coverage · an independent population from Cashback Eligible</div>
+${exPair(d, 'deal', 'deals')}
+<div class="ex-support">
+${exItem('Incremental Sales', hierNum(exS(d.inc), 'deal', 'deals', 'inc'))}
+${exItem('Deal Payout', hierNum(exC(d.payout), 'deal', 'deals', 'payout'))}
+${exItem('Sales Contribution', hierNum(exShare(d.q326, u.q326), 'deal', 'deals', 'scontrib'), 'of total Q3’26 sales')}
+${exItem('New Customer', hierNum(N(d.newDeals), 'new', 'deals', 'deals'))}
+${exItem('Existing Customer', hierNum(N(d.existingDeals), 'existing', 'deals', 'deals'))}
+</div>
+</section>
+</div>
+<section class="ex-sec ex-elig">
+<div class="ex-sec-h"><span class="ex-eyebrow">Cashback Eligible</span><span class="ex-count">${hierNum(N(e.n), 'all', 'egypt', 'n')}<small>pharmacies</small></span></div>
+<div class="ex-sec-sub">Pharmacies that earned loyalty cashback on actual Q3’26 sales · an independent population from Agreed Deals</div>
+${exPair(e, 'all', 'egypt')}
+<div class="ex-support">
+${exItem('Incremental Sales', hierNum(exS(e.inc), 'all', 'egypt', 'inc'))}
+${exItem('Sales Contribution', hierNum(exShare(e.q326, u.q326), 'all', 'egypt', 'scontrib'), 'of total Q3’26 sales')}
+${exItem('Growth Contribution', hierNum(exShare(e.inc, u.inc), 'all', 'egypt', 'gcontrib'), 'of total incremental sales')}
+${exItem('Total Cashback', hierNum(exC(e.loyalty), 'all', 'egypt', 'cashback'))}
+${exItem('Cashback / Incremental Sales', hierNum(hierFmtPct(e.cbInc, false), 'all', 'egypt', 'cbinc'), 'efficiency indicator')}
+</div>
+<div class="ex-types">${exTypeCard(h, 'fixed')}${exTypeCard(h, 'variable')}</div>
+</section>
+<section class="ex-sec ex-invest">
+<div class="ex-sec-h"><span class="ex-eyebrow">Investment</span><span class="ex-sec-sub ex-inline">Cashback Eligible population · EGP</span></div>
+<div class="ex-inv-grid">
+<div class="ex-inv-tiles">
+${exItem('Loyalty Cashback', hierNum(exC(e.loyalty), 'all', 'egypt', 'cashback'))}
+${exItem('Visibility Cashback', hierNum(exC(e.visCashback), 'visEligible', 'egypt', 'visibility'), 'payable at ≥ +15% growth')}
+${exItem('Semester Incentive Accrued', hierNum(exC(e.semAccrued), 'sem', 'egypt', 'semester'), 'accrued, not earned')}
+${exItem('Current Cashback', hierNum(exC(e.current), 'current', 'egypt', 'current'), 'Loyalty + Visibility')}
+<div class="ex-s ex-s-total"><span>Total Investment</span><b>${hierNum(exC(e.total), 'total', 'egypt', 'investment')}</b><em>Current + Semester Accrued</em></div>
+</div>
+<div class="ex-eff">
+<span class="ex-l">Efficiency indicator</span>
+<span class="ex-eff-v">${hierNum(hierFmtPct(e.cbInc, false), 'all', 'egypt', 'cbinc')}</span>
+<span class="ex-eff-t">Cashback / Incremental Sales</span>
+<span class="ex-eff-n">Loyalty cashback ÷ incremental sales of the cashback-eligible pharmacies (${exS(e.inc)} EGP). An efficiency ratio shown alongside business performance — not a causal ROI claim.</span>
+</div>
+</div>
+</section>
+</div>`;
+}
+
+// Level summary for a DM or an MR (Cashback Eligible hierarchy).
+function hierLevelCardHtml(s, scope, label, ps, plabel){
+const N = v => v.toLocaleString('en-US');
+const split = (keys, type) => keys.map(k => `${HIER_SLAB_NAMES[k]} ${hierNum(N(s.slabs[k]), 'slab.' + k, scope, 'n')}`).join(' · ');
+return `<div class="ex-level">
+<div class="ex-sec-h"><span class="ex-eyebrow">${cdlEsc(label)}</span><span class="ex-count">${hierNum(N(s.n), 'all', scope, 'n')}<small>cashback-eligible pharmacies</small></span></div>
+${exPair(s, 'all', scope)}
+<div class="ex-support">
+${exItem('Incremental Sales', hierNum(exS(s.inc), 'all', scope, 'inc'))}
+${exItem('Sales Contribution', hierNum(exShare(s.q326, ps.q326), 'all', scope, 'scontrib'), 'of ' + cdlEsc(plabel))}
+${exItem('Growth Contribution', hierNum(exShare(s.inc, ps.inc), 'all', scope, 'gcontrib'), 'of ' + cdlEsc(plabel) + ' growth')}
+${exItem('Cashback', hierNum(exC(s.loyalty), 'all', scope, 'cashback'))}
+${exItem('Efficiency', hierNum(hierFmtPct(s.cbInc, false), 'all', scope, 'cbinc'), 'cashback ÷ incremental')}
+</div>
+<div class="ex-level-types">
+<div class="ex-lt"><span class="ex-l">New Customer</span><b>${hierNum(N(s.fixedN), 'fixed', scope, 'n')}</b><em>${split(['fixed1','fixed2','fixed3'])}</em></div>
+<div class="ex-lt"><span class="ex-l">Existing Customer</span><b>${hierNum(N(s.variableN), 'variable', scope, 'n')}</b><em>${split(['s1','s2','s3'])}</em></div>
+</div>
+<details class="ex-invd"><summary>Investment detail</summary><div class="ex-support">
+${exItem('Q3’26 Target', hierNum(exC(s.target), 'base', scope, 'target'), 'Q3’25 × 1.15')}
+${exItem('Target Achievement', hierNum(hierFmtPct(s.achievement, false), 'base', scope, 'ach'))}
+${exItem('Visibility Cashback', hierNum(exC(s.visCashback), 'visEligible', scope, 'visibility'))}
+${exItem('Semester Incentive Accrued', hierNum(exC(s.semAccrued), 'sem', scope, 'semester'))}
+${exItem('Current Cashback', hierNum(exC(s.current), 'current', scope, 'current'))}
+${exItem('Total Investment', hierNum(exC(s.total), 'total', scope, 'investment'))}
+</div></details>
+</div>`;
+}
+
+// DM / MR roll-up table (compact executive numbers; exact on click).
+function hierRollupTableHtml(rows, totalSummary, totalScope, rowKind, firstColLabel){
+const N = v => v.toLocaleString('en-US');
+const ps = totalSummary;
+const th = `<th class="hier-sticky">${firstColLabel}</th><th>Pharmacies</th><th>Q3’25 Sales</th><th>Q3’26 Sales</th><th>Growth</th><th>Incremental</th><th>Sales Contrib.</th><th>Growth Contrib.</th><th>Cashback</th><th>Efficiency</th><th>New Customer</th><th>Existing Customer</th>`
++ `<th class="invd">Q3’26 Target</th><th class="invd">Target Ach.</th><th class="invd">Visibility</th><th class="invd">Semester</th><th class="invd">Current</th><th class="invd">Total Investment</th>`;
+const cells = (s, scope, isTotal) => `<td>${hierNum(N(s.n), 'all', scope, 'n')}</td><td>${hierNum(exC(s.q325), 'all', scope, 'q325')}</td><td class="ex-strong">${hierNum(exC(s.q326), 'all', scope, 'q326')}</td><td class="${s.growth !== null && s.growth < 0 ? 'neg' : 'pos'}">${hierNum(hierFmtPct(s.growth, true), 'all', scope, 'growth')}</td><td>${hierNum(exS(s.inc), 'all', scope, 'inc')}</td>`
++ `<td>${isTotal ? '100.00%' : hierNum(exShare(s.q326, ps.q326), 'all', scope, 'scontrib')}</td><td>${isTotal ? '100.00%' : hierNum(exShare(s.inc, ps.inc), 'all', scope, 'gcontrib')}</td>`
++ `<td>${hierNum(exC(s.loyalty), 'all', scope, 'cashback')}</td><td>${hierNum(hierFmtPct(s.cbInc, false), 'all', scope, 'cbinc')}</td><td>${hierNum(N(s.fixedN), 'fixed', scope, 'n')}</td><td>${hierNum(N(s.variableN), 'variable', scope, 'n')}</td>`
++ `<td class="invd">${hierNum(exC(s.target), 'base', scope, 'target')}</td><td class="invd">${hierNum(hierFmtPct(s.achievement, false), 'base', scope, 'ach')}</td><td class="invd">${hierNum(exC(s.visCashback), 'visEligible', scope, 'visibility')}</td><td class="invd">${hierNum(exC(s.semAccrued), 'sem', scope, 'semester')}</td><td class="invd">${hierNum(exC(s.current), 'current', scope, 'current')}</td><td class="invd strong">${hierNum(exC(s.total), 'total', scope, 'investment')}</td>`;
+const body = rows.map(r => `<tr${r.unassigned ? ' class="unassigned"' : ''}><td class="hier-sticky"><button type="button" class="hier-open" data-hier-${rowKind}="${cdlEsc(r.key)}">${cdlEsc(r.key)} <span aria-hidden="true">›</span></button></td>${cells(r.summary, r.scope, false)}</tr>`).join('');
+return `<div class="ex-table-tools"><button type="button" class="ex-invtoggle" data-hier-invtoggle>${execHier.showInv ? 'Hide investment detail' : 'Show investment detail'}</button></div>
+<div class="hier-table-wrap${execHier.showInv ? ' show-inv' : ''}"><table class="hier-table ex-table">
+<thead><tr>${th}</tr></thead>
+<tbody>${body}</tbody>
+<tfoot><tr><td class="hier-sticky">Total — ${rows.length} ${rowKind === 'dm' ? 'DM groups' : 'MR groups'}</td>${cells(totalSummary, totalScope, true)}</tr></tfoot>
+</table></div>`;
+}
+
 function renderExecHierarchyHtml(){
 const h = computeCommercialHierarchy();
 const rootLabel = 'Cashback Eligible' + (h.filtered ? ' (filtered)' : '');
@@ -10399,30 +10692,25 @@ if(!dm){
 level = 'District Managers';
 const rows = h.dms.map(d => Object.assign({}, d, { scope: hierScopeKey(d.key) }));
 const dmSum = rows.reduce((a, d) => a + d.summary.n, 0);
-body = hierSummaryBlocksHtml(h.summary, 'egypt', rootLabel)
-+ `<div class="hier-level-h">District Managers <span>${rows.length} groups · ${dmSum.toLocaleString('en-US')} cashback-eligible pharmacies (reconciles to ${h.summary.n.toLocaleString('en-US')}) · ownership from the pharmacy record · click a DM to open its MRs</span></div>`
+body = `<div class="hier-level-h">District Managers <span>${rows.length} groups · ${dmSum.toLocaleString('en-US')} cashback-eligible pharmacies (reconciles to ${h.summary.n.toLocaleString('en-US')}) · ownership from the pharmacy record · click a DM to open its MRs</span></div>`
 + hierRollupTableHtml(rows, h.summary, 'egypt', 'dm', 'District Manager');
 } else if(!mr){
 level = 'Medical Representatives';
 const scope = hierScopeKey(dm.key);
 const rows = dm.mrs.map(x => Object.assign({}, x, { scope: hierScopeKey(dm.key, x.key) }));
 const mrSum = rows.reduce((a, x) => a + x.summary.n, 0);
-body = hierSummaryBlocksHtml(dm.summary, scope, 'DM: ' + dm.key)
+body = hierLevelCardHtml(dm.summary, scope, 'DM · ' + dm.key, h.summary, 'Cashback Eligible')
 + `<div class="hier-level-h">Medical Representatives under ${cdlEsc(dm.key)} <span>${rows.length} groups · ${mrSum.toLocaleString('en-US')} cashback-eligible pharmacies (reconciles to ${dm.summary.n.toLocaleString('en-US')}) · click an MR to open its pharmacies</span></div>`
 + hierRollupTableHtml(rows, dm.summary, scope, 'mr', 'Medical Representative');
 } else {
 level = 'Pharmacies';
 const scope = hierScopeKey(dm.key, mr.key);
-body = hierSummaryBlocksHtml(mr.summary, scope, 'MR: ' + mr.key)
-+ `<div class="hier-level-h">Cashback-eligible pharmacies of ${cdlEsc(mr.key)} <span>under ${cdlEsc(dm.key)} · click a column header to sort</span></div>`
+body = hierLevelCardHtml(mr.summary, scope, 'MR · ' + mr.key, dm.summary, dm.key)
++ `<div class="hier-level-h">Cashback-eligible pharmacies of ${cdlEsc(mr.key)} <span>under ${cdlEsc(dm.key)} · exact values · click a column header to sort</span></div>`
 + hierPharmacyTableHtml(mr.records, scope);
 }
-return `<div class="section hier-section" id="execHier" dir="ltr">
-<div class="section-head">
-<h2>${iconSvg('layers')}Commercial Hierarchy</h2>
-<span class="section-sub">Total Pharmacy Universe · Agreed Deals · Cashback Eligible → District Manager → Medical Representative → Pharmacy · ${level}</span>
-</div>
-${hierPopulationFlowHtml(h)}
+return `<div class="section hier-section ex-hier" id="execHier" dir="ltr">
+<div class="ex-sec-h"><span class="ex-eyebrow">District Manager → Medical Representative → Pharmacy</span><span class="ex-sec-sub ex-inline">Cashback Eligible hierarchy · ${level}</span></div>
 <nav class="hier-crumbs" aria-label="Hierarchy level">${crumbs.join('<span class="hier-sep" aria-hidden="true">›</span>')}</nav>
 ${body}
 </div>`;
@@ -10444,8 +10732,9 @@ if(el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: 'start',
 // One delegated listener (bubble phase, so the shared .cdl-num capture
 // handler keeps priority for numeric drill-downs).
 document.addEventListener('click', e => {
-const t = e.target && e.target.closest ? e.target.closest('#execHier [data-hier-dm], #execHier [data-hier-mr], #execHier [data-hier-crumb], #execHier [data-hier-sort]') : null;
+const t = e.target && e.target.closest ? e.target.closest('#execHier [data-hier-dm], #execHier [data-hier-mr], #execHier [data-hier-crumb], #execHier [data-hier-sort], #execHier [data-hier-invtoggle]') : null;
 if(!t) return;
+if(t.dataset.hierInvtoggle !== undefined){ execHier.showInv = !execHier.showInv; refreshExecHierarchy(true); return; }
 if(t.dataset.hierDm !== undefined){ execHier.dm = t.dataset.hierDm; execHier.mr = null; execHier.phQ = ''; refreshExecHierarchy(); hierScrollIntoView(); return; }
 if(t.dataset.hierMr !== undefined){ execHier.mr = t.dataset.hierMr; execHier.phQ = ''; execHier.phSort = 'q326'; execHier.phDir = 'desc'; refreshExecHierarchy(); hierScrollIntoView(); return; }
 if(t.dataset.hierCrumb !== undefined){
